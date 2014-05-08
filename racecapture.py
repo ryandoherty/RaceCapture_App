@@ -38,6 +38,7 @@ from samplerateview import SampleRateSelectorView
 from channelnamespinner import ChannelNameSpinner
 from toolbarview import ToolbarView
 from splashview import SplashView
+from chartview import ChartView
 from separator import *
 from bluetoothconfigview import *
 
@@ -133,6 +134,7 @@ class RaceCaptureApp(App):
             label = LinkedTreeViewLabel(text=text)
             label.view = view
             label.color_selected =   [1.0,0,0,0.6]
+            label.padding_x = -15 #Works in negative - docs say this will be fixed in 1.8.1 http://kivy.org/docs/api-kivy.uix.label.html#kivy.uix.label.Label
             tree.add_node(label, n)
             self.configViews.append(view)
 
@@ -153,8 +155,10 @@ class RaceCaptureApp(App):
             attach_node('Bluetooth Link', n, BluetoothTelemetryView())
             n = create_tree('Scripting / Logging')
             attach_node('Lua Script', n, LuaScriptingView())
+            n = create_tree('Chart test')
+            attach_node('Line chart', n, ChartView())
 
-        tree = TreeView(size_hint=(None, 1), width=200, hide_root=True, indent_level=0)
+        tree = TreeView(size_hint=(None, 1), width=215, hide_root=True, indent_level=0)
         tree.bind(selected_node=on_select_node)
         createConfigViews(tree)
 

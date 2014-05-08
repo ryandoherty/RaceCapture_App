@@ -50,6 +50,6 @@ to run:
 4. `set path`
 5. Right click My Computer...System Properties...Advanced...Environment Variables...System Variables and add the extra folders that were added to the path to your system path
 6. Install [PyDev for Eclipse] (http://pydev.org/manual_101_install.html) and use auto-config
-7. (Bit hazy on this part as I tried a few things and was a bit drunk) Make a new project in Eclipse, using the folder with Racecapture in it
-8. Right-click the project...Properties...pyDev-PYTHONPATH...External Libraries - in there, add my_kivy_install_folder\kivy
+7. Make a new project in Eclipse, select "PyDev project" and specify the folder with Racecapture in it
+8. Right-click the project...Properties...pyDev-PYTHONPATH...External Libraries - Add source folder, add my_kivy_install_folder\kivy
 9. Run the project
