@@ -3,32 +3,55 @@
 <ChartView>:
     padding: [30,30]
     orientation: 'vertical'
-    BoxLayout:
-    	size_hint: (1.0,0.1)
-    	orientation: 'horizontal'
-    TestGraph:
+    Graph:
         size_hint: (1.0, 0.6)
         rcid: 'testGraph'
-    Button:
-    	size_hint: (0.3,0.1)
-    	text: 'Add 1000 data points'
-    	on_release: root.add_test_data()
-    Label:
-    	size_hint: (0.1,0.1)
-        text: str(root.dataPoints)
+    BoxLayout:
+		orientation: 'horizontal'
+        size_hint: (1.0, 0.1)
+	    Button:
+	    	size_hint: (0.3,0.1)
+	    	text: 'Add 1000 data points'
+	    	on_release: root.add_test_data()
+	    Label:
+	    	size_hint: (0.1,0.1)
+	        text: str(root.dataPoints) + ' points currently'
+    BoxLayout:
+		orientation: 'horizontal'
+        size_hint: (1.0, 0.1)
+	    Label:
+	        text: 'Zoom (currently showing ' + str(root.zoomLevel) + ')'
+	    Slider:
+	        range: 3, root.dataPoints
+	        value: root.zoomLevel
+	        step: 0.01
+	        on_value: root.zoom(self.value)
+	        size_hint_y: 0.1
+    BoxLayout:
+		orientation: 'horizontal'
+        size_hint: (1.0, 0.1)
+	    Label:
+	        text: 'Scroll'
+	    Slider:
+	        range: 0, root.dataPoints - root.zoomLevel
+	        value: root.scrollLevel
+	        step: 0.01
+	        on_value: root.scroll(self.value)
+	        size_hint_y: 0.1
 
-<TestGraph>:
+<Graph>:
     id: graph
     xlabel: 'Time'
     ylabel: 'Things'
     y_grid_label: True
     x_grid_label: True
+    x_ticks_major: 25
     padding: 5
     x_grid: True
     y_grid: True
     xmin: 0
     xmax: 1000
-    ymin: -1
-    ymax: 1
+    ymin: -2
+    ymax: 2
 
     
