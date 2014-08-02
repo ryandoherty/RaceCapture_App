@@ -56,6 +56,7 @@ class TrackMap:
             self.configuration = venueNode.get('configuration', self.configuration)
             self.length = venueNode.get('length', self.length)
             self.trackId = venueNode.get('id', self.trackId)
+            
             mapPointsNode = venueNode.get('track_map_array')
             mapPoints = []
             if mapPointsNode:
@@ -67,7 +68,7 @@ class TrackMap:
             sectorPoints = []
             if sectorNode:
                 for point in sectorNode:
-                    self.sectorPoints.append(GeoPoint.fromPoint(point[0], point[1]))
+                    sectorPoints.append(GeoPoint.fromPoint(point[0], point[1]))
             self.sectorPoints = sectorPoints
     
     def toJson(self):
@@ -90,7 +91,7 @@ class TrackMap:
         
         sectorPoints = []
         for point in self.sectorPoints:
-            sectorPoints.append(point.latitude, point.longitude)
+            sectorPoints.append([point.latitude, point.longitude])
         venueJson['sector_points'] = sectorPoints
         
         return {'venue': venueJson}
