@@ -30,3 +30,7 @@ class MappedSpinner(Spinner):
 
     def getValueFromKey(self, key):
         return self.keyMappings.get(key, None)
+    
+    def getSelectedValue(self):
+        return self.getValueFromKey(self.text)
+

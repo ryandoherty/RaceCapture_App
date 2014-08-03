@@ -15,6 +15,7 @@ from autosportlabs.racecapture.views.configuration.channels.channelsview import 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.imuchannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.gpschannelsview import *
+from autosportlabs.racecapture.views.configuration.rcp.lapstatsview import *
 from autosportlabs.racecapture.views.configuration.rcp.timerchannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.gpiochannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.pwmchannelsview import *
@@ -113,6 +114,7 @@ class ConfigView(Screen):
 
         defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView())
         attach_node('GPS', None, GPSChannelsView())
+        attach_node('Lap Statistics', None, LapStatsView())        
         attach_node('Analog Sensors', None, AnalogChannelsView(channelCount=8, channels=self.channels))
         attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channelCount=3, channels=self.channels))
         attach_node('Digital In/Out', None, GPIOChannelsView(channelCount=3, channels=self.channels))

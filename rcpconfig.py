@@ -220,7 +220,65 @@ class ImuConfig(object):
     def stale(self, value):
         for channel in self.channels:
             channel.stale = value
+          
+class LapConfigChannel(object):
+    def __init__(self, **kwargs):
+        self.sampleRate = 0
+        self.id = 0
+        
+    def fromJson(self, jsonCfg):
+        if jsonCfg:
+            self.sampleRate = int(jsonCfg.get('sr', self.sampleRate))
+            self.id = int(jsonCfg.get('id', self.id))
+        
+    def toJson(self):
+        return {'id': self.id, 'sr':self.sampleRate}
+        
+        
+class LapConfig(object):
+    def __init__(self, **kwargs):
+        self.stale = False
+        self.lapCount = LapConfigChannel()
+        self.lapTime = LapConfigChannel()
+        self.predTime = LapConfigChannel()
+        self.sector = LapConfigChannel()
+        self.sectorTime = LapConfigChannel()
+
+    def fromJson(self, jsonCfg):
+        if jsonCfg:
+            lapCount = jsonCfg.get('lapCount')
+            if lapCount:
+                self.lapCount.fromJson(lapCount) 
+                
+            lapTime = jsonCfg.get('lapTime')
+            if lapTime: 
+                self.lapTime.fromJson(lapTime)
+                
+            predTime = jsonCfg.get('predTime')
+            if predTime: 
+                self.predTime.fromJson(predTime)
+                
+            sector = jsonCfg.get('sector')
+            if sector: 
+                self.sector.fromJson(sector)
+                
+            sectorTime = jsonCfg.get('sectorTime')
+            if sectorTime: 
+                self.sectorTime.fromJson(sectorTime)
             
+            self.stale = False
+            
+    def toJson(self):
+        lapCfgJson = {'lapCfg':{
+                                  'lapCount': self.lapCount.toJson(),
+                                  'lapTime': self.lapTime.toJson(),
+                                  'predTime': self.predTime.toJson(),
+                                  'sector': self.sector.toJson(),
+                                  'sectorTime': self.sectorTime.toJson()
+                                  }
+                        }
+        return lapCfgJson
+          
 class GpsConfig(object):
     def __init__(self, **kwargs):
         self.stale = False
@@ -753,6 +811,7 @@ class RcpConfig(object):
         self.analogConfig = AnalogConfig()
         self.imuConfig = ImuConfig()
         self.gpsConfig = GpsConfig()
+        self.lapConfig = LapConfig()
         self.timerConfig = TimerConfig()
         self.gpioConfig = GpioConfig()
         self.pwmConfig = PwmConfig()
@@ -769,6 +828,7 @@ class RcpConfig(object):
         return  (self.analogConfig.stale or
                 self.imuConfig.stale or
                 self.gpsConfig.stale or
+                self.lapConfig.stale or
                 self.timerConfig.stale or
                 self.gpioConfig.stale or
                 self.pwmConfig.stale or
@@ -785,6 +845,7 @@ class RcpConfig(object):
         self.analogConfig.stale = value
         self.imuConfig.stale = value
         self.gpsConfig.stale = value
+        self.lapConfig.stale = value
         self.timerConfig.stale = value
         self.gpioConfig.stale = value
         self.pwmConfig.stale = value
@@ -815,6 +876,10 @@ class RcpConfig(object):
                 imuCfgJson = rcpJson.get('imuCfg', None)
                 if imuCfgJson:
                     self.imuConfig.fromJson(imuCfgJson)
+                    
+                lapCfgJson = rcpJson.get('lapCfg', None)
+                if lapCfgJson:
+                    self.lapConfig.fromJson(lapCfgJson)
                     
                 gpsCfgJson = rcpJson.get('gpsCfg', None)
                 if gpsCfgJson:
@@ -870,6 +935,7 @@ class RcpConfig(object):
         rcpJson = {'rcpCfg':{
                              'ver': self.versionConfig.toJson().get('ver'),
                              'gpsCfg':self.gpsConfig.toJson().get('gpsCfg'),
+                             'lapCfg':self.lapConfig.toJson().get('lapCfg'),
                              'imuCfg':self.imuConfig.toJson().get('imuCfg'),
                              'analogCfg':self.analogConfig.toJson().get('analogCfg'),
                              'timerCfg':self.timerConfig.toJson().get('timerCfg'),

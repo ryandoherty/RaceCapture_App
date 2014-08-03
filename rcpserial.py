@@ -295,6 +295,7 @@ class RcpSerial:
                               RcpCmd('analogCfg',   self.getAnalogCfg),
                               RcpCmd('imuCfg',      self.getImuCfg),
                               RcpCmd('gpsCfg',      self.getGpsCfg),
+                              RcpCmd('lapCfg',      self.getLapCfg),
                               RcpCmd('timerCfg',    self.getTimerCfg),
                               RcpCmd('gpioCfg',     self.getGpioCfg),
                               RcpCmd('pwmCfg',      self.getPwmCfg),
@@ -323,6 +324,10 @@ class RcpSerial:
         if gpsCfg.stale:
             cmdSequence.append(RcpCmd('setGpsCfg', self.setGpsCfg, gpsCfg.toJson()))
         
+        lapCfg = cfg.lapConfig
+        if lapCfg.stale:
+            cmdSequence.append(RcpCmd('setLapCfg', self.setLapCfg, lapCfg.toJson()))
+
         imuCfg = cfg.imuConfig
         for i in range(IMU_CHANNEL_COUNT):
             imuChannel = imuCfg.channels[i]
@@ -396,6 +401,12 @@ class RcpSerial:
     def setImuCfg(self, imuCfg, channelId):
         self.sendSet('setImuCfg', imuCfg, channelId)
     
+    def getLapCfg(self):
+        self.sendGet('getLapCfg', None)
+    
+    def setLapCfg(self, lapCfg):
+        self.sendSet('setLapCfg', lapCfg)
+
     def getGpsCfg(self):
         self.sendGet('getGpsCfg', None)
     

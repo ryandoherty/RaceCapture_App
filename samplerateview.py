@@ -21,6 +21,6 @@ class SampleRateSelectorView(BoxLayout):
         kvFind(self, 'rcid', 'sampleRate').setFromValue(value)
 
     def onSelect(self, instance, value):
-        selectedValue = int(instance.getValueFromKey(value))
+        selectedValue = int(instance.getSelectedValue())
         self.dispatch('on_sample_rate', selectedValue)
         
