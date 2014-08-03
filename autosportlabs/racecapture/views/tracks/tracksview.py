@@ -111,10 +111,10 @@ class TracksBrowser(BoxLayout):
         self.lastNameSearch = ''
         self.selectedTrackIds = set()
             
-    def on_tracks_updated(self, trackManager):
+    def on_tracks_updated(self, trackManager):        
         self.trackManager = trackManager
-        self.initTracksList()
         self.initRegionsList()
+        self.initTrackListForSelectedRegion()
         self.initialized = True
         
     def setViewDisabled(self, disabled):
@@ -131,11 +131,11 @@ class TracksBrowser(BoxLayout):
             self.tracksUpdatePopup.dismiss()
          
     def searchAndUpdate(self, dt):
-        foundTrackIds = self.trackManager.filterTracksByName(self.lastNameSearch, self.trackManager.getRegionTrackIds())
+        foundTrackIds = self.trackManager.filterTracksByName(self.lastNameSearch, self.trackManager.getTrackIdsInRegion())
         self.initTracksList(foundTrackIds)
 
     def loadAll(self, dt):
-        self.initTracksList(self.trackManager.getRegionTrackIds())
+        self.initTracksList(self.trackManager.getTrackIdsInRegion())
         
     def on_search_track_name(self, instance, search):
         if self.initialized:
@@ -148,11 +148,16 @@ class TracksBrowser(BoxLayout):
                 Clock.unschedule(self.searchAndUpdate)
                 Clock.unschedule(self.loadAll)
                 Clock.schedule_once(self.searchAndUpdate, self.searchDelay)
+                self.showProgressPopup("", "Loading Tracks...")     
+                
         
+    def getSelectedRegion(self):
+        return kvFind(self, 'rcid', 'regions').text
+            
     def on_region_selected(self, instance, search):
         if self.initialized:
-            foundIds = self.trackManager.filterTracksByRegion(search)
-            self.initTracksList(foundIds)
+            self.showProgressPopup("", "Loading Tracks...")
+            self.initTrackListForSelectedRegion()
 
     def showProgressPopup(self, title, content):
         if type(content) is str:
@@ -162,11 +167,11 @@ class TracksBrowser(BoxLayout):
         self.tracksUpdatePopup = popup
         
     def on_update_check_success(self):
-        self.initTracksList()
+        self.initTrackListForSelectedRegion()
         self.tracksUpdatePopup.content.on_message('Processing...')
         
     def on_update_check_error(self, details):
-        self.initTracksList()
+        self.initTrackListForSelectedRegion()
         self.dismissPopups() 
         print('Error updating: ' + str(details))       
         alertPopup('Error Updating', 'There was an error updating the track list.\n\nPlease check your network connection and try again')
@@ -189,6 +194,11 @@ class TracksBrowser(BoxLayout):
         else:
             self.dismissPopups()
             self.setViewDisabled(False)
+        
+    def initTrackListForSelectedRegion(self):
+        region = self.getSelectedRegion();
+        foundIds = self.trackManager.filterTracksByRegion(region)
+        self.initTracksList(foundIds)
         
     def initTracksList(self, trackIds = None):
         self.setViewDisabled(True)

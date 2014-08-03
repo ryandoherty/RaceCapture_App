@@ -107,14 +107,14 @@ class TrackManager:
     trackList = None
     tracks = None
     regions = None
-    regionTrackIds = None
+    trackIdsInRegion = None
     def __init__(self, **kwargs):
         self.setTracksUserDir(kwargs.get('user_dir', self.tracks_user_dir) + self.track_user_subdir)
         self.updateLock = Lock()
         self.regions = []
         self.trackList = {}
         self.tracks = {}
-        self.regionTrackIds = []
+        self.trackIdsInRegion = []
         
     def setTracksUserDir(self, path):
         try:
@@ -144,8 +144,8 @@ class TrackManager:
     def getAllTrackIds(self):
         return self.tracks.keys()
     
-    def getRegionTrackIds(self):
-        return self.regionTrackIds
+    def getTrackIdsInRegion(self):
+        return self.trackIdsInRegion
         
     def findNearbyTrack(self, point, searchRadius):
         for trackId in self.tracks.keys():
@@ -167,11 +167,11 @@ class TrackManager:
                 
     def filterTracksByRegion(self, regionName):
         allTrackIds = self.tracks.keys()
-        regionTrackIds = self.regionTrackIds
-        del regionTrackIds[:]
+        trackIdsInRegion = self.trackIdsInRegion
+        del trackIdsInRegion[:]
         
         if regionName == None:
-            regionTrackIds.extend(allTrackIds)
+            trackIdsInRegion.extend(allTrackIds)
         else:
             for region in self.regions:
                 if region.name == regionName:
@@ -179,11 +179,11 @@ class TrackManager:
                         for trackId in allTrackIds:
                             track = self.tracks[trackId]
                             if region.withinRegion(track.getCenterPoint()):
-                                regionTrackIds.append(trackId)
+                                trackIdsInRegion.append(trackId)
                     else:
-                        regionTrackIds.extend(allTrackIds)
+                        trackIdsInRegion.extend(allTrackIds)
                     break
-        return regionTrackIds
+        return trackIdsInRegion
 
     def getTrackById(self, trackId):
         return self.tracks.get(trackId)
@@ -288,8 +288,8 @@ class TrackManager:
                         progressCallback(count, trackCount, trackMap.name)
                 except Exception as detail:
                     print('failed to read track file\n' + trackPath + ';\n' + str(detail))
-            del self.regionTrackIds[:]
-            self.regionTrackIds.extend(self.tracks.keys())
+            del self.trackIdsInRegion[:]
+            self.trackIdsInRegion.extend(self.tracks.keys())
                         
     def updateAllTracksWorker(self, winCallback, failCallback, progressCallback=None):
         try:
