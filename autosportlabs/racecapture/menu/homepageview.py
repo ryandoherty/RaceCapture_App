@@ -8,7 +8,6 @@ from kivy.uix.image import Image
 from kivy.app import Builder
 from utils import kvFind
 from iconbutton import TileIconButton
-from kivy.properties import StringProperty
 from kivy.metrics import dp
 import mainfonts
 
