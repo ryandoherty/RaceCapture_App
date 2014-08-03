@@ -110,9 +110,7 @@ class ConfigView(Screen):
             self.configViews.append(view)
             view.bind(on_config_modified=self.on_config_modified)
             return tree.add_node(label, n)
-            
-        
-        
+
         defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView())
         attach_node('GPS', None, GPSChannelsView())
         attach_node('Analog Sensors', None, AnalogChannelsView(channelCount=8, channels=self.channels))

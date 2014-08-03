@@ -70,11 +70,14 @@ class OBD2ChannelsView(BaseConfigView):
                     
     def on_config_updated(self, rcpCfg):
         obd2Cfg = rcpCfg.obd2Config
+        self.obd2Cfg = obd2Cfg
+
+        channels = rcpCfg.channels
+        self.channels = channels
         
         kvFind(self, 'rcid', 'obd2enable').setValue(obd2Cfg.enabled)
         
         self.obd2Grid.clear_widgets()
-        self.obd2Cfg = obd2Cfg
         self.reload_obd2_channel_grid()
         self.update_view_enabled()
 
