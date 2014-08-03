@@ -1,10 +1,10 @@
 import kivy
 kivy.require('1.8.0')
+import os
 from kivy.app import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 import json
-
 from settingsview import SettingsView, SettingsSwitch, SettingsButton, SettingsMappedSpinner
 from autosportlabs.widgets.separator import HLineSeparator
 from valuefield import ValueField
@@ -109,7 +109,7 @@ class WirelessConfigView(BaseConfigView):
     
     def loadApnSettingsSpinner(self, spinner):
         try:
-            json_data = open('resource/settings/cell_providers.json')
+            json_data = open(os.path.join('resource', 'settings', 'cell_providers.json'))
             cellProviderInfo = json.load(json_data)
             apnMap = {}
             apnMap['custom'] = self.customApnLabel
