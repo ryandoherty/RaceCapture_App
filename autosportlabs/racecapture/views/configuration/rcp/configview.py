@@ -226,6 +226,7 @@ class ConfigView(Screen):
                     rcpConfigJsonString = stream.read()
                     self.rcpConfig.fromJsonString(rcpConfigJsonString)
                     self.dispatch('on_config_updated', self.rcpConfig)
+                    self.on_config_modified()
             else:
                 alertPopup('Error Loading', 'No config file selected')
         except Exception as detail:
