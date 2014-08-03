@@ -6,6 +6,7 @@ from kivy.app import Builder
 from iconbutton import IconButton
 from settingsview import SettingsSwitch
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.OBD2.obd2settings import OBD2Settings
 from utils import *
 from rcpconfig import *
 
@@ -14,8 +15,11 @@ Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/obd2channel
 class OBD2Channel(BoxLayout):
     obd2Channel = None
     channels = None
+    obd2Settings = None
+    pidIndex = 0
     def __init__(self, **kwargs):
         super(OBD2Channel, self).__init__(**kwargs)
+        self.obd2Settings = kwargs.get('obd2Settings')
         self.register_event_type('on_delete_pid')
         self.register_event_type('on_modified')
     
@@ -25,32 +29,37 @@ class OBD2Channel(BoxLayout):
     def on_channel(self, instance, value):
         if self.obd2Channel:
             self.obd2Channel.channelId = self.channels.getIdForName(value)
+            pid = self.obd2Settings.getPidForChannelName(value)
+            self.obd2Channel.pidId = pid
+            self.dispatch('on_modified')            
 
     def on_sample_rate(self, instance, value):
         if self.obd2Channel:
             self.obd2Channel.sampleRate = instance.getValueFromKey(value)
+            self.dispatch('on_modified')
                 
     def on_delete_pid(self, pidId):
         pass
     
     def on_delete(self):
-        self.dispatch('on_delete_pid', self.pidId)
+        self.dispatch('on_delete_pid', self.pidIndex)
         
-    def set_channel(self, pidId, channel, channels):
+    def set_channel(self, pidIndex, channel, channels):
         self.obd2Channel = channel
-        self.pidId = pidId
+        self.pidIndex = pidIndex
         self.channels = channels
-        kvFind(self, 'rcid', 'pidId').text = str(pidId + 1)
+        kvFind(self, 'rcid', 'pidIndex').text = str(pidIndex + 1)
         kvFind(self, 'rcid', 'sr').setFromValue(channel.sampleRate)
         channelSpinner = kvFind(self, 'rcid', 'chanId')
+        channelSpinner.filterList = self.obd2Settings.getChannelNames()
         channelSpinner.on_channels_updated(channels)
         channelSpinner.text = channels.getNameForId(channel.channelId)
-        self.obd2Channel.stale = True
         self.dispatch('on_modified')
                 
 class OBD2ChannelsView(BaseConfigView):
     obd2Cfg = None
     obd2Grid = None
+    obd2Settings = None
     def __init__(self, **kwargs):
         super(OBD2ChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
@@ -60,12 +69,17 @@ class OBD2ChannelsView(BaseConfigView):
         obd2Enable.setControl(SettingsSwitch())
         
         self.channels = kwargs['channels']
+        self.obd2Settings = OBD2Settings()
+        
         self.update_view_enabled()
+
+    def on_modified(self, *args):
+        self.obd2Cfg.stale = True
+        self.dispatch('on_config_modified', *args)
 
     def on_obd2_enabled(self, instance, value):
         if self.obd2Cfg:
             self.obd2Cfg.enabled = value
-            self.obd2Cfg.stale = True
             self.dispatch('on_modified')
                     
     def on_config_updated(self, rcpCfg):
@@ -98,14 +112,13 @@ class OBD2ChannelsView(BaseConfigView):
             
         self.update_view_enabled()
 
-    def on_delete_pid(self, instance, pidId):
-        del self.obd2Cfg.pids[pidId]
+    def on_delete_pid(self, instance, pidIndex):
+        del self.obd2Cfg.pids[pidIndex]
         self.reload_obd2_channel_grid()
-        self.obd2Cfg.stale = True
         self.dispatch('on_modified')
                     
     def add_obd2_channel(self, index, pidConfig):
-        obd2Channel = OBD2Channel()
+        obd2Channel = OBD2Channel(obd2Settings = self.obd2Settings)
         obd2Channel.bind(on_delete_pid=self.on_delete_pid)
         obd2Channel.bind(on_modified=self.on_modified)
         obd2Channel.set_channel(index, pidConfig, self.channels)
@@ -117,5 +130,4 @@ class OBD2ChannelsView(BaseConfigView):
             self.obd2Cfg.pids.append(pidConfig)
             self.add_obd2_channel(len(self.obd2Cfg.pids) - 1, pidConfig)
             self.update_view_enabled()
-            self.obd2Cfg.stale = True
             self.dispatch('on_modified')        

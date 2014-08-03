@@ -1,0 +1,43 @@
+{
+    "obd2Channels": {
+    	"EngineLoad":{
+    		"pid": 4
+    	},
+        "EngineTemp": {
+            "pid": 5
+        },
+        "EngineTemp": {
+            "pid": 5
+        },
+        "FuelPress": {
+            "pid": 10
+        },
+        "MAP": {
+            "pid": 11
+        },        
+        "RPM": {
+            "pid": 12
+        },
+        "Speed": {
+            "pid": 13
+        },
+        "IgnTiming": {
+            "pid": 14
+        },
+        "IAT": {
+            "pid": 15
+        },
+        "MAF": {
+            "pid": 16
+        },
+        "TPS": {
+            "pid": 17
+        },
+        "FuelLevel": {
+            "pid": 47
+        },
+        "OilTemp": {
+            "pid": 92
+        }
+    }
+}

@@ -91,12 +91,14 @@ class Channels:
         except IndexError:
             return ''
 
-    def getNamesList(self, channelType):
+    def getNamesList(self, channelType, filterList = None):
 
         names = []
         for channel in self.items:
-            if channelType == None or channelType == channel.channelType:
-                names.append(channel.name)
+            if not filterList or channel.name in filterList:
+                if channelType == None or channelType == channel.channelType:
+                    names.append(channel.name)
+
         return names
 
                 
