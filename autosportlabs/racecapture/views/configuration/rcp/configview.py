@@ -163,7 +163,7 @@ class ConfigView(Screen):
         
     def on_logfile(self, logfileJson):
         if self.scriptView:
-            logfileText = logfileJson.get('logfile').replace('\r','')
+            logfileText = logfileJson.get('logfile').replace('\r','').replace('\0','')
             self.scriptView.dispatch('on_logfile', logfileText)
         
     def runScript(self, instance):

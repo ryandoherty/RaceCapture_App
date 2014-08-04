@@ -29,9 +29,10 @@
                     id: loggingScrollView
                     rcid: 'logfileSv'
                     do_scroll_x:False
-                    TextInput:
+                    CodeInput:
                     	rcid: 'logfile'
-                    	disabled: True
+                    	color: (1.0, 1.0, 1.0, 1.0)
+                    	background_color: (0.8, 0.8, 0.8, 1.0)
                         size_hint_y: None
                         height: max(self.minimum_height, loggingScrollView.height)
         BoxLayout:

@@ -11,6 +11,7 @@ from pygments import lexers
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from iconbutton import IconButton
+from cStringIO import StringIO
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/scriptview.kv')
 
@@ -47,10 +48,8 @@ class LuaScriptingView(BaseConfigView):
         pass
         
     def on_logfile(self, value):
-        text = self.logfileView.text
-        self.logfileView.text = text + value
+        self.logfileView.text += str(value)        
         self.logfileScrollView.scroll_y = 0.0
-        
     
     def clearLog(self):
         self.logfileView.text = ''
