@@ -110,6 +110,12 @@ class RaceCaptureApp(App):
     #Logfile
     def on_poll_logfile(self, instance):
         self.rcpComms.getLogfile()
+    
+    def on_set_logfile_level(self, instance, level):
+        self.rcpComms.setLogfileLevel(level, None, self.on_set_logfile_level_error)
+
+    def on_set_logfile_level_error(self, detail):
+        alertPopup('Error', 'Error Setting Logfile Level:\n\n' + str(detail))
         
     #Run Script
     def on_run_script(self, instance):
@@ -217,6 +223,7 @@ class RaceCaptureApp(App):
         configView.bind(on_write_config=self.on_write_config)
         configView.bind(on_run_script=self.on_run_script)
         configView.bind(on_poll_logfile=self.on_poll_logfile)
+        configView.bind(on_set_logfile_level=self.on_set_logfile_level)
         
         self.rcpComms.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: configView.on_logfile(value)))
         self.rcpComms.on_progress = lambda value: statusBar.dispatch('on_progress', value)

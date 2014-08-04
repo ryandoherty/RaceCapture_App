@@ -47,6 +47,7 @@ class SettingsSwitch(Switch):
         self.dispatch('on_control', value)
 
 class SettingsMappedSpinner(MappedSpinner):
+    lastValue = None
     def __init__(self, **kwargs):
         super(SettingsMappedSpinner, self).__init__(**kwargs)
         self.register_event_type('on_control')
@@ -58,7 +59,9 @@ class SettingsMappedSpinner(MappedSpinner):
         self.setFromValue(value)
     
     def on_text(self, instance, value):
-        self.dispatch('on_control', instance.getValueFromKey(value))
+        if not value == self.lastValue: #eh.. prevent double firing of event. is there a better way?
+            self.dispatch('on_control', instance.getValueFromKey(value))
+            self.lastValue = value
 
 class SettingsTextField(ValueField):
     def __init__(self, **kwargs):

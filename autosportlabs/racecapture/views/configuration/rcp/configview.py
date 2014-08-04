@@ -71,6 +71,7 @@ class ConfigView(Screen):
         self.register_event_type('on_write_config')
         self.register_event_type('on_run_script')
         self.register_event_type('on_poll_logfile')
+        self.register_event_type('on_set_logfile_level')
         
 
     def on_config_written(self, *args):
@@ -127,6 +128,7 @@ class ConfigView(Screen):
         scriptView = LuaScriptingView()
         scriptView.bind(on_run_script=self.runScript)
         scriptView.bind(on_poll_logfile=self.pollLogfile)
+        scriptView.bind(on_set_logfile_level=self.setLogFileLevel)
         attach_node('Scripting', None, scriptView)
         attach_node('Channels', None, ChannelsView())
         self.scriptView = scriptView
@@ -172,6 +174,12 @@ class ConfigView(Screen):
     def on_poll_logfile(self):
         pass
 
+    def on_set_logfile_level(self, level):
+        pass
+    
+    def setLogFileLevel(self, instance, level):
+        self.dispatch('on_set_logfile_level', level)
+        
     def pollLogfile(self, instance):
         self.dispatch('on_poll_logfile')
     

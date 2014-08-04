@@ -13,7 +13,7 @@ Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/canconfigvi
 class CANBaudRateSpinner(SettingsMappedSpinner):
     def __init__(self, **kwargs):    
         super(CANBaudRateSpinner, self).__init__(**kwargs)
-        self.setValueMap({50000: '50K Baud', 125000: '125K Baud', 250000:'250K Baud', 500000:'500K Baud', 1000000:'1M Baud'}, '500K Baud')
+        self.setValueMap({50000: '50K Baud', 125000: '125K Baud', 250000:'250K Baud', 500000:'500K Baud', 1000000:'1M Baud'}, 500000)
     
 class CANConfigView(BaseConfigView):
     canConfig = None

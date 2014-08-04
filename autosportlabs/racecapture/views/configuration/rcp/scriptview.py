@@ -11,11 +11,17 @@ from pygments import lexers
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from iconbutton import IconButton
-from cStringIO import StringIO
+from settingsview import SettingsMappedSpinner
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/scriptview.kv')
 
 LOGFILE_POLL_INTERVAL = 1
+        
+class LogLevelSpinner(SettingsMappedSpinner):
+    def __init__(self, **kwargs):    
+        super(LogLevelSpinner, self).__init__(**kwargs)
+        self.setValueMap({3: 'Error', 6: 'Info', 7:'Debug', 8:'Trace'}, 6)
+        self.text = 'Info'
 
 class LuaScriptingView(BaseConfigView):
     scriptCfg = None
@@ -28,10 +34,14 @@ class LuaScriptingView(BaseConfigView):
         self.register_event_type('on_run_script')
         self.register_event_type('on_poll_logfile')
         self.register_event_type('on_logfile')
+        self.register_event_type('on_set_logfile_level')
         self.logfileView = kvFind(self, 'rcid', 'logfile')
         self.scriptView = kvFind(self, 'rcid', 'script')
         self.logfileScrollView = kvFind(self, 'rcid', 'logfileSv') 
 
+    def on_loglevel_selected(self, instance, value):
+        self.dispatch('on_set_logfile_level', value)
+        
     def on_config_updated(self, rcpCfg):
         scriptCfg = rcpCfg.scriptConfig
         self.scriptView.text = scriptCfg.script
@@ -44,6 +54,9 @@ class LuaScriptingView(BaseConfigView):
             self.dispatch('on_modified')
             
     def on_run_script(self):
+        pass
+    
+    def on_set_logfile_level(self, level):
         pass
     
     def on_poll_logfile(self):
