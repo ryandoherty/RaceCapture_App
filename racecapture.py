@@ -109,10 +109,18 @@ class RaceCaptureApp(App):
    
     #Logfile
     def on_poll_logfile(self, instance):
-        self.rcpComms.getLogfile()
+        try:
+            self.rcpComms.getLogfile()
+        except:
+            pass
+        
     
     def on_set_logfile_level(self, instance, level):
-        self.rcpComms.setLogfileLevel(level, None, self.on_set_logfile_level_error)
+        try:
+            self.rcpComms.setLogfileLevel(level, None, self.on_set_logfile_level_error)
+        except:
+            logging.exception('')
+            self._serial_warning()
 
     def on_set_logfile_level_error(self, detail):
         alertPopup('Error', 'Error Setting Logfile Level:\n\n' + str(detail))
