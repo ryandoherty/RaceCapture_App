@@ -482,6 +482,15 @@ class RcpSerial:
     def runScript(self, winCallback, failCallback):
         self.executeSingle(RcpCmd('runScript', self.sendRunScript), winCallback, failCallback)
         
+    def setLogfileLevel(self, level, winCallback = None, failCallback = None):
+        def setLogfileLevelCmd():
+            self.sendCommand({'setLogfileLevel': level})
+            
+        if winCallback and failCallback:
+            self.executeSingle(RcpCmd('logfileLevel', setLogfileLevelCmd), winCallback, failCallback)
+        else:
+            setLogfileLevelCmd()
+        
     def getLogfile(self, winCallback = None, failCallback = None):
         def getLogfileCmd():
             self.sendCommand({'getLogfile': None})

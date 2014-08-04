@@ -174,7 +174,7 @@ class ConfigView(Screen):
 
     def pollLogfile(self, instance):
         self.dispatch('on_poll_logfile')
-                
+    
     def readConfig(self):
         if self.writeStale:
             popup = None 

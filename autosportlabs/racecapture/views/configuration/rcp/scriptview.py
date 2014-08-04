@@ -15,6 +15,8 @@ from cStringIO import StringIO
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/scriptview.kv')
 
+LOGFILE_POLL_INTERVAL = 1
+
 class LuaScriptingView(BaseConfigView):
     scriptCfg = None
     logfileView = None
@@ -62,7 +64,7 @@ class LuaScriptingView(BaseConfigView):
         
     def enableScript(self, instance, value):
         if value:
-            Clock.schedule_interval(self.poll_logfile, 1)
+            Clock.schedule_interval(self.poll_logfile, LOGFILE_POLL_INTERVAL)
         else:
             Clock.unschedule(self.poll_logfile)
         
