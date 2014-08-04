@@ -54,8 +54,6 @@ class AnalogChannelsView(BaseConfigView):
     def on_config_updated(self, rcpCfg):
         analogCfg = rcpCfg.analogConfig
         channels = rcpCfg.channels
-        self.channels = channels
-        self.analogCfg = analogCfg
 
         analogChannelCount = analogCfg.channelCount
         for i in range(analogChannelCount):
@@ -64,6 +62,8 @@ class AnalogChannelsView(BaseConfigView):
             self.setAccordionItemTitle(self.accordion, analogCfg.channels, analogChannel)
             editor.on_config_updated(analogChannel, channels)
     
+        self.channels = channels
+        self.analogCfg = analogCfg
         
         
     def on_modified(self, instance, channelConfig):
@@ -119,9 +119,6 @@ class AnalogChannel(BoxLayout):
             self.dispatch('on_modified', self.channelConfig)
                     
     def on_config_updated(self, channelConfig, channels):
-        self.channelConfig = channelConfig
-        self.channels = channels
-        
         channelSpinner = kvFind(self, 'rcid', 'chanId')
         channelSpinner.setValue(channels.getNameForId(channelConfig.channelId))
 
@@ -150,6 +147,9 @@ class AnalogChannel(BoxLayout):
         mapEditor = kvFind(self, 'rcid', 'mapEditor')
         mapEditor.on_config_changed(channelConfig.scalingMap)
         mapEditor.bind(on_map_updated=self.on_map_updated)
+
+        self.channelConfig = channelConfig
+        self.channels = channels
         
     def on_map_updated(self, *args):
         self.channelConfig.stale = True

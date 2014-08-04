@@ -54,7 +54,7 @@ class OBD2Channel(BoxLayout):
         channelSpinner.filterList = self.obd2Settings.getChannelNames()
         channelSpinner.on_channels_updated(channels)
         channelSpinner.text = channels.getNameForId(channel.channelId)
-        self.dispatch('on_modified')
+        #self.dispatch('on_modified')
                 
 class OBD2ChannelsView(BaseConfigView):
     obd2Cfg = None
@@ -74,8 +74,9 @@ class OBD2ChannelsView(BaseConfigView):
         self.update_view_enabled()
 
     def on_modified(self, *args):
-        self.obd2Cfg.stale = True
-        self.dispatch('on_config_modified', *args)
+        if self.obd2Cfg:
+            self.obd2Cfg.stale = True
+            self.dispatch('on_config_modified', *args)
 
     def on_obd2_enabled(self, instance, value):
         if self.obd2Cfg:
@@ -84,7 +85,6 @@ class OBD2ChannelsView(BaseConfigView):
                     
     def on_config_updated(self, rcpCfg):
         obd2Cfg = rcpCfg.obd2Config
-        self.obd2Cfg = obd2Cfg
 
         channels = rcpCfg.channels
         self.channels = channels
@@ -92,8 +92,9 @@ class OBD2ChannelsView(BaseConfigView):
         kvFind(self, 'rcid', 'obd2enable').setValue(obd2Cfg.enabled)
         
         self.obd2Grid.clear_widgets()
-        self.reload_obd2_channel_grid()
+        self.reload_obd2_channel_grid(obd2Cfg)
         self.update_view_enabled()
+        self.obd2Cfg = obd2Cfg
 
     def update_view_enabled(self):
         add_disabled = True
@@ -103,11 +104,11 @@ class OBD2ChannelsView(BaseConfigView):
                 
         kvFind(self, 'rcid', 'addpid').disabled = add_disabled
             
-    def reload_obd2_channel_grid(self):
+    def reload_obd2_channel_grid(self, obd2Cfg):
         self.obd2Grid.clear_widgets()
         
-        for i in range(len(self.obd2Cfg.pids)):
-            pidConfig = self.obd2Cfg.pids[i]
+        for i in range(len(obd2Cfg.pids)):
+            pidConfig = obd2Cfg.pids[i]
             self.add_obd2_channel(i, pidConfig)
             
         self.update_view_enabled()
@@ -120,8 +121,8 @@ class OBD2ChannelsView(BaseConfigView):
     def add_obd2_channel(self, index, pidConfig):
         obd2Channel = OBD2Channel(obd2Settings = self.obd2Settings)
         obd2Channel.bind(on_delete_pid=self.on_delete_pid)
-        obd2Channel.bind(on_modified=self.on_modified)
         obd2Channel.set_channel(index, pidConfig, self.channels)
+        obd2Channel.bind(on_modified=self.on_modified)
         self.obd2Grid.add_widget(obd2Channel)
         
     def on_add_obd2_channel(self):

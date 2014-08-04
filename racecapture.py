@@ -159,6 +159,7 @@ class RaceCaptureApp(App):
 
     def on_read_config_complete(self, rcpCfg):
         Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_updated', self.rcpConfig))
+        self.rcpConfig.stale = False
         self.showActivity('')
         
     def on_read_config_error(self, detail):

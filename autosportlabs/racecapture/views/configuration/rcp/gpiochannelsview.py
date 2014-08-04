@@ -49,8 +49,6 @@ class GPIOChannel(BoxLayout):
             self.dispatch('on_modified', self.channelConfig)
             
     def on_config_updated(self, channelConfig, channels):
-        self.channelConfig = channelConfig
-        self.channels = channels
 
         sampleRateSpinner = kvFind(self, 'rcid', 'sr')
         sampleRateSpinner.setValue(channelConfig.sampleRate)
@@ -60,6 +58,9 @@ class GPIOChannel(BoxLayout):
         
         modeSpinner = kvFind(self, 'rcid', 'mode')
         modeSpinner.setFromValue(channelConfig.mode)
+
+        self.channelConfig = channelConfig
+        self.channels = channels
         
         
 class GPIOChannelsView(BaseConfigView):
@@ -99,8 +100,6 @@ class GPIOChannelsView(BaseConfigView):
     def on_config_updated(self, rcpCfg):
         gpioCfg = rcpCfg.gpioConfig
         channels = rcpCfg.channels
-        self.channels = channels 
-        self.gpioCfg = gpioCfg
 
         gpioChannelCount = gpioCfg.channelCount
         for i in range(gpioChannelCount):
@@ -109,6 +108,8 @@ class GPIOChannelsView(BaseConfigView):
             self.setAccordionItemTitle(self.accordion, gpioCfg.channels, gpioChannel)            
             editor.on_config_updated(gpioChannel, channels)
             
+        self.channels = channels 
+        self.gpioCfg = gpioCfg
             
             
             
