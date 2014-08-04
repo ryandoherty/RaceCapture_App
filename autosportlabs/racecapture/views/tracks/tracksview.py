@@ -148,7 +148,6 @@ class TracksBrowser(BoxLayout):
                 Clock.unschedule(self.searchAndUpdate)
                 Clock.unschedule(self.loadAll)
                 Clock.schedule_once(self.searchAndUpdate, self.searchDelay)
-                self.showProgressPopup("", "Loading Tracks...")     
                 
         
     def getSelectedRegion(self):
@@ -156,7 +155,6 @@ class TracksBrowser(BoxLayout):
             
     def on_region_selected(self, instance, search):
         if self.initialized:
-            self.showProgressPopup("", "Loading Tracks...")
             self.initTrackListForSelectedRegion()
 
     def showProgressPopup(self, title, content):
