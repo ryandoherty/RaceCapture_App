@@ -15,6 +15,9 @@ CHANNEL_ADD_MODE_COMPLETE = 2
 TRACK_ADD_MODE_IN_PROGRESS = 1
 TRACK_ADD_MODE_COMPLETE = 2
 
+SCRIPT_ADD_MODE_IN_PROGRESS = 1
+SCRIPT_ADD_MODE_COMPLETE = 2
+
 DEFAULT_READ_RETRIES = 2
 DEFAULT_LEVEL2_RETRIES = 4
 
@@ -458,22 +461,22 @@ class RcpSerial:
     def getScript(self):
         self.sendGet('getScriptCfg', None)
 
-    def setScriptPage(self, scriptPage, page):
-        self.sendCommand({'setScriptCfg': {'data':scriptPage,'page':page}})
+    def setScriptPage(self, scriptPage, page, mode):
+        self.sendCommand({'setScriptCfg': {'data':scriptPage,'page':page, 'mode':mode}})
         
     def sequenceWriteScript(self, scriptCfg, cmdSequence):
-        i = 0
+        page = 0
         print(str(scriptCfg))
         script = scriptCfg['scriptCfg']['data']
         while True:
             if len(script) >= 256:
                 scr = script[:256]
                 script = script[256:]
-                cmdSequence.append(RcpCmd('setScriptCfg', self.setScriptPage, scr, i))
-                i = i + 1
+                mode = SCRIPT_ADD_MODE_IN_PROGRESS if len(script) > 0 else SCRIPT_ADD_MODE_COMPLETE
+                cmdSequence.append(RcpCmd('setScriptCfg', self.setScriptPage, scr, page, mode))
+                page = page + 1
             else:
-                cmdSequence.append(RcpCmd('setScriptCfg', self.setScriptPage, script, i))
-                cmdSequence.append(RcpCmd('setScriptCfg', self.setScriptPage, '', i + 1))
+                cmdSequence.append(RcpCmd('setScriptCfg', self.setScriptPage, script, page, SCRIPT_ADD_MODE_COMPLETE))
                 break
         
     def sendRunScript(self):
