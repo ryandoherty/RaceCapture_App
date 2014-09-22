@@ -785,22 +785,28 @@ class ConnectivityConfig(object):
 
 
 class VersionConfig(object):
+    name = ''
+    friendlyName = ''
     major = 0
     minor = 0
     bugfix = 0
+    serial = 0
     def __init__(self, **kwargs):
         pass
     
     def toString(self):
-        return str(self.major) + "." + str(self.minor) + "." + str(self.bugfix)
+        return str(self.name) + " " + str(self.major) + "." + str(self.minor) + "." + str(self.bugfix) + ' (s/n# ' + str(self.serial) + ')'
     
     def fromJson(self, versionJson):
+        self.name = versionJson.get('name', self.name)
+        self.friendlyName = versionJson.get('fname', self.friendlyName)
         self.major = versionJson.get('major', self.major)
         self.minor = versionJson.get('minor', self.minor)
         self.bugfix = versionJson.get('bugfix', self.bugfix)
+        self.serial = versionJson.get('serial', self.serial)
         
     def toJson(self):
-        versionJson = {'major': self.major, 'minor': self.minor, 'bugfix': self.bugfix}
+        versionJson = {'name': self.name, 'fname': self.friendlyName, 'major': self.major, 'minor': self.minor, 'bugfix': self.bugfix}
         return {'ver': versionJson}
         
 class RcpConfig(object):

@@ -24,6 +24,7 @@ from kivy.uix.screenmanager import *
 from installfix_garden_navigationdrawer import NavigationDrawer
 
 from rcpserial import *
+from autosportlabs.comms.serial_comms import serial_comms
 from utils import *
 from autosportlabs.racecapture.tracks.trackmanager import TrackManager
 from autosportlabs.racecapture.views.tracks.tracksview import TracksView
@@ -69,6 +70,9 @@ class RaceCaptureApp(App):
     
     #main view references for dispatching notifications
     mainViews = None
+
+    #application arguments - initialized upon startup     
+    app_args = []
     
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
@@ -90,9 +94,10 @@ class RaceCaptureApp(App):
     def processArgs(self):
         parser = argparse.ArgumentParser(description='Autosport Labs Race Capture App')
         parser.add_argument('-p','--port', help='Port', required=False)
-        args = vars(parser.parse_args())
-        self.rcpComms.setPort(args['port'])
+        self.app_args = vars(parser.parse_args())
 
+    def getAppArg(self, name):
+        return self.app_args.get(name, None)
 
     def loadCurrentTracksSuccess(self):
         print('Curent Tracks Loaded')
@@ -269,18 +274,16 @@ class RaceCaptureApp(App):
         self.statusBar = statusBar
         self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')
         
-        if self.rcpComms.port:
-            self.initRcpComms()
-        else:
-            self.rcpComms.autoDetect(self.rcpDetectWin, self.rcpDetectFail)
+        self.initRcpComms()
 
     def initRcpComms(self):
-        self.rcpComms.initSerial()
-        Clock.schedule_once(lambda dt: self.on_read_config(self), 1.0)
+        port = self.getAppArg('port')
+        comms = serial_comms(port = port)
+        self.rcpComms.initSerial(comms, self.rcpDetectWin, self.rcpDetectFail)
     
     def rcpDetectWin(self, rcpVersion):
-        self.showStatus("RaceCapture/Pro v{0}.{1}.{2}".format(rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
-        self.initRcpComms()
+        self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
+        Clock.schedule_once(lambda dt: self.on_read_config(self), 1.0)
 
         
     def rcpDetectFail(self):

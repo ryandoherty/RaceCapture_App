@@ -1,4 +1,3 @@
-import serial
 import io
 import json
 import traceback
@@ -6,8 +5,8 @@ import Queue
 from time import sleep
 from threading import Thread, RLock
 from rcpconfig import *
-from serial.tools import list_ports
 from functools import partial
+from autosportlabs.comms.serial_comms import *
 
 CHANNEL_ADD_MODE_IN_PROGRESS = 1
 CHANNEL_ADD_MODE_COMPLETE = 2
@@ -18,12 +17,8 @@ TRACK_ADD_MODE_COMPLETE = 2
 SCRIPT_ADD_MODE_IN_PROGRESS = 1
 SCRIPT_ADD_MODE_COMPLETE = 2
 
-DEFAULT_READ_RETRIES = 2
+
 DEFAULT_LEVEL2_RETRIES = 4
-
-DEFAULT_SERIAL_READ_TIMEOUT = None
-DEFAULT_SERIAL_WRITE_TIMEOUT = 0
-
 DEFAULT_MSG_RX_TIMEOUT = 1.0
 
 
@@ -48,7 +43,8 @@ class SingleRcpCmd(RcpCmd):
         self.winCallback = winCallback
         self.failCallback = failCallback
             
-class RcpSerial:    
+class RcpSerial:
+    comms = None   
     msgListeners = {}
     cmdQueue = Queue.Queue()
     cmdSequenceQueue = Queue.Queue()
@@ -59,20 +55,20 @@ class RcpSerial:
     on_rx = lambda self, value: None
     
     retryCount = DEFAULT_READ_RETRIES
-    timeout = DEFAULT_SERIAL_READ_TIMEOUT
-    writeTimeout = DEFAULT_SERIAL_WRITE_TIMEOUT
     
     def __init__(self, **kwargs):
-        self.ser = None
-        self.port = kwargs.get('port', None)
-     
-    def setPort(self, port):
-        self.port = port
-        
-    def initSerial(self):
+        self.comms = kwargs.get('comms', self.comms)
+
+    def startMessageRxWorker(self, onInitComplete, versionInfo):
         rxThread = Thread(target=self.msgRxWorker)
         rxThread.daemon = True
-        rxThread.start()        
+        rxThread.start()
+        print(str(versionInfo))
+        onInitComplete(versionInfo)
+                     
+    def initSerial(self, comms, detectWin, detectFail):
+        self.comms = comms
+        comms.autoDetect(self.getVersion, lambda versionInfo: self.startMessageRxWorker(detectWin, versionInfo), detectFail)                        
 
     def addListener(self, messageName, callback):
         listeners = self.msgListeners.get(messageName, None)
@@ -94,8 +90,8 @@ class RcpSerial:
         retries = 0
         while True:
             try:
-                serial = self.getSerial()
-                msg = self.readLine(serial)
+                comms = self.getComms()
+                msg = comms.readLine()
                 print('msgRxWorker Rx: ' + str(msg))
                 msgJson = json.loads(msg, strict = False)
                 self.on_rx(True)
@@ -118,12 +114,13 @@ class RcpSerial:
                         retries = 0
                     except:
                         pass
+                    
     def rcpCmdComplete(self, msgReply):
         self.cmdSequenceQueue.put(msgReply)
                 
     def recoverTimeout(self):
         print('POKE')
-        self.getSerial().write('\r')
+        self.getComms().write('\r')
         
     def executeSingle(self, rcpCmd, winCallback, failCallback):
         t = Thread(target=self.executeSequence, args=([rcpCmd], None, winCallback, failCallback))
@@ -210,16 +207,19 @@ class RcpSerial:
         try:
             self.sendCommandLock.acquire()
             rsp = None
-            ser = self.getSerial()
-            ser.flushInput()
-            ser.flushOutput()
+            
+            comms = self.comms
+            comms.flushOutput()
+            if sync: 
+                comms.flushInput()
+                
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
             print('send cmd: ' + cmdStr)
-            ser.write(cmdStr)
+            comms.write(cmdStr)
             if sync:
-                rsp = self.readLine(ser)
+                rsp = comms.readLine()
                 if cmdStr.startswith(rsp):
-                    rsp = self.readLine(ser)
+                    rsp = comms.readLine()
                 return json.loads(rsp)
         finally:
             self.sendCommandLock.release()
@@ -239,56 +239,12 @@ class RcpSerial:
         else:
             self.sendCommand({name: payload})
         
-    def getSerial(self):
-        if not self.ser:
-            ser = self.open()
-            ser.flushInput()
-            ser.flushOutput()
-            self.ser = ser
-        return self.ser
-            
-    def open(self):
-        print('Opening serial')
-        if self.port == None:
-            self.autoDetectWorker()
-            if self.port == None:
-                raise Exception('Could not open port: Device not detected')
-        else:
-            ser = serial.Serial(self.port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
-            ser.flushInput()
-            ser.flushOutput()
-            return ser
-
-    def close(self):
-        if self.ser != None:
-            self.ser.close()
-        self.ser = None
-    
-    def readLine(self, ser):
-        eol2 = b'\r'
-        retryCount = 0
-        line = bytearray()
-
-        while True:
-            c = ser.read(1)
-            if  c == eol2:
-                break
-            elif c == '':
-                if retryCount >= self.retryCount:
-                    self.close()
-                    raise Exception('Could not read message')
-                retryCount +=1
-                print('Timeout - retry: ' + str(retryCount))
-                print("POKE")
-                ser.write(' ')
-            else:
-                line += c
-                
-        line = bytes(line).strip()
-        line = line.replace('\r', '')
-        line = line.replace('\n', '')
-        return line
-        
+    def getComms(self):
+        comms = self.comms
+        if not comms.isOpen():
+            comms.open()
+        return comms
+                    
     def getRcpCfgCallback(self, cfg, rcpCfgJson, winCallback):
         cfg.fromJson(rcpCfgJson)
         winCallback(cfg)
@@ -533,8 +489,6 @@ class RcpSerial:
                                  'channel': channelJson
                                  }
                                  })
-                
-                
     
     def sequenceWriteTrackDb(self, tracksDbJson, cmdSequence):
         trackDbJson = tracksDbJson.get('trackDb')
@@ -563,45 +517,4 @@ class RcpSerial:
         rsp = self.sendCommand({"getVer":None}, sync)
         return rsp
 
-    def autoDetect(self, winCallback, failCallback):
-        t = Thread(target=self.autoDetectWorker, args=(winCallback, failCallback))
-        t.daemon = True
-        t.start()        
-        
-    def autoDetectWorker(self, winCallback = None, failCallback = None):
-        ports = [x[0] for x in list_ports.comports()]
-
-        self.retryCount = 0
-        self.timeout = 0.5
-        self.writeTimeout = 0
-        print "Searching for RaceCapture on all serial ports"
-        testVer = VersionConfig()
-        verJson = None
-        for p in ports:
-            try:
-                print "Trying", p
-                self.port = p
-                verJson = self.getVersion(True)
-                testVer.fromJson(verJson.get('ver', None))
-                if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
-                    break
-                
-            except Exception as detail:
-                print('Not found on ' + str(p))
-                try:
-                    self.close()
-                    self.port = None
-                finally:
-                    pass
-
-        self.retryCount = DEFAULT_READ_RETRIES
-        self.timeout = DEFAULT_SERIAL_READ_TIMEOUT
-        self.writeTimeout = DEFAULT_SERIAL_WRITE_TIMEOUT
-        if not verJson == None:
-            print "Found racecapture version " + testVer.toString() + " on port:", self.port
-            self.close()
-            if winCallback: winCallback(testVer)
-        else:
-            self.port = None
-            if failCallback: failCallback()
 
