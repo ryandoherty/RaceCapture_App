@@ -8,7 +8,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.app import Builder
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
-from rcpconfig import *
+from autosportlabs.racecapture.config.rcpconfig import *
 from mappedspinner import MappedSpinner
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/gpiochannelsview.kv')

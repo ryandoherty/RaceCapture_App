@@ -1,6 +1,7 @@
 import kivy
 kivy.require('1.8.0')
 
+from math import sin
 from installfix_garden_graph import Graph, MeshLinePlot
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.accordion import Accordion, AccordionItem
@@ -8,14 +9,13 @@ from kivy.utils import get_color_from_hex as rgb
 from kivy.app import Builder
 from valuefield import *
 from utils import *
-from rcpconfig import *
 from channels import *
 from kivy.metrics import dp
 from channelnameselectorview import ChannelNameSelectorView
 from channelnamespinner import ChannelNameSpinner
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
-from math import sin
+from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/analogchannelsview.kv')
 

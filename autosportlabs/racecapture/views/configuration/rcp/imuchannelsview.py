@@ -5,10 +5,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.uix.spinner import Spinner
 from mappedspinner import MappedSpinner
-from rcpconfig import *
 from utils import *
 from valuefield import IntegerValueField, FloatValueField
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/imuchannelsview.kv')
 

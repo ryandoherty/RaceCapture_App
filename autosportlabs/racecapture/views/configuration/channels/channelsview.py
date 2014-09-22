@@ -13,7 +13,7 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.api.rcpserial import CHANNEL_ADD_MODE_IN_PROGRESS, CHANNEL_ADD_MODE_COMPLETE
 from utils import *
-from rcpconfig import *
+from autosportlabs.racecapture.config.rcpconfig import *
 from channels import Channels, Channel
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/channels/channelsview.kv')

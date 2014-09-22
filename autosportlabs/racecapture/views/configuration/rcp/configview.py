@@ -28,8 +28,7 @@ from autosportlabs.racecapture.views.configuration.rcp.scriptview import *
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
-
-from rcpconfig import *
+from autosportlabs.racecapture.config.rcpconfig import *
 from channels import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/configview.kv')

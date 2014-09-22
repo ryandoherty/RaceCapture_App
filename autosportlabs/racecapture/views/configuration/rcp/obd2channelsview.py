@@ -8,7 +8,7 @@ from settingsview import SettingsSwitch
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.OBD2.obd2settings import OBD2Settings
 from utils import *
-from rcpconfig import *
+from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/obd2channelsview.kv')
 

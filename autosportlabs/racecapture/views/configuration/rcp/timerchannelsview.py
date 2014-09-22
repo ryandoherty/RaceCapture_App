@@ -7,9 +7,9 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.spinner import Spinner
 from kivy.app import Builder
 from mappedspinner import MappedSpinner
-from rcpconfig import *
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/timerchannelsview.kv')
 

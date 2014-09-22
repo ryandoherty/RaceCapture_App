@@ -1,7 +1,7 @@
 import serial
 from threading import Thread, RLock
 from serial.tools import list_ports
-from rcpconfig import VersionConfig
+from autosportlabs.racecapture.config.rcpconfig import VersionConfig
 
 DEFAULT_READ_RETRIES = 2
 DEFAULT_SERIAL_WRITE_TIMEOUT = 0

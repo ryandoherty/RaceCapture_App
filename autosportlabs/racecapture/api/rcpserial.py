@@ -4,7 +4,7 @@ import traceback
 import Queue
 from time import sleep
 from threading import Thread, RLock
-from rcpconfig import *
+from autosportlabs.racecapture.config.rcpconfig import *
 from functools import partial
 from autosportlabs.comms.serial_comms import *
 

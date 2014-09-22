@@ -3,10 +3,10 @@ kivy.require('1.8.0')
 
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
-from rcpconfig import *
 from samplerateview import *
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/gpschannelsview.kv')            
             
