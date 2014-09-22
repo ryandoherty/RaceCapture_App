@@ -43,7 +43,7 @@ class SingleRcpCmd(RcpCmd):
         self.winCallback = winCallback
         self.failCallback = failCallback
             
-class RcpSerial:
+class RcpApi:
     comms = None   
     msgListeners = {}
     cmdQueue = Queue.Queue()

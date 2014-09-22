@@ -23,7 +23,7 @@ from kivy.uix.screenmanager import *
 
 from installfix_garden_navigationdrawer import NavigationDrawer
 
-from autosportlabs.racecapture.api.rcpserial import RcpSerial
+from autosportlabs.racecapture.api.rcpapi import RcpApi
 from autosportlabs.comms.serial_comms import serial_comms
 from utils import *
 from autosportlabs.racecapture.tracks.trackmanager import TrackManager
@@ -50,7 +50,7 @@ class RaceCaptureApp(App):
     rcpConfig  = RcpConfig()
     
     #RaceCapture serial I/O 
-    rcpComms = RcpSerial()
+    rcpComms = RcpApi()
     
     #Track database manager
     trackManager = None

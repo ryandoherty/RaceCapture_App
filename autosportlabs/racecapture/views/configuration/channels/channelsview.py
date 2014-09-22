@@ -11,7 +11,7 @@ from kivy.uix.screenmanager import Screen
 from autosportlabs.widgets.separator import HSeparator, HSeparatorMinor
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
-from autosportlabs.racecapture.api.rcpserial import CHANNEL_ADD_MODE_IN_PROGRESS, CHANNEL_ADD_MODE_COMPLETE
+from autosportlabs.racecapture.api.rcpapi import CHANNEL_ADD_MODE_IN_PROGRESS, CHANNEL_ADD_MODE_COMPLETE
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
 from channels import Channels, Channel
