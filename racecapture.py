@@ -23,7 +23,7 @@ from kivy.uix.screenmanager import *
 
 from installfix_garden_navigationdrawer import NavigationDrawer
 
-from rcpserial import *
+from autosportlabs.racecapture.api.rcpserial import RcpSerial
 from autosportlabs.comms.serial_comms import serial_comms
 from utils import *
 from autosportlabs.racecapture.tracks.trackmanager import TrackManager
@@ -31,7 +31,7 @@ from autosportlabs.racecapture.views.tracks.tracksview import TracksView
 from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
 from autosportlabs.racecapture.menu.mainmenu import MainMenu
 from autosportlabs.racecapture.menu.homepageview import HomePageView
-
+from rcpconfig import RcpConfig
 from toolbarview import ToolbarView
 
 

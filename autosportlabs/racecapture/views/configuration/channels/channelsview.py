@@ -1,5 +1,4 @@
 import kivy
-from rcpserial import CHANNEL_ADD_MODE_IN_PROGRESS, CHANNEL_ADD_MODE_COMPLETE
 kivy.require('1.8.0')
 from kivy.metrics import dp
 from kivy.uix.popup import Popup
@@ -12,6 +11,7 @@ from kivy.uix.screenmanager import Screen
 from autosportlabs.widgets.separator import HSeparator, HSeparatorMinor
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.api.rcpserial import CHANNEL_ADD_MODE_IN_PROGRESS, CHANNEL_ADD_MODE_COMPLETE
 from utils import *
 from rcpconfig import *
 from channels import Channels, Channel
