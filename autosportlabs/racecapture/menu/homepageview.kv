@@ -32,7 +32,7 @@
 				Label:
 					size_hint_y: None
 					font_size: dp(40)
-					font_name: 'resource/fonts/Roboto-Thin.ttf'
+					font_name: 'resource/fonts/ASL_light.ttf'
 					pos_hint: {'center_y':0.57}
 					text: 'Welcome To RaceCapture'
 		GridLayout:
@@ -40,11 +40,11 @@
 			spacing: dp(60)
 			rows: 2
 			cols: 2
-			DisabledFeatureButton:
+			FeatureButton:
 				icon: '\357\203\244'
 				title: 'Dashboard'
 				on_press: root.show_view('dashboard')
-			DisabledFeatureButton:
+			FeatureButton:
 				icon: '\357\202\200'
 				title: 'Analysis'
 				on_press: root.show_view('analysis')				
