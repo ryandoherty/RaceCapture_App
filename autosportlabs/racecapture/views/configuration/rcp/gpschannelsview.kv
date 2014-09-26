@@ -15,28 +15,34 @@
     	padding: [30,30]
         size_hint: (1.0,0.6)
         cols: 2
-        Label:
+        FieldLabel:
             text: 'Position'
+            halign: 'right'
         Switch:
         	rcid: 'pos'
         	on_active: root.onPosActive(*args)
-        Label:
+        FieldLabel:
             text: 'Speed'
+            halign: 'right'
         Switch:
         	rcid: 'speed'
+        	halign: 'right'
         	on_active: root.onSpeedActive(*args)
-        Label:
+        FieldLabel:
             text: 'Distance'
+            halign: 'right'
         Switch:
         	rcid: 'dist'
         	on_active: root.onDistActive(*args)
-        Label:
+        FieldLabel:
             text: 'Time of Day'
+            halign: 'right'
         Switch:
         	rcid: 'time'
         	on_active: root.onTimeActive(*args)
-        Label:
+        FieldLabel:
             text: 'Satellites'
+            halign: 'right'
         Switch:
         	rcid: 'sats'
         	on_active: root.onSatsActive(*args)

@@ -27,24 +27,27 @@
             BoxLayout:
                 padding: [2, 2]
                 orientation: 'horizontal'
-                Label:
-                    text: 'Channel Operation Mode'
+                FieldLabel:
+                    text: 'Channel Mode'
+                    halign: 'right'
                 TimerModeSpinner:
                 	rcid: 'mode'
                 	on_text: root.on_mode(*args)
             BoxLayout:
                 padding: [2, 2]
                 orientation: 'horizontal'
-                Label:
+                FieldLabel:
                     text: 'Clock Divider'
+                    halign: 'right'
                 DividerSpinner:
                 	rcid: 'divider'
                 	on_text: root.on_divider(*args)
             BoxLayout:
                 padding: [2, 2]
                 orientation: 'horizontal'
-                Label:
-                    text: 'Pulse per Revolution/\nTeeth per Wheel'
+                FieldLabel:
+                    text: 'Pulse per Revolution'
+                    halign: 'right'
                 PulsePerRevSpinner:
                 	rcid: 'ppr'
                 	on_text: root.on_pulse_per_rev(*args)

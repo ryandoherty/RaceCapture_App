@@ -23,15 +23,17 @@
 	    GridLayout:
 	        size_hint: (1.0, 0.5)
 	        cols: 3
-	        Label:
+	        FieldLabel:
         		text: 'Raw (0 - 5v)'
+        		halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
                 rcid: 'smRaw'
                 on_active: root.on_scaling_type_raw(*args)
             Label:
-	        Label:
+	        FieldLabel:
 	        	text: 'Linear'
+	        	halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
                 rcid: 'smLinear'
@@ -39,8 +41,9 @@
 			FloatValueField:
 				rcid: 'linearscaling'
 				on_text: root.on_linear_map_value(*args)	
-	        Label:
+	        FieldLabel:
 	        	text: 'Mapped'
+	        	halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
                 rcid: 'smMapped'
