@@ -26,8 +26,9 @@
             BoxLayout:
                 orientation: 'horizontal'
                 size_hint: (1.0,0.5)
-                Label:
+                FieldLabel:
                     text: 'Mode'
+                    halign: 'right'
                 GPIOModeSpinner:
 					rcid: 'mode'
 					on_text: root.on_mode(*args)
