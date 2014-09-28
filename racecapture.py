@@ -7,6 +7,7 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 #sfrom kivy.core.window import Window
 from functools import partial
 from kivy.clock import Clock
+from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
 kivy.require('1.8.0')
 from kivy.config import Config
 Config.set('graphics', 'width', '1024')
@@ -243,6 +244,7 @@ class RaceCaptureApp(App):
         self.rcpComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
                 
         tracksView = TracksView(name='tracks')
+        dashView = DashboardView(name='dash')
         
         homepageView = HomePageView(name='home')
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
@@ -261,11 +263,12 @@ class RaceCaptureApp(App):
         screenMgr.add_widget(homepageView)
         screenMgr.add_widget(configView)
         screenMgr.add_widget(tracksView)
-        #screenMgr.add_widget(dashView)
+        screenMgr.add_widget(dashView)
         #screenMgr.add_widget(analysisView)
         
         self.mainViews = {'config' : configView, 
-                          'tracks': tracksView}
+                          'tracks': tracksView,
+                          'dash': dashView}
         
         self.screenMgr = screenMgr
 
