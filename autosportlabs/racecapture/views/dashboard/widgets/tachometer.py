@@ -7,7 +7,7 @@ from collections import OrderedDict
 from kivy.metrics import dp
 from kivy.graphics import Color
 
-Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/tachometerview.kv')
+Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/tachometer.kv')
 
 TACH_RANGES = OrderedDict([(7000, 'resource/fonts/tach_7000.ttf'), (10000, 'resource/fonts/tach_10000.ttf'), (15000, 'resource/fonts/tach_15000.ttf')])
 DEFAULT_RANGE = 10000
@@ -16,9 +16,9 @@ DEFAULT_NORMAL_COLOR = [1, 1, 1, 1]
 DEFAULT_WARNING_COLOR = [1, 0.79, 0 ,1]
 DEFAULT_ALERT_COLOR = [1, 0, 0, 1]
 
-class TachometerView(BoxLayout):
+class Tachometer(BoxLayout):
     def __init__(self, **kwargs):
-        super(TachometerView, self).__init__(**kwargs)
+        super(Tachometer, self).__init__(**kwargs)
         self._range         = DEFAULT_RANGE
         self._warning       = 0
         self._alert         = 0
