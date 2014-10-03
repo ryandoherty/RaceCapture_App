@@ -1,5 +1,6 @@
 import kivy
 from autosportlabs.racecapture.views.dashboard.tachometerview import TachometerView
+from autosportlabs.racecapture.views.dashboard.rawchannelview import RawChannelView
 kivy.require('1.8.0')
 from kivy.app import Builder
 from kivy.uix.screenmanager import *
@@ -10,6 +11,7 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/dashboardview.kv')
 class DashboardView(Screen):
     
     tachView = None
+    rawChannelView = None
     
     def __init__(self, **kwargs):
         super(DashboardView, self).__init__(**kwargs)
@@ -21,10 +23,15 @@ class DashboardView(Screen):
         
     def initView(self):
         screenMgr = kvFind(self, 'rcid', 'screens')
+        
         tachView = TachometerView(name='tachView')
+        rawChannelView = RawChannelView(name='rawChannel')
+        
         screenMgr.transition=NoTransition()
         
         screenMgr.add_widget(tachView)
+        screenMgr.add_widget(rawChannelView)
         
         self.tachView = tachView
-             
+        self.rawChannelView = rawChannelView
+        

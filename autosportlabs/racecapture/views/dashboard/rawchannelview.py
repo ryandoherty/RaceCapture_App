@@ -5,18 +5,15 @@ from kivy.uix.label import Label
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.clock import Clock
-from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer
 from utils import kvFind
 
-Builder.load_file('autosportlabs/racecapture/views/dashboard/tachometerview.kv')
+Builder.load_file('autosportlabs/racecapture/views/dashboard/rawchannelview.kv')
 
-class TachometerView(Screen):
+class RawChannelView(Screen):
 
     def __init__(self, **kwargs):
-        super(TachometerView, self).__init__(**kwargs)
+        super(RawChannelView, self).__init__(**kwargs)
         self.initView()
 
-
     def initView(self):
-        tach = kvFind(self, 'rcid', 'tach')
-        tach.value = 5000
+        pass
