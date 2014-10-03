@@ -13,12 +13,12 @@
 				text: ' \357\203\231'
 				size_hint_x: 0.1			
 				on_release: root.on_nav_left()   				
-			Label:
-				text: 'left chan'
-			Label:
-				text: 'middle chan'
-			Label:
-				text: 'right chan'
+			DigitalGauge:
+				rcid: 'left'
+			DigitalGauge:
+				rcid: 'center'
+			DigitalGauge:
+				rcid: 'right'
 			IconButton:
 				font_size: dp(60)
 				rcid: 'teleRxStatus'

@@ -24,7 +24,7 @@ class Tachometer(BoxLayout):
         self._alert         = 0
         self._max           = 0
         self._value         = 0
-        self._graphSize     = 0
+        self._gaugeSize     = 0
         self._graph         = None
         self._alertColor    = DEFAULT_ALERT_COLOR
         self._warningColor  = DEFAULT_WARNING_COLOR
@@ -40,7 +40,6 @@ class Tachometer(BoxLayout):
         self.alert = DEFAULT_RANGE * 0.8
         self.warning = DEFAULT_RANGE * 0.7
         self.max = DEFAULT_RANGE
-        self.value = 0
         
         
     def configureRangeFont(self, range):
@@ -101,11 +100,11 @@ class Tachometer(BoxLayout):
 
     @property
     def graphSize(self):
-        return self._graphSize
+        return self._gaugeSize
     
     @graphSize.setter
     def graphSize(self, value):
-        self._graphSize = value
+        self._gaugeSize = value
         if not self._graph == None:
             self._graph.font_size = value
 
