@@ -1,4 +1,28 @@
 <DashboardView>:
-	ScreenManager:
-		rcid: 'screens'
-		size_hint_y: 0.85
+	BoxLayout:
+		orientation: 'vertical'
+		ScreenManager:
+			rcid: 'screens'
+			size_hint_y: 0.90
+		BoxLayout:
+			size_hint_y: 0.10
+			orientation: 'horizontal'
+			IconButton:
+				font_size: dp(60)			
+				rcid: 'teleRxStatus'
+				text: ' \357\203\231'
+				size_hint_x: 0.1			
+				on_release: root.on_nav_left()   				
+			Label:
+				text: 'left chan'
+			Label:
+				text: 'middle chan'
+			Label:
+				text: 'right chan'
+			IconButton:
+				font_size: dp(60)
+				rcid: 'teleRxStatus'
+				text: '\357\203\232 '
+				size_hint_x: 0.1
+				on_release: root.on_nav_right()
+
