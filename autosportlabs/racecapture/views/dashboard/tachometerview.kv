@@ -1,4 +1,11 @@
-<TachometerView>:	
-	Tachometer:
-		graphSize: dp(400)
-		rcid: 'tach'
+<TachometerView>:
+	BoxLayout:	
+		orientation: 'horizontal'
+		Tachometer:
+			graphSize: dp(400)
+			rcid: 'tach'
+	Label:
+		BigNumberView:
+			size: (100,100)
+			title: 'gear'
+			value: '5'
