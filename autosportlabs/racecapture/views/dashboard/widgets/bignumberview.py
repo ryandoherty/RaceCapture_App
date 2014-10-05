@@ -11,18 +11,28 @@ from iconbutton import TileIconButton
 from kivy.properties import StringProperty, NumericProperty, ObjectProperty
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/bignumberview.kv')
 
-DEFAULT_NORMAL_COLOR = [1, 1, 1, 1]
-DEFAULT_WARNING_COLOR = [1, 0.79, 0 ,1]
-DEFAULT_ALERT_COLOR = [1, 0, 0, 1]
+DEFAULT_NORMAL_COLOR  = [0.2, 0.2 , 0.2, 1.0]
+DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
+DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   , 1 ]
 
 class BigNumberView(AnchorLayout):
 
+    _backgroundView  = None
+    _titleView = None
+    _valueView = None
+    
     title_font = StringProperty('')
     title_font_size = NumericProperty(20)
-    tile_color = ObjectProperty((0.1, 0.1, 0.1, 1.0))    
+    
+    tile_color = ObjectProperty((0.2, 0.2, 0.2, 1.0))    
     value_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
     title_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
+    
     title = StringProperty('')
+    value = NumericProperty(0)
+    warning = NumericProperty(0)
+    alert = NumericProperty(0)
+    max = NumericProperty(0)
 
     def on_press(self, *args):
         self.dispatch('on_press')
@@ -33,11 +43,6 @@ class BigNumberView(AnchorLayout):
         super(BigNumberView, self).__init__(**kwargs)
         self.register_event_type('on_press')
         
-        self._tileView      = None
-        self._warning       = 0
-        self._alert         = 0
-        self._value         = 0
-        self._label         = ''
         self._alertColor    = DEFAULT_ALERT_COLOR
         self._warningColor  = DEFAULT_WARNING_COLOR
         self._normalColor   = DEFAULT_NORMAL_COLOR
@@ -47,72 +52,47 @@ class BigNumberView(AnchorLayout):
         self.alert = 0
         self.warning = 0
         self.max = 0
-                    
-    @property
-    def warning(self):
-        return self._warning
-    
-    @warning.setter
-    def warning(self, value):
-        self._warning = value
         
     @property
-    def alert(self):
-        return self._alert
-    
-    @alert.setter
-    def alert(self, value):
-        self._alert = value
-
+    def backgroundView(self):
+        if not self._backgroundView:
+            self._backgroundView = kvFind(self, 'rcid', 'bg')
+        return self._backgroundView
+            
     @property
-    def max(self):
-        return self._max
+    def titleView(self):
+        if not self._titleView:
+            self._titleView = kvFind(self, 'rcid', 'title')
+        return self._titleView
     
-    @max.setter
-    def max(self, value):
-        self._max = value
-
     @property
-    def label(self):
-        return self._label
+    def valueView(self):
+        if not self._valueView:
+            self._valueView = kvFind(self, 'rcid', 'value')
+        return self._valueView
     
-    @label.setter
-    def label(self, value):
-        view = self._tileView
-        if not view:
-            view = kvFind(self, 'rcid', 'view')
-            self._tileView = view
-        view.title = str(value)
-        self._label = value
+    def on_title(self, instance, value):
+        self.backgroundView.text = value
         
+    def on_value(self, instance, value):
+        self.valueView.text = '{0:0}'.format(value)
+        self._updateView()
         
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        view = self._tileView
-        if not view:
-            view = kvFind(self, 'rcid', 'view')
-            self._tileView = view
-
-        self._value = value
-        view.value = str(value)
-        if value < self._warning:
-            view.color = self._normalColor
-        elif value < self._alert:
-            view.color = self._warningColor
+    def on_tile_color(self, instance, value):
+        self.backgroundView.rect_color = value
+        
+    def on_value_color(self, instance, value):
+        self.valueView.color = value
+        
+    def on_title_color(self, instance, value):
+        self.backgroundView.color = value
+        
+    def _updateView(self):
+        value = self.value
+        bgView = self.backgroundView
+        if value < self.warning:
+            bgView.rect_color = self._normalColor
+        elif value < self.alert:
+            bgView.rect_color = self._warningColor
         else:
-            view.color = self._alertColor        
-
-    @property
-    def gaugeSize(self):
-        return self._gaugeSize
-    
-    @gaugeSize.setter
-    def gaugeSize(self, value):
-        self._gaugeSize = value
-        if not self._valueView == None:
-            self._valueView.font_size = value
-
+            bgView.rect_color = self._alertColor        
