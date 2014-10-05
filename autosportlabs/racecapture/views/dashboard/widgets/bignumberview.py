@@ -19,9 +19,9 @@ class BigNumberView(AnchorLayout):
 
     title_font = StringProperty('')
     title_font_size = NumericProperty(20)
-    tile_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))    
-    value_color = ObjectProperty((1.0, 1.0, 1.0, 0.8))
-    title_color = ObjectProperty((1.0, 1.0, 1.0, 0.8))
+    tile_color = ObjectProperty((0.1, 0.1, 0.1, 1.0))    
+    value_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
+    title_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
     title = StringProperty('')
 
     def on_press(self, *args):
