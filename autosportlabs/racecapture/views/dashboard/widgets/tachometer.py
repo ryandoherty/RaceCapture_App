@@ -6,13 +6,13 @@ from kivy.app import Builder
 from collections import OrderedDict  
 from kivy.metrics import dp
 from kivy.graphics import Color
-from autosportlabs.racecapture.views.dashboard.widgets.graphicalgauge import GraphicalGauge
+from autosportlabs.racecapture.views.dashboard.widgets.fontgraphicalgauge import FontGraphicalGauge
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/tachometer.kv')
 
 TACH_RANGES = OrderedDict([(7000, 'resource/fonts/tach_7000.ttf'), (10000, 'resource/fonts/tach_10000.ttf'), (15000, 'resource/fonts/tach_15000.ttf')])
 
-class Tachometer(AnchorLayout, GraphicalGauge):
+class Tachometer(AnchorLayout, FontGraphicalGauge):
     def __init__(self, **kwargs):
         super(Tachometer, self).__init__(**kwargs)
         self.initWidgets()
@@ -39,21 +39,3 @@ class Tachometer(AnchorLayout, GraphicalGauge):
     def on_max(self, instance, value):
         self.configureRangeFont(value)
         
-    def on_value(self, instance, value):
-        max = self.max
-        if not value == None and not max == None: 
-            view = self.graphView
-            if value > max:
-                value = max
-            
-            view.text = '' if value == 0 else unichr(ord(u'\uE600') + ((value * 100) / max) - 1)
-            
-            if self.alert and value >= self.alert:
-                view.color = self.alert_color
-            elif self.warning and value >=self.warning:
-                view.color = self.warning_color
-            else:
-                view.color = self.normal_color
-                
-            return super(Tachometer, self).on_value(instance, value)
-
