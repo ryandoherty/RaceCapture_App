@@ -3,7 +3,7 @@ kivy.require('1.8.0')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.metrics import dp
-from utils import kvFind
+from utils import kvFind, kvquery
 from kivy.properties import NumericProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 
@@ -12,13 +12,13 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/digitalgaug
 class DigitalGauge(BoxLayout, Gauge):
     value_size = NumericProperty(0)
     title_size = NumericProperty(0)
+    _valueView = None
+    _titleView = None
     
     def __init__(self, **kwargs):
         super(DigitalGauge, self).__init__(**kwargs)
-        self.value_size = dp(50)
-        self.title_size = dp(25)
-        self._valueView     = None
-        self._labelView     = None
+        self.value_size     = dp(50)
+        self.title_size     = dp(25)
         self.initWidgets()
             
     def initWidgets(self):
@@ -26,29 +26,35 @@ class DigitalGauge(BoxLayout, Gauge):
         self.warning = 0
         self.max = 0
                     
+    @property
+    def valueView(self):
+        if not self._valueView:
+            self._valueView = kvFind(self, 'dgid', 'value')
+        return self._valueView
+
+    @property
+    def titleView(self):
+        if not self._titleView:
+            self._titleView = kvFind(self, 'dgid', 'title')
+        return self._titleView
+                    
     def on_title(self, instance, value):
-        x = 1/0
-        view = self._labelView
-        if not view:
-            view = kvFind(self, 'rcid', 'label')
-            self._labelView = view
+        view = self.titleView
+
         view.text = str(value)
         self._label = value
         
     def on_value(self, instance, value):
-        view = self._valueView
-        if not view:
-            view = kvFind(self, 'rcid', 'value')
-            self._valueView = view
-
-        self._value = value
+        view = self.valueView
+        
+        self.value = value
         view.text = str(value)
-        if value < self.warning:
-            view.color = self.normal_color
-        elif value < self.alert:
+        if self.alert and value >= self.alert:
+            view.color = self.alert_color
+        elif self.warning and value >=self.warning:
             view.color = self.warning_color
         else:
-            view.color = self.alert_color        
+            view.color = self.normal_color
 
     @property
     def gaugeSize(self):

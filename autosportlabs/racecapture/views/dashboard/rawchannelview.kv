@@ -1,15 +1,27 @@
 <RawGauge>:
+	spacing: dp(50)
+    height: dp(40)
+    size_hint_y: None
+    normal_color: [0.0, 1.0, 0.0, 1.0]
 	
 <RawChannelView>:
 	AnchorLayout:
 		anchor_x: 'center'
 		anchor_y: 'center'
 		FieldLabel:
-			rcid: 'message'
+			rcid: 'statusMsg'
 			text: 'No Data'
 			font_size: dp(50)
 			halign: 'center'
-		GridLayout:
-			rcid: 'grid'
-			cols: 3
-			
+	    ScrollView:
+	        id: scrlChan
+	        size_hint_y: 1.0
+	        do_scroll_x:False
+	        do_scroll_y:True
+	        GridLayout:
+	        	rcid: 'grid'
+	            padding: [dp(20), dp(20)]
+	            spacing: [dp(10), dp(10)]
+	            size_hint_y: None
+	            height: max(self.minimum_height, scrlChan.height)
+	            cols: 3			
