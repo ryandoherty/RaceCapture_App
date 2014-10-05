@@ -6,6 +6,7 @@ from kivy.app import Builder
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.clock import Clock
 from utils import kvFind
+from autosportlabs.racecapture.views.dashboard.widgets.roundgauge import RoundGauge
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/gaugeview.kv')
 

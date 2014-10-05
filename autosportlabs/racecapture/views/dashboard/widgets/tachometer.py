@@ -87,10 +87,12 @@ class Tachometer(BoxLayout):
     @value.setter
     def value(self, value):
         graph = self._graph
+        range = self._range
         self._value = value
-        if value > self._range:
-            value = self._range
-        graph.text = '' if value == 0 else unichr(ord(u'\uE600') + (value / 100) - 1)
+        if value > range:
+            value = range
+            
+        graph.text = '' if value == 0 else unichr(ord(u'\uE600') + ((value * 100) / range) - 1)            
         if value < self._warning:
             graph.color = self._normalColor
         elif value < self._alert:

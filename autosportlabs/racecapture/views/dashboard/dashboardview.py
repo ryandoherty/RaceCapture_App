@@ -39,11 +39,11 @@ class DashboardView(Screen):
         rawChannelView = RawChannelView(name='rawchannelView')
         
         screenMgr.transition=WipeTransition()
-        screenMgr.add_widget(rawChannelView)
-        screenMgr.add_widget(tachView)
         screenMgr.add_widget(gaugeView)
+        screenMgr.add_widget(tachView)
         screenMgr.add_widget(laptimeView)
         screenMgr.add_widget(comboView)
+        screenMgr.add_widget(rawChannelView)
         
         self._gaugeView = gaugeView
         self._tachView = tachView

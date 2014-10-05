@@ -1,0 +1,31 @@
+<RoundGauge>:
+	anchor_x: 'center'
+	anchor_y: 'center'
+    value_size: dp(50)
+    title_size: dp(25)
+    gauge_size: dp(100)
+	Label:
+		font_name: 'resource/fonts/dial-gauge.ttf'
+		rcid: 'gaugeShadow'
+		text: u'\uE663'
+		color: (0.15, 0.15, 0.15, 1.0)
+		font_size: root.gauge_size				
+	Label:
+		font_name: 'resource/fonts/dial-gauge.ttf'
+		rcid: 'gauge'
+		font_size: root.gauge_size
+	FieldLabel:
+		rcid: 'value'
+		font_size: root.value_size
+		halign: 'center'			
+	AnchorLayout:
+		anchor_x: 'center'
+		anchor_y: 'bottom'
+		FieldLabel:
+			size_hint_y: 0.5
+			rcid: 'title'
+			font_size: root.title_size
+			halign: 'center'			
+		
+		
+		
