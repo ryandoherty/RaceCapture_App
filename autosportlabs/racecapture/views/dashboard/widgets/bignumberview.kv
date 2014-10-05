@@ -5,15 +5,16 @@
 		orientation: 'vertical'
 	    Label:
 	    	rcid: 'value'
-	    	color: root.icon_color
-	    	size_hint_y: 0.7
-	    	font_size: dp(120)
-	    	text: root.icon
-	    	on_press: root.on_press()
+	    	color: root.title_color
+	    	size_hint_y: 0.85
+	    	font_size: dp(160)
+	    	text: str(root.value)
+#	    	on_press: root.on_press()
 	    Label:
 	    	rcid: 'title'
 	    	font_name: root.title_font
 	    	font_size: root.title_font_size
 	    	color: root.title_color
-	    	size_hint_y: 0.3
+	    	size_hint_y: 0.15
+	    	font_size: dp(30)	    	
 	    	text: root.title	

@@ -8,7 +8,7 @@ from kivy.metrics import dp
 from kivy.graphics import Color
 from utils import kvFind
 from iconbutton import TileIconButton
-
+from kivy.properties import StringProperty, NumericProperty, ObjectProperty
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/bignumberview.kv')
 
 DEFAULT_NORMAL_COLOR = [1, 1, 1, 1]
@@ -20,17 +20,12 @@ class BigNumberView(AnchorLayout):
     title_font = StringProperty('')
     title_font_size = NumericProperty(20)
     tile_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))    
-    icon_color = ObjectProperty((1.0, 1.0, 1.0, 0.8))
+    value_color = ObjectProperty((1.0, 1.0, 1.0, 0.8))
     title_color = ObjectProperty((1.0, 1.0, 1.0, 0.8))
-    icon = StringProperty('')
     title = StringProperty('')
- 
-    def __init__(self, **kwargs):
 
-    def on_button_press(self, *args):
-        self.dispatch('on_press')
-        
     def on_press(self, *args):
+        self.dispatch('on_press')
         pass
 
     def __init__(self, **kwargs):

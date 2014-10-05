@@ -7,6 +7,9 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.clock import Clock
 from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer
 from autosportlabs.racecapture.views.dashboard.widgets.bignumberview import BigNumberView
+from autosportlabs.racecapture.views.dashboard.widgets.laptime import Laptime
+from autosportlabs.racecapture.views.dashboard.widgets.timedelta import TimeDelta
+
 from utils import kvFind
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/tachometerview.kv')
@@ -20,4 +23,4 @@ class TachometerView(Screen):
 
     def initView(self):
         tach = kvFind(self, 'rcid', 'tach')
-        tach.value = 5000
+        tach.value = 10000

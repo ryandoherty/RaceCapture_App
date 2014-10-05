@@ -7,6 +7,7 @@ from collections import OrderedDict
 from kivy.metrics import dp
 from kivy.graphics import Color
 from utils import kvFind
+from kivy.properties import NumericProperty
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/digitalgauge.kv')
 
@@ -15,8 +16,13 @@ DEFAULT_WARNING_COLOR = [1, 0.79, 0 ,1]
 DEFAULT_ALERT_COLOR = [1, 0, 0, 1]
 
 class DigitalGauge(BoxLayout):
+    value_size = NumericProperty(0)
+    label_size = NumericProperty(0)
+    
     def __init__(self, **kwargs):
         super(DigitalGauge, self).__init__(**kwargs)
+        self.value_size = dp(50)
+        self.label_size = dp(25)
         self._valueView     = None
         self._labelView     = None
         self._warning       = 0

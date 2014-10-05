@@ -1,11 +1,48 @@
 <TachometerView>:
-	BoxLayout:	
-		orientation: 'horizontal'
-		Tachometer:
-			graphSize: dp(400)
-			rcid: 'tach'
-	Label:
-		BigNumberView:
-			size: (100,100)
-			title: 'gear'
-			value: '5'
+	AnchorLayout:
+		anchor_x: 'center'
+		anchor_y: 'center'
+		AnchorLayout:
+			anchor_x: 'right'
+			anchor_y: 'bottom'
+			BoxLayout:
+				size_hint: (0.8, 0.65)
+				orientation: 'horizontal'
+				AnchorLayout:
+					size_hint: (0.3, 1.0)
+					anchor_x: 'center'
+					anchor_y: 'center'
+					BigNumberView:
+						size_hint: (0.65, 0.6)
+						title: 'GEAR'
+				BoxLayout:
+					size_hint: (0.7, 1.0)
+					orientation: 'vertical'
+					Laptime:
+						rcid: 'curLap'
+						halign: 'right'
+						font_size: dp(110)
+						value: 2.411
+					BoxLayout:
+						orientation: 'horizontal'
+						Laptime:
+							size_hint_x: 0.55
+							rcid: 'bestLap'
+							font_size: dp(60)
+							halign: 'right'
+							color: [1.0, 0.0 , 1.0, 1.0]
+							value: 2.444
+						TimeDelta:
+							size_hint_x: 0.45
+							rcid: 'delta'
+							halign: 'right'
+							font_size: dp(100)
+							value: -1.98							
+		AnchorLayout:
+			anchor_x: 'left'
+			anchor_y: 'center'
+			orientation: 'horizontal'
+			Tachometer:
+				graphSize: dp(400)
+				rcid: 'tach'
+						
