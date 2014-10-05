@@ -6,52 +6,43 @@
 			anchor_x: 'right'
 			anchor_y: 'bottom'
 			BoxLayout:
-				size_hint: (0.83, 0.65)
+				size_hint: (0.8, 0.65)
 				orientation: 'horizontal'
 				AnchorLayout:
-					size_hint: (0.22, 1.0)
+					size_hint: (0.3, 1.0)
 					anchor_x: 'center'
 					anchor_y: 'center'
 					BigNumberView:
-						size_hint: (0.8, 0.6)
+						size_hint: (0.65, 0.6)
 						title: 'GEAR'
 				BoxLayout:
-					size_hint: (0.78, 1.0)
+					size_hint: (0.7, 1.0)
 					orientation: 'vertical'
+					Laptime:
+						rcid: 'curLap'
+						halign: 'left'
+						font_size: dp(110)
+						value: 2.411
 					BoxLayout:
 						orientation: 'horizontal'
-						Laptime:
-							size_hint_x: 0.55
-							rcid: 'curLap'
-							halign: 'right'
-							font_size: dp(80)
-							value: 16.411
 						TimeDelta:
 							size_hint_x: 0.45
 							rcid: 'delta'
-							halign: 'right'
-							font_size: dp(110)
-							value: -11.9
-					BoxLayout:
-						orientation: 'horizontal'
-						spacing: dp(10)
+							halign: 'left'
+							font_size: dp(120)
+							value: -1.98							
 						Laptime:
 							size_hint_x: 0.55
 							rcid: 'bestLap'
-							font_size: dp(70)
-							halign: 'right'
+							font_size: dp(60)
+							halign: 'center'
 							color: [1.0, 0.0 , 1.0, 1.0]
 							value: 2.444
-						FieldLabel:
-							size_hint_x: 0.45
-							font_size: dp(50)
-							text: ''
-							halign: 'left'						
 		AnchorLayout:
 			anchor_x: 'left'
 			anchor_y: 'center'
 			orientation: 'horizontal'
 			Tachometer:
-				graphSize: dp(450)
+				graphSize: dp(400)
 				rcid: 'tach'
 						
