@@ -16,7 +16,7 @@ class FontGraphicalGauge(GraphicalGauge):
             if railedValue > max:
                 railedValue = max
             
-            view.text = '' if railedValue == 0 else unichr(ord(u'\uE600') + ((railedValue * 100) / max) - 1)
+            view.text = '' if railedValue == 0 else unichr(ord(u'\uE600') + int(((railedValue * 100) / max)) - 1)
             
             if self.alert and value >= self.alert:
                 view.color = self.alert_color
