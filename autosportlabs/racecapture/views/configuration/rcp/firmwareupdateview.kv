@@ -1,0 +1,25 @@
+#:kivy 1.8.0
+
+<FirmwareUpdateView>:
+    padding: (dp(10), dp(10))
+    spacing: dp(20)
+    orientation: 'horizontal'
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        HSeparator:
+            text: 'Firmware Update'
+        Button:
+            size_hint: (1., .1)
+            text: "Check for updates online"
+            on_press: root.check_online()
+        Button:
+            size_hint: (1, .1)
+            text: "Update Firmware"
+            on_press: root.select_file()
+        RoundGauge:
+            rcid: 'fw_progress'
+            gauge_size: dp(250)
+            max: 100
+            value: 0
+            title: ""

@@ -2,27 +2,19 @@
 
 #<Label>:
 #	font_name: 'resource/fonts/Roboto-Regular.ttf'
-	
+
 BoxLayout:
-	orientation: 'vertical'
-	pos_hint: {'center_x': .5, 'center_y': .5}
-	
-	ToolbarView:
-		rcid: 'statusbar'
-		
-		size_hint: (1.0	, 0.05)
-	
-	NavigationDrawer:
-		size_hint: (1.0, 0.95)
-		rcid: 'mainNav'
-		MainMenu:
-			rcid: 'mainMenu'
-		ScreenManager:
-			rcid: 'main'
-			
+    orientation: 'vertical'
+    pos_hint: {'center_x': .5, 'center_y': .5}
+    ToolbarView:
+        rcid: 'statusbar'
 
+        size_hint: (1.0	, 0.05)
 
-
-
-
-                
+    NavigationDrawer:
+        size_hint: (1.0, 0.95)
+        rcid: 'mainNav'
+        MainMenu:
+            rcid: 'mainMenu'
+        ScreenManager:
+            rcid: 'main'

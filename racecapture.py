@@ -231,7 +231,7 @@ class RaceCaptureApp(App):
         #fade_in
         self.mainNav.anim_type = 'slide_above_anim'
         
-        configView = ConfigView(name='config', rcpConfig=self.rcpConfig)
+        configView = ConfigView(name='config', rcpConfig=self.rcpConfig, rcpComms=self.rcpComms)
         configView.bind(on_read_config=self.on_read_config)
         configView.bind(on_write_config=self.on_write_config)
         configView.bind(on_run_script=self.on_run_script)
@@ -275,8 +275,8 @@ class RaceCaptureApp(App):
         self.configView = configView
         self.statusBar = statusBar
         self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')
-        
         self.initRcpComms()
+        
 
     def initRcpComms(self):
         port = self.getAppArg('port')
