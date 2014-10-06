@@ -1,10 +1,8 @@
 import kivy
 kivy.require('1.8.0')
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
+from fieldlabel import FieldLabel
 from kivy.app import Builder
-from kivy.uix.screenmanager import Screen, ScreenManager
-from kivy.clock import Clock
+from kivy.uix.screenmanager import Screen
 from utils import kvFind
 from autosportlabs.racecapture.views.dashboard.widgets.roundgauge import RoundGauge
 

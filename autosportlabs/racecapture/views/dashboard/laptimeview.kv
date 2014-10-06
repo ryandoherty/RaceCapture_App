@@ -1,3 +1,28 @@
 <LaptimeView>:
-	Label:
-		text: 'laptime view'
+	BoxLayout:
+		orientation: 'vertical'
+		Laptime:
+			size_hint_y: 0.25
+			rcid: 'curLap'
+			font_size: dp(150)
+			halign: 'center'
+			value: 2.778
+		BoxLayout:
+			size_hint_y: 0.75
+			orientation: 'horizontal'
+			AnchorLayout:
+				size_hint_x: 0.25
+				BigNumberView:
+					size_hint: (0.6, 0.5)
+					title: 'Lap'
+					warning_color: [0.2, 0.2, 0.2, 1.0]
+					alert_color: [0.2, 0.2, 0.2, 1.0]
+					value: 0
+			TimeDelta:
+				size_hint_x: 0.65
+				rcid: 'delta'
+				font_size: dp(180)
+				halign: 'right'
+				value: -12.6
+			BoxLayout:
+				size_hint_x: 0.1
