@@ -19,14 +19,8 @@ class TachometerView(Screen):
     def __init__(self, **kwargs):
         super(TachometerView, self).__init__(**kwargs)
         self.initView()
-        Clock.schedule_interval(self.incrementTach, 0.05)
         
 
     def initView(self):
         pass
-    
-
-    def incrementTach(self, dt):
-        tach = kvFind(self, 'rcid', 'tach')
-        tach.value += 10
-        
+            
