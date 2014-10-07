@@ -63,6 +63,18 @@ class DataBusTest(unittest.TestCase):
 		dataBus.update('EngineTemp', 200)
 		#no listener for this channel, should not cause an error
 	
+	channelMeta = None
+	def test_meta_listener(self):
+		dataBus = DataBus()
+		
+		def metaListener(channel):
+			self.channelMeta = channel
+
+		meta = object()
+		dataBus.addMetaListener(metaListener)
+		dataBus.updateMeta(meta)
+		self.assertEqual(self.channelMeta, meta)
+		
 def main():
 	unittest.main()
 
