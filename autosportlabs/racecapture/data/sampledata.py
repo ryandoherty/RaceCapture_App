@@ -42,7 +42,7 @@ class SampleData(object):
         for ch in metaJson:
             config = ChannelConfig()
             config.fromJson(ch)
-            channelConfigs.append(ch)
+            channelConfigs.append(config)
     
     def processData(self, dataJson):
         

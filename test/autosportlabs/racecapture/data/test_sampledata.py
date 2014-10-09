@@ -11,9 +11,19 @@ class SampleDataTest(unittest.TestCase):
         sampleData = SampleData()
         sampleData.fromJson(sample1_json)
         
-        self.assertEqual(33, sampleData.tick)
-        self.assertEqual(14, len(sampleData.channelConfigs))
-        self.assertEqual(14, len(sampleData.samples))
+        self.assertEqual(sample1_json['s']['t'], sampleData.tick)
+        sampleCount = len(sample1_json['s']['meta'])
+        self.assertEqual(sampleCount, len(sampleData.channelConfigs))
+        self.assertEqual(sampleCount, len(sampleData.samples))
+        
+        metaJson = sample1_json["s"]["meta"]
+        
+        sampleIndex = 0
+        for m in metaJson:
+            self.assertEqual(m['nm'], sampleData.samples[sampleIndex].channelConfig.name)
+            self.assertEqual(m['ut'], sampleData.samples[sampleIndex].channelConfig.units)
+            self.assertEqual(m['sr'], sampleData.samples[sampleIndex].channelConfig.sampleRate)
+            sampleIndex += 1
     
     def test_meta_data(self):
         pass
