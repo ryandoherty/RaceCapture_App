@@ -7,16 +7,16 @@ TEST_SAMPLE1 = '{"s":{"t":33,"meta":[{"nm":"Battery","ut":"Volts","sr":1},{"nm":
 class SampleDataTest(unittest.TestCase):
 
     def test_sample_data(self):
-        sample1_json = json.loads(TEST_SAMPLE1)
+        sampleJson = json.loads(TEST_SAMPLE1)
         sampleData = SampleData()
-        sampleData.fromJson(sample1_json)
+        sampleData.fromJson(sampleJson)
         
-        self.assertEqual(sample1_json['s']['t'], sampleData.tick)
-        sampleCount = len(sample1_json['s']['meta'])
+        self.assertEqual(sampleJson['s']['t'], sampleData.tick)
+        sampleCount = len(sampleJson['s']['meta'])
         self.assertEqual(sampleCount, len(sampleData.channelConfigs))
         self.assertEqual(sampleCount, len(sampleData.samples))
         
-        metaJson = sample1_json["s"]["meta"]
+        metaJson = sampleJson["s"]["meta"]
         
         sampleIndex = 0
         for m in metaJson:
@@ -24,6 +24,13 @@ class SampleDataTest(unittest.TestCase):
             self.assertEqual(m['ut'], sampleData.samples[sampleIndex].channelConfig.units)
             self.assertEqual(m['sr'], sampleData.samples[sampleIndex].channelConfig.sampleRate)
             sampleIndex += 1
+        
+        sampleIndex = 0
+        dataJson = sampleJson['s']['d']
+        for d in dataJson:
+            sampleValue = sampleData.samples[sampleIndex].value
+            print(str(d) + ' ' + str(sampleValue))
+            self.assertEqual(d, sampleValue)
     
     def test_meta_data(self):
         pass
