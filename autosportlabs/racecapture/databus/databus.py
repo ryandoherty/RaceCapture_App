@@ -1,3 +1,5 @@
+from autosportlabs.racecapture.data.sampledata import SampleData
+
 class DataBus(object):
 	channelData = {}
 	channelListeners = {}
@@ -41,3 +43,29 @@ class DataBus(object):
 	
 	def addMetaListener(self, callback):
 		self.metaListeners.append(callback)
+		
+class DataBusPump(object):
+	self.rcApi = None
+	self.databus = None
+	self.sample = SampleData()
+	
+	def __init__(self, databus, rcApi, **kwargs):
+		super(DataBusPump, self).__init__(**kwargs)
+		self.rcApi = rcApi
+		self.databus = databus
+		sampleThread = Thread(target=self.sampleWorker)
+		sampleThread.daemon = True
+		sampleThread.start()
+		
+		
+	def on_sample(self, sampleData):
+		pass
+		
+	def sampleWorker(self):
+		databus = self.databus
+		rcApi = self.rcApi
+		rcApi.addListener(self, 's', self.on_sample)
+		pass
+		
+		
+	
