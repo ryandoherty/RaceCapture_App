@@ -4,7 +4,7 @@ from autosportlabs.racecapture.databus.databus import DataBus
 class DataBusTest(unittest.TestCase):
 	def test_update_value(self):
 		dataBus = DataBus()
-		dataBus.update('RPM', 1234)
+		dataBus.updateData('RPM', 1234)
 		
 		value = dataBus.getData('RPM')
 		self.assertEqual(value, 1234)
@@ -17,7 +17,7 @@ class DataBusTest(unittest.TestCase):
 
 		dataBus = DataBus()
 		dataBus.addListener('RPM', listener)
-		dataBus.update('RPM', 1111)
+		dataBus.updateData('RPM', 1111)
 		self.assertEqual(self.listenerVal0, 1111)
 	
 	listenerVal1 = None
@@ -32,7 +32,7 @@ class DataBusTest(unittest.TestCase):
 		dataBus = DataBus()
 		dataBus.addListener('RPM', listener1)
 		dataBus.addListener('RPM', listener2)
-		dataBus.update('RPM', 1111)
+		dataBus.updateData('RPM', 1111)
 		self.assertEqual(self.listenerVal1, 1111)
 		self.assertEqual(self.listenerVal2, 1111)
 		
@@ -48,19 +48,19 @@ class DataBusTest(unittest.TestCase):
 		dataBus = DataBus()
 		dataBus.addListener('RPM', listener3)
 		dataBus.addListener('EngineTemp', listener4)
-		dataBus.update('RPM', 1111)
+		dataBus.updateData('RPM', 1111)
 		#ensure we don't set the wrong listener
 		self.assertEqual(self.listenerVal3, 1111)
 		self.assertEqual(self.listenerVal4, None)
 		
-		dataBus.update('EngineTemp', 199)
+		dataBus.updateData('EngineTemp', 199)
 		#ensure we don't affect unrelated channels
 		self.assertEqual(self.listenerVal3, 1111)
 		self.assertEqual(self.listenerVal4, 199)
 		
 	def test_no_listener(self):
 		dataBus = DataBus()
-		dataBus.update('EngineTemp', 200)
+		dataBus.updateData('EngineTemp', 200)
 		#no listener for this channel, should not cause an error
 	
 	channelMeta = None

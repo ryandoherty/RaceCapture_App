@@ -517,4 +517,5 @@ class RcpApi:
         rsp = self.sendCommand({"getVer":None}, sync)
         return rsp
 
-
+    def sample(self):
+        self.sendGet('s')

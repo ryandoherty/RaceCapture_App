@@ -1,4 +1,6 @@
-from autosportlabs.racecapture.data.sampledata import SampleData
+import time
+from threading import Thread
+from autosportlabs.racecapture.data.sampledata import Sample
 
 class DataBus(object):
 	channelData = {}
@@ -16,7 +18,7 @@ class DataBus(object):
 	def getMeta(self):
 		return self.channelMeta
 	
-	def update(self, channel, value):
+	def updateData(self, channel, value):
 		self.channelData[channel] = value
 		self.notifyListeners(channel, value)
 	
@@ -45,27 +47,31 @@ class DataBus(object):
 		self.metaListeners.append(callback)
 		
 class DataBusPump(object):
-	self.rcApi = None
-	self.databus = None
-	self.sample = SampleData()
+	rcApi = None
+	dataBus = None
+	sample = Sample()
 	
-	def __init__(self, databus, rcApi, **kwargs):
+	def __init__(self, dataBus, rcApi, **kwargs):
 		super(DataBusPump, self).__init__(**kwargs)
 		self.rcApi = rcApi
-		self.databus = databus
+		self.dataBus = dataBus
 		sampleThread = Thread(target=self.sampleWorker)
 		sampleThread.daemon = True
 		sampleThread.start()
 		
-		
-	def on_sample(self, sampleData):
-		pass
-		
+	def on_sample(self, sampleJson):
+		sample = self.sample
+		dataBus = self.dataBus
+		sample.fromJson(sampleJson)
+		for sampleItem in sample:
+			dataBus.updateData(sampleItem.value, sampleItem.channelConfig.name)
+			
 	def sampleWorker(self):
-		databus = self.databus
 		rcApi = self.rcApi
 		rcApi.addListener(self, 's', self.on_sample)
-		pass
+		while True:
+			rcApi.sample()
+			time.sleep(1)
 		
 		
 	

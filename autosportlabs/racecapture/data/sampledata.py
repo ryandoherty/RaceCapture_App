@@ -10,14 +10,14 @@ class ChannelConfig(object):
         self.units = json.get('ut', self.units)
         self.sampleRate = int(json.get('sr', self.sampleRate))
 
-class Sample(object):
+class SampleValue(object):
     def __init__(self, value, channelConfig):
         self.value = value
         self.channelConfig = channelConfig
 
 STARTING_BITMAP = 1
         
-class SampleData(object):
+class Sample(object):
     def __init__(self, **kwargs):
         self.tick = 0
         self.samples = []
@@ -74,7 +74,7 @@ class SampleData(object):
             if (bitmaskFields[bitmapIndex] & mask) != 0:
                 value = float(fieldData[fieldIndex])
                 fieldIndex += 1
-                sample = Sample(value, channelConfigs[channelConfigIndex])
+                sample = SampleValue(value, channelConfigs[channelConfigIndex])
                 samples.append(sample)
             if (mask != 0):
                 mask <<= 1;
