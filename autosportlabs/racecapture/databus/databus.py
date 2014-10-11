@@ -51,8 +51,10 @@ class DataBusPump(object):
 	dataBus = None
 	sample = Sample()
 	
-	def __init__(self, dataBus, rcApi, **kwargs):
+	def __init__(self, **kwargs):
 		super(DataBusPump, self).__init__(**kwargs)
+		
+	def startDataPump(self, dataBus, rcApi):
 		self.rcApi = rcApi
 		self.dataBus = dataBus
 		sampleThread = Thread(target=self.sampleWorker)
@@ -63,14 +65,16 @@ class DataBusPump(object):
 		sample = self.sample
 		dataBus = self.dataBus
 		sample.fromJson(sampleJson)
-		for sampleItem in sample:
+		for sampleItem in sample.samples:
+			print('sample ' + str(sampleItem.value) + ' ' + str(sampleItem.channelConfig.name))
 			dataBus.updateData(sampleItem.value, sampleItem.channelConfig.name)
 			
 	def sampleWorker(self):
 		rcApi = self.rcApi
-		rcApi.addListener(self, 's', self.on_sample)
+		dataBus = self.dataBus
+		rcApi.addListener('s', self.on_sample)
 		while True:
-			rcApi.sample()
+			rcApi.sample(self.dataBus.channelMeta == None)
 			time.sleep(1)
 		
 		

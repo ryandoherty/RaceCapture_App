@@ -54,8 +54,8 @@ class Sample(object):
                 
         fieldData = dataJson
         fieldDataSize = len(fieldData)
-        if fieldDataSize > maxFieldCount: raise Exception("Data packet count exceeds expected field count")
-        if fieldDataSize < bitmaskFieldCount: raise Exception('Incorrect number of sample data fields detected')
+        if fieldDataSize > maxFieldCount: raise Exception('Data packet count {} exceeds expected field count {}'.format(fieldDataSize, maxFieldCount))
+        if fieldDataSize < bitmaskFieldCount: raise Exception('Incorrect number of sample data fields detected {}. expected at least {}'.format(fieldDataSize, bitmaskFieldCount))
 
         bitmaskFields = []
         for i in range(fieldDataSize - bitmaskFieldCount, fieldDataSize):

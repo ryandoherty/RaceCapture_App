@@ -120,7 +120,7 @@ class RcpApi:
                 
     def recoverTimeout(self):
         print('POKE')
-        self.getComms().write('\r')
+        self.getComms().write(' ')
         
     def executeSingle(self, rcpCmd, winCallback, failCallback):
         t = Thread(target=self.executeSequence, args=([rcpCmd], None, winCallback, failCallback))
@@ -517,5 +517,5 @@ class RcpApi:
         rsp = self.sendCommand({"getVer":None}, sync)
         return rsp
 
-    def sample(self):
-        self.sendGet('s')
+    def sample(self, includeMeta):
+        self.sendCommand({"s":{"meta":1 if includeMeta else 0}})

@@ -40,6 +40,7 @@ class serial_comms():
             self.ser = ser
     
     def close(self):
+        print('closing serial')
         if self.ser != None:
             self.ser.close()
         self.ser = None
@@ -55,6 +56,7 @@ class serial_comms():
             if  c == eol2:
                 break
             elif c == '':
+                print('empty character received...')
                 if retryCount >= self.retryCount:
                     self.close()
                     raise Exception('Could not read line')
@@ -64,7 +66,7 @@ class serial_comms():
                 ser.write(' ')
             else:
                 line += c
-                
+        print('returning line')
         line = bytes(line).strip()
         line = line.replace('\r', '')
         line = line.replace('\n', '')
@@ -120,6 +122,7 @@ class serial_comms():
         if not verJson == None:
             print "Found device version " + testVer.toString() + " on port:", self.port
             self.close()
+            self.open()
             if winCallback: winCallback(testVer)
         else:
             self.port = None

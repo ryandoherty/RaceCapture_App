@@ -25,6 +25,8 @@ from kivy.uix.screenmanager import *
 from installfix_garden_navigationdrawer import NavigationDrawer
 
 from autosportlabs.racecapture.api.rcpapi import RcpApi
+from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
+
 from autosportlabs.comms.serial_comms import serial_comms
 from utils import *
 from autosportlabs.racecapture.tracks.trackmanager import TrackManager
@@ -51,7 +53,13 @@ class RaceCaptureApp(App):
     rcpConfig  = RcpConfig()
     
     #RaceCapture serial I/O 
-    rcpComms = RcpApi()
+    rcComms = RcpApi()
+    
+    #dataBus provides an eventing / polling mechanism to parts of the system that care
+    dataBus = DataBus()
+    
+    #pumps data from rcApi to dataBus
+    dataBusPump = DataBusPump()
     
     #Track database manager
     trackManager = None
@@ -115,14 +123,14 @@ class RaceCaptureApp(App):
     #Logfile
     def on_poll_logfile(self, instance):
         try:
-            self.rcpComms.getLogfile()
+            self.rcComms.getLogfile()
         except:
             pass
         
     
     def on_set_logfile_level(self, instance, level):
         try:
-            self.rcpComms.setLogfileLevel(level, None, self.on_set_logfile_level_error)
+            self.rcComms.setLogfileLevel(level, None, self.on_set_logfile_level_error)
         except:
             logging.exception('')
             self._serial_warning()
@@ -132,7 +140,7 @@ class RaceCaptureApp(App):
         
     #Run Script
     def on_run_script(self, instance):
-        self.rcpComms.runScript(self.on_run_script_complete, self.on_run_script_error)
+        self.rcComms.runScript(self.on_run_script_complete, self.on_run_script_error)
 
     def on_run_script_complete(self, result):
         print('run script complete: ' + str(result))
@@ -153,7 +161,7 @@ class RaceCaptureApp(App):
     def on_write_config(self, instance, *args):
         rcpConfig = self.rcpConfig
         try:
-            self.rcpComms.writeRcpCfg(rcpConfig, self.on_write_config_complete, self.on_write_config_error)
+            self.rcComms.writeRcpCfg(rcpConfig, self.on_write_config_complete, self.on_write_config_error)
         except:
             logging.exception('')
             self._serial_warning()
@@ -170,7 +178,7 @@ class RaceCaptureApp(App):
     #Read Configuration        
     def on_read_config(self, instance, *args):
         try:
-            self.rcpComms.getRcpCfg(self.rcpConfig, self.on_read_config_complete, self.on_read_config_error)
+            self.rcComms.getRcpCfg(self.rcpConfig, self.on_read_config_complete, self.on_read_config_error)
             self.showActivity("Reading configuration")
         except:
             logging.exception('')
@@ -238,11 +246,12 @@ class RaceCaptureApp(App):
         configView.bind(on_poll_logfile=self.on_poll_logfile)
         configView.bind(on_set_logfile_level=self.on_set_logfile_level)
         
-        self.rcpComms.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: configView.on_logfile(value)))
-        self.rcpComms.on_progress = lambda value: statusBar.dispatch('on_progress', value)
-        self.rcpComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
-        self.rcpComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
-                
+        rcComms = self.rcComms
+        rcComms.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: configView.on_logfile(value)))
+        rcComms.on_progress = lambda value: statusBar.dispatch('on_progress', value)
+        rcComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
+        rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
+        
         tracksView = TracksView(name='tracks')
         dashView = DashboardView(name='dash')
         
@@ -276,19 +285,20 @@ class RaceCaptureApp(App):
         self.statusBar = statusBar
         self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')
         
-        self.initRcpComms()
+        self.initRcComms()        
 
-    def initRcpComms(self):
+    def initRcComms(self):
         port = self.getAppArg('port')
         comms = serial_comms(port = port)
-        self.rcpComms.initSerial(comms, self.rcpDetectWin, self.rcpDetectFail)
+        self.rcComms.initSerial(comms, self.rcDetectWin, self.rcDetectFail)
     
-    def rcpDetectWin(self, rcpVersion):
+    def rcDetectWin(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         Clock.schedule_once(lambda dt: self.on_read_config(self), 1.0)
+        self.dataBusPump.startDataPump(self.dataBus, self.rcComms)
 
         
-    def rcpDetectFail(self):
+    def rcDetectFail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)
 if __name__ == '__main__':
 
