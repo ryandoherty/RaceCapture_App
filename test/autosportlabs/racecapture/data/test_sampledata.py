@@ -27,10 +27,11 @@ class SampleDataTest(unittest.TestCase):
         
         sampleIndex = 0
         dataJson = sampleJson['s']['d']
-        for d in dataJson:
-            sampleValue = sampleData.samples[sampleIndex].value
-            print(str(d) + ' ' + str(sampleValue))
-            self.assertEqual(d, sampleValue)
+        
+        for sample in sampleData.samples:
+            value = dataJson[sampleIndex]
+            self.assertEqual(value, sample.value)
+            sampleIndex += 1
     
     def test_meta_data(self):
         pass

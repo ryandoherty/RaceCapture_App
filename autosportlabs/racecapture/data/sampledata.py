@@ -74,8 +74,8 @@ class SampleData(object):
             if (bitmaskFields[bitmapIndex] & mask) != 0:
                 value = float(fieldData[fieldIndex])
                 fieldIndex += 1
-                samples.append(Sample(value, channelConfigs[channelConfigIndex]))
-
+                sample = Sample(value, channelConfigs[channelConfigIndex])
+                samples.append(sample)
             if (mask != 0):
                 mask <<= 1;
             else:
