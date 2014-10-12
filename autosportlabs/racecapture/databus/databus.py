@@ -1,5 +1,5 @@
 import time
-from threading import Thread
+from threading import Thread, Event
 from autosportlabs.racecapture.data.sampledata import Sample
 
 class DataBus(object):
@@ -59,10 +59,15 @@ class DataBus(object):
 	def addMetaListener(self, callback):
 		self.metaListeners.append(callback)
 		
+SAMPLE_POLL_WAIT_TIMEOUT 		= 2.0
+SAMPLE_POLL_INTERVAL	 		= 0.1
+SAMPLE_POLL_EXCEPTION_RECOVERY 	= 2.0
+
 class DataBusPump(object):
 	rcApi = None
 	dataBus = None
 	sample = Sample()
+	sampleEvent = None
 	
 	def __init__(self, **kwargs):
 		super(DataBusPump, self).__init__(**kwargs)
@@ -82,16 +87,22 @@ class DataBusPump(object):
 		if sample.updatedMeta:
 			dataBus.updateMeta(sample.channelMetas)
 			
+		self.sampleEvent.set()
+			
 	def sampleWorker(self):
 		rcApi = self.rcApi
 		dataBus = self.dataBus
+		sampleEvent = Event()
+		self.sampleEvent = sampleEvent
+		sampleEvent.set()
 		rcApi.addListener('s', self.on_sample)
 		while True:
 			try:
+				sampleEvent.wait(SAMPLE_POLL_WAIT_TIMEOUT)
 				rcApi.sample(self.dataBus.channelMetas == None)
-				time.sleep(.1)
+				time.sleep(SAMPLE_POLL_INTERVAL)
 			except:
-				time.sleep(2)
+				time.sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
 				pass
 		
 		
