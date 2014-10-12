@@ -17,6 +17,7 @@ from time import sleep
 from threading import Thread
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/firmwareupdateview.kv')
+
 #TODO: MK1 support
 class FirmwareUpdateView(BaseConfigView):
     progress_gauge = ObjectProperty(None)
@@ -50,8 +51,6 @@ class FirmwareUpdateView(BaseConfigView):
         kvFind(self, 'rcid', 'fw_progress').value = int(percent)
 
     def _update_thread(self, instance):
-        sleep(1)
-        #TODO: Move this into a thread
         try:
             selection = instance.selection
             filename = selection[0] if len(selection) else None
@@ -61,14 +60,27 @@ class FirmwareUpdateView(BaseConfigView):
                 try:
                     kvFind(self, 'rcid', 'fw_progress').title="Processing"
                     self.rcpComms.resetDevice(bootloader=True)
+                    self.rcpComms.comms.close()
                     sleep(5)
                 except:
                     pass
-                kvFind(self, 'rcid', 'fw_progress').title="Progress"
-                fu = fw_update.FwUpdater()
 
+                kvFind(self, 'rcid', 'fw_progress').title="Progress"
+
+                #Get our firmware updater class and register the
+                #callback that will update the progress gauge
+                fu = fw_update.FwUpdater()
                 fu.register_progress_callback(self._update_progress_gauge)
+
+                #Find our bootloader
                 port = fu.scan_for_device()
+
+                #Bail if we can't find an active loader
+                if not port:
+                    kvFind(self, 'rcid', 'fw_progress').title=""
+                    raise Exception("Unable to locate bootloader")
+
+                #Go on our jolly way
                 fu.update_firmware(filename, port)
                 kvFind(self, 'rcid', 'fw_progress').title="Restarting"
 
@@ -78,12 +90,12 @@ class FirmwareUpdateView(BaseConfigView):
                 alertPopup('Error Loading', 'No firmware file selected')
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Firmware:\n\n' + str(detail))
-        
+
         self.rcpComms.runAutoDetect()
         kvFind(self, 'rcid', 'fw_progress').value = 0
         kvFind(self, 'rcid', 'fw_progress').title=""
 
-        
+
 
     def update_fw(self, instance):
         self._popup.dismiss()
