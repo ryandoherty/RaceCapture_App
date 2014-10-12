@@ -1,8 +1,11 @@
 import kivy
 kivy.require('1.8.0')
-from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty
-from utils import kvFind
+from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty, DictProperty
+from kivy.clock import Clock
+from utils import kvFind, dist
 from kivy.uix.anchorlayout import AnchorLayout
+from installfix_garden_modernmenu import ModernMenu
+from functools import partial
 
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
@@ -24,9 +27,24 @@ class Gauge(AnchorLayout):
     title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
     normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
     warning_color = ObjectProperty(DEFAULT_WARNING_COLOR)
-    alert_color   = ObjectProperty(DEFAULT_ALERT_COLOR)
-    
+    alert_color   = ObjectProperty(DEFAULT_ALERT_COLOR)    
     pressed = ListProperty([0,0])
+    
+    
+    timeout = NumericProperty(0.1)
+    menu_cls = ObjectProperty(ModernMenu)
+    cancel_distance = NumericProperty(10)
+    menu_args = DictProperty({})
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     def __init__(self, **kwargs):
@@ -85,14 +103,33 @@ class Gauge(AnchorLayout):
             
     def setValue(self, value):
         self.value = value
-        
-    def on_touch_down(self, touch):
-        print('touch')
+
+    def on_touch_down(self, touch, *args):
         if self.collide_point(*touch.pos):
-            self.pressed = touch.pos
-            return True
-        return super(Gauge, self).on_touch_down(touch)
-    
-    def on_pressed(self, instance, pos):
-        print ('pressed at {pos}'.format(pos=pos) + str(self.channel))
-        
+            print('t down ' + str(self.rcid))        
+            t = partial(self.display_menu, touch)
+            touch.ud['menu_timeout'] = t
+            Clock.schedule_once(t, self.timeout)
+            return super(Gauge, self).on_touch_down(touch, *args)
+
+    def on_touch_move(self, touch, *args):
+        if self.collide_point(*touch.pos):
+            print('t move ' + str(self.rcid))      
+            if (
+                touch.ud['menu_timeout'] and
+                dist(touch.pos, touch.opos) > self.cancel_distance
+            ):
+                Clock.unschedule(touch.ud['menu_timeout'])
+            return super(Gauge, self).on_touch_move(touch, *args)
+
+    def on_touch_up(self, touch, *args):
+        if self.collide_point(*touch.pos):
+            print('t up ' + str(self.rcid))      
+            if touch.ud.get('menu_timeout'):
+                Clock.unschedule(touch.ud['menu_timeout'])
+            return super(Gauge, self).on_touch_up(touch, *args)
+
+    def display_menu(self, touch, dt):
+        menu = self.menu_cls(center=touch.pos, **self.menu_args)
+        self.add_widget(menu)
+        menu.start_display(touch)

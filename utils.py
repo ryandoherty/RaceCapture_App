@@ -6,13 +6,16 @@ Utils
 
 __all__ = ('intersection', 'difference', 'curry', 'strtotuple',
            'get_color_from_hex', 'get_random_color',
-           'is_color_transparent', 'boundary',
+           'is_color_transparent', 'boundary', 'dist',
            'deprecated', 'SafeList',
            'interpolate', 'OrderedDict', 'kvFind', 'kvFindClass', 'kvPrintAttr',
            'breadth_first', 'walk_tree', 'filter_tree', 'kvquery')
 
 from re import match, split
 from UserDict import DictMixin
+
+def dist((x1, y1), (x2, y2)):
+    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 5
 
 def boundary(value, minvalue, maxvalue):
     '''Limit a value between a minvalue and maxvalue'''
