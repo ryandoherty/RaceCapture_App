@@ -35,9 +35,9 @@ class TachometerView(Screen):
         
         gauges = list(kvFindClass(self, Gauge))
         
-        print('init screen')
         for gauge in gauges:
             channel = gauge.channel
+            print('gauge found ' + str(gauge) + ' ' + channel)
             if channel:
                 dataBus.addChannelListener(channel, gauge.setValue)
         

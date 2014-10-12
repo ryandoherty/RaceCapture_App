@@ -5,6 +5,7 @@
 		RoundGauge:
 			rcid: 'center'
 			title: 'RPM'
+			channel: 'RPM'
 			max: 10000
 			warning: 7000
 			alert: 8500
@@ -22,6 +23,7 @@
 				max: 100
 				value: 76
 				title: 'FuelLevel'
+				channel: 'FuelLevel'
 		AnchorLayout:
 			anchor_x: 'left'
 			anchor_y: 'bottom'
@@ -29,9 +31,10 @@
 				size_hint: (0.3, 0.5)
 				gauge_size: dp(250)
 				rcid: 'bl'
-				max: 150
+				max: 250
 				value: 55
-				title: 'OilPress'
+				title: 'EngineTemp'
+				channel: 'EngineTemp'
 		AnchorLayout:
 			anchor_x: 'right'
 			anchor_y: 'top'
@@ -42,6 +45,7 @@
 				max: 20
 				value: 10
 				title: 'AFR'
+				channel: 'AFR'
 		AnchorLayout:
 			anchor_x: 'right'
 			anchor_y: 'bottom'
@@ -49,6 +53,7 @@
 				size_hint: (0.3, 0.5)
 				gauge_size: dp(250)
 				rcid: 'br'
-				max: 25
+				max: 150
 				value: 12
-				title: 'Boost'
+				title: 'OilPress'
+				channel: 'OilPress'

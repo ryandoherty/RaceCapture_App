@@ -34,11 +34,12 @@ class DashboardView(Screen):
     def initView(self):
         screenMgr = kvFind(self, 'rcid', 'screens')
         
-        gaugeView = GaugeView(name='gaugeView')
-        tachView = TachometerView(name='tachView', dataBus=self._dataBus)
-        laptimeView = LaptimeView(name='laptimeView')
-        comboView = ComboView(name='comboView')
-        rawChannelView = RawChannelView(name='rawchannelView', dataBus=self._dataBus)
+        dataBus = self._dataBus
+        gaugeView = GaugeView(name='gaugeView', dataBus=dataBus)
+        tachView = TachometerView(name='tachView', dataBus=dataBus)
+        laptimeView = LaptimeView(name='laptimeView', dataBus=dataBus)
+        comboView = ComboView(name='comboView', dataBus=dataBus)
+        rawChannelView = RawChannelView(name='rawchannelView', dataBus=dataBus)
         
         screenMgr.transition=WipeTransition()
         screenMgr.add_widget(gaugeView)

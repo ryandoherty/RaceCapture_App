@@ -14,7 +14,7 @@ class Gauge(object):
     title_size = NumericProperty(0)
     channel = StringProperty(None)    
     title = StringProperty('')
-    value = NumericProperty(None)
+    value = NumericProperty(-1)
     warning = NumericProperty(None)
     alert = NumericProperty(None)
     max = NumericProperty(None)
