@@ -110,7 +110,13 @@ class RcpApi:
                 if retries > retryMax:
                     try:
                         sleep(0.5)
-                        self.close()
+                        print("Closing Connection")
+                        comms.close()
+                        sleep(0.5)
+                        try:
+                            comms.open()
+                        except:
+                            comms.reset()                        
                         retries = 0
                     except:
                         pass
@@ -518,4 +524,7 @@ class RcpApi:
         return rsp
 
     def sample(self, includeMeta):
-        self.sendCommand({"s":{"meta":1 if includeMeta else 0}})
+        if includeMeta:
+            self.sendCommand({'s':{'meta':1}})
+        else:
+            self.sendCommand({'s':0})

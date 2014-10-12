@@ -8,6 +8,7 @@ DEFAULT_SERIAL_WRITE_TIMEOUT = 0
 DEFAULT_SERIAL_READ_TIMEOUT = None
 
 class serial_comms():
+    getVersion = None
     port = None
     ser = None
     timeout = DEFAULT_SERIAL_READ_TIMEOUT
@@ -17,6 +18,11 @@ class serial_comms():
     def __init__(self, **kwargs):
         self.port = kwargs.get('port', self.port)
     
+    def reset(self):
+        self.close()
+        self.port = None
+        self.ser = None
+        
     def setPort(self, port):
         self.port = port
     
@@ -29,7 +35,7 @@ class serial_comms():
     def open(self):
         print('Opening serial')
         if self.port == None:
-            self.autoDetectWorker()
+            self.autoDetectWorker(self.getVersion)
             if self.port == None:
                 self.ser = None
                 raise Exception('Could not open port: Device not detected')
@@ -82,6 +88,7 @@ class serial_comms():
         self.ser.flushOutput()
     
     def autoDetect(self, getVersion, winCallback, failCallback):
+        self.getVersion = getVersion
         t = Thread(target=self.autoDetectWorker, args=(getVersion, winCallback, failCallback))
         t.daemon = True
         t.start()        
