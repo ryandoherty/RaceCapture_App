@@ -19,7 +19,7 @@ class RoundGauge(FontGraphicalGauge):
         self.menu_args =  dict(
                 creation_direction=-1,
                 radius=30,
-                creation_timeout=.4,
+                creation_timeout=.2,
                 choices=[
                 dict(text='Remove', index=1, callback=self.removeGauge),
                 dict(text='Select Channel', index=2, callback=self.selectChannel),
