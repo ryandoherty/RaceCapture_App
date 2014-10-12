@@ -239,7 +239,10 @@ class RaceCaptureApp(App):
         #fade_in
         self.mainNav.anim_type = 'slide_above_anim'
         
-        configView = ConfigView(name='config', rcpConfig=self.rcpConfig, rcpComms=self.rcComms)
+        configView = ConfigView(name='config',
+                                rcpConfig=self.rcpConfig,
+                                rcpComms=self.rcComms,
+                                dataBusPump=self.dataBusPump)
         configView.bind(on_read_config=self.on_read_config)
         configView.bind(on_write_config=self.on_write_config)
         configView.bind(on_run_script=self.on_run_script)

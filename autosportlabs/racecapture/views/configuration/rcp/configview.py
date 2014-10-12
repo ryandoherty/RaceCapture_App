@@ -58,6 +58,7 @@ class ConfigView(Screen):
         self.channels = kwargs.get('channels', None)
         self.rcpConfig = kwargs.get('rcpConfig', None)
         self.rcpComms = kwargs.get('rcpComms', None)
+        self.dataBusPump = kwargs.get('dataBusPump', None)
 
         super(ConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
@@ -118,30 +119,28 @@ class ConfigView(Screen):
                                   TrackConfigView(rcpComms=self.rcpComms))
         attach_node('GPS', None,
                     GPSChannelsView(rcpComms=self.rcpComms))
-        attach_node('Lap Statistics', None, LapStatsView
-                    (rcpComms=self.rcpComms))        
+        attach_node('Lap Statistics', None, LapStatsView())        
         attach_node('Analog Sensors', None,
-                    AnalogChannelsView(channelCount=8, channels=self.channels,rcpComms=self.rcpComms))
+                    AnalogChannelsView(channelCount=8, channels=self.channels))
         attach_node('Pulse/RPM Sensors', None,
-                    PulseChannelsView(channelCount=3, channels=self.channels,rcpComms=self.rcpComms))
+                    PulseChannelsView(channelCount=3, channels=self.channels))
         attach_node('Digital In/Out', None,
-                    GPIOChannelsView(channelCount=3, channels=self.channels,rcpComms=self.rcpComms))
+                    GPIOChannelsView(channelCount=3, channels=self.channels))
         attach_node('Accelerometer/Gyro', None,
-                    ImuChannelsView(rcpComms=self.rcpComms))
+                    ImuChannelsView())
         attach_node('Pulse/Analog Out', None,
-                    AnalogPulseOutputChannelsView(channelCount=4, channels=self.channels,
-                                                  rcpComms=self.rcpComms))
+                    AnalogPulseOutputChannelsView(channelCount=4, channels=self.channels))
         attach_node('CAN Bus', None,
-                    CANConfigView(rcpComms=self.rcpComms))
+                    CANConfigView())
         attach_node('OBDII', None,
-                    OBD2ChannelsView(channels=self.channels,rcpComms=self.rcpComms))
+                    OBD2ChannelsView(channels=self.channels))
         attach_node('Wireless', None,
-                    WirelessConfigView(rcpComms=self.rcpComms))
+                    WirelessConfigView())
         attach_node('Telemetry', None,
-                    TelemetryConfigView(rcpComms=self.rcpComms))
+                    TelemetryConfigView())
         attach_node('Firmware', None,
-                    FirmwareUpdateView(rcpComms=self.rcpComms))
-        scriptView = LuaScriptingView(rcpComms=self.rcpComms)
+                    FirmwareUpdateView(dataBusPump=self.dataBusPump))
+        scriptView = LuaScriptingView()
         scriptView.bind(on_run_script=self.runScript)
         scriptView.bind(on_poll_logfile=self.pollLogfile)
         scriptView.bind(on_set_logfile_level=self.setLogFileLevel)

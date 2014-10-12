@@ -23,7 +23,7 @@ class FirmwareUpdateView(BaseConfigView):
     progress_gauge = ObjectProperty(None)
 
     def __init__(self, **kwargs):
-        self.rcpComms = kwargs.get('rcpComms', None)
+        self.dataBusPump = kwargs.get('dataBusPump', None)
 
         super(FirmwareUpdateView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
@@ -40,16 +40,28 @@ class FirmwareUpdateView(BaseConfigView):
     def select_file(self):
         #Inside a try block since this will fail if there is no device detected
         try:
-            self.rcpComms.stopMessageRxWorker()
+            self.dataBusPump.rcApi.stopMessageRxWorker()
         except:
             pass
-        content = LoadDialog(ok=self.update_fw, cancel=self.dismiss_popup, filters=['*' + '.ihex'])
+        content = LoadDialog(ok=self.update_fw, cancel=self.dismiss_popup,
+                             filters=['*' + '.ihex'])
         self._popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
         self._popup.open()
 
     def _update_progress_gauge(self, percent):
         kvFind(self, 'rcid', 'fw_progress').value = int(percent)
 
+    def _teardown_json_serial(self):
+        self.dataBusPump.stopDataPump()
+        self.dataBusPump.rcApi.resetDevice(bootloader=True)
+        self.dataBusPump.rcApi.comms.close()
+        sleep(5)
+
+    def _restart_json_serial(self):
+        self.dataBusPump.rcApi.runAutoDetect()
+        self.dataBusPump.startDataPump(self.dataBusPump.dataBus,
+                                       self.dataBusPump.rcApi)
+                        
     def _update_thread(self, instance):
         try:
             selection = instance.selection
@@ -59,10 +71,13 @@ class FirmwareUpdateView(BaseConfigView):
                 #since it doesn't return a value
                 try:
                     kvFind(self, 'rcid', 'fw_progress').title="Processing"
-                    self.rcpComms.resetDevice(bootloader=True)
-                    self.rcpComms.comms.close()
-                    sleep(5)
+                    self._teardown_json_serial()
                 except:
+                    import sys, traceback
+                    print "Exception in user code:"
+                    print '-'*60
+                    traceback.print_exc(file=sys.stdout)
+                    print '-'*60
                     pass
 
                 kvFind(self, 'rcid', 'fw_progress').title="Progress"
@@ -91,7 +106,7 @@ class FirmwareUpdateView(BaseConfigView):
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Firmware:\n\n' + str(detail))
 
-        self.rcpComms.runAutoDetect()
+        self._restart_json_serial()
         kvFind(self, 'rcid', 'fw_progress').value = 0
         kvFind(self, 'rcid', 'fw_progress').title=""
 
