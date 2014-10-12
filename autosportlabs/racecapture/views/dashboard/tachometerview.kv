@@ -14,33 +14,33 @@
 					anchor_y: 'center'
 					BigNumberView:
 						size_hint: (0.62, 0.65)
-						title: 'Gear'
+						title: 'Lap'
+						channel: 'LapCount'
 						warning_color: [0.2, 0.2, 0.2, 1.0]
 						alert_color: [0.2, 0.2, 0.2, 1.0]
-						value: 0
 				BoxLayout:
 					size_hint: (0.7, 1.0)
 					orientation: 'vertical'
 					Laptime:
 						rcid: 'curLap'
+						channel: 'LapTime'
 						halign: 'left'
 						font_size: dp(120)
-						value: 2.411
 					BoxLayout:
 						orientation: 'horizontal'
 						TimeDelta:
 							size_hint_x: 0.50
 							rcid: 'delta'
+							channel: 'BestDelta'
 							halign: 'left'
 							font_size: dp(120)
-							value: -1.98							
 						Laptime:
 							size_hint_x: 0.50
 							rcid: 'bestLap'
+							channel: 'BestLap'
 							font_size: dp(60)
 							halign: 'center'
 							color: [1.0, 0.0 , 1.0, 1.0]
-							value: 2.444
 		AnchorLayout:
 			anchor_x: 'left'
 			anchor_y: 'center'
@@ -48,9 +48,9 @@
 			Tachometer:
 				gauge_size: dp(400)
 				rcid: 'tach'
+				channel: 'RPM'
 				max: 10000
 				alert: 9000
 				warning: 8000
-				value: 0
 				title: 'RPM'
 						

@@ -8,7 +8,7 @@ __all__ = ('intersection', 'difference', 'curry', 'strtotuple',
            'get_color_from_hex', 'get_random_color',
            'is_color_transparent', 'boundary',
            'deprecated', 'SafeList',
-           'interpolate', 'OrderedDict', 'kvFind', 'kvPrintAttr',
+           'interpolate', 'OrderedDict', 'kvFind', 'kvFindClass', 'kvPrintAttr',
            'breadth_first', 'walk_tree', 'filter_tree', 'kvquery')
 
 from re import match, split
@@ -280,6 +280,16 @@ def kvPrintAttr(w, k):
     for c in w.children:
         kvPrintAttr(c, k)
         
+def kvFindClass(w, k):
+    matched = []
+    if issubclass(type(w), k):
+        matched.append(w)
+        
+    for child in w.children:
+        matched.extend(kvFindClass(child, k))
+        
+    return matched
+    
 def kvFind(w, k, v):
     #print "kvFind " + str(w) + " for " + k + ':' + v ,
     if hasattr(w, k):

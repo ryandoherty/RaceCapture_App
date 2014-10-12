@@ -35,7 +35,7 @@ class DashboardView(Screen):
         screenMgr = kvFind(self, 'rcid', 'screens')
         
         gaugeView = GaugeView(name='gaugeView')
-        tachView = TachometerView(name='tachView')
+        tachView = TachometerView(name='tachView', dataBus=self._dataBus)
         laptimeView = LaptimeView(name='laptimeView')
         comboView = ComboView(name='comboView')
         rawChannelView = RawChannelView(name='rawchannelView', dataBus=self._dataBus)

@@ -11,15 +11,17 @@ class Gauge(object):
     _valueView = None
     _titleView = None    
     value_size = NumericProperty(0)
-    title_size = NumericProperty(0)    
+    title_size = NumericProperty(0)
+    channel = StringProperty(None)    
     title = StringProperty('')
     value = NumericProperty(None)
     warning = NumericProperty(None)
     alert = NumericProperty(None)
     max = NumericProperty(None)
-    normal_color = ObjectProperty(DEFAULT_NORMAL_COLOR)
+    title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
+    normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
     warning_color = ObjectProperty(DEFAULT_WARNING_COLOR)
-    alert_color = ObjectProperty(DEFAULT_ALERT_COLOR)
+    alert_color   = ObjectProperty(DEFAULT_ALERT_COLOR)
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
@@ -56,3 +58,9 @@ class Gauge(object):
         if not value == None:
             view = self.titleView
             view.text = str(value)
+            
+    def on_title_color(self, instance, value):
+        self.titleView.color = value
+
+    def setValue(self, value):
+        self.value = value
