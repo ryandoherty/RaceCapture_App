@@ -253,7 +253,7 @@ class RaceCaptureApp(App):
         rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
         
         tracksView = TracksView(name='tracks')
-        dashView = DashboardView(name='dash')
+        dashView = DashboardView(name='dash', dataBus=self.dataBus)
         
         homepageView = HomePageView(name='home')
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))

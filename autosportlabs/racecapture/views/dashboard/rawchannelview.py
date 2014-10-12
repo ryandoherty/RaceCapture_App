@@ -32,36 +32,36 @@ class RawGauge(DigitalGauge):
         
         
 class RawChannelView(Screen):
-    _gauges = []
+    _gauges = {}
     _grid = None
     _bgCurrent = RAW_GRID_BGCOLOR_1
+    dataBus = None
     
     def __init__(self, **kwargs):
         super(RawChannelView, self).__init__(**kwargs)
-        Clock.schedule_once(lambda dt: self.initView(), 1)
+        self.initScreen(kwargs.get('dataBus', None))
     
     @property
     def _gridView(self):
         if self._grid == None:
             self._grid = kvFind(self, 'rcid', 'grid')
         return self._grid
-        
-    def initView(self):
-        self._addGauge('OilPress', 35)        
-        self._addGauge('Distance', 0)
-        self._addGauge('Speed', 0)
-        self._addGauge('EngineTemp', 189)
-        self._addGauge('RPM', 935)
-        self._addGauge('AccelX',0.03)
-        self._addGauge('AccelY',0.05)
-        self._addGauge('AccelZ',1.0)
-        self._addGauge('Yaw',0.01)
-        self._addGauge('Pitch',0.0)
-        self._addGauge('Roll',0.0)
 
-        for i in range (1, 100):
-            self._addGauge('channel{}'.format(i), i)
+    def on_sample(self, sample):
+        for sampleValue in sample.samples:
+            gauge = self._gauges.get(sampleValue.channelMeta.name)
+            if gauge:
+                gauge.value = sampleValue.value
         
+    def on_meta(self, channelMetas):
+        self._clearGauges()
+        for channelMeta in channelMetas:
+            self._addGauge(channelMeta.name, 0)
+            
+    def initScreen(self, dataBus):
+        dataBus.addMetaListener(self.on_meta)
+        dataBus.addSampleListener(self.on_sample)
+        self.dataBus = dataBus
         
     def _enableNoDataStatus(self, enabled):
         statusView = kvFind(self, 'rcid', 'statusMsg')
@@ -78,14 +78,14 @@ class RawChannelView(Screen):
         
         gauge.value = value
         gauge.channel = channel
-        
         if len(gridView.children) % 3 == 0:
             self._bgCurrent = RAW_GRID_BGCOLOR_2 if self._bgCurrent == RAW_GRID_BGCOLOR_1 else RAW_GRID_BGCOLOR_1
             
         gauge.backgroundColor = self._bgCurrent
         gridView.add_widget(gauge)
-        self._gauges.append(gauge)
+        self._gauges[channel] = gauge
         self._enableNoDataStatus(False)
+        
         
         
         

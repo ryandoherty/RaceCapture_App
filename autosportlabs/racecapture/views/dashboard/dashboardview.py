@@ -14,6 +14,7 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/dashboardview.kv')
 
 class DashboardView(Screen):
     
+    _dataBus = None
     _screenMgr = None
     _gaugeView = None
     _tachView = None
@@ -24,6 +25,7 @@ class DashboardView(Screen):
     def __init__(self, **kwargs):
         super(DashboardView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
+        self._dataBus = kwargs.get('dataBus', None)
         self.initView()
             
     def on_tracks_updated(self, trackManager):
@@ -36,7 +38,7 @@ class DashboardView(Screen):
         tachView = TachometerView(name='tachView')
         laptimeView = LaptimeView(name='laptimeView')
         comboView = ComboView(name='comboView')
-        rawChannelView = RawChannelView(name='rawchannelView')
+        rawChannelView = RawChannelView(name='rawchannelView', dataBus=self._dataBus)
         
         screenMgr.transition=WipeTransition()
         screenMgr.add_widget(gaugeView)
@@ -50,7 +52,6 @@ class DashboardView(Screen):
         self._rawchannelView = rawChannelView
         self._laptimeView = laptimeView
         self._comboView = comboView
-        
         self._screenMgr = screenMgr
 
     def on_nav_left(self):

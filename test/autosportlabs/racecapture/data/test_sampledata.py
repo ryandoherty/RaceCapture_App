@@ -13,16 +13,16 @@ class SampleDataTest(unittest.TestCase):
         
         self.assertEqual(sampleJson['s']['t'], sample.tick)
         sampleCount = len(sampleJson['s']['meta'])
-        self.assertEqual(sampleCount, len(sample.channelConfigs))
+        self.assertEqual(sampleCount, len(sample.channelMetas))
         self.assertEqual(sampleCount, len(sample.samples))
         
         metaJson = sampleJson["s"]["meta"]
         
         sampleIndex = 0
         for m in metaJson:
-            self.assertEqual(m['nm'], sample.samples[sampleIndex].channelConfig.name)
-            self.assertEqual(m['ut'], sample.samples[sampleIndex].channelConfig.units)
-            self.assertEqual(m['sr'], sample.samples[sampleIndex].channelConfig.sampleRate)
+            self.assertEqual(m['nm'], sample.samples[sampleIndex].channelMeta.name)
+            self.assertEqual(m['ut'], sample.samples[sampleIndex].channelMeta.units)
+            self.assertEqual(m['sr'], sample.samples[sampleIndex].channelMeta.sampleRate)
             sampleIndex += 1
         
         sampleIndex = 0

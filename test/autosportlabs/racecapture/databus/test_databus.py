@@ -1,10 +1,18 @@
 import unittest
 from autosportlabs.racecapture.databus.databus import DataBus
+from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, SampleValue
 
 class DataBusTest(unittest.TestCase):
 	def test_update_value(self):
 		dataBus = DataBus()
-		dataBus.updateData('RPM', 1234)
+
+		sample = Sample()
+		
+		meta = ChannelMeta(name='RPM')
+		sample.channelMetas = [meta]
+		sample.samples = [SampleValue(1234, meta)]
+		
+		dataBus.updateSample(sample)
 		
 		value = dataBus.getData('RPM')
 		self.assertEqual(value, 1234)
@@ -15,9 +23,16 @@ class DataBusTest(unittest.TestCase):
 		def listener(value):
 			self.listenerVal0 = value
 
+		sample = Sample()
+		
+		meta = ChannelMeta(name='RPM')
+		sample.channelMetas = [meta]
+		sample.samples = [SampleValue(1111, meta)]
+
+
 		dataBus = DataBus()
-		dataBus.addListener('RPM', listener)
-		dataBus.updateData('RPM', 1111)
+		dataBus.addChannelListener('RPM', listener)
+		dataBus.updateSample(sample)
 		self.assertEqual(self.listenerVal0, 1111)
 	
 	listenerVal1 = None
@@ -30,9 +45,15 @@ class DataBusTest(unittest.TestCase):
 			self.listenerVal2 = value
 			
 		dataBus = DataBus()
-		dataBus.addListener('RPM', listener1)
-		dataBus.addListener('RPM', listener2)
-		dataBus.updateData('RPM', 1111)
+		dataBus.addChannelListener('RPM', listener1)
+		dataBus.addChannelListener('RPM', listener2)
+		
+		sample = Sample()
+		meta = ChannelMeta(name='RPM')
+		sample.channelMetas = [meta]
+		sample.samples = [SampleValue(1111, meta)]
+		
+		dataBus.updateSample(sample)
 		self.assertEqual(self.listenerVal1, 1111)
 		self.assertEqual(self.listenerVal2, 1111)
 		
@@ -45,22 +66,37 @@ class DataBusTest(unittest.TestCase):
 		def listener4(value):
 			self.listenerVal4 = value
 			
+			
+		sample = Sample()
+		metaRpm = ChannelMeta(name='RPM')
+		metaEngineTemp = ChannelMeta(name='EngineTemp')
+		sample.channelMetas = [metaRpm, metaEngineTemp]
+		sample.samples = [SampleValue(1111, metaRpm)]
+			
 		dataBus = DataBus()
-		dataBus.addListener('RPM', listener3)
-		dataBus.addListener('EngineTemp', listener4)
-		dataBus.updateData('RPM', 1111)
+		dataBus.addChannelListener('RPM', listener3)
+		dataBus.addChannelListener('EngineTemp', listener4)
+		dataBus.updateSample(sample)
 		#ensure we don't set the wrong listener
 		self.assertEqual(self.listenerVal3, 1111)
 		self.assertEqual(self.listenerVal4, None)
 		
-		dataBus.updateData('EngineTemp', 199)
+		sample.samples = [SampleValue(1111, metaRpm), SampleValue(199, metaEngineTemp)]
+		
+		dataBus.updateSample(sample)
 		#ensure we don't affect unrelated channels
 		self.assertEqual(self.listenerVal3, 1111)
 		self.assertEqual(self.listenerVal4, 199)
 		
 	def test_no_listener(self):
+
+		sample = Sample()
+		meta = ChannelMeta(name='EngineTemp')
+		sample.channelMetas = [meta]
+		sample.samples = [SampleValue(200, meta)]
+		
 		dataBus = DataBus()
-		dataBus.updateData('EngineTemp', 200)
+		dataBus.updateSample(sample)
 		#no listener for this channel, should not cause an error
 	
 	channelMeta = None
@@ -70,7 +106,8 @@ class DataBusTest(unittest.TestCase):
 		def metaListener(channel):
 			self.channelMeta = channel
 
-		meta = object()
+		meta = ChannelMeta(name='RPM')
+
 		dataBus.addMetaListener(metaListener)
 		dataBus.updateMeta(meta)
 		self.assertEqual(self.channelMeta, meta)

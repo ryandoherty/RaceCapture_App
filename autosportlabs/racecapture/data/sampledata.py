@@ -1,9 +1,13 @@
 
-class ChannelConfig(object):
+class ChannelMeta(object):
+    name = None
+    units = None
+    sampleRate = 0
+    
     def __init__(self, **kwargs):
-        self.name = None
-        self.units = None
-        self.sampleRate = 0
+        self.name = kwargs.get('name', 0)
+        self.units = kwargs.get('samples', self.units)
+        self.sampleRate = kwargs.get('sampleRate', self.sampleRate)
         
     def fromJson(self, json):
         self.name = json.get('nm', self.name)
@@ -11,19 +15,24 @@ class ChannelConfig(object):
         self.sampleRate = int(json.get('sr', self.sampleRate))
 
 class SampleValue(object):
-    def __init__(self, value, channelConfig):
+    def __init__(self, value, channelMeta):
         self.value = value
-        self.channelConfig = channelConfig
+        self.channelMeta = channelMeta
 
 STARTING_BITMAP = 1
         
 class Sample(object):
+    tick = 0
+    samples = []
+    channelMetas = []
+    updatedMeta = False
+    
     def __init__(self, **kwargs):
-        self.tick = 0
-        self.samples = []
-        self.channelConfigs = []
-        self.bitmask = 0
-
+        self.tick = kwargs.get('tick', self.tick)
+        self.samples = kwargs.get('samples', self.samples)
+        self.channelMetas = kwargs.get('channelMetas', self.channelMetas)
+        self.updatedMeta = len(self.channelMetas) > 0
+        
     def fromJson(self, json):
         if json:
             sample = json.get('s')
@@ -33,20 +42,23 @@ class Sample(object):
                 dataJson = sample.get('d')
                 if metaJson:
                     self.processMeta(metaJson)
+                else:
+                    self.updatedMeta = False
                 if dataJson:
                     self.processData(dataJson)
 
     def processMeta(self, metaJson):
-        channelConfigs = self.channelConfigs
-        del channelConfigs[:]
+        channelMetas = self.channelMetas
+        del channelMetas[:]
         for ch in metaJson:
-            config = ChannelConfig()
+            config = ChannelMeta()
             config.fromJson(ch)
-            channelConfigs.append(config)
+            channelMetas.append(config)
+        self.updatedMeta = True
     
     def processData(self, dataJson):
         
-        channelConfigs = self.channelConfigs
+        channelConfigs = self.channelMetas
         channelConfigCount = len(channelConfigs)        
         bitmaskFieldCount = channelConfigCount / 32 + 1 if channelConfigCount % 32 > 0 else 0
         

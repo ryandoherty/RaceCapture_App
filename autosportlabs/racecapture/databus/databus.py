@@ -4,28 +4,38 @@ from autosportlabs.racecapture.data.sampledata import Sample
 
 class DataBus(object):
 	channelData = {}
+	sampleListeners = []
 	channelListeners = {}
 	metaListeners = []
-	channelMeta = None
+	channelMetas = None
 	
 	def __init__(self, **kwargs):
 		super(DataBus, self).__init__(**kwargs)
 	
-	def updateMeta(self, channelMeta):
-		self.channelMeta = channelMeta
-		self.notifyMetaListeners(channelMeta)
+	def updateMeta(self, channelMetas):
+		self.channelMetas = channelMetas
+		self.notifyMetaListeners(channelMetas)
 	
 	def getMeta(self):
-		return self.channelMeta
+		return self.channelMetas
 	
-	def updateData(self, channel, value):
-		self.channelData[channel] = value
-		self.notifyListeners(channel, value)
+	def updateSample(self, sample):
+		for sampleItem in sample.samples:
+			channel = sampleItem.channelMeta.name
+			value = sampleItem.value
+			self.channelData[channel] = value
+			self.notifyChannelListeners(channel, value)
+			
+		self.notifySampleListeners(sample)
 	
 	def getData(self, channel):
 		return self.channelData[channel]
 
-	def notifyListeners(self, channel, value):
+	def notifySampleListeners(self, sample):
+		for listener in self.sampleListeners:
+			listener(sample)
+			
+	def notifyChannelListeners(self, channel, value):
 		listeners = self.channelListeners.get(channel)
 		if not listeners == None:
 			for listener in listeners:
@@ -35,7 +45,10 @@ class DataBus(object):
 		for listener in self.metaListeners:
 			listener(channelMeta)			
 	
-	def addListener(self, channel, callback):
+	def addSampleListener(self, callback):
+		self.sampleListeners.append(callback)
+			
+	def addChannelListener(self, channel, callback):
 		listeners = self.channelListeners.get(channel)
 		if listeners == None:
 			listeners = [callback]
@@ -65,17 +78,21 @@ class DataBusPump(object):
 		sample = self.sample
 		dataBus = self.dataBus
 		sample.fromJson(sampleJson)
-		for sampleItem in sample.samples:
-			print('sample ' + str(sampleItem.value) + ' ' + str(sampleItem.channelConfig.name))
-			dataBus.updateData(sampleItem.value, sampleItem.channelConfig.name)
+		dataBus.updateSample(sample)
+		if sample.updatedMeta:
+			dataBus.updateMeta(sample.channelMetas)
 			
 	def sampleWorker(self):
 		rcApi = self.rcApi
 		dataBus = self.dataBus
 		rcApi.addListener('s', self.on_sample)
 		while True:
-			rcApi.sample(self.dataBus.channelMeta == None)
-			time.sleep(1)
+			try:
+				rcApi.sample(self.dataBus.channelMetas == None)
+				time.sleep(.1)
+			except:
+				time.sleep(2)
+				pass
 		
 		
 	
