@@ -112,6 +112,7 @@ class DataBusPump(object):
             try:
                 sampleEvent.wait(SAMPLE_POLL_WAIT_TIMEOUT)
                 rcApi.sample(self.shouldGetMeta)
+                sampleEvent.clear()
                 time.sleep(SAMPLE_POLL_INTERVAL)
             except:
                 time.sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
