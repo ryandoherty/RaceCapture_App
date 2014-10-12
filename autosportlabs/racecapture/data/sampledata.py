@@ -5,16 +5,25 @@ class SampleMetaException(Exception):
 class ChannelMeta(object):
     name = None
     units = None
+    min = 0
+    max = 100
+    precision = 0
     sampleRate = 0
     
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', 0)
         self.units = kwargs.get('samples', self.units)
+        self.min = kwargs.get('min', self.min)
+        self.max = kwargs.get('max', self.max)
+        self.precision = kwargs.get('prec', self.precision)
         self.sampleRate = kwargs.get('sampleRate', self.sampleRate)
         
     def fromJson(self, json):
         self.name = json.get('nm', self.name)
         self.units = json.get('ut', self.units)
+        self.min = json.get('min', self.min)
+        self.max = json.get('max', self.max)
+        self.precision = json.get('prec', self.precision)
         self.sampleRate = int(json.get('sr', self.sampleRate))
 
 class SampleValue(object):

@@ -56,7 +56,7 @@ class RawChannelView(Screen):
     def on_meta(self, channelMetas):
         self._clearGauges()
         for channelMeta in channelMetas:
-            self._addGauge(channelMeta.name, 0)
+            self._addGauge(channelMeta)
             
     def initScreen(self, dataBus):
         dataBus.addMetaListener(self.on_meta)
@@ -72,12 +72,13 @@ class RawChannelView(Screen):
         gridView.clear_widgets()
         self._enableNoDataStatus(True)
         
-    def _addGauge(self, channel, value):
+    def _addGauge(self, channelMeta):
+        channel = channelMeta.name
         gauge = RawGauge()
         gridView = self._gridView
-        
-        gauge.value = value
+        gauge.precision = channelMeta.precision
         gauge.channel = channel
+        
         if len(gridView.children) % 3 == 0:
             self._bgCurrent = RAW_GRID_BGCOLOR_2 if self._bgCurrent == RAW_GRID_BGCOLOR_1 else RAW_GRID_BGCOLOR_1
             

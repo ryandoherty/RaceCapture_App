@@ -37,7 +37,6 @@ class TachometerView(Screen):
         
         for gauge in gauges:
             channel = gauge.channel
-            print('gauge found ' + str(gauge) + ' ' + channel)
             if channel:
                 dataBus.addChannelListener(channel, gauge.setValue)
         

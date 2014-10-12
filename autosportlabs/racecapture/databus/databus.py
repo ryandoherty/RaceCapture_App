@@ -67,7 +67,7 @@ class DataBusPump(object):
     rcApi = None
     dataBus = None
     sample = Sample()
-    sampleEvent = None
+    sampleEvent = Event()
     shouldGetMeta = True
     running = Event()
 
@@ -104,8 +104,7 @@ class DataBusPump(object):
     def sampleWorker(self):
         rcApi = self.rcApi
         dataBus = self.dataBus
-        sampleEvent = Event()
-        self.sampleEvent = sampleEvent
+        sampleEvent = self.sampleEvent
         sampleEvent.set()
         rcApi.addListener('s', self.on_sample)
         print("DataBus Sampler Starting")

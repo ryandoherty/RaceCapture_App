@@ -11,27 +11,41 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/gaugeview.kv')
 
 class GaugeView(Screen):
 
+    _gaugesMap = {}
+     
     def __init__(self, **kwargs):
         super(GaugeView, self).__init__(**kwargs)
         self.initScreen(kwargs.get('dataBus', None))
+
+    def findActiveGauges(self):
+        gauges = list(kvFindClass(self, Gauge))
+        for gauge in gauges:
+            self._gaugesMap[gauge.channel] = gauge
+            
+        return self._gaugesMap
 
     def on_sample(self, sample):
         pass
         
     def on_meta(self, channelMetas):
-        pass
-
+        gauges = self.findActiveGauges()
+        
+        for channelMeta in channelMetas:
+            name = channelMeta.name
+            gauge = gauges.get(name)
+            if gauge:
+                gauge.precision = channelMeta.precision
+                gauge.min = channelMeta.min
+                gauge.max = channelMeta.max
+        
     def initScreen(self, dataBus):
         dataBus.addMetaListener(self.on_meta)
         dataBus.addSampleListener(self.on_sample)
         
-        gauges = list(kvFindClass(self, Gauge))
+        gauges = self.findActiveGauges()
         
-        for gauge in gauges:
-            channel = gauge.channel
-            print('gauge found ' + str(gauge) + ' ' + channel)
-            if channel:
-                dataBus.addChannelListener(channel, gauge.setValue)
+        for channel, gauge in gauges.iteritems():
+            dataBus.addChannelListener(channel, gauge.setValue)
         
         self.dataBus = dataBus
  
