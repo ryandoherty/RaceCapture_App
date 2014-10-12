@@ -9,7 +9,7 @@ from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/digitalgauge.kv')
 
-class DigitalGauge(BoxLayout, Gauge):
+class DigitalGauge(Gauge):
     
     def __init__(self, **kwargs):
         super(DigitalGauge, self).__init__(**kwargs)

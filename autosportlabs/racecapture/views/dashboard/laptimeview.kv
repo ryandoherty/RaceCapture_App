@@ -4,7 +4,7 @@
 		Laptime:
 			size_hint_y: 0.25
 			rcid: 'curLap'
-			font_size: dp(180)
+			value_size: dp(180)
 			halign: 'center'
 		BoxLayout:
 			size_hint_y: 0.6
@@ -19,7 +19,7 @@
 			TimeDelta:
 				size_hint_x: 0.65
 				rcid: 'delta'
-				font_size: dp(200)
+				value_size: dp(200)
 				halign: 'right'
 			BoxLayout:
 				size_hint_x: 0.1
@@ -36,14 +36,14 @@
 				rcid: 'best'
 				size_hint_x: 0.35
 				halign: 'left'
-				color: [1.0, 0.0 , 1.0, 1.0]
-				font_size: dp(80)
+				normal_color: [1.0, 0.0 , 1.0, 1.0]
+				value_size: dp(80)
 			Laptime:
 				rcid: 'sector'
 				size_hint_x: 0.35
 				halign: 'right'
-				font_size: dp(80)
-				color: [1.0, 1.0 , 0.0, 1.0]
+				value_size: dp(80)
+				normal_color: [1.0, 1.0 , 0.0, 1.0]
 			FieldLabel:
 				size_hint_x: 0.15
 				font_size: dp(40)

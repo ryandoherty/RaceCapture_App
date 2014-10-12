@@ -1,13 +1,14 @@
 import kivy
 kivy.require('1.8.0')
-from kivy.properties import StringProperty, NumericProperty, ObjectProperty
+from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty
 from utils import kvFind
+from kivy.uix.anchorlayout import AnchorLayout
 
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
 DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   ,1.0]
 
-class Gauge(object):
+class Gauge(AnchorLayout):
     _valueView = None
     _titleView = None    
     value_size = NumericProperty(0)
@@ -15,6 +16,7 @@ class Gauge(object):
     channel = StringProperty(None)    
     title = StringProperty('')
     value = NumericProperty(None)
+    valueFormat = "{:.0f}"
     precision = NumericProperty(0)
     warning = NumericProperty(None)
     alert = NumericProperty(None)
@@ -23,7 +25,9 @@ class Gauge(object):
     normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
     warning_color = ObjectProperty(DEFAULT_WARNING_COLOR)
     alert_color   = ObjectProperty(DEFAULT_ALERT_COLOR)
-    valueFormat = "{:.0f}"
+    
+    pressed = ListProperty([0,0])
+    
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
@@ -53,13 +57,15 @@ class Gauge(object):
     def on_value(self, instance, value):
         if not value == None:
             view = self.valueView
-            view.text = self.valueFormat.format(value)
-            self.updateColors()
+            if view:
+                view.text = self.valueFormat.format(value)
+                self.updateColors()
 
     def on_title(self, instance, value):
         if not value == None:
             view = self.titleView
-            view.text = str(value)
+            if view:
+                view.text = str(value)
 
     def on_precision(self, instance, value):
         self.valueFormat = '{:.' + str(value) + 'f}'
@@ -67,5 +73,26 @@ class Gauge(object):
     def on_title_color(self, instance, value):
         self.titleView.color = value
 
+    def on_value_size(self, instance, value):
+        view = self.valueView
+        if view:
+            view.font_size = value
+    
+    def on_title_size(self, instance, value):
+        view = self.titleView
+        if view:
+            view.font_size = value
+            
     def setValue(self, value):
         self.value = value
+        
+    def on_touch_down(self, touch):
+        print('touch')
+        if self.collide_point(*touch.pos):
+            self.pressed = touch.pos
+            return True
+        return super(Gauge, self).on_touch_down(touch)
+    
+    def on_pressed(self, instance, pos):
+        print ('pressed at {pos}'.format(pos=pos) + str(self.channel))
+        

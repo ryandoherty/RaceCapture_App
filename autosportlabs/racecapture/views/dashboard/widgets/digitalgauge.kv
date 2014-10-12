@@ -1,16 +1,19 @@
 <DigitalGauge>:
-	orientation: 'horizontal'
-	spacing: dp(20)
+	anchor_x: 'center'
+	anchor_y: 'center'
 	title_size: dp(25)
 	value_size: dp(50)
-	
-	FieldLabel:
-		rcid: 'title'
-		text: 'channel'
-		font_size: root.title_size
-		halign: 'right'
-	FieldLabel:
-		rcid: 'value'
-		text: '---'
-		font_size: root.value_size
-		halign: 'left'
+	BoxLayout:
+		orientation: 'horizontal'
+		spacing: dp(20)
+		
+		FieldLabel:
+			rcid: 'title'
+			text: 'channel'
+			font_size: root.title_size
+			halign: 'right'
+		FieldLabel:
+			rcid: 'value'
+			text: '---'
+			font_size: root.value_size
+			halign: 'left'

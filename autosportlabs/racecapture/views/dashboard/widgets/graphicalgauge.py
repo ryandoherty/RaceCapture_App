@@ -3,6 +3,7 @@ kivy.require('1.8.0')
 from utils import kvFind
 from kivy.properties import NumericProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+
 class GraphicalGauge(Gauge):
     _gaugeView = None
     gauge_size = NumericProperty(0)

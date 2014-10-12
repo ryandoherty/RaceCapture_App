@@ -16,7 +16,7 @@ DEFAULT_NORMAL_COLOR  = [0.2, 0.2 , 0.2, 1.0]
 DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
 DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   , 1 ]
 
-class BigNumberView(AnchorLayout, Gauge):
+class BigNumberView(Gauge):
 
     _backgroundView  = None
     
