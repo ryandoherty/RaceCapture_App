@@ -188,7 +188,6 @@ class MenuSpawner(Widget):
         return super(MenuSpawner, self).on_touch_move(touch, *args)
 
     def on_touch_up(self, touch, *args):
-        print('touchup')
         if touch.ud.get('menu_timeout'):
             Clock.unschedule(touch.ud['menu_timeout'])
         return super(MenuSpawner, self).on_touch_up(touch, *args)
