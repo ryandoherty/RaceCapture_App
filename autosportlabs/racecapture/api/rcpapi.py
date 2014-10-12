@@ -3,7 +3,7 @@ import json
 import traceback
 import Queue
 from time import sleep
-from threading import Thread, RLock
+from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from functools import partial
 from autosportlabs.comms.serial_comms import *
@@ -58,17 +58,35 @@ class RcpApi:
     
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
+        self._running = Event()
+        self._running.clear()
 
-    def startMessageRxWorker(self, onInitComplete, versionInfo):
-        rxThread = Thread(target=self.msgRxWorker)
-        rxThread.daemon = True
-        rxThread.start()
-        print(str(versionInfo))
-        onInitComplete(versionInfo)
-                     
+    def startMessageRxWorker(self, onInitComplete=None, versionInfo=None):
+        self._running.set()
+        self._rxThread = Thread(target=self.msgRxWorker)
+        self._rxThread.daemon = True
+        self._rxThread.start()
+
+        if versionInfo:
+            print(str(versionInfo))
+
+        if onInitComplete:
+            onInitComplete(versionInfo)
+
+
+    def stopMessageRxWorker(self):
+        print('Stopping msgRxWorker')
+        self._running.clear()
+        self._rxThread.join()
+        
+
     def initSerial(self, comms, detectWin, detectFail):
         self.comms = comms
-        comms.autoDetect(self.getVersion, lambda versionInfo: self.startMessageRxWorker(detectWin, versionInfo), detectFail)                        
+        self.runAutoDetect(detectWin, detectFail)
+
+    def runAutoDetect(self, detectWin=None, detectFail=None):
+        self.comms.port = None
+        self.comms.autoDetect(self.getVersion, lambda versionInfo: self.startMessageRxWorker(detectWin, versionInfo), detectFail)
 
     def addListener(self, messageName, callback):
         listeners = self.msgListeners.get(messageName, None)
@@ -88,21 +106,25 @@ class RcpApi:
         print('msgRxWorker started')
         retryMax = 3
         retries = 0
-        while True:
+        msg = ''
+        comms = self.getComms()
+        while self._running.is_set():
             try:
-                comms = self.getComms()
-                msg = comms.readLine()
-                print('msgRxWorker Rx: ' + str(msg))
-                msgJson = json.loads(msg, strict = False)
-                self.on_rx(True)
-                retries = 0
-                for messageName in msgJson.keys():
-                    print('processing message ' + messageName)
-                    listeners = self.msgListeners.get(messageName, None)
-                    if listeners:
-                        for listener in listeners:
-                            listener(msgJson)
-                    break
+                msg += comms.read(1)
+                if msg[-2:] == '\r\n':
+                    msg = msg[:-2]
+                    print('msgRxWorker Rx: ' + str(msg))
+                    msgJson = json.loads(msg, strict = False)
+                    self.on_rx(True)
+                    retries = 0
+                    for messageName in msgJson.keys():
+                        print('processing message ' + messageName)
+                        listeners = self.msgListeners.get(messageName, None)
+                        if listeners:
+                            for listener in listeners:
+                                listener(msgJson)
+                                break
+                    msg = ''
             except Exception:
                 print('Message Rx Exception: ' + str(Exception))
                 traceback.print_exc()
@@ -120,6 +142,7 @@ class RcpApi:
                         retries = 0
                     except:
                         pass
+        print("RxWorker exiting")
                     
     def rcpCmdComplete(self, msgReply):
         self.cmdSequenceQueue.put(msgReply)
@@ -352,10 +375,18 @@ class RcpApi:
         t = Thread(target=self.executeSequence, args=(cmdSequence, 'setRcpCfg', winCallback, failCallback,))
         t.daemon = True
         t.start()
-                        
+
+
+    def resetDevice(self, bootloader=False):
+        if bootloader:
+            loaderint = 1
+        else:
+            loaderint = 0
+            
+        self.sendCommand({'sysReset': {'loader':loaderint}})
                 
     def getAnalogCfg(self, channelId = None):
-        self.sendGet('getAnalogCfg', channelId)    
+        self.sendGet('getAnalogCfg', channelId)
 
     def setAnalogCfg(self, analogCfg, channelId):
         self.sendSet('setAnalogCfg', analogCfg, channelId)

@@ -1,56 +1,51 @@
 #:kivy 1.8.0
 
 <MainMenuItem>:
-	orientation: 'horizontal'
-	spacing: dp(10)
-	Label:
-		size_hint_x: 0.05
-	FieldLabel:
-		size_hint_x: 0.2
-		font_size: dp(40)
-		rcid: 'icon'
-		font_name: 'resource/fonts/fa.ttf'
-	FieldLabel:
-		size_hint_x: 0.75
-		font_size: dp(27)
-		rcid: 'desc'
-		
+    orientation: 'horizontal'
+    spacing: dp(10)
+    Label:
+        size_hint_x: 0.05
+    FieldLabel:
+        size_hint_x: 0.2
+        font_size: dp(40)
+        rcid: 'icon'
+        font_name: 'resource/fonts/fa.ttf'
+    FieldLabel:
+        size_hint_x: 0.75
+        font_size: dp(27)
+        rcid: 'desc'
+
 <MainMenu>:
-	orientation: 'vertical'
-	canvas.before:
-		Color:
-			rgba: 0.15, 0.03, 0.03, 1
-		Rectangle:
-		    pos: self.pos
-		    size: self.size
-	MainMenuItem:
-		rcid: 'dash'
-		size_hint_y: 0.1
-		icon: '\357\203\244'
-		description: 'Dashboard'
-		on_main_menu_item_selected: root.on_main_menu_item_selected(*args)
-	MainMenuItem:
-		rcid: 'analysis'
-		size_hint_y: 0.1
-		icon: '\357\202\200'
-		description: 'Analysis'
-		on_main_menu_item_selected: root.on_main_menu_item_selected(*args)
-	MainMenuItem:
-		rcid: 'config'
-		size_hint_y: 0.1
-		icon: '\357\202\205'
-		description: 'Configuration'
-		on_main_menu_item_selected: root.on_main_menu_item_selected(*args)		
-	MainMenuItem:
-		rcid: 'tracks'
-		size_hint_y: 0.1
-		icon: '\357\200\230'
-		description: 'Race Tracks'
-		on_main_menu_item_selected: root.on_main_menu_item_selected(*args)		
-	Label:
-		size_hint_y: 0.8
-			
-			
-	
-		
-		
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: 0.15, 0.03, 0.03, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    MainMenuItem:
+        rcid: 'dash'
+        size_hint_y: 0.1
+        icon: '\357\203\244'
+        description: 'Dashboard'
+        on_main_menu_item_selected: root.on_main_menu_item_selected(*args)
+    MainMenuItem:
+        rcid: 'analysis'
+        size_hint_y: 0.1
+        icon: '\357\202\200'
+        description: 'Analysis'
+        on_main_menu_item_selected: root.on_main_menu_item_selected(*args)
+    MainMenuItem:
+        rcid: 'config'
+        size_hint_y: 0.1
+        icon: '\357\202\205'
+        description: 'Configuration'
+        on_main_menu_item_selected: root.on_main_menu_item_selected(*args)		
+    MainMenuItem:
+        rcid: 'tracks'
+        size_hint_y: 0.1
+        icon: '\357\200\230'
+        description: 'Race Tracks'
+        on_main_menu_item_selected: root.on_main_menu_item_selected(*args)		
+    Label:
+        size_hint_y: 0.8

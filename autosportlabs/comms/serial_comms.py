@@ -5,15 +5,14 @@ from autosportlabs.racecapture.config.rcpconfig import VersionConfig
 
 DEFAULT_READ_RETRIES = 2
 DEFAULT_SERIAL_WRITE_TIMEOUT = 0
-DEFAULT_SERIAL_READ_TIMEOUT = None
+DEFAULT_SERIAL_READ_TIMEOUT = 0
 
 class serial_comms():
     getVersion = None
     port = None
     ser = None
     timeout = DEFAULT_SERIAL_READ_TIMEOUT
-    writeTimeout = DEFAULT_SERIAL_WRITE_TIMEOUT
- 
+    writeTimeout = DEFAULT_SERIAL_WRITE_TIMEOUT 
 
     def __init__(self, **kwargs):
         self.port = kwargs.get('port', self.port)
@@ -40,6 +39,8 @@ class serial_comms():
                 self.ser = None
                 raise Exception('Could not open port: Device not detected')
         else:
+            if self.timeout == None:
+                raise Exception("No timeout")
             ser = serial.Serial(self.port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
             ser.flushInput()
             ser.flushOutput()
@@ -50,6 +51,11 @@ class serial_comms():
         if self.ser != None:
             self.ser.close()
         self.ser = None
+
+    def read(self, count):
+        ret = self.ser.read(count)
+        return ret
+        
     
     def readLine(self):
         ser = self.ser
