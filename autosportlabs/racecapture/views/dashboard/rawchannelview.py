@@ -59,8 +59,8 @@ class RawChannelView(Screen):
             self._addGauge(channelMeta)
             
     def initScreen(self, dataBus):
-        dataBus.addMetaListener(self.on_meta)
-        dataBus.addSampleListener(self.on_sample)
+        dataBus.addMetaListener(lambda channelMetas: Clock.schedule_once(lambda dt: self.on_meta(channelMetas)))
+        dataBus.addSampleListener(lambda sample: Clock.schedule_once(lambda dt: self.on_sample(sample)))
         self.dataBus = dataBus
         
     def _enableNoDataStatus(self, enabled):

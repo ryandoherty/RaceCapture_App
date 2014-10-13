@@ -45,7 +45,7 @@ class GaugeView(Screen):
         gauges = self.findActiveGauges()
         
         for channel, gauge in gauges.iteritems():
-            dataBus.addChannelListener(channel, gauge.setValue)
+            dataBus.addChannelListener(channel, lambda value: Clock.schedule_once(lambda dt: gauge.setValue))
         
         self.dataBus = dataBus
  

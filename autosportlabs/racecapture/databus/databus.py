@@ -1,6 +1,7 @@
 import time
 from threading import Thread, Event
 from autosportlabs.racecapture.data.sampledata import Sample, SampleMetaException
+from kivy.clock import Clock
 
 class DataBus(object):
     channelData = {}
@@ -106,12 +107,13 @@ class DataBusPump(object):
         dataBus = self.dataBus
         sampleEvent = self.sampleEvent
         sampleEvent.set()
-        rcApi.addListener('s', self.on_sample)
+        rcApi.addListener('s', lambda sampleJson: Clock.schedule_once(lambda dt: self.on_sample(sampleJson)))
         print("DataBus Sampler Starting")
         while self.running.is_set():
             try:
                 sampleEvent.wait(SAMPLE_POLL_WAIT_TIMEOUT)
                 rcApi.sample(self.shouldGetMeta)
+                sampleEvent.clear()
                 time.sleep(SAMPLE_POLL_INTERVAL)
             except:
                 time.sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)

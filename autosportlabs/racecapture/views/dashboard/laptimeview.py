@@ -15,3 +15,4 @@ class LaptimeView(Screen):
 
     def initView(self):
         pass
+

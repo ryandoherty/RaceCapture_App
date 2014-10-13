@@ -12,7 +12,7 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/tachometer.
 
 TACH_RANGES = OrderedDict([(7000, 'resource/fonts/tach_7000.ttf'), (10000, 'resource/fonts/tach_10000.ttf'), (15000, 'resource/fonts/tach_15000.ttf')])
 
-class Tachometer(AnchorLayout, FontGraphicalGauge):
+class Tachometer(FontGraphicalGauge):
     def __init__(self, **kwargs):
         super(Tachometer, self).__init__(**kwargs)
         self.initWidgets()
