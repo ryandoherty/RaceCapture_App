@@ -11,6 +11,8 @@ Dependencies:
 * Included in package right now but ultimately shouldn't be:
   * Graph (via kivy-garden via python-pip)
   * NavigationDrawer (via kivy-garden)
+  * ModernMenu (via kivy-garden)
+  * asl_f4_loader (in dependencies folder)
 
 ## dev installation (OS X)
 
@@ -21,6 +23,7 @@ Dependencies:
 1. create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. activate the virtualenv: `. _ve/bin/activate`
 1. install pip requirements: `pip install -r requirements.txt` (you may be required to upgrade your version of setuptools via the provided command)
+1. install asl_f4_loader in dependencies folder: pip install asl_f4_loader-X.X.X.tar.gz
 
 ## running (OS X)
 
@@ -93,6 +96,7 @@ Dependencies:
 1. create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. activate the virtualenv: `. _ve/bin/activate`
 1. install pip requirements: `sudo pip install -r requirements.txt` (you may be required to upgrade your version of setuptools via the provided command)
+1. install asl_f4_loader in dependencies folder: pip install asl_f4_loader-X.X.X.tar.gz
 
 ## running (Linux - Ubuntu)
 
