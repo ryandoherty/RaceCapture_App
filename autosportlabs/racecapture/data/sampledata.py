@@ -1,6 +1,27 @@
+import json
+
+CHANNEL_TYPE_UNKNOWN    = 0
+CHANNEL_TYPE_ANALOG     = 1
+CHANNEL_TYPE_FREQ       = 2
+CHANNEL_TYPE_GPIO       = 3
+CHANNEL_TYPE_PWM        = 4
+CHANNEL_TYPE_IMU        = 5
+CHANNEL_TYPE_GPS        = 6
+CHANNEL_TYPE_STATISTICS = 7
 
 class SampleMetaException(Exception):
     pass
+
+class SystemChannels(object):
+    channels = {}
+    
+    def __init__(self, **kwargs):
+        systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
+        channelsJson = systemChannelsJson.get('channels')
+        for channelJson in channelsJson:
+            channel = ChannelMeta()
+            channel.fromJson(channelJson) 
+            self.channels[channel['name']] = channel
 
 class ChannelMeta(object):
     name = None
@@ -9,6 +30,7 @@ class ChannelMeta(object):
     max = 100
     precision = 0
     sampleRate = 0
+    type = 0
     
     def __init__(self, **kwargs):
         self.name = kwargs.get('name', 0)
@@ -17,6 +39,7 @@ class ChannelMeta(object):
         self.max = kwargs.get('max', self.max)
         self.precision = kwargs.get('prec', self.precision)
         self.sampleRate = kwargs.get('sampleRate', self.sampleRate)
+        self.type = kwargs.get('type', self.type)
         
     def fromJson(self, json):
         self.name = json.get('nm', self.name)
@@ -25,6 +48,7 @@ class ChannelMeta(object):
         self.max = json.get('max', self.max)
         self.precision = json.get('prec', self.precision)
         self.sampleRate = int(json.get('sr', self.sampleRate))
+        self.sampleRate = int(json.get('type', self.type))
 
 class SampleValue(object):
     def __init__(self, value, channelMeta):
