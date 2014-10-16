@@ -61,7 +61,7 @@ class DataBus(object):
         self.metaListeners.append(callback)
 
 SAMPLE_POLL_WAIT_TIMEOUT       = 4.0
-SAMPLE_POLL_INTERVAL	       = 0.1
+SAMPLE_POLL_INTERVAL	       = 0.5
 SAMPLE_POLL_EXCEPTION_RECOVERY = 2.0
 
 class DataBusPump(object):
