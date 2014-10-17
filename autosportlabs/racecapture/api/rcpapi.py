@@ -85,7 +85,6 @@ class RcpApi:
         self.runAutoDetect(detectWin, detectFail)
 
     def runAutoDetect(self, detectWin=None, detectFail=None):
-        self.comms.port = None
         self.comms.autoDetect(self.getVersion, lambda versionInfo: self.startMessageRxWorker(detectWin, versionInfo), detectFail)
 
     def addListener(self, messageName, callback):
