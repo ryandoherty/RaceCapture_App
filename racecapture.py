@@ -35,19 +35,15 @@ from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigV
 from autosportlabs.racecapture.menu.mainmenu import MainMenu
 from autosportlabs.racecapture.menu.homepageview import HomePageView
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig
+from autosportlabs.racecapture.settings.systemsettings import SystemSettings
 from toolbarview import ToolbarView
 
-class AppConfig():
-    userDir = "."
-    
-    def setUserDir(self, userDir):
-        print('using user storage directory: ' + userDir)
-        self.userDir = userDir
-        pass
     
 class RaceCaptureApp(App):
     
-    appConfig = AppConfig()
+
+    #container for all settings
+    settings = SystemSettings()
     
     #Central RCP configuration object
     rcpConfig  = RcpConfig()
@@ -90,7 +86,7 @@ class RaceCaptureApp(App):
         Window.bind(on_key_down=self._on_keyboard_down)
         self.register_event_type('on_tracks_updated')
         self.processArgs()
-        self.appConfig.setUserDir(self.user_data_dir)
+        self.settings.appConfig.setUserDir(self.user_data_dir)
         self.trackManager = TrackManager(user_dir=self.user_data_dir)
         self.initData()
 

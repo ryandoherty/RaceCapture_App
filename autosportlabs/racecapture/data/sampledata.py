@@ -16,12 +16,16 @@ class SystemChannels(object):
     channels = {}
     
     def __init__(self, **kwargs):
-        systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
-        channelsJson = systemChannelsJson.get('channels')
-        for channelJson in channelsJson:
-            channel = ChannelMeta()
-            channel.fromJson(channelJson) 
-            self.channels[channel['name']] = channel
+        try:
+            systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
+            channelsJson = systemChannelsJson.get('channels')
+            for channelJson in channelsJson:
+                channel = ChannelMeta()
+                channel.fromJson(channelJson) 
+                self.channels[channel['name']] = channel
+        except Exception as detail:
+            print('Error loading system channels: {}'.format(str(detail)))
+            
 
 class ChannelMeta(object):
     name = None
