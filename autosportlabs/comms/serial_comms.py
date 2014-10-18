@@ -4,8 +4,8 @@ from serial.tools import list_ports
 from autosportlabs.racecapture.config.rcpconfig import VersionConfig
 
 DEFAULT_READ_RETRIES = 2
-DEFAULT_SERIAL_WRITE_TIMEOUT = 0
-DEFAULT_SERIAL_READ_TIMEOUT = 0
+DEFAULT_SERIAL_WRITE_TIMEOUT = 1
+DEFAULT_SERIAL_READ_TIMEOUT = 1
 
 class serial_comms():
     getVersion = None
