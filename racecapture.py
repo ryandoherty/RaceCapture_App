@@ -8,6 +8,7 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from functools import partial
 from kivy.clock import Clock
 from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
+from kivy.properties import AliasProperty
 kivy.require('1.8.0')
 from kivy.config import Config
 Config.set('graphics', 'width', '1024')
@@ -36,6 +37,7 @@ from autosportlabs.racecapture.menu.mainmenu import MainMenu
 from autosportlabs.racecapture.menu.homepageview import HomePageView
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig
 from autosportlabs.racecapture.settings.systemsettings import SystemSettings
+from autosportlabs.racecapture.settings.prefs import Range
 from toolbarview import ToolbarView
 
     
@@ -217,7 +219,16 @@ class RaceCaptureApp(App):
           
     def showActivity(self, status):
         self.statusBar.dispatch('on_activity', status)
-        
+
+    def _setX(self, x):
+        pass
+    
+    def _getX(self):
+        pass
+    
+    xx = AliasProperty(_getX, _setX)
+    
+                
     def build(self):
         Builder.load_file('racecapture.kv')
         statusBar = kvFind(self.root, 'rcid', 'statusbar')
@@ -251,7 +262,7 @@ class RaceCaptureApp(App):
         rcComms.on_progress = lambda value: statusBar.dispatch('on_progress', value)
         rcComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
         rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
-        
+            
         tracksView = TracksView(name='tracks')
         dashView = DashboardView(name='dash', dataBus=self.dataBus, settings=self.settings)
         
@@ -259,6 +270,8 @@ class RaceCaptureApp(App):
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
         
         screenMgr = kvFind(self.root, 'rcid', 'main')
+        
+        self.settings.userPrefs.rangeAlerts = (3,3)
         
         #NoTransition
         #SlideTransition
