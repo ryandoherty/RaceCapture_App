@@ -1,4 +1,5 @@
 import json
+from kivy.properties import ObjectProperty
 
 CHANNEL_TYPE_UNKNOWN    = 0
 CHANNEL_TYPE_ANALOG     = 1
@@ -13,17 +14,19 @@ class SampleMetaException(Exception):
     pass
 
 class SystemChannels(object):
-    channels = {}
+    channels = ObjectProperty({})
     
     def __init__(self, **kwargs):
         try:
             systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
             channelsJson = systemChannelsJson.get('channels')
+            channels = {}
             for channelJson in channelsJson:
                 channel = ChannelMeta()
                 channel.fromJson(channelJson) 
-                self.channels[channel.name] = channel
-                
+                channels[channel.name] = channel
+            self.channels = channels
+            
         except Exception as detail:
             print('Error loading system channels: {}'.format(str(detail)))
             
