@@ -22,7 +22,8 @@ class SystemChannels(object):
             for channelJson in channelsJson:
                 channel = ChannelMeta()
                 channel.fromJson(channelJson) 
-                self.channels[channel['name']] = channel
+                self.channels[channel.name] = channel
+                
         except Exception as detail:
             print('Error loading system channels: {}'.format(str(detail)))
             
