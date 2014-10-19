@@ -37,8 +37,12 @@ class ToolbarView(BoxLayout):
         self.register_event_type('on_tele_tx')
         self.register_event_type('on_tele_rx')
         self.register_event_type('on_status')
-        self.register_event_type('on_activity')        
-                    
+        self.register_event_type('on_activity')
+        
+        self._rcTxDecay = Clock.create_trigger(self.on_rc_tx_decay, TOOLBAR_LED_DURATION)
+        self._rcRxDecay = Clock.create_trigger(self.on_rc_rx_decay, TOOLBAR_LED_DURATION)                
+        self._teleTxDecay = Clock.create_trigger(self.on_tele_tx_decay, TOOLBAR_LED_DURATION)
+        self._teleRxDecay = Clock.create_trigger(self.on_tele_rx_decay, TOOLBAR_LED_DURATION)                
                                     
 
     def on_activity(self, msg):
@@ -78,8 +82,7 @@ class ToolbarView(BoxLayout):
         if not self.rcTxStatus:
             self.rcTxStatus = kvFind(self, 'rcid', 'rcTxStatus')            
         self.rcTxStatus.color = self.txOnColor if value else self.txOffColor
-        Clock.unschedule(self.on_rc_tx_decay)
-        Clock.schedule_once(self.on_rc_tx_decay, TOOLBAR_LED_DURATION)
+        self._rcTxDecay()
     
     def on_rc_rx_decay(self, dt):
         self.on_rc_rx(False)
@@ -88,8 +91,7 @@ class ToolbarView(BoxLayout):
         if not self.rcRxStatus:
             self.rcRxStatus = kvFind(self, 'rcid', 'rcRxStatus')    
         self.rcRxStatus.color = self.rxOnColor if value else self.rxOffColor
-        Clock.unschedule(self.on_rc_rx_decay)
-        Clock.schedule_once(self.on_rc_rx_decay, TOOLBAR_LED_DURATION)
+        self._rcRxDecay()        
     
     def on_tele_tx_decay(self):
         self.on_tele_tx(False)
@@ -98,8 +100,7 @@ class ToolbarView(BoxLayout):
         if not self.teleTxStatus:
             self.teleTxStatus = kvFind(self, 'rcid', 'teleRxStatus')
         self.teleTxStatus.color = self.txOnColor if value else self.txOnColor
-        Clock.unschedule(self.on_tele_tx_decay)
-        Clock.schedule_once(self.on_tele_tx_decay, TOOLBAR_LED_DURATION)
+        self._teleTxDecay()        
 
     def on_tele_rx_decay(self):
         self.on_tele_rx(False)
@@ -108,6 +109,5 @@ class ToolbarView(BoxLayout):
         if not self.teleRxStatus:
             self.teleRxStatus = kvFind(self, 'rcid', 'teleTxStatus')
         self.teleRxStatus.color = self.rxOnColor if value else self.rxOffColor
-        Clock.unschedule(self.on_tele_rx_decay)
-        Clock.schedule_once(self.on_tele_rx_decay, TOOLBAR_LED_DURATION)
+        self._teleRxDecay()        
     
