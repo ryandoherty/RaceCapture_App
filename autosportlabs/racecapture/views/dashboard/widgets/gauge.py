@@ -179,6 +179,8 @@ class Gauge(AnchorLayout):
         self._popup = popup
         
     def channelSelected(self, instance, value):
+        if self.channel:
+            self.dataBus.removeChannelListener(self.channel, self.setValue)        
         self.channel = value
         self.dismiss_popup()
 
