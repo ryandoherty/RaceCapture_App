@@ -3,7 +3,7 @@ kivy.require('1.8.0')
 from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty, DictProperty
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
-from utils import kvFind, dist
+from utils import kvFind, kvquery, dist
 from kivy.uix.anchorlayout import AnchorLayout
 from installfix_garden_modernmenu import ModernMenu
 from functools import partial
@@ -13,6 +13,11 @@ DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
 DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   ,1.0]
 
+DEFAULT_VALUE = None
+DEFAULT_MIN = 0
+DEFAULT_MAX = 100
+DEFAULT_PRECISION = 0
+
 class Gauge(AnchorLayout):
     _valueView = None
     settings = ObjectProperty(None)    
@@ -20,13 +25,13 @@ class Gauge(AnchorLayout):
     title_size = NumericProperty(0)
     channel = StringProperty(None, allownone=True)    
     title = StringProperty('')
-    value = NumericProperty(None)
+    value = NumericProperty(None, allownone=True)
     valueFormat = "{:.0f}"
-    precision = NumericProperty(0)
+    precision = NumericProperty(DEFAULT_PRECISION)
     warning = NumericProperty(None)
     alert = NumericProperty(None)
-    min = NumericProperty(None)
-    max = NumericProperty(None)
+    min = NumericProperty(DEFAULT_MIN)
+    max = NumericProperty(DEFAULT_MAX)
     title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
     normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
     warning_color = ObjectProperty(DEFAULT_WARNING_COLOR)
@@ -53,7 +58,7 @@ class Gauge(AnchorLayout):
                 creation_direction=-1,
                 radius=30,
                 creation_timeout=0.2,
-                dismiss_timeout=0.2,
+                dismiss_timeout=0.1,
                 choices=[
                 dict(text='Remove', index=1, callback=self.removeGauge),
                 dict(text='Select Channel', index=2, callback=self.selectChannel),
@@ -62,6 +67,14 @@ class Gauge(AnchorLayout):
         
     def removeGauge(self, *args):
         args[0].parent.dismiss()
+        #this is a hack to prevent the modernmenu from grabbing the channel title widget when the title is blanked out
+        #there's a bug in kvFind that needs to be fixed        
+        Clock.schedule_once(lambda dt: self.removeChannel(), 0.2)
+
+    def removeChannel(self):
+        channel = self.channel
+        if channel:
+            self.dataBus.removeChannelListener(channel, self.setValue)
         self.channel = None        
 
     def customizeGauge(self, *args):
@@ -92,11 +105,13 @@ class Gauge(AnchorLayout):
             view.color = self.normal_color
         
     def on_value(self, instance, value):
-        if not value == None:
-            view = self.valueView
+        view = self.valueView
+        if value != None:
             if view:
                 view.text = self.valueFormat.format(value)
                 self.updateColors()
+        else:
+            view.text=''
 
     def on_title(self, instance, value):
         if not value == None:
@@ -146,7 +161,6 @@ class Gauge(AnchorLayout):
     def display_menu(self, touch, dt):
         if not self._popup:
             if self.channel:
-                print('start display')
                 menu = self.menuClass(center=touch.pos, **self.menuArgs)
                 self.add_widget(menu)
                 menu.start_display(touch)
@@ -172,13 +186,17 @@ class Gauge(AnchorLayout):
         self._popup = None
         
     def dismiss_popup(self, *args):
-        self._popup.dismiss()
-        self._popup = None
+        if self._popup:
+            self._popup.dismiss()
+            self._popup = None
                 
     def on_channel(self, instance, value):
-        self.updateChannelBinding()
-        self.updateDisplay()
-        self.updateTitle()
+        try:
+            self.updateDisplay()
+            self.updateTitle()
+            self.updateChannelBinding()
+        except Exception as e:
+            print('Error setting channel () ()'.format(value, str(e)))
         
     def on_dataBus(self, instance, value):
         self.updateChannelBinding()
@@ -200,18 +218,21 @@ class Gauge(AnchorLayout):
     def updateDisplay(self):
         try:
             channelMeta = self.settings.systemChannels.channels.get(self.channel)
-            self.min = channelMeta.min
-            self.max = channelMeta.max
-            self.precision = channelMeta.precision
+            if channelMeta:
+                self.min = channelMeta.min
+                self.max = channelMeta.max
+                self.precision = channelMeta.precision
+            else:
+                self.min = DEFAULT_MIN
+                self.max = DEFAULT_MAX
+                self.precision = DEFAULT_PRECISION
+                self.value = DEFAULT_VALUE
         except Exception as e:
             print('Failed to update gauge min/max ' + str(e))
         
     def updateChannelBinding(self):
         dataBus = self.dataBus
         channel = self.channel
-        if dataBus:
-            if channel:
-                dataBus.addChannelListener(str(channel), self.setValue)
-            else:
-                dataBus.removeChannelListener(channel, self.setValue)
+        if dataBus and channel:
+            dataBus.addChannelListener(str(channel), self.setValue)
                 

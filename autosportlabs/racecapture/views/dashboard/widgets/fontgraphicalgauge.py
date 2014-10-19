@@ -8,23 +8,33 @@ class FontGraphicalGauge(GraphicalGauge):
     def __init__(self, **kwargs):
         super(FontGraphicalGauge, self).__init__(**kwargs)
 
-    def on_value(self, instance, value):
-        max = self.max
-        railedValue = value
-        if not railedValue == None and not max == None: 
+
+    def refreshGaugeDisplay(self):
+        try:
+            value = self.value
+            min = self.min
+            max = self.max
+            railedValue = value
             view = self.graphView
             if railedValue > max:
                 railedValue = max
-            
-            view.text = '' if railedValue == 0 else unichr(ord(u'\uE600') + int(((railedValue * 100) / max)) - 1)
-            
+            if railedValue < min:
+                railedValue = min
+    
+            range = max - min
+            offset = railedValue - min
+            view.text = '' if offset == 0 else unichr(ord(u'\uE600') + int(((offset * 100) / range)) - 1)
             if self.alert and value >= self.alert:
                 view.color = self.alert_color
             elif self.warning and value >=self.warning:
                 view.color = self.warning_color
             else:
                 view.color = self.normal_color
-                
-            return super(FontGraphicalGauge, self).on_value(instance, value)
+        except Exception as e:
+            print('error setting font gauge value ' + str(e))
+        
+    def on_value(self, instance, value):
+        self.refreshGaugeDisplay()
+        return super(FontGraphicalGauge, self).on_value(instance, value)
 
 

@@ -17,3 +17,9 @@ class DigitalGauge(Gauge):
             
     def initWidgets(self):
         pass
+
+    def updateTitle(self):
+        try:
+            self.title = self.channel if self.channel else ''
+        except Exception as e:
+            print('Failed to update digital gauge title ' + str(e))
