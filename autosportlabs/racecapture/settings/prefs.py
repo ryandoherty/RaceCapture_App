@@ -7,6 +7,13 @@ class Range(EventDispatcher):
     high = NumericProperty(0)
     low = NumericProperty(0)
     
+    def __init__(self, **kwargs):
+        self.low = kwargs.get('low', self.low)
+        self.high = kwargs.get('high', self.high)
+    
+    def isInRange(self, value):
+        return value >= self.low and value <= self.high
+    
 class UserPrefs(EventDispatcher):
     UNITS_KM    = 'km'
     UNITS_MILE = 'mile'

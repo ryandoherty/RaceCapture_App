@@ -84,9 +84,9 @@ class Gauge(AnchorLayout):
     def updateColors(self):
         value = self.value
         view = self.valueView
-        if self.alert and value >= self.alert:
+        if self.alert and self.alert.isInRange(value):
             view.color = self.alert_color
-        elif self.warning and value >=self.warning:
+        elif self.warning and self.warning.isInRange(value):
             view.color = self.warning_color
         else:
             view.color = self.normal_color

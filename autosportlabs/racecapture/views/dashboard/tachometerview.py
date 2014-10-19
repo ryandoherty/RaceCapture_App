@@ -10,7 +10,6 @@ from autosportlabs.racecapture.views.dashboard.widgets.bignumberview import BigN
 from autosportlabs.racecapture.views.dashboard.widgets.laptime import Laptime
 from autosportlabs.racecapture.views.dashboard.widgets.timedelta import TimeDelta
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
-
 from utils import kvFind, kvFindClass
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/tachometerview.kv')
