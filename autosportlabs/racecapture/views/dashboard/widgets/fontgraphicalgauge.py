@@ -27,3 +27,4 @@ class FontGraphicalGauge(GraphicalGauge):
                 
             return super(FontGraphicalGauge, self).on_value(instance, value)
 
+

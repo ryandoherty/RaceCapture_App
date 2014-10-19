@@ -16,3 +16,5 @@ class GraphicalGauge(Gauge):
         if not self._gaugeView:
             self._gaugeView = kvFind(self, 'rcid', 'gauge')
         return self._gaugeView
+    
+    

@@ -2,6 +2,7 @@ import kivy
 kivy.require('1.8.0')
 from fieldlabel import FieldLabel
 from kivy.app import Builder
+from kivy.clock import Clock
 from kivy.uix.screenmanager import Screen
 from utils import kvFind, kvFindClass
 from autosportlabs.racecapture.views.dashboard.widgets.roundgauge import RoundGauge
@@ -24,16 +25,20 @@ class GaugeView(Screen):
     def on_sample(self, sample):
         pass
         
+    def findActiveGauges(self):
+        return list(kvFindClass(self, Gauge))
+    
     def on_meta(self, channelMetas):
         gauges = self.findActiveGauges()
         
-        for channelMeta in channelMetas:
-            name = channelMeta.name
-            gauge = gauges.get(name)
-            if gauge:
-                gauge.precision = channelMeta.precision
-                gauge.min = channelMeta.min
-                gauge.max = channelMeta.max
+        for gauge in gauges:
+            channel = gauge.channel
+            if channel:
+                channelMeta = channelMetas.get(channel)
+                if channelMeta:
+                    gauge.precision = channelMeta.precision
+                    gauge.min = channelMeta.min
+                    gauge.max = channelMeta.max
         
     def initScreen(self):
         dataBus = self._dataBus
@@ -41,9 +46,8 @@ class GaugeView(Screen):
         dataBus.addMetaListener(self.on_meta)
         dataBus.addSampleListener(self.on_sample)
         
-        gauges = list(kvFindClass(self, Gauge))
+        gauges = self.findActiveGauges()
         for gauge in gauges:
             gauge.settings = settings
-            if gauge.channel:
-                dataBus.addChannelListener(gauge.channel, lambda value: Clock.schedule_once(lambda dt: gauge.setValue))
+            gauge.dataBus = dataBus
  

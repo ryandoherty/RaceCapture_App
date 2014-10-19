@@ -8,14 +8,16 @@ class DataBus(object):
     sampleListeners = []
     channelListeners = {}
     metaListeners = []
-    channelMetas = None
+    channelMetas = {}
 
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
 
     def updateMeta(self, channelMetas):
-        self.channelMetas = channelMetas
-        self.notifyMetaListeners(channelMetas)
+        self.channelMetas.clear()
+        for meta in channelMetas:
+            self.channelMetas[meta.name] = meta
+        Clock.schedule_once(lambda dt: self.notifyMetaListeners(self.channelMetas))
 
     def getMeta(self):
         return self.channelMetas
@@ -23,22 +25,27 @@ class DataBus(object):
     def updateSample(self, sample):
         for sampleItem in sample.samples:
             channel = sampleItem.channelMeta.name
-            value = sampleItem.value
+            value = sampleItem.value            
             self.channelData[channel] = value
-            self.notifyChannelListeners(channel, value)
 
-            self.notifySampleListeners(sample)
-
+        Clock.schedule_once(lambda dt: self.notifySampleListeners(sample))
+    
     def getData(self, channel):
         return self.channelData[channel]
 
     def notifySampleListeners(self, sample):
+
+        for sampleItem in sample.samples:
+            channel = sampleItem.channelMeta.name
+            value = sampleItem.value
+            self.notifyChannelListeners(channel, value)
+        
         for listener in self.sampleListeners:
                 listener(sample)
 
     def notifyChannelListeners(self, channel, value):
-        listeners = self.channelListeners.get(channel)
-        if not listeners == None:
+        listeners = self.channelListeners.get(str(channel))
+        if listeners:
             for listener in listeners:
                 listener(value)
 
@@ -57,6 +64,12 @@ class DataBus(object):
         else:
             listeners.append(callback)
 
+
+    def removeChannelListener(self, channel, callback):
+                listeners = self.channelListeners.get(channel)
+                if listeners:
+                    listeners.remove(callback)
+                    
     def addMetaListener(self, callback):
         self.metaListeners.append(callback)
 
@@ -69,7 +82,7 @@ class DataBusPump(object):
     dataBus = None
     sample = Sample()
     sampleEvent = Event()
-    shouldGetMeta = True
+    requestMeta = True
     running = Event()
 
     def __init__(self, **kwargs):
@@ -81,7 +94,7 @@ class DataBusPump(object):
         self.running.set()
         self._sampleThread = Thread(target=self.sampleWorker)
         self._sampleThread.daemon = True
-        #self._sampleThread.start()
+        self._sampleThread.start()
 
     def on_sample(self, sampleJson):
         sample = self.sample
@@ -91,10 +104,10 @@ class DataBusPump(object):
             dataBus.updateSample(sample)
             if sample.updatedMeta:
                 dataBus.updateMeta(sample.channelMetas)
-                self.shouldGetMeta = False
+                self.requestMeta = False
         except SampleMetaException as e:
             print('SampleMeta Exception: {}'.format(str(e)))
-            self.shouldGetMeta = True
+            self.requestMeta = True
         finally:
             self.sampleEvent.set()
 
@@ -112,11 +125,11 @@ class DataBusPump(object):
         while self.running.is_set():
             try:
                 sampleEvent.wait(SAMPLE_POLL_WAIT_TIMEOUT)
-                rcApi.sample(self.shouldGetMeta)
+                rcApi.sample(self.requestMeta)
                 sampleEvent.clear()
                 time.sleep(SAMPLE_POLL_INTERVAL)
             except:
                 time.sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
-                self.shouldGetMeta = True
+                self.requestMeta = True
         print("DataBus Sampler Exiting")
 

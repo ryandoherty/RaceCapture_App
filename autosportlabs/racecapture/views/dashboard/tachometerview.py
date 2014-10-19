@@ -37,16 +37,12 @@ class TachometerView(Screen):
         dataBus = self._dataBus
         settings = self._settings
         dataBus.addMetaListener(self.on_meta)
-        dataBus.addSampleListener(self.on_sample)
+        dataBus.addSampleListener(self.on_sample)        
         
         gauges = list(kvFindClass(self, Gauge))
         
         for gauge in gauges:
             gauge.settings = settings
-            channel = gauge.channel
-            if channel:
-                dataBus.addChannelListener(channel, gauge.setValue)
-        
-        self.dataBus = dataBus
+            gauge.dataBus = dataBus
         
             

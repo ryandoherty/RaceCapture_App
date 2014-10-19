@@ -105,6 +105,7 @@ class ModernMenu(Widget):
     circle_progress = NumericProperty(0)
     creation_direction = NumericProperty(1)
     creation_timeout = NumericProperty(1)
+    dismiss_timeout = NumericProperty(1)
     choices = ListProperty([])
     item_cls = ObjectProperty(ModernMenuLabel)
     item_args = DictProperty({'opacity': 0})
@@ -158,7 +159,7 @@ class ModernMenu(Widget):
         return super(ModernMenu, self).on_touch_up(touch, *args)
 
     def dismiss(self):
-        a = Animation(opacity=0)
+        a = Animation(opacity=0, d=self.dismiss_timeout)
         a.bind(on_complete=self._remove)
         a.start(self)
 

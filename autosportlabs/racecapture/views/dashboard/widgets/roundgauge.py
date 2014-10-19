@@ -18,3 +18,7 @@ class RoundGauge(FontGraphicalGauge):
     def initWidgets(self):
         pass
     
+    def on_channel(self, instance, value):
+        addChannelView = self.ids.get('add_gauge')
+        if addChannelView: addChannelView.text = '+' if value == None else ''
+        return super(RoundGauge, self).on_channel(instance, value)    
