@@ -9,7 +9,9 @@ kivy.require('1.8.0')
 from kivy.app import Builder
 from kivy.uix.screenmanager import *
 from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer
-from utils import kvFind
+from utils import kvFind, kvFindClass
+from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+
 Builder.load_file('autosportlabs/racecapture/views/dashboard/dashboardview.kv')
 
 class DashboardView(Screen):
@@ -33,6 +35,16 @@ class DashboardView(Screen):
     def on_tracks_updated(self, trackManager):
         pass
         
+    def initGlobalGauges(self):
+        dataBus = self._dataBus
+        settings = self._settings
+ 
+        activeGauges = list(kvFindClass(self, Gauge))
+        
+        for gauge in activeGauges:
+            gauge.settings = settings
+            gauge.dataBus = dataBus
+         
     def initView(self):
         screenMgr = kvFind(self, 'rcid', 'screens')
         
@@ -57,6 +69,8 @@ class DashboardView(Screen):
         self._laptimeView = laptimeView
         self._comboView = comboView
         self._screenMgr = screenMgr
+
+#        self.initGlobalGauges()
 
     def on_nav_left(self):
         self._screenMgr.current = self._screenMgr.previous()
