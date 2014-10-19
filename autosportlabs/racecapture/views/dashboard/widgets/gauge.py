@@ -177,7 +177,7 @@ class Gauge(AnchorLayout):
                 
     def on_channel(self, instance, value):
         self.updateChannelBinding()
-        self.updateMinMax()
+        self.updateDisplay()
         self.updateTitle()
         
     def on_dataBus(self, instance, value):
@@ -197,11 +197,12 @@ class Gauge(AnchorLayout):
         except Exception as e:
             print('Failed to update gauge title & units ' + str(e))
         
-    def updateMinMax(self):
+    def updateDisplay(self):
         try:
             channelMeta = self.settings.systemChannels.channels.get(self.channel)
             self.min = channelMeta.min
             self.max = channelMeta.max
+            self.precision = channelMeta.precision
         except Exception as e:
             print('Failed to update gauge min/max ' + str(e))
         
