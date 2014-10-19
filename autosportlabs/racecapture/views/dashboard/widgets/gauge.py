@@ -2,10 +2,12 @@ import kivy
 kivy.require('1.8.0')
 from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty, DictProperty
 from kivy.clock import Clock
+from kivy.uix.popup import Popup
 from utils import kvFind, dist
 from kivy.uix.anchorlayout import AnchorLayout
 from installfix_garden_modernmenu import ModernMenu
 from functools import partial
+from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
 
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
@@ -13,7 +15,8 @@ DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   ,1.0]
 
 class Gauge(AnchorLayout):
     _valueView = None
-    _titleView = None    
+    _titleView = None
+    settings = ObjectProperty(None)    
     value_size = NumericProperty(0)
     title_size = NumericProperty(0)
     channel = StringProperty(None)    
@@ -34,6 +37,8 @@ class Gauge(AnchorLayout):
     menu_cls = ObjectProperty(ModernMenu)
     cancel_distance = NumericProperty(10)
     menu_args = DictProperty({})
+    
+    _popup = None
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
@@ -122,18 +127,17 @@ class Gauge(AnchorLayout):
             return super(Gauge, self).on_touch_down(touch, *args)
 
     def on_touch_move(self, touch, *args):
+        menuTimeout = touch.ud.get('menu_timeout')
         if self.collide_point(*touch.pos):
-            if (
-                touch.ud['menu_timeout'] and
-                dist(touch.pos, touch.opos) > self.cancel_distance
-            ):
-                Clock.unschedule(touch.ud['menu_timeout'])
+            if menuTimeout and dist(touch.pos, touch.opos) > self.cancel_distance:
+                Clock.unschedule(menuTimeout)
             return super(Gauge, self).on_touch_move(touch, *args)
 
     def on_touch_up(self, touch, *args):
         if self.collide_point(*touch.pos):
-            if touch.ud.get('menu_timeout'):
-                Clock.unschedule(touch.ud['menu_timeout'])
+            menuTimeout = touch.ud.get('menu_timeout')
+            if menuTimeout:
+                Clock.unschedule(menuTimeout)
             return super(Gauge, self).on_touch_up(touch, *args)
 
     def display_menu(self, touch, dt):
@@ -144,9 +148,20 @@ class Gauge(AnchorLayout):
         else:
             self.showChannelSelectDialog()
             
-    def showChannelSelectDialog(self):
-        pass
+    def showChannelSelectDialog(self):  
         
+        content = ChannelSelectView(settings=self.settings)
+        content.bind(on_channel_selected=self.channelSelected)
+        content.bind(on_channel_cancel=self.dismiss_popup)
+
+        self._popup = Popup(title="Select Channel", content=content, size_hint=(0.5, 0.7))
+        self._popup.open()
         
-        
+    def channelSelected(self, instance, value):
+        self._popup.dismiss()
+        print('channel ' + value)
+
+    def dismiss_popup(self, *args):
+        self._popup.dismiss()
+                
             

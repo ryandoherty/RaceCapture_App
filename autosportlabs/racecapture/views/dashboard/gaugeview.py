@@ -11,18 +11,15 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/gaugeview.kv')
 
 class GaugeView(Screen):
 
+    _dataBus = None
+    _settings = None
     _gaugesMap = {}
      
     def __init__(self, **kwargs):
         super(GaugeView, self).__init__(**kwargs)
-        self.initScreen(kwargs.get('dataBus', None))
-
-    def findActiveGauges(self):
-        gauges = list(kvFindClass(self, Gauge))
-        for gauge in gauges:
-            self._gaugesMap[gauge.channel] = gauge
-            
-        return self._gaugesMap
+        self._dataBus = kwargs.get('dataBus')
+        self._settings = kwargs.get('settings')
+        self.initScreen()
 
     def on_sample(self, sample):
         pass
@@ -38,14 +35,15 @@ class GaugeView(Screen):
                 gauge.min = channelMeta.min
                 gauge.max = channelMeta.max
         
-    def initScreen(self, dataBus):
+    def initScreen(self):
+        dataBus = self._dataBus
+        settings = self._settings
         dataBus.addMetaListener(self.on_meta)
         dataBus.addSampleListener(self.on_sample)
         
-        gauges = self.findActiveGauges()
-        
-        for channel, gauge in gauges.iteritems():
-            dataBus.addChannelListener(channel, lambda value: Clock.schedule_once(lambda dt: gauge.setValue))
-        
-        self.dataBus = dataBus
+        gauges = list(kvFindClass(self, Gauge))
+        for gauge in gauges:
+            gauge.settings = settings
+            if gauge.channel:
+                dataBus.addChannelListener(gauge.channel, lambda value: Clock.schedule_once(lambda dt: gauge.setValue))
  

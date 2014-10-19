@@ -17,10 +17,14 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/tachometerview.kv')
 
 class TachometerView(Screen):
 
-    dataBus = None
+    _dataBus = None
+    _settings = None
+    
     def __init__(self, **kwargs):
         super(TachometerView, self).__init__(**kwargs)
-        self.initScreen(kwargs.get('dataBus', None))        
+        self._dataBus = kwargs.get('dataBus')
+        self._settings = kwargs.get('settings')
+        self.initScreen()        
         
 
     def on_sample(self, sample):
@@ -29,13 +33,16 @@ class TachometerView(Screen):
     def on_meta(self, channelMetas):
         pass
  
-    def initScreen(self, dataBus):
+    def initScreen(self):
+        dataBus = self._dataBus
+        settings = self._settings
         dataBus.addMetaListener(self.on_meta)
         dataBus.addSampleListener(self.on_sample)
         
         gauges = list(kvFindClass(self, Gauge))
         
         for gauge in gauges:
+            gauge.settings = settings
             channel = gauge.channel
             if channel:
                 dataBus.addChannelListener(channel, gauge.setValue)

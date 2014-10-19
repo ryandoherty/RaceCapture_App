@@ -1,4 +1,6 @@
 import json
+from collections import OrderedDict
+from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 
 CHANNEL_TYPE_UNKNOWN    = 0
@@ -13,14 +15,14 @@ CHANNEL_TYPE_STATISTICS = 7
 class SampleMetaException(Exception):
     pass
 
-class SystemChannels(object):
-    channels = ObjectProperty({})
+class SystemChannels(EventDispatcher):
+    channels = ObjectProperty(None)
     
     def __init__(self, **kwargs):
         try:
             systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
             channelsJson = systemChannelsJson.get('channels')
-            channels = {}
+            channels = OrderedDict()
             for channelJson in channelsJson:
                 channel = ChannelMeta()
                 channel.fromJson(channelJson) 

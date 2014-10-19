@@ -1,0 +1,23 @@
+<ChannelItemButton>:
+    background_color: [0, 0, 0, 0]
+    background_down: ''
+    font_size: dp(25)
+    color: [1.0, 1.0, 1.0, 0.8]
+    #background_normal: ''
+    deselected_color: [0.3, 0.3, 0.3, 1.0]
+
+
+<ChannelSelectView>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+    	ListView:
+    		size_hint_y: 0.8
+    		id: channelList
+    		rcid: 'channelsList'
+    		font_size: dp(100)
+    	IconButton:
+    		size_hint_y: 0.2
+			text: "\357\200\215"
+    		on_press: root.on_cancel()
