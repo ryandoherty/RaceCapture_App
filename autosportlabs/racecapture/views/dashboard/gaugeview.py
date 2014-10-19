@@ -14,7 +14,6 @@ class GaugeView(Screen):
 
     _dataBus = None
     _settings = None
-    _gaugesMap = {}
      
     def __init__(self, **kwargs):
         super(GaugeView, self).__init__(**kwargs)
@@ -25,9 +24,6 @@ class GaugeView(Screen):
     def on_sample(self, sample):
         pass
         
-    def findActiveGauges(self):
-        return list(kvFindClass(self, Gauge))
-    
     def on_meta(self, channelMetas):
         gauges = self.findActiveGauges()
         
@@ -39,6 +35,9 @@ class GaugeView(Screen):
                     gauge.precision = channelMeta.precision
                     gauge.min = channelMeta.min
                     gauge.max = channelMeta.max
+
+    def findActiveGauges(self):
+        return list(kvFindClass(self, Gauge))
         
     def initScreen(self):
         dataBus = self._dataBus
