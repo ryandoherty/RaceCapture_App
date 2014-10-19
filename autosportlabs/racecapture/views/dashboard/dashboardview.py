@@ -14,6 +14,7 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/dashboardview.kv')
 
 class DashboardView(Screen):
     
+    _settings = None
     _dataBus = None
     _screenMgr = None
     _gaugeView = None
@@ -25,7 +26,8 @@ class DashboardView(Screen):
     def __init__(self, **kwargs):
         super(DashboardView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
-        self._dataBus = kwargs.get('dataBus', None)
+        self._dataBus = kwargs.get('dataBus')
+        self._settings = kwargs.get('settings')
         self.initView()
             
     def on_tracks_updated(self, trackManager):
@@ -35,11 +37,12 @@ class DashboardView(Screen):
         screenMgr = kvFind(self, 'rcid', 'screens')
         
         dataBus = self._dataBus
-        gaugeView = GaugeView(name='gaugeView', dataBus=dataBus)
-        tachView = TachometerView(name='tachView', dataBus=dataBus)
-        laptimeView = LaptimeView(name='laptimeView', dataBus=dataBus)
-        comboView = ComboView(name='comboView', dataBus=dataBus)
-        rawChannelView = RawChannelView(name='rawchannelView', dataBus=dataBus)
+        settings = self._settings
+        gaugeView = GaugeView(name='gaugeView', dataBus=dataBus, settings=settings)
+        tachView = TachometerView(name='tachView', dataBus=dataBus, settings=settings)
+        laptimeView = LaptimeView(name='laptimeView', dataBus=dataBus, settings=settings)
+        comboView = ComboView(name='comboView', dataBus=dataBus, settings=settings)
+        rawChannelView = RawChannelView(name='rawchannelView', dataBus=dataBus, settings=settings)
         
         screenMgr.transition=WipeTransition()
         screenMgr.add_widget(gaugeView)

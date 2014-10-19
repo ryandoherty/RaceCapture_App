@@ -271,8 +271,6 @@ class RaceCaptureApp(App):
         
         screenMgr = kvFind(self.root, 'rcid', 'main')
         
-        self.settings.userPrefs.rangeAlerts = (3,3)
-        
         #NoTransition
         #SlideTransition
         #SwapTransition

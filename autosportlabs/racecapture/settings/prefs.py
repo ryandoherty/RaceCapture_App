@@ -1,44 +1,34 @@
 from kivy.event import EventDispatcher
-from kivy.properties import OptionProperty, NumericProperty, AliasProperty,\
-    DictProperty
+from kivy.properties import OptionProperty, NumericProperty
 from kivy.clock import Clock
 
-UNITS_KM    = 'km'
-UNITS_MILES = 'miles'
 
 class Range(EventDispatcher):
     high = NumericProperty(0)
     low = NumericProperty(0)
     
 class UserPrefs(EventDispatcher):
+    UNITS_KM    = 'km'
+    UNITS_MILE = 'mile'
     _scheduleSave = None
     _rangeAlerts = {}
-    speedUnits = OptionProperty("None", options=[UNITS_KM, UNITS_MILES], default=UNITS_MILES)
-    alerts = DictProperty({})
-    
-    blah = NumericProperty(3)
+
+    #properties    
+    speedUnits = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
+    distanceUnits = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
     
     def __init__(self, **kwargs):
-        self._scheduleSave = Clock.create_trigger(self.savePrefs, 3)
+        self._scheduleSave = Clock.create_trigger(self.savePrefs, 10)
+        self.bind(speedUnits=self._scheduleSave)
+        self.bind(distanceUnits=self._scheduleSave)
 
-    def on_alerts(self, value):
-        print(str(value))
+    def setRangeAlert(self, key, rangeAlert):
+        self._rangeAlerts[key] = rangeAlert
+        self._scheduleSave();
         
-    def _get_rangeAlert(self):
-        return 'foo'
-    
-    def _set_rangeAlert(self, value):
-        print(str(value[0]))
-        #self._rangeAlerts[key] = value
-        pass
-
-    rangeAlerts = AliasProperty(_get_rangeAlert, _set_rangeAlert)
+    def getrangeAlert(self, key):
+        return _rangeAlerts.get(key)
         
-    def on_speedUnits(self, instance, value):
-        self._scheduleSave()
-            
-    def on_rangeAlerts(self, instance, value):
-        self._scheduleSave()
                 
     def savePrefs(self, *largs):
         print('saving prefs')

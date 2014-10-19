@@ -30,25 +30,35 @@ class Gauge(AnchorLayout):
     alert_color   = ObjectProperty(DEFAULT_ALERT_COLOR)    
     pressed = ListProperty([0,0])
     
-    
     timeout = NumericProperty(0.1)
     menu_cls = ObjectProperty(ModernMenu)
     cancel_distance = NumericProperty(10)
     menu_args = DictProperty({})
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
+        
+        self.menu_args =  dict(
+                creation_direction=-1,
+                radius=30,
+                creation_timeout=.2,
+                choices=[
+                dict(text='Remove', index=1, callback=self.removeGauge),
+                dict(text='Select Channel', index=2, callback=self.selectChannel),
+                dict(text='Customize', index=3, callback=self.customizeGauge),
+                ])
+        
+    def removeGauge(self, *args):
+        print "remove Gauge"
+        args[0].parent.dismiss()        
+
+    def customizeGauge(self, *args):
+        print "customize gauge"
+        args[0].parent.dismiss()
+
+    def selectChannel(self, *args):
+        print "select channel"
+        args[0].parent.dismiss()
 
     @property
     def valueView(self):
@@ -106,7 +116,6 @@ class Gauge(AnchorLayout):
 
     def on_touch_down(self, touch, *args):
         if self.collide_point(*touch.pos):
-            print('t down ' + str(self.rcid))        
             t = partial(self.display_menu, touch)
             touch.ud['menu_timeout'] = t
             Clock.schedule_once(t, self.timeout)
@@ -114,7 +123,6 @@ class Gauge(AnchorLayout):
 
     def on_touch_move(self, touch, *args):
         if self.collide_point(*touch.pos):
-            print('t move ' + str(self.rcid))      
             if (
                 touch.ud['menu_timeout'] and
                 dist(touch.pos, touch.opos) > self.cancel_distance
@@ -124,12 +132,21 @@ class Gauge(AnchorLayout):
 
     def on_touch_up(self, touch, *args):
         if self.collide_point(*touch.pos):
-            print('t up ' + str(self.rcid))      
             if touch.ud.get('menu_timeout'):
                 Clock.unschedule(touch.ud['menu_timeout'])
             return super(Gauge, self).on_touch_up(touch, *args)
 
     def display_menu(self, touch, dt):
-        menu = self.menu_cls(center=touch.pos, **self.menu_args)
-        self.add_widget(menu)
-        menu.start_display(touch)
+        if self.channel:
+            menu = self.menu_cls(center=touch.pos, **self.menu_args)
+            self.add_widget(menu)
+            menu.start_display(touch)
+        else:
+            self.showChannelSelectDialog()
+            
+    def showChannelSelectDialog(self):
+        pass
+        
+        
+        
+            
