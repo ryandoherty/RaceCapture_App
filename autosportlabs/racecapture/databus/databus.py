@@ -66,9 +66,13 @@ class DataBus(object):
 
 
     def removeChannelListener(self, channel, callback):
-                listeners = self.channelListeners.get(channel)
-                if listeners:
-                    listeners.remove(callback)
+        try:
+            listeners = self.channelListeners.get(channel)
+            if listeners:
+                listeners.remove(callback)
+        except:
+            pass
+            
                     
     def addMetaListener(self, callback):
         self.metaListeners.append(callback)

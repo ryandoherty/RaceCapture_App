@@ -8,6 +8,7 @@ from kivy.metrics import dp
 from kivy.graphics import Color
 from utils import kvFind
 from iconbutton import TileIconButton
+from kivy.clock import Clock
 from kivy.properties import StringProperty, NumericProperty, ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/bignumberview.kv')
@@ -15,26 +16,22 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/bignumbervi
 DEFAULT_NORMAL_COLOR  = [0.2, 0.2 , 0.2, 1.0]
 DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
 DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   , 1 ]
+DEFAULT_VALUE_FONT_SIZE = 180
+DEFAULT_TITLE_FONT_SIZE = 25
 
 class BigNumberView(Gauge):
 
     _backgroundView  = None
-    
-    title_font = StringProperty('')
-    title_font_size = NumericProperty(20)
+    title_font_size = NumericProperty(DEFAULT_TITLE_FONT_SIZE)
+    value_font_size = NumericProperty(DEFAULT_VALUE_FONT_SIZE)
     
     tile_color = ObjectProperty((0.2, 0.2, 0.2, 1.0))    
     value_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
     title_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
-    
-    def on_press(self, *args):
-        self.dispatch('on_press')
-        pass
-
+                
     def __init__(self, **kwargs):
         
         super(BigNumberView, self).__init__(**kwargs)
-        self.register_event_type('on_press')
         
         self._alertColor    = DEFAULT_ALERT_COLOR
         self._warningColor  = DEFAULT_WARNING_COLOR
@@ -70,3 +67,24 @@ class BigNumberView(Gauge):
             bgView.rect_color = self._warningColor
         else:
             bgView.rect_color = self._alertColor        
+
+    def on_channel(self, instance, value):
+        self.valueView.font_size = DEFAULT_VALUE_FONT_SIZE
+        return super(BigNumberView, self).on_channel(instance, value)
+ 
+    
+    def updateTitle(self):
+        try:
+            self.title = self.channel if self.channel else ''
+        except Exception as e:
+            print('Failed to update digital gauge title ' + str(e))
+
+    def change_font_size(self):
+        valueView = self.valueView
+        try:
+            if valueView.texture_size[0] > valueView.width or valueView.texture_size[1] > valueView.height:
+                valueView.font_size -= 1
+        except Exception as e:
+            print('Failed to change font size ' + str(e))
+                
+    

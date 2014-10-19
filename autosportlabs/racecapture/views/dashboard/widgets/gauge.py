@@ -19,6 +19,7 @@ DEFAULT_MAX = 100
 DEFAULT_PRECISION = 0
 
 class Gauge(AnchorLayout):
+    _titleView = None
     _valueView = None
     settings = ObjectProperty(None)    
     value_size = NumericProperty(0)
@@ -92,7 +93,9 @@ class Gauge(AnchorLayout):
 
     @property
     def titleView(self):
-        return kvFind(self, 'rcid', 'title')
+        if not self._titleView:
+            self._titleView = kvFind(self, 'rcid', 'title')
+        return self._titleView
 
     def updateColors(self):
         value = self.value
@@ -180,7 +183,8 @@ class Gauge(AnchorLayout):
         
     def channelSelected(self, instance, value):
         if self.channel:
-            self.dataBus.removeChannelListener(self.channel, self.setValue)        
+            self.dataBus.removeChannelListener(self.channel, self.setValue)
+        self.value = None        
         self.channel = value
         self.dismiss_popup()
 
