@@ -39,3 +39,13 @@ class Laptime(Gauge):
     def on_halign(self, instance, value):
         self.valueView.halign = value 
         
+    def on_touch_down(self, touch, *args):
+        pass
+
+    def on_touch_move(self, touch, *args):
+        pass
+
+    def on_touch_up(self, touch, *args):
+        pass
+        
+        

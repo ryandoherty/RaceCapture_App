@@ -39,3 +39,14 @@ class Tachometer(FontGraphicalGauge):
     def on_max(self, instance, value):
         self.configureRangeFont(value)
         
+    def on_touch_down(self, touch, *args):
+        pass
+
+    def on_touch_move(self, touch, *args):
+        pass
+
+    def on_touch_up(self, touch, *args):
+        pass
+        
+        
+        

@@ -27,12 +27,6 @@ class BigNumberView(Gauge):
     value_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
     title_color = ObjectProperty((1.0, 1.0, 1.0, 1.0))
     
-    title = StringProperty('')
-    value = NumericProperty(0)
-    warning = NumericProperty(0)
-    alert = NumericProperty(0)
-    max = NumericProperty(0)
-
     def on_press(self, *args):
         self.dispatch('on_press')
         pass
@@ -59,12 +53,8 @@ class BigNumberView(Gauge):
         return self._backgroundView
                 
     def on_title(self, instance, value):
-        self.backgroundView.text = value
-        
-    def on_value(self, instance, value):
-        self.valueView.text = '{0:0}'.format(value)
-        self.updateColors()
-        
+        self.backgroundView.text = str(value) if value else ''
+                
     def on_tile_color(self, instance, value):
         self.backgroundView.rect_color = value
         
