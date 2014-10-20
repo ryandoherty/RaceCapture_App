@@ -1,6 +1,7 @@
 import kivy
 kivy.require('1.8.0')
 from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty, DictProperty
+from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
 from utils import kvFind, kvquery, dist
@@ -18,8 +19,9 @@ DEFAULT_MIN = 0
 DEFAULT_MAX = 100
 DEFAULT_PRECISION = 0
 
+MENU_ITEM_RADIUS = 100
+
 class Gauge(AnchorLayout):
-    _titleView = None
     _valueView = None
     settings = ObjectProperty(None)    
     value_size = NumericProperty(0)
@@ -57,14 +59,16 @@ class Gauge(AnchorLayout):
         self.settings = kwargs.get('settings')
         self.menuArgs =  dict(
                 creation_direction=-1,
-                radius=30,
+                radius=dp(30),
                 creation_timeout=0.2,
                 dismiss_timeout=0.1,
                 choices=[
                 dict(text='Remove', index=1, callback=self.removeGauge),
                 dict(text='Select Channel', index=2, callback=self.selectChannel),
                 dict(text='Customize', index=3, callback=self.customizeGauge),
-                ])
+                ],
+                item_args=dict(radius=dp(MENU_ITEM_RADIUS))
+                )
         
     def removeGauge(self, *args):
         args[0].parent.dismiss()
@@ -93,9 +97,7 @@ class Gauge(AnchorLayout):
 
     @property
     def titleView(self):
-        if not self._titleView:
-            self._titleView = kvFind(self, 'rcid', 'title')
-        return self._titleView
+        return kvFind(self, 'rcid', 'title')
 
     def updateColors(self):
         value = self.value
@@ -164,8 +166,24 @@ class Gauge(AnchorLayout):
     def display_menu(self, touch, dt):
         if not self._popup:
             if self.channel:
-                menu = self.menuClass(center=touch.pos, **self.menuArgs)
-                self.add_widget(menu)
+                parent = self.get_parent_window()
+                center = touch.pos
+
+                halfWidth = parent.width / 2
+                halfHeight = parent.height / 2
+                x = center[0] - halfWidth
+                y = center[1] - halfHeight
+                paddedRadius = MENU_ITEM_RADIUS * 1.4
+                
+                if x - paddedRadius < -halfWidth: x = -halfWidth + paddedRadius
+                if x + paddedRadius > halfWidth: x = halfWidth - paddedRadius
+                
+                if y - paddedRadius < -halfHeight: y = -halfHeight + paddedRadius
+                if y + paddedRadius > halfHeight: y= halfHeight -paddedRadius
+                
+                menu = self.menuClass(pos=(x, y), **self.menuArgs)
+                
+                self.get_parent_window().add_widget(menu)
                 menu.start_display(touch)
             else:
                 self.showChannelSelectDialog()
