@@ -50,6 +50,9 @@ class DashboardView(Screen):
         
         dataBus = self._dataBus
         settings = self._settings
+        
+        self.initGlobalGauges()
+        
         gaugeView = GaugeView(name='gaugeView', dataBus=dataBus, settings=settings)
         tachView = TachometerView(name='tachView', dataBus=dataBus, settings=settings)
         laptimeView = LaptimeView(name='laptimeView', dataBus=dataBus, settings=settings)
@@ -70,7 +73,6 @@ class DashboardView(Screen):
         self._comboView = comboView
         self._screenMgr = screenMgr
 
-#        self.initGlobalGauges()
 
     def on_nav_left(self):
         self._screenMgr.current = self._screenMgr.previous()
