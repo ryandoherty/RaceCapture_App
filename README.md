@@ -103,11 +103,16 @@ Dependencies:
 
     python racecapture.py
 
-## Preparing to build installers (for Android)
 
-1. Install [VirtualBox] (https://www.virtualbox.org/)
-1. Download and extract the [Kivy Python for Android VM] (http://kivy.org/#download) (while it may be tempting to try and set up your own Ubuntu machine for this, it becomes less appealing after hunting for weird version combos of the Android SDK and NDK that appear to be no longer available for download)
-1. Follow [these instructions] (http://pythonthusiast.pythonblogs.com/230_pythonthusiast/archive/1346_starting_to_use_kivy__developing_letter_of_heroes_an_android_alphabet_teaching_aid_application_for_kids-part_1_of_2.html) to set up the Kivy VM
-1. add your GitHub repo to the shared folders for the VM as "RaceCapture_App"
-1. Reboot the VM
-1. `sudo mount -t vboxsf RaceCapture_App ~/RaceCapture_App` (you're supposed to be able to do this in /etc/fstab but for some reason it's not working for me)
+## Buildozer android APK build/install (Linux only)
+
+1. install buildozer from https://github.com/kivy/buildozer
+1. from the root RaceCapture app directory, run ./build_apk.sh . buildozer will download files as necessary and build the apk
+1. if buildozer fails with a cython error, install cython from your package manager
+1. if buildozer fails with an Android SDK error, enter the ~/.buildozer directoy and run android update sdk -u from the android tools directory.
+
+## Launch android apk
+1. Ensure your android device is in developer mode and plug it in via usb
+1. install / launch the app using ./launch_apk.sh
+1. Console / debug output will appear on screen as app is downloaded, installed and run
+
