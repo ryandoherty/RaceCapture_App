@@ -8,6 +8,7 @@ from threading import Thread, Lock
 from os import listdir, makedirs
 from urlparse import urljoin, urlparse
 import urllib2
+import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
         
 class Venue:
@@ -139,7 +140,7 @@ class TrackManager:
                     region.fromJson(regionNode)
                     self.regions.append(region)
         except Exception as detail:
-            print('Error loading regions data ' + str(detail))
+            print('Error loading regions data ' + traceback.format_exc())
     
     def getAllTrackIds(self):
         return self.tracks.keys()
@@ -198,12 +199,12 @@ class TrackManager:
                 j = json.loads(jsonStr)
                 return j
             except Exception as detail:
-                print('Failed to read: ' + str(detail))
+                print('Failed to read: from {} : {}'.format(uri, traceback.format_exc()))
                 if retries < self.readRetries:
                     print('retrying in ' + str(self.retryDelay) + ' seconds...')
                     retries += 1
                     time.sleep(self.retryDelay)
-            raise Exception('Error reading json doc from: ' + uri)    
+        raise Exception('Error reading json doc from: ' + uri)    
                 
     def downloadTrackList(self):
         start = 0

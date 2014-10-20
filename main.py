@@ -1,3 +1,4 @@
+__version__ = "1.0.0"
 #!/usr/bin/python
 import kivy
 import logging
@@ -296,7 +297,7 @@ class RaceCaptureApp(App):
         self.statusBar = statusBar
         self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')
         
-        self.initRcComms()        
+       # self.initRcComms()        
 
     def initRcComms(self):
         port = self.getAppArg('port')

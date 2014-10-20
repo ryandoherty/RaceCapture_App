@@ -13,7 +13,7 @@ package.domain = autosportlabs.com
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,ttf
+source.include_exts = py,png,jpg,kv,atlas,ttf,json
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
@@ -32,7 +32,7 @@ version.filename = %(source.dir)s/main.py
 # version = 1.2.0
 
 # (list) Application requirements
-# comma seperated e.g. requirements = sqlite3,kivy
+# comma seperated e.g. requirements = sqlite3, kivy, pygments
 requirements = kivy, sqlite3
 
 # (list) Garden requirements
@@ -56,7 +56,7 @@ fullscreen = 1
 #
 
 # (list) Permissions
-#android.permissions = INTERNET
+android.permissions = INTERNET
 
 # (int) Android API to use
 #android.api = 14

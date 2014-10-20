@@ -1,6 +1,6 @@
-import serial
+#import serial
 from threading import Thread, RLock
-from serial.tools import list_ports
+#from serial.tools import list_ports
 from autosportlabs.racecapture.config.rcpconfig import VersionConfig
 
 DEFAULT_READ_RETRIES = 2

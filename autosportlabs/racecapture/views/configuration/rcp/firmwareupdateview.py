@@ -12,7 +12,7 @@ from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
-from asl_f4_loader import fw_update
+#from asl_f4_loader import fw_update
 from time import sleep
 from threading import Thread
 
