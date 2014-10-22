@@ -4,8 +4,9 @@ from kivy.properties import ListProperty, StringProperty, NumericProperty, Objec
 from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
-from utils import kvFind, kvquery, dist
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.behaviors import ButtonBehavior
+from utils import kvFind, kvquery, dist
 from installfix_garden_modernmenu import ModernMenu
 from functools import partial
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
@@ -21,7 +22,7 @@ DEFAULT_PRECISION = 0
 
 MENU_ITEM_RADIUS = 100
 
-class Gauge(AnchorLayout):
+class Gauge(ButtonBehavior, AnchorLayout):
     _valueView = None
     settings = ObjectProperty(None)    
     value_size = NumericProperty(0)
@@ -164,29 +165,26 @@ class Gauge(AnchorLayout):
             return super(Gauge, self).on_touch_up(touch, *args)
 
     def display_menu(self, touch, dt):
-        if not self._popup:
-            if self.channel:
-                parent = self.get_parent_window()
-                center = touch.pos
+        if self.channel:
+            parent = self.get_parent_window()
+            center = touch.pos
 
-                halfWidth = parent.width / 2
-                halfHeight = parent.height / 2
-                x = center[0] - halfWidth
-                y = center[1] - halfHeight
-                paddedRadius = MENU_ITEM_RADIUS * 1.4
-                
-                if x - paddedRadius < -halfWidth: x = -halfWidth + paddedRadius
-                if x + paddedRadius > halfWidth: x = halfWidth - paddedRadius
-                
-                if y - paddedRadius < -halfHeight: y = -halfHeight + paddedRadius
-                if y + paddedRadius > halfHeight: y= halfHeight -paddedRadius
-                
-                menu = self.menuClass(pos=(x, y), **self.menuArgs)
-                
-                self.get_parent_window().add_widget(menu)
-                menu.start_display(touch)
-            else:
-                self.showChannelSelectDialog()
+            halfWidth = parent.width / 2
+            halfHeight = parent.height / 2
+            x = center[0] - halfWidth
+            y = center[1] - halfHeight
+            paddedRadius = MENU_ITEM_RADIUS * 1.4
+            
+            if x - paddedRadius < -halfWidth: x = -halfWidth + paddedRadius
+            if x + paddedRadius > halfWidth: x = halfWidth - paddedRadius
+            
+            if y - paddedRadius < -halfHeight: y = -halfHeight + paddedRadius
+            if y + paddedRadius > halfHeight: y= halfHeight -paddedRadius
+            
+            menu = self.menuClass(pos=(x, y), **self.menuArgs)
+            
+            self.get_parent_window().add_widget(menu)
+            menu.start_display(touch)
             
     def showChannelSelectDialog(self):  
         
@@ -259,4 +257,8 @@ class Gauge(AnchorLayout):
         channel = self.channel
         if dataBus and channel:
             dataBus.addChannelListener(str(channel), self.setValue)
+            
+    def on_release(self):
+        if not self.channel:
+            self.showChannelSelectDialog()
                 
