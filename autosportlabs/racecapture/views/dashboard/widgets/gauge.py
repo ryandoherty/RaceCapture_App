@@ -10,7 +10,7 @@ from utils import kvFind, kvquery, dist
 from installfix_garden_modernmenu import ModernMenu
 from functools import partial
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
-
+from autosportlabs.racecapture.views.channels.channelcustomizationview import ChannelCustomizationView
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
 DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   ,1.0]
@@ -85,6 +85,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
 
     def customizeGauge(self, *args):
         args[0].parent.dismiss()
+        self.showChannelConfigDialog()
 
     def selectChannel(self, *args):
         args[0].parent.dismiss()
@@ -187,12 +188,20 @@ class Gauge(ButtonBehavior, AnchorLayout):
             menu.start_display(touch)
             
     def showChannelSelectDialog(self):  
-        
         content = ChannelSelectView(settings=self.settings)
         content.bind(on_channel_selected=self.channelSelected)
         content.bind(on_channel_cancel=self.dismiss_popup)
 
         popup = Popup(title="Select Channel", content=content, size_hint=(0.5, 0.7))
+        popup.bind(on_dismiss=self.popup_dismissed)
+        popup.open()
+        self._popup = popup
+        
+    def showChannelConfigDialog(self):          
+        content = ChannelCustomizationView(settings=self.settings)
+        content.bind(on_channel_customization_close=self.dismiss_popup)
+
+        popup = Popup(title="Customize Channel", content=content, size_hint=(0.5, 0.7))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
