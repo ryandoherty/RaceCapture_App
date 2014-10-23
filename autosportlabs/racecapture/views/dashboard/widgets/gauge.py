@@ -8,7 +8,6 @@ from kivy.uix.bubble import Bubble,BubbleButton
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.behaviors import ButtonBehavior
 from utils import kvFind, kvquery, dist
-from installfix_garden_modernmenu import ModernMenu
 from functools import partial
 from kivy.app import Builder
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView

@@ -3,28 +3,93 @@
         size: root.size
         pos: root.pos
         orientation: 'vertical'
-        GridLayout:
-        	cols: 3
+        BoxLayout:
+        	orientation: 'horizontal'
         	spacing: dp(10)
         	FieldLabel:
+        		size_hint_x: 0.25
         		text: 'Warning'
         		halign: 'right'
-    		Slider:
-    			id: warnLow
-    		Slider:
-    			id: warnHigh
-			FieldLabel:
-				text: 'Alert'
-				halign: 'right'
-			Slider:
-				id: alertLow
-			Slider:
-				id: alertHigh
-    	ListView:
-    		size_hint_y: 0.8
-    		id: channelList
-    		rcid: 'channelsList'
-    		font_size: dp(100)
+        	GridLayout:
+        		spacing: dp(10)
+        		size_hint_x: 0.75
+        		cols: 2
+        		orientation: 'vertical'
+        		FieldLabel:
+        			size_hint_x: 0.25
+        			text: 'Low'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.75
+	    			id: warnLow
+        		FieldLabel:
+        			size_hint_x: 0.25
+        			text: 'High'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.75
+	    			id: warnHigh
+	    			
+	    		Widget:
+	    			size_hint_x: 0.25
+	    		BoxLayout:
+	    			size_hint_x: 0.75
+	    			orientation: 'horizontal'
+	    			FieldLabel:
+	    				halign: 'right'
+	    				id: warnLowValue
+	    				text: '7000'
+    				FieldLabel:
+    					halign: 'center'
+    					text: '-'
+    				FieldLabel:
+    					halign: 'left'
+    					id: warnHighValue
+    					text: '9000'
+		BoxLayout:
+			orientation: 'horizontal'
+			spacing: dp(10)
+        	FieldLabel:
+        		size_hint_x: 0.25
+        		text: 'Alert'
+        		halign: 'right'
+        	GridLayout:
+        		spacing: dp(10)
+        		size_hint_x: 0.75
+        		cols: 2
+        		orientation: 'vertical'
+        		FieldLabel:
+        			size_hint_x: 0.25
+        			text: 'Low'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.75
+	    			id: alertLow
+        		FieldLabel:
+        			size_hint_x: 0.25
+        			text: 'High'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.75
+	    			id: alertHigh
+
+	    		Widget:
+	    			size_hint_x: 0.25
+	    		BoxLayout:
+	    			size_hint_x: 0.75
+	    			orientation: 'horizontal'
+	    			FieldLabel:
+	    				halign: 'right'
+	    				id: alertLowValue
+	    				text: '7000'
+    				FieldLabel:
+    					halign: 'center'
+    					text: '-'
+    				FieldLabel:
+    					halign: 'left'
+    					id: alertHighValue
+    					text: '9000'
+	    			
     	IconButton:
     		size_hint_y: 0.2
 			text: "\357\200\215"
