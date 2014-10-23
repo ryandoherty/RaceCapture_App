@@ -4,7 +4,7 @@ from kivy.properties import ListProperty, StringProperty, NumericProperty, Objec
 from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
-from kivy.uix.bubble import Bubble
+from kivy.uix.bubble import Bubble,BubbleButton
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.behaviors import ButtonBehavior
 from utils import kvFind, kvquery, dist
@@ -27,22 +27,18 @@ MENU_ITEM_RADIUS = 100
 Builder.load_string('''
 <CustomizeGaugeBubble>
     orientation: 'vertical'
-    size_hint: (0.5, 0.5)
+    size_hint: (None, None)
     pos_hint: {'center_x': .5, 'y': .5}
-    arrow_pos: 'bottom_mid'
-    BubbleButton:
-        text: 'Remove'
-    BubbleButton:
-        text: 'Select Channel'
-    BubbleButton:
-        text: 'Customize'
-    
+    #arrow_pos: 'bottom_mid'
+    #background_color: (1, 0, 0, 1.0) #50% translucent red
+    #border: [0, 0, 0, 0]    
 ''')
 
 class CustomizeGaugeBubble(Bubble):
     pass
 
 class Gauge(ButtonBehavior, AnchorLayout):
+    _customizeGaugeBubble = None
     _valueView = None
     settings = ObjectProperty(None)    
     value_size = NumericProperty(0)
@@ -63,13 +59,6 @@ class Gauge(ButtonBehavior, AnchorLayout):
     pressed = ListProperty([0,0])
     dataBus = ObjectProperty(None)
     
-    
-    #Popup menu
-    menuTimeout = NumericProperty(0.1)
-    menuClass = ObjectProperty(ModernMenu)
-    cancelDistance = NumericProperty(10)
-    menuArgs = DictProperty({})
-    
     _popup = None
     
     def __init__(self, **kwargs):
@@ -78,37 +67,20 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self.dataBus = kwargs.get('dataBus')
         self.channel = kwargs.get('channel')
         self.settings = kwargs.get('settings')
-        self.menuArgs =  dict(
-                creation_direction=-1,
-                radius=dp(30),
-                creation_timeout=0.0,
-                dismiss_timeout=0.1,
-                choices=[
-                dict(text='Remove', index=1, callback=self.removeGauge),
-                dict(text='Select Channel', index=2, callback=self.selectChannel),
-                dict(text='Customize', index=3, callback=self.customizeGauge),
-                ],
-                item_args=dict(radius=dp(MENU_ITEM_RADIUS))
-                )
         
-    def removeGauge(self, *args):
-        args[0].parent.dismiss()
-        #this is a hack to prevent the modernmenu from grabbing the channel title widget when the title is blanked out
-        #there's a bug in kvFind that needs to be fixed        
-        Clock.schedule_once(lambda dt: self.removeChannel(), 0.2)
-
     def removeChannel(self):
+        self.remove_widget(self._customizeGaugeBubble)        
         channel = self.channel
         if channel:
             self.dataBus.removeChannelListener(channel, self.setValue)
         self.channel = None        
 
     def customizeGauge(self, *args):
-        args[0].parent.dismiss()
+        self.remove_widget(self._customizeGaugeBubble)
         self.showChannelConfigDialog()
 
     def selectChannel(self, *args):
-        args[0].parent.dismiss()
+        self.remove_widget(self._customizeGaugeBubble)
         self.showChannelSelectDialog()        
 
     @property
@@ -163,49 +135,6 @@ class Gauge(ButtonBehavior, AnchorLayout):
             
     def setValue(self, value):
         self.value = value
-
-    def on_touch_downx(self, touch, *args):
-        if self.collide_point(*touch.pos):
-            t = partial(self.display_menu, touch)
-            touch.ud['menu_timeout'] = t
-            Clock.schedule_once(t, self.menuTimeout)
-            return super(Gauge, self).on_touch_down(touch, *args)
-
-    def on_touch_movex(self, touch, *args):
-        menuTimeout = touch.ud.get('menu_timeout')
-        if self.collide_point(*touch.pos):
-            if menuTimeout and dist(touch.pos, touch.opos) > self.cancelDistance:
-                Clock.unschedule(menuTimeout)
-            return super(Gauge, self).on_touch_move(touch, *args)
-
-    def on_touch_upx(self, touch, *args):
-        if self.collide_point(*touch.pos):
-            menuTimeout = touch.ud.get('menu_timeout')
-            if menuTimeout:
-                Clock.unschedule(menuTimeout)
-            return super(Gauge, self).on_touch_up(touch, *args)
-
-    def display_menu(self, touch, dt):
-        if self.channel:
-            parent = self.get_parent_window()
-            center = touch.pos
-
-            halfWidth = parent.width / 2
-            halfHeight = parent.height / 2
-            x = center[0] - halfWidth
-            y = center[1] - halfHeight
-            paddedRadius = MENU_ITEM_RADIUS * 1.4
-            
-            if x - paddedRadius < -halfWidth: x = -halfWidth + paddedRadius
-            if x + paddedRadius > halfWidth: x = halfWidth - paddedRadius
-            
-            if y - paddedRadius < -halfHeight: y = -halfHeight + paddedRadius
-            if y + paddedRadius > halfHeight: y= halfHeight -paddedRadius
-            
-            menu = self.menuClass(pos=(x, y), **self.menuArgs)
-            
-            self.get_parent_window().add_widget(menu)
-            menu.start_display(touch)
             
     def showChannelSelectDialog(self):  
         content = ChannelSelectView(settings=self.settings)
@@ -292,7 +221,12 @@ class Gauge(ButtonBehavior, AnchorLayout):
             self.showChannelSelectDialog()
         else:
             bubble = CustomizeGaugeBubble()
+            bubble.add_widget(BubbleButton(text='Remove', on_press=lambda a:self.removeChannel()))
+            bubble.add_widget(BubbleButton(text='Select Channel', on_press=lambda a:self.selectChannel()))
+            bubble.add_widget(BubbleButton(text='Customize', on_press=lambda a:self.customizeGauge()))
+            bubble.size =  (dp(200), dp(150))            
             self.add_widget(bubble)
+            self._customizeGaugeBubble = bubble
             
             
             
