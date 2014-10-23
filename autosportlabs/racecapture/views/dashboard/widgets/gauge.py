@@ -61,7 +61,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self.menuArgs =  dict(
                 creation_direction=-1,
                 radius=dp(30),
-                creation_timeout=0.2,
+                creation_timeout=0.0,
                 dismiss_timeout=0.1,
                 choices=[
                 dict(text='Remove', index=1, callback=self.removeGauge),

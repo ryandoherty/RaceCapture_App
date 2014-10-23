@@ -5,6 +5,7 @@ from kivy.app import Builder
 from kivy.metrics import dp
 from kivy.uix.floatlayout import FloatLayout
 from fieldlabel import FieldLabel
+from kivy.uix.slider import Slider
 
 Builder.load_file('autosportlabs/racecapture/views/channels/channelcustomizationview.kv')
 
