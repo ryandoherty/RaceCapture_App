@@ -38,14 +38,14 @@
 	    			FieldLabel:
 	    				halign: 'right'
 	    				id: warnLowValue
-	    				text: '7000'
+	    				text: '{:.1f}'.format(warnLow.value)
     				FieldLabel:
     					halign: 'center'
     					text: '-'
     				FieldLabel:
     					halign: 'left'
     					id: warnHighValue
-    					text: '9000'
+    					text: '{:.1f}'.format(warnHigh.value)
 		BoxLayout:
 			orientation: 'horizontal'
 			spacing: dp(10)
@@ -81,14 +81,14 @@
 	    			FieldLabel:
 	    				halign: 'right'
 	    				id: alertLowValue
-	    				text: '7000'
+	    				text: '{:.1f}'.format(alertLow.value)
     				FieldLabel:
     					halign: 'center'
     					text: '-'
     				FieldLabel:
     					halign: 'left'
     					id: alertHighValue
-    					text: '9000'
+    					text: '{:.1f}'.format(alertHigh.value)
 	    			
     	IconButton:
     		size_hint_y: 0.2
