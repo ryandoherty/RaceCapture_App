@@ -2,8 +2,9 @@
 
 <SettingsView>:
 	orientation: 'vertical'
+	spacing: 50
 	BoxLayout:
-		size_hint_y: 0.4
+		size_hint_y: 0.3
 		spacing: 40
 		rcid: 'fieldContainer'
 		orientation: 'horizontal'
@@ -18,9 +19,9 @@
 			anchor_y: 'center'
 			size_hint: (0.5, None)
 			rcid: 'control'
-			
 	HelpLabel:
-		size_hint_y: 0.6
+		padding: (dp(0), dp(10))
+		size_hint_y: 0.7
 		rcid: 'helpLabel'
 		halign: 'left'
 		text: ''
@@ -44,5 +45,3 @@
 	rcid: 'settingsCtrl'
 	size_hint: (0.6, 0.3)
 	on_text: root.on_text(*args)
-	
-		

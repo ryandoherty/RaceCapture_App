@@ -14,12 +14,12 @@
 			on_text: root.on_lon(*args)
 
 <TrackConfigView>:
-	padding: (dp(10),dp(10))
+	padding: (dp(10),dp(20))
 	spacing: dp(20)
 	orientation: 'vertical'
 	BoxLayout:
 		orientation: 'vertical'
-		size_hint_y: 0.15
+		size_hint_y: 0.20
 		spacing: dp(20)
 		SettingsView:
 			rcid: 'autoDetect'
@@ -29,7 +29,7 @@
 		height: dp(5)
 	ScreenManager:
 		rcid: 'screenmgr'
-		size_hint_y: 0.85
+		size_hint_y: 0.80
 
 <EmptyTrackDbView>:
 	BoxLayout:
@@ -112,13 +112,13 @@
 	BoxLayout:
 		orientation: 'vertical'
 		SettingsView:
-			size_hint_y: 0.25
+			size_hint_y: 0.30
 			rcid: 'sepStartFinish'
 			label_text: 'Separate start and finish lines'
 			help_text: 'Specify a separate start / finish line for Stage Rally, Hill Climb or Autocross type courses. Leave off for circuit type courses'
 		BoxLayout:
 			orientation: 'vertical'
-			size_hint_y: 0.75
+			size_hint_y: 0.70
 		    	
 		    BoxLayout:
 		    	size_hint_y: 0.1
