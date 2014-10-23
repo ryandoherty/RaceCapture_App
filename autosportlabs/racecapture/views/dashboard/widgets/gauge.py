@@ -4,11 +4,13 @@ from kivy.properties import ListProperty, StringProperty, NumericProperty, Objec
 from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
+from kivy.uix.bubble import Bubble
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.behaviors import ButtonBehavior
 from utils import kvFind, kvquery, dist
 from installfix_garden_modernmenu import ModernMenu
 from functools import partial
+from kivy.app import Builder
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
 from autosportlabs.racecapture.views.channels.channelcustomizationview import ChannelCustomizationView
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
@@ -21,6 +23,24 @@ DEFAULT_MAX = 100
 DEFAULT_PRECISION = 0
 
 MENU_ITEM_RADIUS = 100
+
+Builder.load_string('''
+<CustomizeGaugeBubble>
+    orientation: 'vertical'
+    size_hint: (0.5, 0.5)
+    pos_hint: {'center_x': .5, 'y': .5}
+    arrow_pos: 'bottom_mid'
+    BubbleButton:
+        text: 'Remove'
+    BubbleButton:
+        text: 'Select Channel'
+    BubbleButton:
+        text: 'Customize'
+    
+''')
+
+class CustomizeGaugeBubble(Bubble):
+    pass
 
 class Gauge(ButtonBehavior, AnchorLayout):
     _valueView = None
@@ -144,21 +164,21 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def setValue(self, value):
         self.value = value
 
-    def on_touch_down(self, touch, *args):
+    def on_touch_downx(self, touch, *args):
         if self.collide_point(*touch.pos):
             t = partial(self.display_menu, touch)
             touch.ud['menu_timeout'] = t
             Clock.schedule_once(t, self.menuTimeout)
             return super(Gauge, self).on_touch_down(touch, *args)
 
-    def on_touch_move(self, touch, *args):
+    def on_touch_movex(self, touch, *args):
         menuTimeout = touch.ud.get('menu_timeout')
         if self.collide_point(*touch.pos):
             if menuTimeout and dist(touch.pos, touch.opos) > self.cancelDistance:
                 Clock.unschedule(menuTimeout)
             return super(Gauge, self).on_touch_move(touch, *args)
 
-    def on_touch_up(self, touch, *args):
+    def on_touch_upx(self, touch, *args):
         if self.collide_point(*touch.pos):
             menuTimeout = touch.ud.get('menu_timeout')
             if menuTimeout:
@@ -270,4 +290,10 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def on_release(self):
         if not self.channel:
             self.showChannelSelectDialog()
+        else:
+            bubble = CustomizeGaugeBubble()
+            self.add_widget(bubble)
+            
+            
+            
                 
