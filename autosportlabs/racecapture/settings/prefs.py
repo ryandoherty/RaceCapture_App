@@ -2,6 +2,8 @@ from kivy.event import EventDispatcher
 from kivy.properties import OptionProperty, NumericProperty,\
     ListProperty
 from kivy.clock import Clock
+from kivy.storage.jsonstore import JsonStore
+import json
 
 
 class Range(EventDispatcher):
@@ -20,33 +22,40 @@ class Range(EventDispatcher):
         return value >= self.min and value <= self.max
     
 class UserPrefs(EventDispatcher):
-    UNITS_KM    = 'km'
+    UNITS_KM = 'km'
     UNITS_MILE = 'mile'
-    _scheduleSave = None
-    _rangeAlerts = {}
+    _schedule_save = None
+    _prefs_dict = {'range_alerts': {}}
+    store = None
+    prefs_file = None
 
     #properties    
-    speedUnits = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
-    distanceUnits = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
+    speed_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
+    distance_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
     
     def __init__(self, **kwargs):
-        self._scheduleSave = Clock.create_trigger(self.savePrefs, 10)
-        self.bind(speedUnits=self._scheduleSave)
-        self.bind(distanceUnits=self._scheduleSave)
+        self._schedule_save = Clock.create_trigger(self.save, 10)
+        self.bind(speed_units=self._schedule_save)
+        self.bind(distance_units=self._schedule_save)
+        self.prefs_file = kwargs.get('data_dir')+'/prefs.json'
+        self.load()
 
-    def setRangeAlert(self, key, rangeAlert):
-        self._rangeAlerts[key] = rangeAlert
-        self._scheduleSave();
+    def set_range_alert(self, key, range_alert):
+        self._prefs_dict["range_alerts"][key] = range_alert
+        self._schedule_save()
         
-    def getRangeAlert(self, key, default=None):
-        return self._rangeAlerts.get(key, default)
-        
-                
-    def savePrefs(self, *largs):
+    def get_range_alert(self, key, default=None):
+        return self._prefs_dict["range_alerts"].get(key)
+
+    def save(self):
         print('saving prefs')
-    
-    
-        
-        
-        
+        json.dump(self._prefs_dict, open(self.prefs_file, mode='w+'))
+
+    def load(self):
+        print('loading prefs')
+        try:
+            self._prefs_dict = json.load(open(self.prefs_file))
+        except:
+            print "No prefs file found"
+
     
