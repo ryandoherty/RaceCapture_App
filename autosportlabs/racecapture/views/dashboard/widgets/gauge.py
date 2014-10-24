@@ -146,7 +146,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self._popup = popup
         
     def showChannelConfigDialog(self):          
-        content = ChannelCustomizationView(settings=self.settings)
+        content = ChannelCustomizationView(settings=self.settings, channel=self.channel)
         content.bind(on_channel_customization_close=self.dismiss_popup)
 
         popup = Popup(title="Customize Channel", content=content, size_hint=(0.5, 0.7))

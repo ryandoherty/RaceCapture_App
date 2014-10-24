@@ -1,94 +1,109 @@
+<RangeLabel>:
+	font_size: dp(25)
+	
 <ChannelCustomizationView>:
     BoxLayout:
         size: root.size
         pos: root.pos
         orientation: 'vertical'
         BoxLayout:
+        	size_hint_y: 0.4
         	orientation: 'horizontal'
         	spacing: dp(10)
-        	FieldLabel:
-        		size_hint_x: 0.25
+        	RangeLabel:
+        		size_hint_x: 0.10
         		text: 'Warning'
         		halign: 'right'
         	GridLayout:
         		spacing: dp(10)
-        		size_hint_x: 0.75
+        		size_hint_x: 0.70
         		cols: 2
         		orientation: 'vertical'
-        		FieldLabel:
+        		RangeLabel:
         			size_hint_x: 0.25
         			text: 'Low'
         			halign: 'right'
 	    		Slider:
 	    			size_hint_x: 0.75
-	    			id: warnLow
-        		FieldLabel:
+	    			id: warnLowSlider
+        			on_value: root.on_warnLow(*args)
+        		RangeLabel:
         			size_hint_x: 0.25
         			text: 'High'
         			halign: 'right'
 	    		Slider:
 	    			size_hint_x: 0.75
-	    			id: warnHigh
-	    			
+	    			id: warnHighSlider
+	    			on_value: root.on_warnHigh(*args)
 	    		Widget:
 	    			size_hint_x: 0.25
 	    		BoxLayout:
 	    			size_hint_x: 0.75
 	    			orientation: 'horizontal'
-	    			FieldLabel:
+	    			RangeLabel:
 	    				halign: 'right'
 	    				id: warnLowValue
-	    				text: '{:.1f}'.format(warnLow.value)
-    				FieldLabel:
+    				RangeLabel:
     					halign: 'center'
     					text: '-'
-    				FieldLabel:
+    				RangeLabel:
     					halign: 'left'
     					id: warnHighValue
-    					text: '{:.1f}'.format(warnHigh.value)
+			ColorBlock:
+				id: selectedWarnColor
+				size_hint_x: 0.2
+				on_press: root.on_warn_color()
+    	Widget:
+    		size_hint_y: 0.2
 		BoxLayout:
+			size_hint_y: 0.4
 			orientation: 'horizontal'
 			spacing: dp(10)
-        	FieldLabel:
-        		size_hint_x: 0.25
+        	RangeLabel:
+        		size_hint_x: 0.10
         		text: 'Alert'
         		halign: 'right'
         	GridLayout:
         		spacing: dp(10)
-        		size_hint_x: 0.75
+        		size_hint_x: 0.70
         		cols: 2
         		orientation: 'vertical'
-        		FieldLabel:
+        		RangeLabel:
         			size_hint_x: 0.25
         			text: 'Low'
         			halign: 'right'
 	    		Slider:
 	    			size_hint_x: 0.75
-	    			id: alertLow
-        		FieldLabel:
+	    			id: alertLowSlider
+	    			on_value: root.on_alertLow(*args)
+        		RangeLabel:
         			size_hint_x: 0.25
         			text: 'High'
         			halign: 'right'
 	    		Slider:
 	    			size_hint_x: 0.75
-	    			id: alertHigh
+	    			id: alertHighSlider
+	    			on_value: root.on_alertHigh(*args)
 
 	    		Widget:
 	    			size_hint_x: 0.25
 	    		BoxLayout:
 	    			size_hint_x: 0.75
 	    			orientation: 'horizontal'
-	    			FieldLabel:
+	    			RangeLabel:
 	    				halign: 'right'
 	    				id: alertLowValue
-	    				text: '{:.1f}'.format(alertLow.value)
-    				FieldLabel:
+    				RangeLabel:
     					halign: 'center'
     					text: '-'
-    				FieldLabel:
+    				RangeLabel:
     					halign: 'left'
     					id: alertHighValue
-    					text: '{:.1f}'.format(alertHigh.value)
+			ColorBlock:
+				id: selectedAlertColor
+				size_hint_x: 0.2
+				on_press: root.on_alert_color()
+    					
 	    			
     	IconButton:
     		size_hint_y: 0.2

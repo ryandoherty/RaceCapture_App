@@ -1,18 +1,23 @@
 from kivy.event import EventDispatcher
-from kivy.properties import OptionProperty, NumericProperty
+from kivy.properties import OptionProperty, NumericProperty,\
+    ListProperty
 from kivy.clock import Clock
 
 
 class Range(EventDispatcher):
-    high = NumericProperty(0)
-    low = NumericProperty(0)
+    DEFAULT_WARN_COLOR = [1.0, 0.84, 0.0, 1.0]
+    DEFAULT_ALERT_COLOR = [1.0, 0.0, 0.0, 1.0]
+    max = NumericProperty(0)
+    min = NumericProperty(0)
+    color = ListProperty([1.0, 1.0, 1.0, 1.0])
     
     def __init__(self, **kwargs):
-        self.low = kwargs.get('low', self.low)
-        self.high = kwargs.get('high', self.high)
-    
+        self.min = kwargs.get('min', self.min)
+        self.max = kwargs.get('max', self.max)
+        self.color = kwargs.get('color', self.color)
+        
     def isInRange(self, value):
-        return value >= self.low and value <= self.high
+        return value >= self.min and value <= self.max
     
 class UserPrefs(EventDispatcher):
     UNITS_KM    = 'km'
@@ -33,8 +38,8 @@ class UserPrefs(EventDispatcher):
         self._rangeAlerts[key] = rangeAlert
         self._scheduleSave();
         
-    def getrangeAlert(self, key):
-        return _rangeAlerts.get(key)
+    def getRangeAlert(self, key, default=None):
+        return self._rangeAlerts.get(key, default)
         
                 
     def savePrefs(self, *largs):

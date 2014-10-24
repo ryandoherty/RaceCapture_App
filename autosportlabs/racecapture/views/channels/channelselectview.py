@@ -46,7 +46,6 @@ class ChannelSelectView(FloatLayout):
     
     def on_cancel(self):
         self.dispatch('on_channel_cancel')
-        pass
 
     def on_channel_selected(self, selectedTrackIds):
         pass
