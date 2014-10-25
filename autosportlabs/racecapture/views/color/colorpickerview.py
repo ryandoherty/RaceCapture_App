@@ -29,7 +29,7 @@ class ColorPickerView(FloatLayout):
         self.color = kwargs.get('color')
         self.register_event_type('on_color_selected')
         self.register_event_type('on_color_cancel')
-        self.init_view(None)
+        Clock.schedule_once(self.init_view)
 
     def init_view(self, dt):
         color = self.color

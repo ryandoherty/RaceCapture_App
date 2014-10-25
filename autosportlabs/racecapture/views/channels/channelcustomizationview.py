@@ -124,9 +124,7 @@ class ChannelCustomizationView(FloatLayout):
     def warnColorSelected(self, instance, value):
         self.warnRange.color = value
         self.ids.selectedWarnColor.color = value
-        
         self.dismiss_popup()
-        print(str(value))
     
     def on_warn_color(self):
         content = ColorPickerView(color=self.warnRange.color)

@@ -11,8 +11,8 @@
         	orientation: 'horizontal'
         	spacing: dp(10)
         	RangeLabel:
-        		size_hint_x: 0.10
-        		text: 'Warning'
+        		size_hint_x: 0.15
+        		text: 'Warn'
         		halign: 'right'
         	GridLayout:
         		spacing: dp(10)
@@ -28,11 +28,11 @@
 	    			id: warnLowSlider
         			on_value: root.on_warnLow(*args)
         		RangeLabel:
-        			size_hint_x: 0.25
+        			size_hint_x: 0.10
         			text: 'High'
         			halign: 'right'
 	    		Slider:
-	    			size_hint_x: 0.75
+	    			size_hint_x: 0.90
 	    			id: warnHighSlider
 	    			on_value: root.on_warnHigh(*args)
 	    		Widget:
@@ -51,7 +51,7 @@
     					id: warnHighValue
 			ColorBlock:
 				id: selectedWarnColor
-				size_hint_x: 0.2
+				size_hint_x: 0.15
 				on_press: root.on_warn_color()
     	Widget:
     		size_hint_y: 0.2
@@ -60,12 +60,12 @@
 			orientation: 'horizontal'
 			spacing: dp(10)
         	RangeLabel:
-        		size_hint_x: 0.10
+        		size_hint_x: 0.15
         		text: 'Alert'
         		halign: 'right'
         	GridLayout:
         		spacing: dp(10)
-        		size_hint_x: 0.70
+        		size_hint_x: 0.75
         		cols: 2
         		orientation: 'vertical'
         		RangeLabel:
@@ -77,11 +77,11 @@
 	    			id: alertLowSlider
 	    			on_value: root.on_alertLow(*args)
         		RangeLabel:
-        			size_hint_x: 0.25
+        			size_hint_x: 0.10
         			text: 'High'
         			halign: 'right'
 	    		Slider:
-	    			size_hint_x: 0.75
+	    			size_hint_x: 0.90
 	    			id: alertHighSlider
 	    			on_value: root.on_alertHigh(*args)
 
@@ -101,7 +101,8 @@
     					id: alertHighValue
 			ColorBlock:
 				id: selectedAlertColor
-				size_hint_x: 0.2
+				padding: (dp(20), dp(20))
+				size_hint_x: 0.15
 				on_press: root.on_alert_color()
     					
 	    			
