@@ -61,6 +61,9 @@ class Gauge(ButtonBehavior, AnchorLayout):
     dataBus = ObjectProperty(None)
     
     _popup = None
+
+    _dismiss_customization_bubble_trigger = None
+    _dismiss_customization_popup_trigger = None
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
@@ -76,6 +79,10 @@ class Gauge(ButtonBehavior, AnchorLayout):
                                                                  
             self.channel = channel
             self.settings = settings
+            
+        self._dismiss_customization_bubble_trigger = Clock.create_trigger(self._remove_customization_bubble, POPUP_DISMISS_TIMEOUT_SHORT)
+        self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
+            
         
     def _get_warn_prefs_key(self, channel):
         return '{}.warn'.format(self.channel)        
@@ -83,7 +90,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def _get_alert_prefs_key(self, channel):
         return '{}.alert'.format(self.channel)
         
-    def _remove_customization_bubble(self):
+    def _remove_customization_bubble(self, *args):
         try:
             if self._customizeGaugeBubble:
                 self.get_parent_window().remove_widget(self._customizeGaugeBubble)
@@ -167,6 +174,8 @@ class Gauge(ButtonBehavior, AnchorLayout):
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
+        self._dismiss_customization_popup_trigger()
+        
     
     def on_channel_customization_close(self, instance, *args):
         try:
@@ -185,6 +194,8 @@ class Gauge(ButtonBehavior, AnchorLayout):
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
+        self._dismiss_customization_popup_trigger()
+        
     
     def channelSelected(self, instance, value):
         if self.channel:
@@ -250,12 +261,9 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def on_release(self):
         if not self.channel:
             self.showChannelSelectDialog()
-            Clock.schedule_once(lambda dt: self._dismiss_popup(), POPUP_DISMISS_TIMEOUT_LONG)
         else:
             bubble = CustomizeGaugeBubble()
-            
             buttons = []
-            
             if self.is_removable: buttons.append(BubbleButton(text='Remove', on_press=lambda a:self.removeChannel()))
             if self.is_channel_selectable: buttons.append(BubbleButton(text='Select Channel', on_press=lambda a:self.selectChannel()))
             buttons.append(BubbleButton(text='Customize', on_press=lambda a:self.customizeGauge()))
@@ -267,7 +275,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 bubble.size =  (dp(200), dp(150))            
                 self.get_parent_window().add_widget(bubble)
                 self._customizeGaugeBubble = bubble
-                Clock.schedule_once(lambda dt: self._remove_customization_bubble(), POPUP_DISMISS_TIMEOUT_SHORT)
+                self._dismiss_customization_bubble_trigger()
             
             
                 
