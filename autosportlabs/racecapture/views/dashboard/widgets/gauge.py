@@ -10,11 +10,10 @@ from kivy.uix.behaviors import ButtonBehavior
 from utils import kvFind, kvquery, dist
 from functools import partial
 from kivy.app import Builder
+from autosportlabs.racecapture.settings.prefs import Range
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
 from autosportlabs.racecapture.views.channels.channelcustomizationview import ChannelCustomizationView
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
-DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
-DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   ,1.0]
 
 DEFAULT_VALUE = None
 DEFAULT_MIN = 0
@@ -47,14 +46,12 @@ class Gauge(ButtonBehavior, AnchorLayout):
     value = NumericProperty(None, allownone=True)
     valueFormat = "{:.0f}"
     precision = NumericProperty(DEFAULT_PRECISION)
-    warning = NumericProperty(None)
-    alert = NumericProperty(None)
+    warning = ObjectProperty(Range())
+    alert = ObjectProperty(Range())
     min = NumericProperty(DEFAULT_MIN)
     max = NumericProperty(DEFAULT_MAX)
     title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
     normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
-    warning_color = ObjectProperty(DEFAULT_WARNING_COLOR)
-    alert_color   = ObjectProperty(DEFAULT_ALERT_COLOR)    
     pressed = ListProperty([0,0])
     dataBus = ObjectProperty(None)
     
@@ -64,8 +61,22 @@ class Gauge(ButtonBehavior, AnchorLayout):
         super(Gauge, self).__init__(**kwargs)
         
         self.dataBus = kwargs.get('dataBus')
-        self.channel = kwargs.get('channel')
-        self.settings = kwargs.get('settings')
+        channel = kwargs.get('channel')
+        settings = kwargs.get('settings')
+        if settings:
+            userPrefs = settings.userPrefs
+            
+            self.warning = userPrefs.getRangeAlert('{}.warn'.format(channel), self.warning)
+            self.alert   = userPrefs.getRangeAlert('{}.alert'.format(channel), self.alert)        
+                                                                 
+            self.channel = channel
+            self.settings = settings
+        
+    def getWarnPrefsKey(self, channel):
+        return 
+    
+    def getAlertPrefsKey(self, channel):
+        return '{}.alert'.format(self.channel)
         
     def removeChannel(self):
         self.remove_widget(self._customizeGaugeBubble)        
@@ -92,13 +103,12 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def titleView(self):
         return kvFind(self, 'rcid', 'title')
 
-    def updateColors(self):
+    def updateColors(self, view):
         value = self.value
-        view = self.valueView
         if self.alert and self.alert.isInRange(value):
-            view.color = self.alert_color
+            view.color = self.alert.color
         elif self.warning and self.warning.isInRange(value):
-            view.color = self.warning_color
+            view.color = self.warning.color
         else:
             view.color = self.normal_color
         
@@ -107,7 +117,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         if value != None:
             if view:
                 view.text = self.valueFormat.format(value)
-                self.updateColors()
+                self.updateColors(view)
         else:
             view.text=''
 
@@ -144,16 +154,25 @@ class Gauge(ButtonBehavior, AnchorLayout):
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
-        
+    
+    def on_channel_customization_close(self, instance, *args):
+        try:
+            self.warning = args[0]
+            self.alert = args[1]
+        except Exception as e:
+            print("Error customizing channel: " + str(e))
+            
+        self.dismiss_popup()
+             
     def showChannelConfigDialog(self):          
         content = ChannelCustomizationView(settings=self.settings, channel=self.channel)
-        content.bind(on_channel_customization_close=self.dismiss_popup)
+        content.bind(on_channel_customization_close=self.on_channel_customization_close)
 
         popup = Popup(title="Customize Channel", content=content, size_hint=(0.6, 0.7))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
-        
+    
     def channelSelected(self, instance, value):
         if self.channel:
             self.dataBus.removeChannelListener(self.channel, self.setValue)

@@ -58,15 +58,15 @@ class BigNumberView(Gauge):
     def on_value_color(self, instance, value):
         self.valueView.color = value
                 
-    def updateColors(self):
+    def updateColors(self, view):
         value = self.value
-        bgView = self.backgroundView
-        if value < self.warning:
-            bgView.rect_color = self._normalColor
-        elif value < self.alert:
-            bgView.rect_color = self._warningColor
+        view = self.backgroundView
+        if self.alert and self.alert.isInRange(value):
+            view.rect_color = self.alert.color
+        elif self.warning and self.warning.isInRange(value):
+            view.rect_color = self.warning.color
         else:
-            bgView.rect_color = self._alertColor        
+            view.rect_color = self.normal_color
 
     def on_channel(self, instance, value):
         self.valueView.font_size = DEFAULT_VALUE_FONT_SIZE

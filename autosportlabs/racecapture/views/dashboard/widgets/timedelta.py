@@ -34,9 +34,9 @@ class TimeDelta(Gauge):
             railedValue = MIN_TIME_DELTA if railedValue < MIN_TIME_DELTA else railedValue
             railedvalue = MAX_TIME_DELTA if railedValue > MAX_TIME_DELTA else railedValue
             self.valueView.text = '{0:+1.1f}'.format(float(railedValue))
-        self.updateColors()
+        self.update_delta_color()
 
-    def updateColors(self):
+    def update_delta_color(self):
         self.valueView.color = self.ahead_color if self.value <= 0 else self.behind_color
         
     def on_halign(self, instance, value):

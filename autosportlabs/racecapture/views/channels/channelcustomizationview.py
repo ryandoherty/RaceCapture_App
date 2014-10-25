@@ -47,10 +47,9 @@ class ChannelCustomizationView(FloatLayout):
     def on_close(self):
         self.settings.userPrefs.setRangeAlert(self.getWarnPrefsKey(self.channel), self.warnRange)
         self.settings.userPrefs.setRangeAlert(self.getAlertPrefsKey(self.channel), self.alertRange)
-        self.dispatch('on_channel_customization_close')
-        pass
+        self.dispatch('on_channel_customization_close', self.warnRange, self.alertRange)
 
-    def on_channel_customization_close(self):
+    def on_channel_customization_close(self, instance, *args):
         pass
     
     def setupSlider(self, slider, channelMeta, initialValue):
@@ -125,16 +124,26 @@ class ChannelCustomizationView(FloatLayout):
         self.warnRange.color = value
         self.ids.selectedWarnColor.color = value
         self.dismiss_popup()
-    
-    def on_warn_color(self):
-        content = ColorPickerView(color=self.warnRange.color)
-        content.bind(on_color_selected=self.warnColorSelected)
-        content.bind(on_color_cancel=self.dismiss_popup)
 
+    def alertColorSelected(self, instance, value):
+        self.alertRange.color = value
+        self.ids.selectedAlertColor.color = value
+        self.dismiss_popup()
+        
+    def show_color_select_popup(self, title, content):
         popup = Popup(title="Warning Color", content=content, size_hint=(0.4, 0.6))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
+            
+    def on_warn_color(self):
+        content = ColorPickerView(color=self.warnRange.color)
+        content.bind(on_color_selected=self.warnColorSelected)
+        content.bind(on_color_cancel=self.dismiss_popup)
+        self.show_color_select_popup('Warning Color', content)
         
     def on_alert_color(self):
-        pass
+        content = ColorPickerView(color=self.alertRange.color)
+        content.bind(on_color_selected=self.alertColorSelected)
+        content.bind(on_color_cancel=self.dismiss_popup)
+        self.show_color_select_popup('Alert Color', content)
