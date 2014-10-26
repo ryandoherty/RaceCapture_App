@@ -78,8 +78,8 @@ class Gauge(ButtonBehavior, AnchorLayout):
         if settings:
             userPrefs = settings.userPrefs
             
-            self.warning = userPrefs.getRangeAlert(self._get_warn_prefs_key(channel), self.warning)
-            self.alert   = userPrefs.getRangeAlert(self._get_alert_prefs_key(channel), self.alert)        
+            self.warning = userPrefs.get_range_alert(self._get_warn_prefs_key(channel), self.warning)
+            self.alert   = userPrefs.get_range_alert(self._get_alert_prefs_key(channel), self.alert)
                                                                  
             self.channel = channel
             self.settings = settings
