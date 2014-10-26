@@ -129,9 +129,9 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def select_alert_color(self):
         value = self.value
         color = self.normal_color
-        if self.alert and self.alert.isInRange(value):
+        if self.alert and self.alert.is_in_range(value):
             color = self.alert.color
-        elif self.warning and self.warning.isInRange(value):
+        elif self.warning and self.warning.is_in_range(value):
             color = self.warning.color
         return color
         

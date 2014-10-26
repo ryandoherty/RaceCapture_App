@@ -12,7 +12,7 @@ class Range(EventDispatcher):
     min = NumericProperty(0)
     color = ListProperty([1.0, 1.0, 1.0, 1.0])
     
-    def __init__(self, minimum, maximum, **kwargs):
+    def __init__(self, minimum=0, maximum=0, **kwargs):
         self.min = minimum
         self.max = maximum
         self.color = kwargs.get('color', self.color)
