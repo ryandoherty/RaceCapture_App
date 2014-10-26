@@ -1,177 +1,6 @@
 {
     "channels": [
         {
-            "nm": "Unknown",
-            "ut": "",
-            "sys": 1,
-            "type": 0,
-            "prec": 0,
-            "min": 0,
-            "max": 1024
-        },
-        {
-            "nm": "Analog1",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Analog2",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Analog3",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Analog4",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Analog5",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Analog6",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Analog7",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Analog8",
-            "ut": "",
-            "sys": 1,
-            "type": 1,
-            "prec": 2,
-            "min": 0,
-            "max": 5
-        },
-        {
-            "nm": "Freq1",
-            "ut": "",
-            "sys": 1,
-            "type": 2,
-            "prec": 0,
-            "min": 0,
-            "max": 1000
-        },
-        {
-            "nm": "Freq2",
-            "ut": "",
-            "sys": 1,
-            "type": 2,
-            "prec": 0,
-            "min": 0,
-            "max": 1000
-        },
-        {
-            "nm": "Freq3",
-            "ut": "",
-            "sys": 1,
-            "type": 2,
-            "prec": 0,
-            "min": 0,
-            "max": 1000
-        },
-        {
-            "nm": "GPIO1",
-            "ut": "",
-            "sys": 1,
-            "type": 3,
-            "prec": 0,
-            "min": 0,
-            "max": 1
-        },
-        {
-            "nm": "GPIO2",
-            "ut": "",
-            "sys": 1,
-            "type": 3,
-            "prec": 0,
-            "min": 0,
-            "max": 1
-        },
-        {
-            "nm": "GPIO3",
-            "ut": "",
-            "sys": 1,
-            "type": 3,
-            "prec": 0,
-            "min": 0,
-            "max": 1
-        },
-        {
-            "nm": "PWM1",
-            "ut": "",
-            "sys": 1,
-            "type": 4,
-            "prec": 0,
-            "min": 0,
-            "max": 100
-        },
-        {
-            "nm": "PWM2",
-            "ut": "",
-            "sys": 1,
-            "type": 4,
-            "prec": 0,
-            "min": 0,
-            "max": 100
-        },
-        {
-            "nm": "PWM3",
-            "ut": "",
-            "sys": 1,
-            "type": 4,
-            "prec": 0,
-            "min": 0,
-            "max": 100
-        },
-        {
-            "nm": "PWM4",
-            "ut": "",
-            "sys": 1,
-            "type": 4,
-            "prec": 0,
-            "min": 0,
-            "max": 100
-        },
-        {
             "nm": "Coolant",
             "ut": "F",
             "sys": 1,
@@ -584,6 +413,177 @@
             "prec": 0,
             "min": 0,
             "max": 1000
-        }
+        },
+        {
+            "nm": "Unknown",
+            "ut": "",
+            "sys": 1,
+            "type": 0,
+            "prec": 0,
+            "min": 0,
+            "max": 1024
+        },
+        {
+            "nm": "Analog1",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Analog2",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Analog3",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Analog4",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Analog5",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Analog6",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Analog7",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Analog8",
+            "ut": "",
+            "sys": 1,
+            "type": 1,
+            "prec": 2,
+            "min": 0,
+            "max": 5
+        },
+        {
+            "nm": "Freq1",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "Freq2",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "Freq3",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "GPIO1",
+            "ut": "",
+            "sys": 1,
+            "type": 3,
+            "prec": 0,
+            "min": 0,
+            "max": 1
+        },
+        {
+            "nm": "GPIO2",
+            "ut": "",
+            "sys": 1,
+            "type": 3,
+            "prec": 0,
+            "min": 0,
+            "max": 1
+        },
+        {
+            "nm": "GPIO3",
+            "ut": "",
+            "sys": 1,
+            "type": 3,
+            "prec": 0,
+            "min": 0,
+            "max": 1
+        },
+        {
+            "nm": "PWM1",
+            "ut": "",
+            "sys": 1,
+            "type": 4,
+            "prec": 0,
+            "min": 0,
+            "max": 100
+        },
+        {
+            "nm": "PWM2",
+            "ut": "",
+            "sys": 1,
+            "type": 4,
+            "prec": 0,
+            "min": 0,
+            "max": 100
+        },
+        {
+            "nm": "PWM3",
+            "ut": "",
+            "sys": 1,
+            "type": 4,
+            "prec": 0,
+            "min": 0,
+            "max": 100
+        },
+        {
+            "nm": "PWM4",
+            "ut": "",
+            "sys": 1,
+            "type": 4,
+            "prec": 0,
+            "min": 0,
+            "max": 100
+        }        
     ]
 }
