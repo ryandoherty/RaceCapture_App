@@ -45,8 +45,8 @@ class ChannelCustomizationView(FloatLayout):
         return '{}.alert'.format(self.channel)
         
     def on_close(self):
-        self.settings.userPrefs.setRangeAlert(self.getWarnPrefsKey(self.channel), self.warnRange)
-        self.settings.userPrefs.setRangeAlert(self.getAlertPrefsKey(self.channel), self.alertRange)
+        self.settings.userPrefs.set_range_alert(self.getWarnPrefsKey(self.channel), self.warnRange)
+        self.settings.userPrefs.set_range_alert(self.getAlertPrefsKey(self.channel), self.alertRange)
         self.dispatch('on_channel_customization_close', self.warnRange, self.alertRange)
 
     def on_channel_customization_close(self, instance, *args):
@@ -66,8 +66,10 @@ class ChannelCustomizationView(FloatLayout):
         if channel and channelMeta:
             self.valueFormat = '{0:.' + str(self.channelMeta.precision) + 'f}'        
             
-            warnRange = self.settings.userPrefs.getRangeAlert(self.getWarnPrefsKey(channel), Range(min=channelMeta.min, max=channelMeta.min, color=Range.DEFAULT_WARN_COLOR))
-            alertRange = self.settings.userPrefs.getRangeAlert(self.getAlertPrefsKey(channel), Range(min=channelMeta.min, max=channelMeta.min, color=Range.DEFAULT_ALERT_COLOR))
+            warnRange = self.settings.userPrefs.get_range_alert(self.getWarnPrefsKey(channel), 
+                    Range(min=channelMeta.max, max=channelMeta.max, color=Range.DEFAULT_WARN_COLOR))
+            alertRange = self.settings.userPrefs.get_range_alert(self.getAlertPrefsKey(channel), 
+                    Range(min=channelMeta.max, max=channelMeta.max, color=Range.DEFAULT_ALERT_COLOR))
             
             self.setupSlider(self.ids.warnLowSlider, channelMeta, warnRange.min)
             self.setupSlider(self.ids.warnHighSlider, channelMeta, warnRange.max)
@@ -80,7 +82,6 @@ class ChannelCustomizationView(FloatLayout):
             
             self.alertRange = alertRange
             self.warnRange = warnRange
-                        
         
     def _synchLabels(self, gaugeRange, lowSlider, highSlider, lowLabel, highLabel):
         lowLabel.text = self.valueFormat.format(gaugeRange.min)

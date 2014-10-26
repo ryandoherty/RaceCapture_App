@@ -43,10 +43,9 @@ from toolbarview import ToolbarView
     
 class RaceCaptureApp(App):
     
-
     #container for all settings
-    settings = SystemSettings()
-    
+    settings = None
+
     #Central RCP configuration object
     rcpConfig  = RcpConfig()
     
@@ -84,7 +83,8 @@ class RaceCaptureApp(App):
         super(RaceCaptureApp, self).__init__(**kwargs)
         #self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)    
-        
+        self.settings = SystemSettings(self.user_data_dir)
+
         Window.bind(on_key_down=self._on_keyboard_down)
         self.register_event_type('on_tracks_updated')
         self.processArgs()
