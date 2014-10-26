@@ -59,9 +59,8 @@ class BigNumberView(Gauge):
     def on_channel(self, instance, value):
         self.valueView.font_size = DEFAULT_VALUE_FONT_SIZE
         return super(BigNumberView, self).on_channel(instance, value)
- 
-    
-    def updateTitle(self):
+   
+    def update_title(self):
         try:
             self.title = self.channel if self.channel else ''
         except Exception as e:

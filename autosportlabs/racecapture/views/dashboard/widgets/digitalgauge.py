@@ -19,7 +19,7 @@ class DigitalGauge(Gauge):
         super(DigitalGauge, self).__init__(**kwargs)
         self.normal_color = DEFAULT_BACKGROUND_COLOR
 
-    def updateTitle(self):
+    def update_title(self):
         try:
             self.title = self.channel if self.channel else ''
         except Exception as e:

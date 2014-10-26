@@ -73,25 +73,10 @@ class Gauge(ButtonBehavior, AnchorLayout):
         super(Gauge, self).__init__(**kwargs)
         
         self.dataBus = kwargs.get('dataBus')
-        channel = kwargs.get('channel')
-        settings = kwargs.get('settings')
-        if settings:
-            userPrefs = settings.userPrefs
-            
-            self.warning = userPrefs.get_range_alert(self._get_warn_prefs_key(channel), self.warning)
-            self.alert   = userPrefs.get_range_alert(self._get_alert_prefs_key(channel), self.alert)
-                                                                 
-            self.channel = channel
-            self.settings = settings
-            
+        self.settings = kwargs.get('settings')
+        self.channel = kwargs.get('channel')
         self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
             
-        
-    def _get_warn_prefs_key(self, channel):
-        return '{}.warn'.format(self.channel)        
-    
-    def _get_alert_prefs_key(self, channel):
-        return '{}.alert'.format(self.channel)
         
     def _remove_customization_bubble(self, *args):
         try:
@@ -100,7 +85,23 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 self._customizeGaugeBubble = None
         except:
             pass
+
+    def _get_warn_prefs_key(self, channel):
+        return '{}.warn'.format(self.channel)        
+    
+    def _get_alert_prefs_key(self, channel):
+        return '{}.alert'.format(self.channel)
             
+    def _update_channel_ranges(self):
+        #try:
+        channel = self.channel
+        user_prefs = self.settings.userPrefs
+        self.warning = user_prefs.get_range_alert(self._get_warn_prefs_key(channel), self.warning)
+        self.alert   = user_prefs.get_range_alert(self._get_alert_prefs_key(channel), self.alert)
+        x=x/0
+        #except Exception as e:
+         #   print("Failed to load channel ranges " + str(e))
+                    
     def removeChannel(self):
         self._remove_customization_bubble()        
         channel = self.channel
@@ -221,16 +222,17 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 
     def on_channel(self, instance, value):
         try:
-            self.updateDisplay()
-            self.updateTitle()
-            self.updateChannelBinding()
+            self._update_display()
+            self.update_title()
+            self._update_channel_binding()
+            self._update_channel_ranges()
         except Exception as e:
-            print('Error setting channel () ()'.format(value, str(e)))
+            print('Error setting channel {} {}'.format(value, str(e)))
         
     def on_dataBus(self, instance, value):
-        self.updateChannelBinding()
+        self._update_channel_binding()
 
-    def updateTitle(self):
+    def update_title(self):
         try:
             channel = self.channel
             if channel:
@@ -244,7 +246,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         except Exception as e:
             print('Failed to update gauge title & units ' + str(e))
         
-    def updateDisplay(self):
+    def _update_display(self):
         try:
             channelMeta = self.settings.systemChannels.channels.get(self.channel)
             if channelMeta:
@@ -259,7 +261,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         except Exception as e:
             print('Failed to update gauge min/max ' + str(e))
         
-    def updateChannelBinding(self):
+    def _update_channel_binding(self):
         dataBus = self.dataBus
         channel = self.channel
         if dataBus and channel:
