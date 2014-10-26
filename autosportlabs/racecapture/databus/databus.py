@@ -13,22 +13,27 @@ class DataBus(object):
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
 
-    def updateMeta(self, channelMetas):
+    def updateMeta(self, channelMetas, async = True):
         self.channelMetas.clear()
         for meta in channelMetas:
             self.channelMetas[meta.name] = meta
-        Clock.schedule_once(lambda dt: self.notifyMetaListeners(self.channelMetas))
+        if async: 
+            Clock.schedule_once(lambda dt: self.notifyMetaListeners(self.channelMetas))
+        else:
+            self.notifyMetaListeners(self.channelMetas)
 
     def getMeta(self):
         return self.channelMetas
 
-    def updateSample(self, sample):
+    def updateSample(self, sample, async = True):
         for sampleItem in sample.samples:
             channel = sampleItem.channelMeta.name
             value = sampleItem.value            
             self.channelData[channel] = value
-
-        Clock.schedule_once(lambda dt: self.notifySampleListeners(sample))
+        if async:
+            Clock.schedule_once(lambda dt: self.notifySampleListeners(sample))
+        else:
+            self.notifySampleListeners(sample)
     
     def getData(self, channel):
         return self.channelData[channel]

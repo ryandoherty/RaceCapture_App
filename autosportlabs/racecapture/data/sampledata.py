@@ -40,7 +40,7 @@ class ChannelMeta(object):
         self.max = json.get('max', self.max)
         self.precision = json.get('prec', self.precision)
         self.sampleRate = int(json.get('sr', self.sampleRate))
-        self.sampleRate = int(json.get('type', self.type))
+        self.type = int(json.get('type', self.type))
 
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
