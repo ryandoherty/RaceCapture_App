@@ -9,6 +9,10 @@ class FontGraphicalGauge(GraphicalGauge):
         super(FontGraphicalGauge, self).__init__(**kwargs)
 
 
+    def updateColors(self):
+        self.graphView.color = self.select_alert_color()
+        return super(FontGraphicalGauge, self).updateColors()
+        
     def refreshGaugeDisplay(self):
         try:
             value = self.value
@@ -24,7 +28,6 @@ class FontGraphicalGauge(GraphicalGauge):
             range = max - min
             offset = railedValue - min
             view.text = '' if offset == 0 else unichr(ord(u'\uE600') + int(((offset * 100) / range)) - 1)
-            self.updateColors(view)
                 
         except Exception as e:
             print('error setting font gauge value ' + str(e))

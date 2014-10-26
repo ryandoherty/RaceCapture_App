@@ -126,21 +126,25 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def titleView(self):
         return kvFind(self, 'rcid', 'title')
 
-    def updateColors(self, view):
+    def select_alert_color(self):
         value = self.value
+        color = self.normal_color
         if self.alert and self.alert.isInRange(value):
-            view.color = self.alert.color
+            color = self.alert.color
         elif self.warning and self.warning.isInRange(value):
-            view.color = self.warning.color
-        else:
-            view.color = self.normal_color
+            color = self.warning.color
+        return color
+        
+    def updateColors(self):
+        view = self.valueView
+        if view: view.color = self.select_alert_color()
         
     def on_value(self, instance, value):
         view = self.valueView
         if value != None:
             if view:
                 view.text = self.valueFormat.format(value)
-                self.updateColors(view)
+                self.updateColors()
         else:
             view.text=''
 
