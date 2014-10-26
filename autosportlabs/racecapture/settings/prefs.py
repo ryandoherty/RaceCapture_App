@@ -2,7 +2,6 @@ from kivy.event import EventDispatcher
 from kivy.properties import OptionProperty, NumericProperty,\
     ListProperty
 from kivy.clock import Clock
-from kivy.storage.jsonstore import JsonStore
 import json
 
 
@@ -13,13 +12,31 @@ class Range(EventDispatcher):
     min = NumericProperty(0)
     color = ListProperty([1.0, 1.0, 1.0, 1.0])
     
-    def __init__(self, **kwargs):
-        self.min = kwargs.get('min', self.min)
-        self.max = kwargs.get('max', self.max)
+    def __init__(self, minimum, maximum, **kwargs):
+        self.min = minimum
+        self.max = maximum
         self.color = kwargs.get('color', self.color)
-        
-    def isInRange(self, value):
-        return value >= self.min and value <= self.max
+
+    def is_in_range(self, value):
+        return self.min <= value <= self.max
+
+    def to_json(self):
+        return json.dumps(self.to_dict())
+
+    def to_dict(self):
+        return {'min': self.min,
+                'max': self.max,
+                'color': self.color
+                }
+
+    @staticmethod
+    def from_json(range_json):
+        range_dict = json.loads(range_json)
+        return Range.from_dict(range_dict)
+
+    @staticmethod
+    def from_dict(range_dict):
+        return Range(minimum=range_dict['min'], maximum=range_dict['max'], color=range_dict['color'])
     
 class UserPrefs(EventDispatcher):
     UNITS_KM = 'km'
@@ -27,17 +44,18 @@ class UserPrefs(EventDispatcher):
     _schedule_save = None
     _prefs_dict = {'range_alerts': {}}
     store = None
+    prefs_file_name = 'prefs.json'
     prefs_file = None
 
     #properties    
     speed_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
     distance_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
     
-    def __init__(self, **kwargs):
-        self._schedule_save = Clock.create_trigger(self.save, 10)
+    def __init__(self, data_dir, save_timeout=10, **kwargs):
+        self._schedule_save = Clock.create_trigger(self.save, save_timeout)
         self.bind(speed_units=self._schedule_save)
         self.bind(distance_units=self._schedule_save)
-        self.prefs_file = kwargs.get('data_dir')+'/prefs.json'
+        self.prefs_file = data_dir+'/'+self.prefs_file_name
         self.load()
 
     def set_range_alert(self, key, range_alert):
@@ -45,17 +63,30 @@ class UserPrefs(EventDispatcher):
         self._schedule_save()
         
     def get_range_alert(self, key, default=None):
-        return self._prefs_dict["range_alerts"].get(key)
+        return self._prefs_dict["range_alerts"].get(key, default)
 
-    def save(self):
-        print('saving prefs')
-        json.dump(self._prefs_dict, open(self.prefs_file, mode='w+'))
+    def save(self, *largs):
+        with open(self.prefs_file, 'w+') as prefs_file:
+            data = self.to_json()
+            prefs_file.write(data)
 
     def load(self):
-        print('loading prefs')
+        self._prefs_dict = {'range_alerts': {}}
         try:
-            self._prefs_dict = json.load(open(self.prefs_file))
-        except:
-            print "No prefs file found"
+            with open(self.prefs_file, 'r') as data:
+                content = data.read()
+                content_dict = json.loads(content)
 
-    
+                for name, settings in content_dict["range_alerts"].iteritems():
+                    self._prefs_dict["range_alerts"][name] = Range.from_dict(settings)
+
+        except IOError:
+            pass
+
+    def to_json(self):
+        data = {'range_alerts': {}}
+
+        for name, range_alert in self._prefs_dict["range_alerts"].iteritems():
+            data["range_alerts"][name] = range_alert.to_dict()
+
+        return json.dumps(data)

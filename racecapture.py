@@ -83,7 +83,7 @@ class RaceCaptureApp(App):
         super(RaceCaptureApp, self).__init__(**kwargs)
         #self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)    
-        self.settings = SystemSettings(user_dir=self.user_data_dir)
+        self.settings = SystemSettings(self.user_data_dir)
 
         Window.bind(on_key_down=self._on_keyboard_down)
         self.register_event_type('on_tracks_updated')
