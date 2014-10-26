@@ -23,7 +23,7 @@ DEFAULT_PRECISION = 0
 
 MENU_ITEM_RADIUS = 100
 POPUP_DISMISS_TIMEOUT_SHORT = 2.0
-POPUP_DISMISS_TIMEOUT_LONG = 20.0
+POPUP_DISMISS_TIMEOUT_LONG = 60.0
 
 Builder.load_string('''
 <CustomizeGaugeBubble>
@@ -166,8 +166,8 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self.value = value
             
     def showChannelSelectDialog(self):  
-        content = ChannelSelectView(settings=self.settings)
-        content.bind(on_channel_selected=self.channelSelected)
+        content = ChannelSelectView(settings=self.settings, channel=self.channel)
+        content.bind(on_channel_selected=self.channel_selected)
         content.bind(on_channel_cancel=self._dismiss_popup)
 
         popup = Popup(title="Select Channel", content=content, size_hint=(0.5, 0.7))
@@ -190,14 +190,14 @@ class Gauge(ButtonBehavior, AnchorLayout):
         content = ChannelCustomizationView(settings=self.settings, channel=self.channel)
         content.bind(on_channel_customization_close=self.on_channel_customization_close)
 
-        popup = Popup(title="Customize Channel", content=content, size_hint=(0.6, 0.7))
+        popup = Popup(title='Customize {}'.format(self.channel), content=content, size_hint=(0.6, 0.7))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
         self._dismiss_customization_popup_trigger()
         
     
-    def channelSelected(self, instance, value):
+    def channel_selected(self, instance, value):
         if self.channel:
             self.dataBus.removeChannelListener(self.channel, self.setValue)
         self.value = None        
@@ -262,20 +262,21 @@ class Gauge(ButtonBehavior, AnchorLayout):
         if not self.channel:
             self.showChannelSelectDialog()
         else:
-            bubble = CustomizeGaugeBubble()
-            buttons = []
-            if self.is_removable: buttons.append(BubbleButton(text='Remove', on_press=lambda a:self.removeChannel()))
-            if self.is_channel_selectable: buttons.append(BubbleButton(text='Select Channel', on_press=lambda a:self.selectChannel()))
-            buttons.append(BubbleButton(text='Customize', on_press=lambda a:self.customizeGauge()))
-            if len(buttons) == 1:
-                buttons[0].dispatch('on_press')
-            else:
-                for b in buttons:
-                    bubble.add_widget(b)
-                bubble.size =  (dp(200), dp(150))            
-                self.get_parent_window().add_widget(bubble)
-                self._customizeGaugeBubble = bubble
-                self._dismiss_customization_bubble_trigger()
+            if not self._customizeGaugeBubble:
+                bubble = CustomizeGaugeBubble()
+                buttons = []
+                if self.is_removable: buttons.append(BubbleButton(text='Remove', on_press=lambda a:self.removeChannel()))
+                if self.is_channel_selectable: buttons.append(BubbleButton(text='Select Channel', on_press=lambda a:self.selectChannel()))
+                buttons.append(BubbleButton(text='Customize', on_press=lambda a:self.customizeGauge()))
+                if len(buttons) == 1:
+                    buttons[0].dispatch('on_press')
+                else:
+                    for b in buttons:
+                        bubble.add_widget(b)
+                    bubble.size =  (dp(200), dp(150))            
+                    self.get_parent_window().add_widget(bubble)
+                    self._customizeGaugeBubble = bubble
+                    self._dismiss_customization_bubble_trigger()
             
             
                 
