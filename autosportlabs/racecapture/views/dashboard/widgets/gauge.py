@@ -5,8 +5,9 @@ from kivy.properties import ListProperty, StringProperty, NumericProperty, Objec
 from kivy.metrics import dp
 from kivy.clock import Clock
 from kivy.uix.popup import Popup
-from kivy.uix.bubble import Bubble,BubbleButton
+from kivy.uix.bubble import BubbleButton
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.behaviors import ButtonBehavior
 from utils import kvFind, kvquery, dist
 from functools import partial
@@ -14,6 +15,8 @@ from kivy.app import Builder
 from autosportlabs.racecapture.settings.prefs import Range
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
 from autosportlabs.racecapture.views.channels.channelcustomizationview import ChannelCustomizationView
+from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble
+
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 
 DEFAULT_VALUE = None
@@ -35,8 +38,10 @@ Builder.load_string('''
     #border: [0, 0, 0, 0]    
 ''')
 
-class CustomizeGaugeBubble(Bubble):
+class CustomizeGaugeBubble(CenteredBubble):
     pass
+
+
 
 class Gauge(ButtonBehavior, AnchorLayout):
     _customizeGaugeBubble = None
@@ -62,7 +67,6 @@ class Gauge(ButtonBehavior, AnchorLayout):
     
     _popup = None
 
-    _dismiss_customization_bubble_trigger = None
     _dismiss_customization_popup_trigger = None
     
     def __init__(self, **kwargs):
@@ -80,7 +84,6 @@ class Gauge(ButtonBehavior, AnchorLayout):
             self.channel = channel
             self.settings = settings
             
-        self._dismiss_customization_bubble_trigger = Clock.create_trigger(self._remove_customization_bubble, POPUP_DISMISS_TIMEOUT_SHORT)
         self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
             
         
@@ -92,8 +95,8 @@ class Gauge(ButtonBehavior, AnchorLayout):
         
     def _remove_customization_bubble(self, *args):
         try:
-            if self._customizeGaugeBubble:
-                self.get_parent_window().remove_widget(self._customizeGaugeBubble)
+            if self._customizeGaugeBubble: 
+                self._customizeGaugeBubble.dismiss()
                 self._customizeGaugeBubble = None
         except:
             pass
@@ -257,26 +260,29 @@ class Gauge(ButtonBehavior, AnchorLayout):
         channel = self.channel
         if dataBus and channel:
             dataBus.addChannelListener(str(channel), self.setValue)
-            
+                 
     def on_release(self):
         if not self.channel:
             self.showChannelSelectDialog()
         else:
-            if not self._customizeGaugeBubble:
-                bubble = CustomizeGaugeBubble()
-                buttons = []
-                if self.is_removable: buttons.append(BubbleButton(text='Remove', on_press=lambda a:self.removeChannel()))
-                if self.is_channel_selectable: buttons.append(BubbleButton(text='Select Channel', on_press=lambda a:self.selectChannel()))
-                buttons.append(BubbleButton(text='Customize', on_press=lambda a:self.customizeGauge()))
-                if len(buttons) == 1:
-                    buttons[0].dispatch('on_press')
-                else:
-                    for b in buttons:
-                        bubble.add_widget(b)
-                    bubble.size =  (dp(200), dp(150))            
-                    self.get_parent_window().add_widget(bubble)
-                    self._customizeGaugeBubble = bubble
-                    self._dismiss_customization_bubble_trigger()
+            bubble = CustomizeGaugeBubble()
+            buttons = []
+            if self.is_removable: buttons.append(BubbleButton(text='Remove', on_press=lambda a:self.removeChannel()))
+            if self.is_channel_selectable: buttons.append(BubbleButton(text='Select Channel', on_press=lambda a:self.selectChannel()))
+            buttons.append(BubbleButton(text='Customize', on_press=lambda a:self.customizeGauge()))
+            if len(buttons) == 1:
+                buttons[0].dispatch('on_press')
+            else:
+                for b in buttons:
+                    bubble.add_widget(b)
+                    
+                bubble_height = dp(150)
+                bubble_width = dp(200)
+                bubble.size =  (bubble_width, bubble_height)
+                bubble.center_on(self)
+                bubble.auto_dismiss_timeout(POPUP_DISMISS_TIMEOUT_SHORT)
+                self._customizeGaugeBubble = bubble
+                self.add_widget(bubble)
             
             
                 
