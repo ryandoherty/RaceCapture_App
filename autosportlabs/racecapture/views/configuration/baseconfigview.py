@@ -17,7 +17,7 @@ class BaseConfigView(BoxLayout):
     def on_config_modified(self, *args):
         pass
     
-    def on_tracks_updated(self, trackManager):
+    def on_tracks_updated(self, trackmanager):
         pass
 
     def setAccordionItemTitle(self, accordion, channels, channelConfig):

@@ -1,3 +1,15 @@
 <AnalysisView>:
-    Label:
-        text: 'Analysis View!'
+	BoxLayout:
+		orientation: 'vertical'
+		BoxLayout:
+			orientation: 'horizontal'
+			RaceTrackView:
+				id: trackview
+				size_hint_x: 0.75
+			Label:
+				size_hint_x: 0.25
+				text: 'secondary chart'
+		BoxLayout:
+			orientation: 'vertical'
+			Label:
+				text: 'chart'

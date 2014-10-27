@@ -32,7 +32,7 @@ class DashboardView(Screen):
         self._settings = kwargs.get('settings')
         self.init_view()
             
-    def on_tracks_updated(self, trackManager):
+    def on_tracks_updated(self, trackmanager):
         pass
         
     def initGlobalGauges(self):

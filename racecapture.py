@@ -191,9 +191,9 @@ class RaceCaptureApp(App):
         alertPopup('Error Reading', 'Could not read configuration:\n\n' + str(detail))
 
 
-    def on_tracks_updated(self, trackManager):
+    def on_tracks_updated(self, trackmanager):
         for view in self.mainViews.itervalues():
-            view.dispatch('on_tracks_updated', trackManager)
+            view.dispatch('on_tracks_updated', trackmanager)
             
     def notifyTracksUpdated(self):
         self.dispatch('on_tracks_updated', self.trackManager)
