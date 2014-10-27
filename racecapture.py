@@ -1,15 +1,12 @@
 #!/usr/bin/python
-import kivy
 import logging
 import sys
 import argparse
-from autosportlabs.racecapture.views.util.alertview import alertPopup
-#sfrom kivy.core.window import Window
-from functools import partial
-from kivy.clock import Clock
-from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
+import kivy
 from kivy.properties import AliasProperty
 kivy.require('1.8.0')
+from functools import partial
+from kivy.clock import Clock
 from kivy.config import Config
 Config.set('graphics', 'width', '1024')
 Config.set('graphics', 'height', '576')
@@ -24,6 +21,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import *
 
 from installfix_garden_navigationdrawer import NavigationDrawer
+from autosportlabs.racecapture.views.util.alertview import alertPopup
 
 from autosportlabs.racecapture.api.rcpapi import RcpApi
 from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
@@ -33,6 +31,8 @@ from utils import *
 from autosportlabs.racecapture.tracks.trackmanager import TrackManager
 from autosportlabs.racecapture.views.tracks.tracksview import TracksView
 from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
+from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
+from autosportlabs.racecapture.views.analysis.analysisview import AnalysisView
 from autosportlabs.racecapture.menu.mainmenu import MainMenu
 from autosportlabs.racecapture.menu.homepageview import HomePageView
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig
@@ -264,10 +264,13 @@ class RaceCaptureApp(App):
         rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
             
         tracksView = TracksView(name='tracks')
+        
         dashView = DashboardView(name='dash', dataBus=self.dataBus, settings=self.settings)
         
         homepageView = HomePageView(name='home')
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
+        
+        analysisView = AnalysisView(name='analysis', data_bus=self.dataBus, settings=self.settings)
         
         screenMgr = kvFind(self.root, 'rcid', 'main')
         
@@ -284,11 +287,12 @@ class RaceCaptureApp(App):
         screenMgr.add_widget(configView)
         screenMgr.add_widget(tracksView)
         screenMgr.add_widget(dashView)
-        #screenMgr.add_widget(analysisView)
+        screenMgr.add_widget(analysisView)
         
         self.mainViews = {'config' : configView, 
                           'tracks': tracksView,
-                          'dash': dashView}
+                          'dash': dashView,
+                          'analysis': analysisView}
         
         self.screenMgr = screenMgr
 

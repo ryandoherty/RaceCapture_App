@@ -35,7 +35,7 @@ class ChannelCustomizationView(FloatLayout):
         self.settings = kwargs.get('settings')
         self.channel = kwargs.get('channel')
         self.channelMeta = self.settings.systemChannels.findChannelMeta(self.channel)
-        self.initView()
+        self.init_view()
         
     
     def getWarnPrefsKey(self, channel):
@@ -60,7 +60,7 @@ class ChannelCustomizationView(FloatLayout):
         slider.max = max
         slider.step = (max - min) / 100
         
-    def initView(self):
+    def init_view(self):
         channel = self.channel
         channelMeta = self.channelMeta
         if channel and channelMeta:
