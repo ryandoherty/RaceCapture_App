@@ -7,14 +7,6 @@ from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from functools import partial
 
-from kivy import platform
-if platform == 'android':
-    from autosportlabs.comms.bluetooth.bluetoothcomms import *
-elif platform == 'ios':
-    from autosportlabs.comms.socket.socketcomms import *
-else:
-    from autosportlabs.comms.serial.serialcomms import *
-
 CHANNEL_ADD_MODE_IN_PROGRESS = 1    
 CHANNEL_ADD_MODE_COMPLETE = 2
 
@@ -61,7 +53,6 @@ class RcpApi:
     on_tx = lambda self, value: None
     on_rx = lambda self, value: None
     
-    retryCount = DEFAULT_READ_RETRIES
     
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
@@ -198,10 +189,9 @@ class RcpApi:
                         rcpCmd.cmd(payload)
                     else:
                         rcpCmd.cmd()
-                    
 
                     retry = 0
-                    while not result and retry < self.retryCount:
+                    while not result and retry < self.comms.DEFAULT_READ_RETRIES:
                         try:
                             result = q.get(True, DEFAULT_MSG_RX_TIMEOUT)
                             msgName = result.keys()[0]

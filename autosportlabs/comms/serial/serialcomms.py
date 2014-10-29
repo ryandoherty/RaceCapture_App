@@ -3,11 +3,12 @@ from threading import Thread, RLock
 from serial.tools import list_ports
 from autosportlabs.racecapture.config.rcpconfig import VersionConfig
 
-DEFAULT_READ_RETRIES = 2
-DEFAULT_SERIAL_WRITE_TIMEOUT = 1
-DEFAULT_SERIAL_READ_TIMEOUT = 1
 
-class serial_comms():
+class Comms():
+    DEFAULT_READ_RETRIES = 2
+    DEFAULT_SERIAL_WRITE_TIMEOUT = 1
+    DEFAULT_SERIAL_READ_TIMEOUT = 1
+
     getVersion = None
     port = None
     ser = None
@@ -129,9 +130,9 @@ class serial_comms():
                 finally:
                     pass
 
-        self.retryCount = DEFAULT_READ_RETRIES
-        self.timeout = DEFAULT_SERIAL_READ_TIMEOUT
-        self.writeTimeout = DEFAULT_SERIAL_WRITE_TIMEOUT
+        self.retryCount = self.DEFAULT_READ_RETRIES
+        self.timeout = self.DEFAULT_SERIAL_READ_TIMEOUT
+        self.writeTimeout = self.DEFAULT_SERIAL_WRITE_TIMEOUT
         if not verJson == None:
             print "Found device version " + testVer.toString() + " on port:", self.port
             self.close()

@@ -25,6 +25,7 @@ from installfix_garden_navigationdrawer import NavigationDrawer
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 
 from autosportlabs.racecapture.api.rcpapi import RcpApi
+from autosportlabs.comms.commsfactory import comms_factory_create
 from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
 
 from utils import *
@@ -300,11 +301,11 @@ class RaceCaptureApp(App):
         self.statusBar = statusBar
         self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')
         
-       # self.initRcComms()        
+        self.initRcComms()        
 
     def initRcComms(self):
         port = self.getAppArg('port')
-        comms = serial_comms(port = port)
+        comms = comms_factory_create(port = port)
         self.rcApi.initSerial(comms, self.rcDetectWin, self.rcDetectFail)
     
     def rcDetectWin(self, rcpVersion):
