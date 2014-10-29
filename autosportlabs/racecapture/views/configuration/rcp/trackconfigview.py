@@ -123,8 +123,8 @@ class AutomaticTrackConfigScreen(Screen):
         self.trackDb = rcpCfg.trackDb
         self.init_tracks_list()
         
-    def on_tracks_updated(self, trackManager):
-        self.trackManager = trackManager
+    def on_tracks_updated(self, trackmanager):
+        self.trackManager = trackmanager
         self.init_tracks_list()
     
     def on_tracks_selected(self, instance, selectedTrackIds):
@@ -313,8 +313,8 @@ class TrackConfigView(BaseConfigView):
         autoDetect.bind(on_setting=self.on_auto_detect)
         autoDetect.setControl(SettingsSwitch())
 
-    def on_tracks_updated(self, trackManager):
-        self.autoConfigView.on_tracks_updated(trackManager)
+    def on_tracks_updated(self, trackmanager):
+        self.autoConfigView.on_tracks_updated(trackmanager)
         
     def on_config_updated(self, rcpCfg):
         trackCfg = rcpCfg.trackConfig

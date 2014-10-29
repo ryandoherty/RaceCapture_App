@@ -1,0 +1,112 @@
+<RangeLabel>:
+	font_size: dp(25)
+	
+<ChannelCustomizationView>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: 'vertical'
+        BoxLayout:
+        	size_hint_y: 0.4
+        	orientation: 'horizontal'
+        	spacing: dp(10)
+        	RangeLabel:
+        		size_hint_x: 0.15
+        		text: 'Warn'
+        		halign: 'right'
+        	GridLayout:
+        		spacing: dp(10)
+        		size_hint_x: 0.70
+        		cols: 2
+        		orientation: 'vertical'
+        		RangeLabel:
+        			size_hint_x: 0.25
+        			text: 'Low'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.75
+	    			id: warnLowSlider
+        			on_value: root.on_warnLow(*args)
+        		RangeLabel:
+        			size_hint_x: 0.10
+        			text: 'High'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.90
+	    			id: warnHighSlider
+	    			on_value: root.on_warnHigh(*args)
+	    		Widget:
+	    			size_hint_x: 0.25
+	    		BoxLayout:
+	    			size_hint_x: 0.75
+	    			orientation: 'horizontal'
+	    			RangeLabel:
+	    				halign: 'right'
+	    				id: warnLowValue
+    				RangeLabel:
+    					halign: 'center'
+    					text: '-'
+    				RangeLabel:
+    					halign: 'left'
+    					id: warnHighValue
+			ColorBlock:
+				id: selectedWarnColor
+				size_hint_x: 0.15
+				on_press: root.on_warn_color()
+    	Widget:
+    		size_hint_y: 0.2
+		BoxLayout:
+			size_hint_y: 0.4
+			orientation: 'horizontal'
+			spacing: dp(10)
+        	RangeLabel:
+        		size_hint_x: 0.15
+        		text: 'Alert'
+        		halign: 'right'
+        	GridLayout:
+        		spacing: dp(10)
+        		size_hint_x: 0.75
+        		cols: 2
+        		orientation: 'vertical'
+        		RangeLabel:
+        			size_hint_x: 0.25
+        			text: 'Low'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.75
+	    			id: alertLowSlider
+	    			on_value: root.on_alertLow(*args)
+        		RangeLabel:
+        			size_hint_x: 0.10
+        			text: 'High'
+        			halign: 'right'
+	    		Slider:
+	    			size_hint_x: 0.90
+	    			id: alertHighSlider
+	    			on_value: root.on_alertHigh(*args)
+
+	    		Widget:
+	    			size_hint_x: 0.25
+	    		BoxLayout:
+	    			size_hint_x: 0.75
+	    			orientation: 'horizontal'
+	    			RangeLabel:
+	    				halign: 'right'
+	    				id: alertLowValue
+    				RangeLabel:
+    					halign: 'center'
+    					text: '-'
+    				RangeLabel:
+    					halign: 'left'
+    					id: alertHighValue
+			ColorBlock:
+				id: selectedAlertColor
+				padding: (dp(20), dp(20))
+				size_hint_x: 0.15
+				on_press: root.on_alert_color()
+    					
+	    			
+    	IconButton:
+    		size_hint_y: 0.2
+			text: "\357\200\214"
+    		on_press: root.on_close()

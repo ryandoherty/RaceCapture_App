@@ -91,8 +91,8 @@ class TracksView(Screen):
         self.trackManager = kwargs.get('trackManager')
         self.register_event_type('on_tracks_updated')
                 
-    def on_tracks_updated(self, trackManager):
-        kvFind(self, 'rcid', 'browser').on_tracks_updated(trackManager)
+    def on_tracks_updated(self, trackmanager):
+        kvFind(self, 'rcid', 'browser').on_tracks_updated(trackmanager)
         
 class TracksBrowser(BoxLayout):
     trackmap = None
@@ -111,8 +111,8 @@ class TracksBrowser(BoxLayout):
         self.lastNameSearch = ''
         self.selectedTrackIds = set()
             
-    def on_tracks_updated(self, trackManager):        
-        self.trackManager = trackManager
+    def on_tracks_updated(self, trackmanager):        
+        self.trackManager = trackmanager
         self.initRegionsList()
         self.initTrackListForSelectedRegion()
         self.initialized = True

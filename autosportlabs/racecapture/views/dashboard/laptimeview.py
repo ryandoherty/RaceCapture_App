@@ -10,12 +10,12 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/laptimeview.kv')
 
 class LaptimeView(Screen):
 
-    _dataBus = None
+    _databus = None
     _settings = None
      
     def __init__(self, **kwargs):
         super(LaptimeView, self).__init__(**kwargs)
-        self._dataBus = kwargs.get('dataBus')
+        self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings')
         self.initScreen()
 
@@ -38,7 +38,7 @@ class LaptimeView(Screen):
         return list(kvFindClass(self, Gauge))
         
     def initScreen(self):
-        dataBus = self._dataBus
+        dataBus = self._databus
         settings = self._settings
         dataBus.addMetaListener(self.on_meta)
         dataBus.addSampleListener(self.on_sample)

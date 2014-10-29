@@ -15,6 +15,7 @@ class ChannelItemButton(ListItemButton):
         super(ChannelItemButton, self).__init__(**kwargs)
 
 class ChannelSelectView(FloatLayout):
+    channel = None
     def __init__(self, **kwargs):
         super(ChannelSelectView, self).__init__(**kwargs)
         self.register_event_type('on_channel_selected')
@@ -22,33 +23,36 @@ class ChannelSelectView(FloatLayout):
         
         settings = kwargs.get('settings')
         type = kwargs.get('type')
+        channel = kwargs.get('channel')
         
         data = []
-        channelList = self.ids.channelList
-        for channel,channelMeta in settings.systemChannels.channels.iteritems():
-            channelType = channelMeta.type
-            #if channelType == type or channelType == None:
-            data.append({'text': channel, 'is_selected': False})    
-
+        channel_list = self.ids.channelList
+        for available_channel,channelMeta in settings.systemChannels.channels.iteritems():
+            channel_type = channelMeta.type
+            data.append({'text': available_channel, 'is_selected': False})
+            
         args_converter = lambda row_index, rec: {'text': rec['text'], 'size_hint_y': None, 'height': dp(50)}
 
         list_adapter = ListAdapter(data=data,
                            args_converter=args_converter,
                            cls=ChannelItemButton,
                            selection_mode='single',
-                           allow_empty_selection=False)
+                           allow_empty_selection=True)
 
-        channelList.adapter=list_adapter
+        channel_list.adapter=list_adapter
         list_adapter.bind(on_selection_change=self.on_select)
+        self.channel = channel
 
     def on_select(self, value):
-        self.dispatch('on_channel_selected', value.selection[0].text)
+        try:
+            self.channel = value.selection[0].text
+        except Exception as e:
+            print('Error Selecting channel: ' + str(e))
     
-    def on_cancel(self):
-        self.dispatch('on_channel_cancel')
-        pass
+    def on_close(self):
+        self.dispatch('on_channel_selected', self.channel)
 
-    def on_channel_selected(self, selectedTrackIds):
+    def on_channel_selected(self, selected_channel):
         pass
     
     def on_channel_cancel(self):

@@ -25,6 +25,7 @@ Dependencies:
 1. activate the virtualenv: `. _ve/bin/activate`
 1. install pip requirements: `pip install -r requirements.txt` (you may be required to upgrade your version of setuptools via the provided command)
 1. install asl_f4_loader in dependencies folder: pip install asl_f4_loader-X.X.X.tar.gz
+1. install pygame (http://www.pygame.org/download.shtml - use correct package for your OSX+Python version)
 
 ## running (OS X)
 

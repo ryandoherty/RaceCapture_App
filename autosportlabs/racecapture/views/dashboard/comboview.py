@@ -13,7 +13,7 @@ class ComboView(Screen):
 
     def __init__(self, **kwargs):
         super(ComboView, self).__init__(**kwargs)
-        self.initView()
+        self.init_view()
 
-    def initView(self):
+    def init_view(self):
         pass

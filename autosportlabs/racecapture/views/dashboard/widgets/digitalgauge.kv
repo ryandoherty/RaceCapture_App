@@ -13,7 +13,13 @@
 			font_size: root.title_size
 			halign: 'right'
 		FieldLabel:
+			canvas.before:
+				Color:
+					rgba: root.alert_background_color
+				Rectangle:
+					pos: self.pos
+					size: self.size
 			rcid: 'value'
 			text: '---'
 			font_size: root.value_size
-			halign: 'left'
+			halign: 'center'

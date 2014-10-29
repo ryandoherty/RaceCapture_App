@@ -18,19 +18,21 @@ DATA_MSG    = ''
 
 RAW_GRID_BGCOLOR_1 = [0  , 0  , 0  , 1.0]
 RAW_GRID_BGCOLOR_2 = [0.1, 0.1, 0.1, 1.0]
+RAW_NORMAL_COLOR   = [0.0, 1.0, 0.0, 1.0]
 
 class RawGauge(DigitalGauge):
-    
-    backgroundColor = ObjectProperty([0, 0, 0, 0])
-    channel = StringProperty(None)
-    
+    backgroundColor = ObjectProperty(RAW_GRID_BGCOLOR_1)
+
     def __init__(self, **kwargs):
         super(RawGauge  , self).__init__(**kwargs)
+        self.normal_color =  RAW_NORMAL_COLOR
         
-    def on_channel(self, instance, value):
-        self.title = str(value)
-        return super(RawGauge, self).on_channel(instance, value)
-
+    def updateColors(self):
+        color = self.select_alert_color()
+        if (self.channel == 'LapTime'): print(self.channel + ' ' + str(color))
+        self.valueView.color = color
+ 
+        
         
 class RawChannelView(Screen):
     _gauges = {}

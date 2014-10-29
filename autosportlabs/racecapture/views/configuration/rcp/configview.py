@@ -152,9 +152,9 @@ class ConfigView(Screen):
         self.dispatch('on_channels_updated', config.channels)
         self.updateControls()
         
-    def on_tracks_updated(self, trackManager):
+    def on_tracks_updated(self, trackmanager):
         for view in self.configViews:
-            view.dispatch('on_tracks_updated', trackManager)
+            view.dispatch('on_tracks_updated', trackmanager)
         pass
     
     def on_read_config(self, instance, *args):

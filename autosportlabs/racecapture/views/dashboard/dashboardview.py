@@ -17,8 +17,8 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/dashboardview.kv')
 class DashboardView(Screen):
     
     _settings = None
-    _dataBus = None
-    _screenMgr = None
+    _databus = None
+    _screen_mgr = None
     _gaugeView = None
     _tachView = None
     _rawchannelView = None
@@ -28,15 +28,15 @@ class DashboardView(Screen):
     def __init__(self, **kwargs):
         super(DashboardView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
-        self._dataBus = kwargs.get('dataBus')
+        self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings')
-        self.initView()
+        self.init_view()
             
-    def on_tracks_updated(self, trackManager):
+    def on_tracks_updated(self, trackmanager):
         pass
         
     def initGlobalGauges(self):
-        dataBus = self._dataBus
+        dataBus = self._databus
         settings = self._settings
  
         activeGauges = list(kvFindClass(self, Gauge))
@@ -45,10 +45,10 @@ class DashboardView(Screen):
             gauge.settings = settings
             gauge.dataBus = dataBus
          
-    def initView(self):
+    def init_view(self):
         screenMgr = kvFind(self, 'rcid', 'screens')
         
-        dataBus = self._dataBus
+        dataBus = self._databus
         settings = self._settings
         
         self.initGlobalGauges()
@@ -71,12 +71,12 @@ class DashboardView(Screen):
         self._rawchannelView = rawChannelView
         self._laptimeView = laptimeView
         self._comboView = comboView
-        self._screenMgr = screenMgr
+        self._screen_mgr = screenMgr
 
 
     def on_nav_left(self):
-        self._screenMgr.current = self._screenMgr.previous()
+        self._screen_mgr.current = self._screen_mgr.previous()
 
     def on_nav_right(self):
-        self._screenMgr.current = self._screenMgr.next()
+        self._screen_mgr.current = self._screen_mgr.next()
         

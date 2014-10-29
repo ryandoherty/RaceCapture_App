@@ -15,24 +15,6 @@ CHANNEL_TYPE_STATISTICS = 7
 class SampleMetaException(Exception):
     pass
 
-class SystemChannels(EventDispatcher):
-    channels = ObjectProperty(None)
-    
-    def __init__(self, **kwargs):
-        try:
-            systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
-            channelsJson = systemChannelsJson.get('channels')
-            channels = OrderedDict()
-            for channelJson in channelsJson:
-                channel = ChannelMeta()
-                channel.fromJson(channelJson) 
-                channels[channel.name] = channel
-            self.channels = channels
-            
-        except Exception as detail:
-            print('Error loading system channels: {}'.format(str(detail)))
-            
-
 class ChannelMeta(object):
     name = None
     units = None
@@ -58,7 +40,30 @@ class ChannelMeta(object):
         self.max = json.get('max', self.max)
         self.precision = json.get('prec', self.precision)
         self.sampleRate = int(json.get('sr', self.sampleRate))
-        self.sampleRate = int(json.get('type', self.type))
+        self.type = int(json.get('type', self.type))
+
+class SystemChannels(EventDispatcher):
+    channels = ObjectProperty(None)
+    unknownChannel = ChannelMeta(name='Unknown')
+        
+    def __init__(self, **kwargs):
+        try:
+            systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
+            channelsJson = systemChannelsJson.get('channels')
+            channels = OrderedDict()
+            for channelJson in channelsJson:
+                channel = ChannelMeta()
+                channel.fromJson(channelJson) 
+                channels[channel.name] = channel
+            self.channels = channels
+            
+        except Exception as detail:
+            print('Error loading system channels: {}'.format(str(detail)))
+
+    def findChannelMeta(self, channel):
+        channelMeta = self.channels.get(channel)
+        if not channelMeta: channelMeta = self.unknownChannel
+        return channelMeta
 
 class SampleValue(object):
     def __init__(self, value, channelMeta):

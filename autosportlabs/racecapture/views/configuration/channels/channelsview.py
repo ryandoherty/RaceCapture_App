@@ -64,9 +64,9 @@ class ChannelEditor(BoxLayout):
     def __init__(self, **kwargs):
         super(ChannelEditor, self).__init__(**kwargs)
         self.channel = kwargs.get('channel', None)
-        self.initView()
+        self.init_view()
         
-    def initView(self):
+    def init_view(self):
         nameField = kvFind(self, 'rcid', 'name')
         unitsField = kvFind(self, 'rcid', 'units')
         precisionField = kvFind(self, 'rcid', 'prec')

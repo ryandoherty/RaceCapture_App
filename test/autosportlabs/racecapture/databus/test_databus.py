@@ -12,7 +12,7 @@ class DataBusTest(unittest.TestCase):
 		sample.channelMetas = [meta]
 		sample.samples = [SampleValue(1234, meta)]
 		
-		dataBus.updateSample(sample)
+		dataBus.updateSample(sample, False)
 		
 		value = dataBus.getData('RPM')
 		self.assertEqual(value, 1234)
@@ -32,7 +32,7 @@ class DataBusTest(unittest.TestCase):
 
 		dataBus = DataBus()
 		dataBus.addChannelListener('RPM', listener)
-		dataBus.updateSample(sample)
+		dataBus.updateSample(sample, False)
 		self.assertEqual(self.listenerVal0, 1111)
 	
 	listenerVal1 = None
@@ -53,7 +53,7 @@ class DataBusTest(unittest.TestCase):
 		sample.channelMetas = [meta]
 		sample.samples = [SampleValue(1111, meta)]
 		
-		dataBus.updateSample(sample)
+		dataBus.updateSample(sample, False)
 		self.assertEqual(self.listenerVal1, 1111)
 		self.assertEqual(self.listenerVal2, 1111)
 		
@@ -76,14 +76,14 @@ class DataBusTest(unittest.TestCase):
 		dataBus = DataBus()
 		dataBus.addChannelListener('RPM', listener3)
 		dataBus.addChannelListener('EngineTemp', listener4)
-		dataBus.updateSample(sample)
+		dataBus.updateSample(sample, False)
 		#ensure we don't set the wrong listener
 		self.assertEqual(self.listenerVal3, 1111)
 		self.assertEqual(self.listenerVal4, None)
 		
 		sample.samples = [SampleValue(1111, metaRpm), SampleValue(199, metaEngineTemp)]
 		
-		dataBus.updateSample(sample)
+		dataBus.updateSample(sample, False)
 		#ensure we don't affect unrelated channels
 		self.assertEqual(self.listenerVal3, 1111)
 		self.assertEqual(self.listenerVal4, 199)
@@ -96,7 +96,7 @@ class DataBusTest(unittest.TestCase):
 		sample.samples = [SampleValue(200, meta)]
 		
 		dataBus = DataBus()
-		dataBus.updateSample(sample)
+		dataBus.updateSample(sample, False)
 		#no listener for this channel, should not cause an error
 	
 	channelMeta = None
@@ -106,11 +106,11 @@ class DataBusTest(unittest.TestCase):
 		def metaListener(channel):
 			self.channelMeta = channel
 
-		meta = ChannelMeta(name='RPM')
+		meta = [ChannelMeta(name='RPM')]
 
 		dataBus.addMetaListener(metaListener)
-		dataBus.updateMeta(meta)
-		self.assertEqual(self.channelMeta, meta)
+		dataBus.updateMeta(meta, False)
+		self.assertEqual(self.channelMeta['RPM'], meta[0])
 		
 def main():
 	unittest.main()

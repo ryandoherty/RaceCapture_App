@@ -14,8 +14,6 @@ from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/bignumberview.kv')
 
 DEFAULT_NORMAL_COLOR  = [0.2, 0.2 , 0.2, 1.0]
-DEFAULT_WARNING_COLOR = [1.0, 0.79, 0.2 ,1.0]
-DEFAULT_ALERT_COLOR   = [1.0, 0   , 0   , 1 ]
 DEFAULT_VALUE_FONT_SIZE = 180
 DEFAULT_TITLE_FONT_SIZE = 25
 
@@ -32,10 +30,7 @@ class BigNumberView(Gauge):
     def __init__(self, **kwargs):
         
         super(BigNumberView, self).__init__(**kwargs)
-        
-        self._alertColor    = DEFAULT_ALERT_COLOR
-        self._warningColor  = DEFAULT_WARNING_COLOR
-        self._normalColor   = DEFAULT_NORMAL_COLOR
+        self.normal_color   = DEFAULT_NORMAL_COLOR
         self.initWidgets()
             
     def initWidgets(self):
@@ -59,21 +54,13 @@ class BigNumberView(Gauge):
         self.valueView.color = value
                 
     def updateColors(self):
-        value = self.value
-        bgView = self.backgroundView
-        if value < self.warning:
-            bgView.rect_color = self._normalColor
-        elif value < self.alert:
-            bgView.rect_color = self._warningColor
-        else:
-            bgView.rect_color = self._alertColor        
+        self.backgroundView.rect_color = self.select_alert_color()
 
     def on_channel(self, instance, value):
         self.valueView.font_size = DEFAULT_VALUE_FONT_SIZE
         return super(BigNumberView, self).on_channel(instance, value)
- 
-    
-    def updateTitle(self):
+   
+    def update_title(self):
         try:
             self.title = self.channel if self.channel else ''
         except Exception as e:
