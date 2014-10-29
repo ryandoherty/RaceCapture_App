@@ -1,5 +1,5 @@
-__version__ = "1.0.0"
 #!/usr/bin/python
+__version__ = "1.0.0"
 import logging
 import sys
 import argparse
@@ -27,7 +27,6 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.api.rcpapi import RcpApi
 from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
 
-from autosportlabs.comms.serial_comms import serial_comms
 from utils import *
 from autosportlabs.racecapture.tracks.trackmanager import TrackManager
 from autosportlabs.racecapture.views.tracks.tracksview import TracksView

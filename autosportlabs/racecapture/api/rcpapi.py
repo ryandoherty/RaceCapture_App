@@ -6,9 +6,16 @@ from time import sleep
 from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from functools import partial
-from autosportlabs.comms.serial_comms import *
 
-CHANNEL_ADD_MODE_IN_PROGRESS = 1
+from kivy import platform
+if platform == 'android':
+    from autosportlabs.comms.bluetooth.bluetoothcomms import *
+elif platform == 'ios':
+    from autosportlabs.comms.socket.socketcomms import *
+else:
+    from autosportlabs.comms.serial.serialcomms import *
+
+CHANNEL_ADD_MODE_IN_PROGRESS = 1    
 CHANNEL_ADD_MODE_COMPLETE = 2
 
 TRACK_ADD_MODE_IN_PROGRESS = 1
