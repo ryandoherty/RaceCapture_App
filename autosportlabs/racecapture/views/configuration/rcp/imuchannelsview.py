@@ -130,7 +130,7 @@ class ImuChannelsView(BaseConfigView):
         for i in ids:
             editor = ImuChannel(rcid='imu_chan_' + str(i))
             container.add_widget(editor)
-            editor.bind(on_modified=self.on_modified)            
+            editor.bind(on_modified=self.on_modified)
             editors.append(editor)
         
     def on_sample_rate(self, instance, value):

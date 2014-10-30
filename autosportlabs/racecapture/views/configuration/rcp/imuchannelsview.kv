@@ -4,12 +4,12 @@
     orientation: 'horizontal'
     padding: [5,5]
     spacing: [5,5]
-    Label:
-        rcid: 'label'   
-        text: ''
-    CheckBox:
+    Switch:
         rcid: 'enabled'
         on_active: root.on_enabled(*args)
+    Label:
+        rcid: 'label'
+        text: ''
     OrientationSpinner:
         rcid: 'orientation'
         on_text: root.on_orientation(*args)
@@ -28,9 +28,9 @@
     BoxLayout:
         orientation: 'horizontal'
         HSeparatorMinor:
-            text: 'Axis'
+            text: ''
         HSeparatorMinor:
-            text: 'Enabled'
+            text: 'Axis'
         HSeparatorMinor:
             text: 'Orientation'
         HSeparatorMinor:
@@ -47,9 +47,9 @@
     BoxLayout:
         orientation: 'horizontal'
         HSeparatorMinor:
-            text: 'Axis'
+            text: ''
         HSeparatorMinor:
-            text: 'Enabled'
+            text: 'Axis'
         HSeparatorMinor:
             text: 'Orientation'
         HSeparatorMinor:
