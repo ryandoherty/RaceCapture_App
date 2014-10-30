@@ -1,27 +1,23 @@
-import serial
 from threading import Thread, RLock
-from serial.tools import list_ports
 from autosportlabs.racecapture.config.rcpconfig import VersionConfig
-
 
 class Comms():
     DEFAULT_READ_RETRIES = 2
-    DEFAULT_SERIAL_WRITE_TIMEOUT = 1
-    DEFAULT_SERIAL_READ_TIMEOUT = 1
-
+    DEFAULT_WRITE_TIMEOUT = 1
+    DEFAULT_READ_TIMEOUT = 1
     getVersion = None
     port = None
-    ser = None
-    timeout = DEFAULT_SERIAL_READ_TIMEOUT
-    writeTimeout = DEFAULT_SERIAL_WRITE_TIMEOUT 
+    connection = None
+    timeout = DEFAULT_READ_TIMEOUT
+    writeTimeout = DEFAULT_WRITE_TIMEOUT 
 
     def __init__(self, **kwargs):
-        self.port = kwargs.get('port', self.port)
-    
+        self.port = kwargs.get('port')
+        self.connection = kwargs.get('connection')
+        
     def reset(self):
-        self.close()
+        self.connection.reset()
         self.port = None
-        self.ser = None
         
     def setPort(self, port):
         self.port = port
@@ -30,42 +26,39 @@ class Comms():
         return self.port
     
     def isOpen(self):
-        return not self.ser == None
+        return self.connection.isOpen()
     
     def open(self):
-        print('Opening serial')
+        connection = self.connection
+        print('Opening connection')
         if self.port == None:
             self.autoDetectWorker(self.getVersion)
             if self.port == None:
-                self.ser = None
-                raise Exception('Could not open port: Device not detected')
+                connection.close()
+                raise Exception('Could not open connection: Device not detected')
         else:
             if self.timeout == None:
                 raise Exception("No timeout")
-            ser = serial.Serial(self.port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
-            ser.flushInput()
-            ser.flushOutput()
-            self.ser = ser
+            connection.open(self.port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
+            connection.flushInput()
+            connection.flushOutput()
     
     def close(self):
-        print('closing serial')
-        if self.ser != None:
-            self.ser.close()
-        self.ser = None
+        print('closing connection')
+        self.connection.close()
 
     def read(self, count):
-        ret = self.ser.read(count)
+        ret = self.connection.read(count)
         return ret
-        
     
     def readLine(self):
-        ser = self.ser
+        connection = self.connection
         eol2 = b'\r'
         retryCount = 0
         line = bytearray()
 
         while True:
-            c = ser.read(1)
+            c = connection.read(1)
             if  c == eol2:
                 break
             elif c == '':
@@ -76,7 +69,7 @@ class Comms():
                 retryCount +=1
                 print('Timeout - retry: ' + str(retryCount))
                 print("POKE")
-                ser.write(' ')
+                connection.write(' ')
             else:
                 line += c
         print('returning line')
@@ -86,13 +79,13 @@ class Comms():
         return line
     
     def write(self, data):
-        return self.ser.write(data)
+        return self.connection.write(data)
     
     def flushInput(self):
-        self.ser.flushInput()
+        self.connection.flushInput()
     
     def flushOutput(self):
-        self.ser.flushOutput()
+        self.connection.flushOutput()
     
     def autoDetect(self, getVersion, winCallback, failCallback):
         self.getVersion = getVersion
@@ -104,12 +97,12 @@ class Comms():
         if self.port:
             ports = [self.port]
         else:
-            ports = [x[0] for x in list_ports.comports()]
+            ports = self.connection.get_available_ports()
 
         self.retryCount = 0
         self.timeout = 0.5
         self.writeTimeout = 0
-        print "Searching for device on all serial ports"
+        print "Searching for device on all ports"
         testVer = VersionConfig()
         verJson = None
         for p in ports:
@@ -131,8 +124,8 @@ class Comms():
                     pass
 
         self.retryCount = self.DEFAULT_READ_RETRIES
-        self.timeout = self.DEFAULT_SERIAL_READ_TIMEOUT
-        self.writeTimeout = self.DEFAULT_SERIAL_WRITE_TIMEOUT
+        self.timeout = self.DEFAULT_READ_TIMEOUT
+        self.writeTimeout = self.DEFAULT_WRITE_TIMEOUT
         if not verJson == None:
             print "Found device version " + testVer.toString() + " on port:", self.port
             self.close()
