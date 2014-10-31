@@ -12,7 +12,7 @@ class AnalysisView(Screen):
     _settings = None
     _databus = None
     _trackmanager = None
-    
+
     def __init__(self, **kwargs):
         super(AnalysisView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
@@ -22,10 +22,13 @@ class AnalysisView(Screen):
         self.init_view()
     
     def on_tracks_updated(self, trackmanager):
-        trackId = trackmanager.getAllTrackIds()[0]
-        track = trackmanager.getTrackById(trackId)
-        self.ids.trackview.initMap(track)        
-        self._trackmanager = trackmanager
+        tracks = trackmanager.getAllTrackIds()
+
+        if len(tracks) > 0:
+            trackId = trackmanager.getAllTrackIds()[0]
+            track = trackmanager.getTrackById(trackId)
+            self.ids.trackview.initMap(track)
+            self._trackmanager = trackmanager
 
     def init_view(self):
         pass
