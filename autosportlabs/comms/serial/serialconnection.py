@@ -10,6 +10,7 @@ class SerialConnection():
     
     def get_available_ports(self):
         ports = [x[0] for x in list_ports.comports()]
+        return ports
     
     def reset(self):
         self.close()
