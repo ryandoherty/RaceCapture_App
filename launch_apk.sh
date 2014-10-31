@@ -1,2 +1,2 @@
 #!/bin/bash
-buildozer android deploy run logcat
+buildozer android debug deploy run logcat
