@@ -91,7 +91,6 @@ class RaceCaptureApp(App):
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
         self.trackManager = TrackManager(user_dir=self.user_data_dir)
-        self.initData()
 
     def _on_keyboard_down(self, keyboard, keycode, *args):
         if keycode == 27:
@@ -146,15 +145,6 @@ class RaceCaptureApp(App):
             
     def on_run_script_error(self, detail):
         alertPopup('Error Running', 'Error Running Script:\n\n' + str(detail))
-    
-    
-    
-    
-    
-    
-    
-    
-    
         
     #Write Configuration        
     def on_write_config(self, instance, *args):
@@ -227,13 +217,15 @@ class RaceCaptureApp(App):
     def _getX(self):
         pass
     
-    xx = AliasProperty(_getX, _setX)
-    
+    def on_start(self):
+        self.initData()
+        self.initRcComms()        
                 
     def build(self):
         Builder.load_file('racecapture.kv')
         statusBar = kvFind(self.root, 'rcid', 'statusbar')
         statusBar.bind(on_main_menu=self.on_main_menu)
+        self.statusBar = statusBar
         
         mainMenu = kvFind(self.root, 'rcid', 'mainMenu')
         mainMenu.bind(on_main_menu_item=self.on_main_menu_item)
@@ -282,7 +274,7 @@ class RaceCaptureApp(App):
         #WipeTransition
         #FallOutTransition
         #RiseInTransition
-        screenMgr.transition=NoTransition()
+        screenMgr.transition=WipeTransition()
         
         screenMgr.add_widget(homepageView)
         screenMgr.add_widget(configView)
@@ -298,11 +290,11 @@ class RaceCaptureApp(App):
         self.screenMgr = screenMgr
 
         self.configView = configView
-        self.statusBar = statusBar
         self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')
         
-        self.initRcComms()        
-
+        print("build() complete")
+        
+            
     def initRcComms(self):
         port = self.getAppArg('port')
         comms = comms_factory(port)
