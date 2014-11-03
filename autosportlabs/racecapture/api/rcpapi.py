@@ -19,7 +19,6 @@ SCRIPT_ADD_MODE_COMPLETE = 2
 DEFAULT_LEVEL2_RETRIES = 4
 DEFAULT_MSG_RX_TIMEOUT = 5.0
 
-
 class RcpCmd:
     name = None
     cmd = None
@@ -49,6 +48,9 @@ class RcpApi:
     on_tx = lambda self, value: None
     on_rx = lambda self, value: None
     level_2_retries = 0
+    _cmd_sequence_thread = None
+    _msg_rx_thread = None
+    _auto_detect_event = Event()
     
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
@@ -57,28 +59,34 @@ class RcpApi:
 
     def _start_message_rx_worker(self):
         self._running.set()
-        self._rxThread = Thread(target=self.msgRxWorker)
-        self._rxThread.daemon = True
-        self._rxThread.start()
+        self._msg_rx_thread = Thread(target=self.msg_rx_worker)
+        self._msg_rx_thread.daemon = True
+        self._msg_rx_thread.start()
 
     def stop_msessage_rx_worker(self):
         print('Stopping msg rx worker')
         self._running.clear()
-        self._rxThread.join()
-        
+        self._msg_rx_thread.join()
+    
+    def _start_cmd_sequence_worker(self):
+        self._cmd_sequence_thread = Thread(target=self.cmd_sequence_worker)
+        self._cmd_sequence_thread.daemon = True
+        self._cmd_sequence_thread.start()
 
-    def initSerial(self, comms, detectWin, detectFail):
+    def initSerial(self, comms, detect_win, detect_fail):
         self.comms = comms
         self._start_message_rx_worker()
-        self.level_2_retries = 0                
-        self.runAutoDetect(detectWin, detectFail)
+        self._start_cmd_sequence_worker()
+        self.start_auto_detect_worker(lambda version_info: self.detect_win(detect_win, version_info), detect_fail)
+        self.run_auto_detect()
 
     def detect_win(self, detect_win, version_info):
         self.level_2_retries = DEFAULT_LEVEL2_RETRIES
         detect_win(version_info)
         
-    def runAutoDetect(self, detect_win=None, detect_fail=None):
-        self.comms.autoDetect(self.getVersion, lambda version_info: self.detect_win(detect_win, version_info), detect_fail)
+    def run_auto_detect(self):
+        self.level_2_retries = 0
+        self._auto_detect_event.set()                
 
     def addListener(self, messageName, callback):
         listeners = self.msgListeners.get(messageName, None)
@@ -94,8 +102,8 @@ class RcpApi:
         if listeners:
             listeners.discard(callback)
             
-    def msgRxWorker(self):
-        print('msgRxWorker started')
+    def msg_rx_worker(self):
+        print('msg_rx_worker started')
         retryMax = 3
         retries = 0
         msg = ''
@@ -105,7 +113,7 @@ class RcpApi:
                 msg += comms.read(1)
                 if msg[-2:] == '\r\n':
                     msg = msg[:-2]
-                    print('msgRxWorker Rx: ' + str(msg))
+                    print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
                     retries = 0
@@ -118,8 +126,8 @@ class RcpApi:
                                 break
                     msg = ''
             except Exception:
-                print('Message Rx Exception: ' + str(Exception))
-                traceback.print_exc()
+                #print('Message Rx Exception: ' + str(Exception))
+                #traceback.print_exc()
                 sleep(0.5)
                     
         print("RxWorker exiting")
@@ -130,6 +138,10 @@ class RcpApi:
     def recoverTimeout(self):
         print('POKE')
         self.comms.write(' ')
+
+    def notifyProgress(self, count, total):
+        if self.on_progress:
+            self.on_progress((float(count) / float(total)) * 100)
         
     def executeSingle(self, cmd, win_callback, fail_callback):
         command = CommandSequence()
@@ -145,13 +157,9 @@ class RcpApi:
         command.rootName = root_name
         command.winCallback = win_callback
         command.failCallback = fail_callback
-        
-    def notifyProgress(self, count, total):
-        if self.on_progress:
-            self.on_progress((float(count) / float(total)) * 100)
-        
-    def executeSequence(self):
-
+        self._command_queue.put(command)
+                
+    def cmd_sequence_worker(self):
         while True:
             try:
                 command = self._command_queue.get() #this blocks forever
@@ -282,10 +290,7 @@ class RcpApi:
                               RcpCmd('channels',    self.getChannels)
                            ]
                 
-        t = Thread(target=self.executeSequence, args=(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback))
-        t.daemon = True
-        t.start()
-            
+        self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)            
         
     def writeRcpCfg(self, cfg, winCallback = None, failCallback = None):
         cmdSequence = []
@@ -357,11 +362,8 @@ class RcpApi:
             self.sequenceWriteChannels(channels.toJson(), cmdSequence)
         
         cmdSequence.append(RcpCmd('flashCfg', self.sendFlashConfig))
-                
-        t = Thread(target=self.executeSequence, args=(cmdSequence, 'setRcpCfg', winCallback, failCallback,))
-        t.daemon = True
-        t.start()
-
+        
+        self._queue_multiple(cmdSequence, 'setRcpCfg', winCallback, failCallback)        
 
     def resetDevice(self, bootloader=False):
         if bootloader:
@@ -489,10 +491,7 @@ class RcpApi:
         self.sendGet('getChannels')
         
     def getChannelList(self, winCallback, failCallback):
-        cmdSequence = [ RcpCmd('channels', self.getChannels) ]
-        t = Thread(target=self.executeSequence, args=(cmdSequence, None, winCallback, failCallback))
-        t.daemon = True
-        t.start()
+        self.executeSingle(RcpCmd('channels', self.getChannels), winCallback, failCallback)
                 
     def sequenceWriteChannels(self, channels, cmdSequence):
         
@@ -548,3 +547,76 @@ class RcpApi:
             self.sendCommand({'s':{'meta':1}})
         else:
             self.sendCommand({'s':0})
+            
+    def start_auto_detect_worker(self, winCallback, failCallback):
+        self._auto_detect_event.clear()
+        t = Thread(target=self.auto_detect_worker, args=(self.getVersion, winCallback, failCallback))
+        t.daemon = True
+        t.start()        
+        
+    def auto_detect_worker(self, getVersion, winCallback = None, failCallback = None):
+
+        class VersionResult(object):
+            version_json = None
+
+        def on_ver_win(value):
+            print('get_ver_success ' + str(value))
+            version_result.version_json = value
+            version_result_event.set()
+            
+        def on_ver_fail(value):
+            print('on_ver_fail ' + str(value))
+            version_result_event.set()
+        
+        while True:
+            try:
+                self._auto_detect_event.wait()
+                self._auto_detect_event.clear()
+                
+                version_result = VersionResult()        
+                version_result_event = Event()
+                version_result_event.clear()
+
+                comms = self.comms
+                if comms.port:
+                    ports = [comms.port]
+                else:
+                    ports = comms.get_available_ports()
+        
+                print "Searching for device on all ports"
+                testVer = VersionConfig()
+                for p in ports:
+                    try:
+                        print "Trying", p
+                        comms.port = p
+                        comms.open()
+                        getVersion(on_ver_win, on_ver_fail)
+                        version_result_event.wait()
+                        version_result_event.clear()
+                        if version_result.version_json != None:
+                            print('get ver success!')
+                            testVer.fromJson(version_result.version_json.get('ver', None))
+                            if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
+                                break
+        
+                    except Exception as detail:
+                        print('Not found on ' + str(p) + " " + str(detail))
+                        try:
+                            comms.close()
+                            comms.port = None
+                        finally:
+                            pass
+        
+                if version_result.version_json != None:
+                    print "Found device version " + testVer.toString() + " on port:", comms.port
+                    print(str(winCallback))
+                    if winCallback: winCallback(testVer)
+                else:
+                    comms.port = None
+                    if failCallback: failCallback()
+            except Exception as e:
+                print ('Error running auto detect: ' + str(e))
+                traceback.print_exc()
+            finally: 
+                print("auto detect finished")
+            

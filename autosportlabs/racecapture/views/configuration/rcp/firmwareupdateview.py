@@ -58,7 +58,7 @@ class FirmwareUpdateView(BaseConfigView):
         sleep(5)
 
     def _restart_json_serial(self):
-        self.dataBusPump.rcApi.runAutoDetect()
+        self.dataBusPump.rcApi.run_auto_detect()
         self.dataBusPump.startDataPump(self.dataBusPump.dataBus,
                                        self.dataBusPump.rcApi)
                         

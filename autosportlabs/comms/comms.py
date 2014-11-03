@@ -1,16 +1,15 @@
 from threading import Thread, RLock, Event
-from autosportlabs.racecapture.config.rcpconfig import VersionConfig
 from time import sleep
 
 class Comms():
     DEFAULT_READ_RETRIES = 2
     DEFAULT_WRITE_TIMEOUT = 1
     DEFAULT_READ_TIMEOUT = 1
-    getVersion = None
     port = None
     connection = None
     timeout = DEFAULT_READ_TIMEOUT
     writeTimeout = DEFAULT_WRITE_TIMEOUT 
+    retryCount = DEFAULT_READ_RETRIES    
 
     def __init__(self, **kwargs):
         self.port = kwargs.get('port')
@@ -25,6 +24,9 @@ class Comms():
     
     def getPort(self):
         return self.port
+    
+    def get_available_ports(self):
+        return self.connection.get_available_ports()
     
     def isOpen(self):
         return self.connection.isOpen()
@@ -80,81 +82,3 @@ class Comms():
     def flushOutput(self):
         self.connection.flushOutput()
     
-    def autoDetect(self, getVersion, winCallback, failCallback):
-        self.getVersion = getVersion
-        t = Thread(target=self.autoDetectWorker, args=(getVersion, winCallback, failCallback))
-        t.daemon = True
-        t.start()        
-        
-        
-        
-    def autoDetectWorker(self, getVersion, winCallback = None, failCallback = None):
-
-        class VersionResult(object):
-            version_json = None
-
-        def on_ver_win(value):
-            print('get_ver_success ' + str(value))
-            version_result.version_json = value
-            version_result_event.set()
-            
-        def on_ver_fail(value):
-            print('on_ver_fail ' + str(value))
-            version_result_event.set()
-        
-        
-        version_result = VersionResult()        
-        version_result_event = Event()
-        version_result_event.clear()
-            
-        if self.port:
-            ports = [self.port]
-        else:
-            ports = self.connection.get_available_ports()
-
-        self.retryCount = 0
-        self.timeout = 0.5
-        self.writeTimeout = 0
-        print "Searching for device on all ports"
-        testVer = VersionConfig()
-        for p in ports:
-            try:
-                print "Trying", p
-                self.port = p
-                self.open()
-                getVersion(on_ver_win, on_ver_fail)
-                version_result_event.wait()
-                version_result_event.clear()
-                if version_result.version_json != None:
-                    print('get ver success!')
-                    testVer.fromJson(version_result.version_json.get('ver', None))
-                    if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
-                        break
-
-            except Exception as detail:
-                print('Not found on ' + str(p) + " " + str(detail))
-                try:
-                    self.close()
-                    self.port = None
-                finally:
-                    pass
-
-        self.retryCount = self.DEFAULT_READ_RETRIES
-        self.timeout = self.DEFAULT_READ_TIMEOUT
-        self.writeTimeout = self.DEFAULT_WRITE_TIMEOUT
-        if version_result.version_json != None:
-            print "Found device version " + testVer.toString() + " on port:", self.port
-            self.close()
-            print("sleeping before re-opeining")
-            #sleep(5)
-            #self.open()
-            if winCallback: winCallback(testVer)
-        else:
-            self.port = None
-            if failCallback: failCallback()
-        
-        while True:
-            sleep(1)
-            print("zzzzzzzzzzzzzzzzzzzzz")
-        
-        print("Autodetect worker exiting")
