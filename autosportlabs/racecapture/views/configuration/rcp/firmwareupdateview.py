@@ -40,7 +40,7 @@ class FirmwareUpdateView(BaseConfigView):
     def select_file(self):
         #Inside a try block since this will fail if there is no device detected
         try:
-            self.dataBusPump.rcApi.stopMessageRxWorker()
+            self.dataBusPump.rcApi.stop_msessage_rx_worker()
         except:
             pass
         content = LoadDialog(ok=self.update_fw, cancel=self.dismiss_popup,

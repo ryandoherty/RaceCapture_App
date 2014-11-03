@@ -11,6 +11,9 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 import os
 
+from kivy import platform
+FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
+
 from autosportlabs.racecapture.views.configuration.channels.channelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.imuchannelsview import *
@@ -25,7 +28,8 @@ from autosportlabs.racecapture.views.configuration.rcp.canconfigview import *
 from autosportlabs.racecapture.views.configuration.rcp.telemetryconfigview import *
 from autosportlabs.racecapture.views.configuration.rcp.wirelessconfigview import *
 from autosportlabs.racecapture.views.configuration.rcp.scriptview import *
-from autosportlabs.racecapture.views.configuration.rcp.firmwareupdateview import *
+if FIRMWARE_UPDATABLE:
+    from autosportlabs.racecapture.views.configuration.rcp.firmwareupdateview import *
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
@@ -134,7 +138,8 @@ class ConfigView(Screen):
         attach_node('Scripting', None, scriptView)
         self.scriptView = scriptView
         attach_node('Channels', None, ChannelsView(rcpComms=self.rcpComms))
-        attach_node('Firmware', None, FirmwareUpdateView(dataBusPump=self.dataBusPump))
+        if FIRMWARE_UPDATABLE:
+            attach_node('Firmware', None, FirmwareUpdateView(dataBusPump=self.dataBusPump))
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)

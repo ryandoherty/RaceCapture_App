@@ -16,9 +16,8 @@ TRACK_ADD_MODE_COMPLETE = 2
 SCRIPT_ADD_MODE_IN_PROGRESS = 1
 SCRIPT_ADD_MODE_COMPLETE = 2
 
-
 DEFAULT_LEVEL2_RETRIES = 4
-DEFAULT_MSG_RX_TIMEOUT = 1.0
+DEFAULT_MSG_RX_TIMEOUT = 5.0
 
 
 class RcpCmd:
@@ -33,57 +32,53 @@ class RcpCmd:
         self.payload = payload
         self.index = index
         self.option = option
-
-class SingleRcpCmd(RcpCmd):
+            
+class CommandSequence():
+    command_list = None
+    rootName = None
     winCallback = None
-    failCallback = None
-    def __init__(self, name, cmd, winCallback, failCallback, payload = None, index = None, option = None):
-        super(SingleRcpCmd, self).__init__(name, cmd, payload, index, option)
-        self.winCallback = winCallback
-        self.failCallback = failCallback
+    failCallback = None    
             
 class RcpApi:
     comms = None   
     msgListeners = {}
-    cmdQueue = Queue.Queue()
     cmdSequenceQueue = Queue.Queue()
-    cmdSequenceLock = RLock()
+    _command_queue = Queue.Queue()
     sendCommandLock = RLock()
     on_progress = lambda self, value: value
     on_tx = lambda self, value: None
     on_rx = lambda self, value: None
-    
+    level_2_retries = 0
     
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
         self._running = Event()
         self._running.clear()
 
-    def startMessageRxWorker(self, onInitComplete=None, versionInfo=None):
+    def _start_message_rx_worker(self):
         self._running.set()
         self._rxThread = Thread(target=self.msgRxWorker)
         self._rxThread.daemon = True
         self._rxThread.start()
 
-        if versionInfo:
-            print(str(versionInfo))
-
-        if onInitComplete:
-            onInitComplete(versionInfo)
-
-
-    def stopMessageRxWorker(self):
-        print('Stopping msgRxWorker')
+    def stop_msessage_rx_worker(self):
+        print('Stopping msg rx worker')
         self._running.clear()
         self._rxThread.join()
         
 
     def initSerial(self, comms, detectWin, detectFail):
         self.comms = comms
+        self._start_message_rx_worker()
+        self.level_2_retries = 0                
         self.runAutoDetect(detectWin, detectFail)
 
-    def runAutoDetect(self, detectWin=None, detectFail=None):
-        self.comms.autoDetect(self.getVersion, lambda versionInfo: self.startMessageRxWorker(detectWin, versionInfo), detectFail)
+    def detect_win(self, detect_win, version_info):
+        self.level_2_retries = DEFAULT_LEVEL2_RETRIES
+        detect_win(version_info)
+        
+    def runAutoDetect(self, detect_win=None, detect_fail=None):
+        self.comms.autoDetect(self.getVersion, lambda version_info: self.detect_win(detect_win, version_info), detect_fail)
 
     def addListener(self, messageName, callback):
         listeners = self.msgListeners.get(messageName, None)
@@ -104,7 +99,7 @@ class RcpApi:
         retryMax = 3
         retries = 0
         msg = ''
-        comms = self.getComms()
+        comms = self.comms
         while self._running.is_set():
             try:
                 msg += comms.read(1)
@@ -125,20 +120,8 @@ class RcpApi:
             except Exception:
                 print('Message Rx Exception: ' + str(Exception))
                 traceback.print_exc()
-                retries += 1
-                if retries > retryMax:
-                    try:
-                        sleep(0.5)
-                        print("Closing Connection")
-                        comms.close()
-                        sleep(0.5)
-                        try:
-                            comms.open()
-                        except:
-                            comms.reset()                        
-                        retries = 0
-                    except:
-                        pass
+                sleep(0.5)
+                    
         print("RxWorker exiting")
                     
     def rcpCmdComplete(self, msgReply):
@@ -146,106 +129,119 @@ class RcpApi:
                 
     def recoverTimeout(self):
         print('POKE')
-        self.getComms().write(' ')
+        self.comms.write(' ')
         
-    def executeSingle(self, rcpCmd, winCallback, failCallback):
-        t = Thread(target=self.executeSequence, args=([rcpCmd], None, winCallback, failCallback))
-        t.daemon = True
-        t.start()
+    def executeSingle(self, cmd, win_callback, fail_callback):
+        command = CommandSequence()
+        command.command_list = [cmd]
+        command.rootName = None
+        command.winCallback = win_callback
+        command.failCallback = fail_callback
+        self._command_queue.put(command)
+        
+    def _queue_multiple(self, command_list, root_name, win_callback, fail_callback):
+        command = CommandSequence()
+        command.command_list = command_list
+        command.rootName = root_name
+        command.winCallback = win_callback
+        command.failCallback = fail_callback
         
     def notifyProgress(self, count, total):
         if self.on_progress:
             self.on_progress((float(count) / float(total)) * 100)
         
-        
-    def executeSequence(self, cmdSequence, rootName, winCallback, failCallback):
-                    
-        self.cmdSequenceLock.acquire()
-        print('Execute Sequence begin')
+    def executeSequence(self):
+
+        while True:
+            try:
+                command = self._command_queue.get() #this blocks forever
                 
-        q = self.cmdSequenceQueue
-        
-        responseResults = {}
-        cmdCount = 0
-        cmdLength = len(cmdSequence)
-        self.notifyProgress(cmdCount, cmdLength)
-        try:
-            for rcpCmd in cmdSequence:
-                payload = rcpCmd.payload
-                index = rcpCmd.index
-                option = rcpCmd.option
-
-                level2Retry = 0
-                name = rcpCmd.name
-                result = None
+                command_list = command.command_list
+                rootName = command.rootName
+                winCallback = command.winCallback
+                failCallback = command.failCallback
                 
-                self.addListener(name, self.rcpCmdComplete)
-                while not result and level2Retry < DEFAULT_LEVEL2_RETRIES:
-                    if not payload == None and not index == None and not option == None:
-                        rcpCmd.cmd(payload, index, option)
-                    elif not payload == None and not index == None:
-                        rcpCmd.cmd(payload, index)
-                    elif not payload == None:
-                        rcpCmd.cmd(payload)
-                    else:
-                        rcpCmd.cmd()
-
-                    retry = 0
-                    while not result and retry < self.comms.DEFAULT_READ_RETRIES:
-                        try:
-                            result = q.get(True, DEFAULT_MSG_RX_TIMEOUT)
-                            msgName = result.keys()[0]
-                            if not msgName == name:
-                                print('rx message did not match expected name ' + str(name) + '; ' + str(msgName))
-                                result = None
-                        except Exception:
-                            print('Read message timeout')
-                            self.recoverTimeout()
-                            retry += 1
-                    if not result:
-                        print('Level 2 retry for ' + name)
-                        level2Retry += 1
-
-
-                if not result:
-                    raise Exception('Timeout waiting for ' + name)
-                            
-                                    
-                responseResults[name] = result[name]
-                self.removeListener(name, self.rcpCmdComplete)
-                cmdCount += 1
+                print('Execute Sequence begin')
+                        
+                q = self.cmdSequenceQueue
+                
+                responseResults = {}
+                cmdCount = 0
+                cmdLength = len(command_list)
                 self.notifyProgress(cmdCount, cmdLength)
+                try:
+                    for rcpCmd in command_list:
+                        payload = rcpCmd.payload
+                        index = rcpCmd.index
+                        option = rcpCmd.option
+        
+                        level2Retry = 0
+                        name = rcpCmd.name
+                        result = None
+                        
+                        self.addListener(name, self.rcpCmdComplete)
+                        while not result and level2Retry <= self.level_2_retries:
+                            if not payload == None and not index == None and not option == None:
+                                rcpCmd.cmd(payload, index, option)
+                            elif not payload == None and not index == None:
+                                rcpCmd.cmd(payload, index)
+                            elif not payload == None:
+                                rcpCmd.cmd(payload)
+                            else:
+                                rcpCmd.cmd()
+        
+                            retry = 0
+                            while not result and retry < self.comms.DEFAULT_READ_RETRIES:
+                                try:
+                                    result = q.get(True, DEFAULT_MSG_RX_TIMEOUT)
+                                    msgName = result.keys()[0]
+                                    if not msgName == name:
+                                        print('rx message did not match expected name ' + str(name) + '; ' + str(msgName))
+                                        result = None
+                                except Exception as e:
+                                    print('Read message timeout ' + str(e))
+                                    self.recoverTimeout()
+                                    retry += 1
+                            if not result:
+                                print('Level 2 retry for ' + name)
+                                level2Retry += 1
+        
+        
+                        if not result:
+                            raise Exception('Timeout waiting for ' + name)
+                                    
+                                            
+                        responseResults[name] = result[name]
+                        self.removeListener(name, self.rcpCmdComplete)
+                        cmdCount += 1
+                        self.notifyProgress(cmdCount, cmdLength)
+                        
+                    if rootName:
+                        winCallback({rootName: responseResults})
+                    else:
+                        winCallback(responseResults)
+                except Exception as detail:
+                    print('Command sequence exception: ' + str(detail))
+                    traceback.print_exc()
+                    failCallback(detail)
+
+                print('Execute Sequence complete')
                 
-            if rootName:
-                winCallback({rootName: responseResults})
-            else:
-                winCallback(responseResults)
-        except Exception as detail:
-            print('Command sequence exception: ' + str(detail))
-            traceback.print_exc()
-            failCallback(detail)
-        finally:
-            self.cmdSequenceLock.release()
-        print('Execute Sequence complete')
+            except Exception as e:
+                print('Execute command exception ' + str(e))
                 
-    def sendCommand(self, cmd, sync = False):
+    def sendCommand(self, cmd):
         try:
             self.sendCommandLock.acquire()
             rsp = None
             
             comms = self.comms
             comms.flushOutput()
-            if sync: 
-                comms.flushInput()
-                
+            comms.flushInput()
+
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
             print('send cmd: ' + cmdStr)
             comms.write(cmdStr)
-            if sync:
-                rsp = comms.readLine()
-                if cmdStr.startswith(rsp):
-                    rsp = comms.readLine()
-                return json.loads(rsp)
         finally:
             self.sendCommandLock.release()
             self.on_tx(True)
@@ -263,19 +259,13 @@ class RcpApi:
             self.sendCommand({name: {str(index): payload}})            
         else:
             self.sendCommand({name: payload})
-        
-    def getComms(self):
-        comms = self.comms
-        if not comms.isOpen():
-            comms.open()
-        return comms
-                    
+                            
     def getRcpCfgCallback(self, cfg, rcpCfgJson, winCallback):
         cfg.fromJson(rcpCfgJson)
         winCallback(cfg)
         
     def getRcpCfg(self, cfg, winCallback, failCallback):
-        cmdSequence = [       RcpCmd('ver',         self.getVersion),
+        cmdSequence = [       RcpCmd('ver',         self.sendGetVersion),
                               RcpCmd('analogCfg',   self.getAnalogCfg),
                               RcpCmd('imuCfg',      self.getImuCfg),
                               RcpCmd('gpsCfg',      self.getGpsCfg),
@@ -545,10 +535,13 @@ class RcpApi:
 
     def getTrackDb(self):
         self.sendGet('getTrackDb')
-                                                  
-    def getVersion(self, sync = False):
-        rsp = self.sendCommand({"getVer":None}, sync)
-        return rsp
+
+    def sendGetVersion(self):
+        rsp = self.sendCommand({"getVer":None})
+
+    def getVersion(self, winCallback, failCallback):
+        print('in getVersion')
+        self.executeSingle(RcpCmd('ver', self.sendGetVersion), winCallback, failCallback)
 
     def sample(self, includeMeta):
         if includeMeta:

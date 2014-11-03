@@ -1,5 +1,6 @@
-from threading import Thread, RLock
+from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import VersionConfig
+from time import sleep
 
 class Comms():
     DEFAULT_READ_RETRIES = 2
@@ -30,18 +31,10 @@ class Comms():
     
     def open(self):
         connection = self.connection
-        print('Opening connection')
-        if self.port == None:
-            self.autoDetectWorker(self.getVersion)
-            if self.port == None:
-                connection.close()
-                raise Exception('Could not open connection: Device not detected')
-        else:
-            if self.timeout == None:
-                raise Exception("No timeout")
-            connection.open(self.port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
-            connection.flushInput()
-            connection.flushOutput()
+        print('Opening connection ' + str(self.port))
+        connection.open(self.port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
+        connection.flushInput()
+        connection.flushOutput()
     
     def close(self):
         print('closing connection')
@@ -59,12 +52,12 @@ class Comms():
 
         while True:
             c = connection.read(1)
+            print(str(c))
             if  c == eol2:
                 break
             elif c == '':
                 print('empty character received...')
                 if retryCount >= self.retryCount:
-                    self.close()
                     raise Exception('Could not read line')
                 retryCount +=1
                 print('Timeout - retry: ' + str(retryCount))
@@ -93,7 +86,27 @@ class Comms():
         t.daemon = True
         t.start()        
         
+        
+        
     def autoDetectWorker(self, getVersion, winCallback = None, failCallback = None):
+
+        class VersionResult(object):
+            version_json = None
+
+        def on_ver_win(value):
+            print('get_ver_success ' + str(value))
+            version_result.version_json = value
+            version_result_event.set()
+            
+        def on_ver_fail(value):
+            print('on_ver_fail ' + str(value))
+            version_result_event.set()
+        
+        
+        version_result = VersionResult()        
+        version_result_event = Event()
+        version_result_event.clear()
+            
         if self.port:
             ports = [self.port]
         else:
@@ -104,17 +117,20 @@ class Comms():
         self.writeTimeout = 0
         print "Searching for device on all ports"
         testVer = VersionConfig()
-        verJson = None
         for p in ports:
             try:
                 print "Trying", p
                 self.port = p
                 self.open()
-                verJson = getVersion(True)
-                testVer.fromJson(verJson.get('ver', None))
-                if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
-                    break
-                
+                getVersion(on_ver_win, on_ver_fail)
+                version_result_event.wait()
+                version_result_event.clear()
+                if version_result.version_json != None:
+                    print('get ver success!')
+                    testVer.fromJson(version_result.version_json.get('ver', None))
+                    if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
+                        break
+
             except Exception as detail:
                 print('Not found on ' + str(p) + " " + str(detail))
                 try:
@@ -126,12 +142,19 @@ class Comms():
         self.retryCount = self.DEFAULT_READ_RETRIES
         self.timeout = self.DEFAULT_READ_TIMEOUT
         self.writeTimeout = self.DEFAULT_WRITE_TIMEOUT
-        if not verJson == None:
+        if version_result.version_json != None:
             print "Found device version " + testVer.toString() + " on port:", self.port
             self.close()
-            self.open()
+            print("sleeping before re-opeining")
+            #sleep(5)
+            #self.open()
             if winCallback: winCallback(testVer)
         else:
             self.port = None
             if failCallback: failCallback()
         
+        while True:
+            sleep(1)
+            print("zzzzzzzzzzzzzzzzzzzzz")
+        
+        print("Autodetect worker exiting")

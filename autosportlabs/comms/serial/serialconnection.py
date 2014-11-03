@@ -20,11 +20,7 @@ class SerialConnection():
         return not self.ser == None
     
     def open(self, port, timeout, writeTimeout):
-        if port: self.port = port
-        if self.port == None:
-            raise Exception("Error opening: port is not defined")
-        
-        ser = serial.Serial(self.port, timeout=timeout, writeTimeout = writeTimeout) 
+        ser = serial.Serial(port, timeout=timeout, writeTimeout = writeTimeout) 
         self.ser = ser
             
     def close(self):

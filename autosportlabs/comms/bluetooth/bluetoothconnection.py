@@ -40,9 +40,10 @@ class BluetoothConnection():
         self.port_to_open = port
         self.error_message = None
         self.open_request_event.set()
-        self.open_complete_event.wait(5.0)
+        print('waiting to open Bluetooth')
+        self.open_complete_event.wait(30.0)
         self.open_complete_event.clear()
-        print('after waiting for open: ' + str(self.error_message))
+        print('after waiting for Bluetooth open: ' + str(self.error_message))
         if self.error_message != None:
             raise Exception(self.error_message)
         if self.socket == None:
@@ -58,7 +59,7 @@ class BluetoothConnection():
                 paired_devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
                 socket = None
                 port = self.port_to_open
-                print('attempting to open port ' + port)
+                print('attempting to open port::: ' + port)
                 for device in paired_devices:
                     if device.getName() == port:
                         print('waiting to connect to device ' + port)

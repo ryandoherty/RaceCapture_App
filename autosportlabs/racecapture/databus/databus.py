@@ -103,7 +103,7 @@ class DataBusPump(object):
         self.running.set()
         self._sampleThread = Thread(target=self.sampleWorker)
         self._sampleThread.daemon = True
-        self._sampleThread.start()
+        #self._sampleThread.start()
 
     def on_sample(self, sampleJson):
         sample = self.sample
