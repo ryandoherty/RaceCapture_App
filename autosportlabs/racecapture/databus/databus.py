@@ -103,8 +103,11 @@ class DataBusPump(object):
         self.running.set()
         self._sampleThread = Thread(target=self.sampleWorker)
         self._sampleThread.daemon = True
-        #self._sampleThread.start()
+        self._sampleThread.start()
 
+    def on_meta(self, meta_json):
+        pass
+    
     def on_sample(self, sampleJson):
         sample = self.sample
         dataBus = self.dataBus
@@ -124,12 +127,17 @@ class DataBusPump(object):
         self.running.clear()
         self._sampleThread.join()
 
+    def request_meta(self):
+        rcpApi.get_meta()
+        
     def sampleWorker(self):
         rcApi = self.rcApi
         dataBus = self.dataBus
         sampleEvent = self.sampleEvent
         sampleEvent.set()
         rcApi.addListener('s', lambda sampleJson: Clock.schedule_once(lambda dt: self.on_sample(sampleJson)))
+        rcApi.addListener('meta', lambda sampleJson: Clock.schedule_once(lambda dt: self.on_meta(sampleJson)))
+        
         print("DataBus Sampler Starting")
         while self.running.is_set():
             try:

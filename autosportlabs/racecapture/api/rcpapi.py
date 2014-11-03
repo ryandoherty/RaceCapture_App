@@ -129,6 +129,7 @@ class RcpApi:
                 #print('Message Rx Exception: ' + str(Exception))
                 #traceback.print_exc()
                 sleep(0.5)
+                msg = ''
                     
         print("RxWorker exiting")
                     
