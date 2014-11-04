@@ -1,6 +1,7 @@
 import time
 from threading import Thread, Event
-from autosportlabs.racecapture.data.sampledata import Sample, SampleMetaException
+from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, SampleMetaException,\
+    ChannelMetaCollection
 from kivy.clock import Clock
 
 class DataBus(object):
@@ -8,22 +9,22 @@ class DataBus(object):
     sampleListeners = []
     channelListeners = {}
     metaListeners = []
-    channelMetas = {}
+    channel_metas = {}
 
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
 
     def updateMeta(self, channelMetas, async = True):
-        self.channelMetas.clear()
+        self.channel_metas.clear()
         for meta in channelMetas:
-            self.channelMetas[meta.name] = meta
+            self.channel_metas[meta.name] = meta
         if async: 
-            Clock.schedule_once(lambda dt: self.notifyMetaListeners(self.channelMetas))
+            Clock.schedule_once(lambda dt: self.notifyMetaListeners(self.channel_metas))
         else:
-            self.notifyMetaListeners(self.channelMetas)
+            self.notifyMetaListeners(self.channel_metas)
 
     def getMeta(self):
-        return self.channelMetas
+        return self.channel_metas
 
     def updateSample(self, sample, async = True):
         for sampleItem in sample.samples:
@@ -87,66 +88,66 @@ SAMPLE_POLL_INTERVAL	       = 0.1
 SAMPLE_POLL_EXCEPTION_RECOVERY = 2.0
 
 class DataBusPump(object):
-    rcApi = None
-    dataBus = None
+    rc_api = None
+    data_bus = None
     sample = Sample()
-    sampleEvent = Event()
-    requestMeta = True
+    sample_event = Event()
     running = Event()
-
+    _sample_thread = None
+    
     def __init__(self, **kwargs):
         super(DataBusPump, self).__init__(**kwargs)
 
-    def startDataPump(self, dataBus, rcApi):
-        self.rcApi = rcApi
-        self.dataBus = dataBus
+    def startDataPump(self, data_bus, rc_api):
+        self.rc_api = rc_api
+        self.data_bus = data_bus
         self.running.set()
-        self._sampleThread = Thread(target=self.sampleWorker)
-        self._sampleThread.daemon = True
-        self._sampleThread.start()
+        self._sample_thread = Thread(target=self.sample_worker)
+        self._sample_thread.daemon = True
+        self._sample_thread.start()
 
     def on_meta(self, meta_json):
-        pass
+        channel_metas = ChannelMetaCollection()
+        channel_metas.fromJson(meta_json)
+        self.data_bus.updateMeta(channel_metas)
     
-    def on_sample(self, sampleJson):
+    def on_sample(self, sample_json):
         sample = self.sample
-        dataBus = self.dataBus
+        dataBus = self.data_bus
         try:
-            sample.fromJson(sampleJson)
+            sample.fromJson(sample_json)
             dataBus.updateSample(sample)
-            if sample.updatedMeta:
-                dataBus.updateMeta(sample.channelMetas)
-                self.requestMeta = False
+            if sample.updated_meta:
+                dataBus.updateMeta(sample.channel_metas)
+                self.sample_event.set()
         except SampleMetaException as e:
             print('SampleMeta Exception: {}'.format(str(e)))
-            self.requestMeta = True
-        finally:
-            self.sampleEvent.set()
+            self.request_meta()
 
     def stopDataPump(self):
         self.running.clear()
-        self._sampleThread.join()
+        self._sample_thread.join()
 
     def request_meta(self):
-        rcpApi.get_meta()
+        self.rcpApi.get_meta()
         
-    def sampleWorker(self):
-        rcApi = self.rcApi
-        dataBus = self.dataBus
-        sampleEvent = self.sampleEvent
-        sampleEvent.set()
-        rcApi.addListener('s', lambda sampleJson: Clock.schedule_once(lambda dt: self.on_sample(sampleJson)))
-        rcApi.addListener('meta', lambda sampleJson: Clock.schedule_once(lambda dt: self.on_meta(sampleJson)))
+    
+    def sample_worker(self):
+        rc_api = self.rc_api
+        data_bus = self.data_bus
+        sample_event = self.sample_event
+        rc_api.addListener('s', self.on_sample)
+        rc_api.addListener('meta', self.on_meta)
         
         print("DataBus Sampler Starting")
+        sample_event.set()
         while self.running.is_set():
             try:
-                sampleEvent.wait(SAMPLE_POLL_WAIT_TIMEOUT)
-                rcApi.sample(self.requestMeta)
-                sampleEvent.clear()
+                sample_event.wait(SAMPLE_POLL_WAIT_TIMEOUT)
+                sample_event.clear()
+                rc_api.sample()
                 time.sleep(SAMPLE_POLL_INTERVAL)
             except:
                 time.sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
-                self.requestMeta = True
         print("DataBus Sampler Exiting")
 

@@ -42,6 +42,6 @@ class TachometerView(Screen):
         
         for gauge in gauges:
             gauge.settings = settings
-            gauge.dataBus = dataBus
+            gauge.data_bus = dataBus
         
             

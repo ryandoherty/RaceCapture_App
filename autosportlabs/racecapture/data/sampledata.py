@@ -25,8 +25,8 @@ class ChannelMeta(object):
     type = 0
     
     def __init__(self, **kwargs):
-        self.name = kwargs.get('name', 0)
-        self.units = kwargs.get('samples', self.units)
+        self.name = kwargs.get('name', '')
+        self.units = kwargs.get('units', self.units)
         self.min = kwargs.get('min', self.min)
         self.max = kwargs.get('max', self.max)
         self.precision = kwargs.get('prec', self.precision)
@@ -42,6 +42,17 @@ class ChannelMeta(object):
         self.sampleRate = int(json.get('sr', self.sampleRate))
         self.type = int(json.get('type', self.type))
 
+class ChannelMetaCollection(object):
+    channel_metas = []
+    
+    def fromJson(self, metaJson):
+        channel_metas = self.channel_metas
+        del channel_metas[:]
+        for ch in metaJson:
+            channel_meta = ChannelMeta()
+            channel_meta.fromJson(ch)
+            channel_metas.append(channel_meta)
+        
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
     unknownChannel = ChannelMeta(name='Unknown')
@@ -75,14 +86,14 @@ STARTING_BITMAP = 1
 class Sample(object):
     tick = 0
     samples = []
-    channelMetas = []
-    updatedMeta = False
+    channel_metas = ChannelMetaCollection()
+    updated_meta = False
     
     def __init__(self, **kwargs):
         self.tick = kwargs.get('tick', self.tick)
         self.samples = kwargs.get('samples', self.samples)
-        self.channelMetas = kwargs.get('channelMetas', self.channelMetas)
-        self.updatedMeta = len(self.channelMetas) > 0
+        self.channel_metas = kwargs.get('channelMetas', self.channel_metas)
+        self.updated_meta = len(self.channel_metas) > 0
         
     def fromJson(self, json):
         if json:
@@ -92,24 +103,16 @@ class Sample(object):
                 metaJson = sample.get('meta')
                 dataJson = sample.get('d')
                 if metaJson:
-                    self.processMeta(metaJson)
+                    self.channel_meta.fromJson(metaJson)
+                    self.updated_meta = True
                 else:
-                    self.updatedMeta = False
+                    self.updated_meta = False
                 if dataJson:
                     self.processData(dataJson)
-
-    def processMeta(self, metaJson):
-        channelMetas = self.channelMetas
-        del channelMetas[:]
-        for ch in metaJson:
-            config = ChannelMeta()
-            config.fromJson(ch)
-            channelMetas.append(config)
-        self.updatedMeta = True
     
     def processData(self, dataJson):
         
-        channelConfigs = self.channelMetas
+        channelConfigs = self.channel_metas
         channelConfigCount = len(channelConfigs)        
         bitmaskFieldCount = channelConfigCount / 32 + 1 if channelConfigCount % 32 > 0 else 0
         

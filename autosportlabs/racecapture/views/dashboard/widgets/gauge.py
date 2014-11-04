@@ -63,7 +63,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
     normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
     pressed = ListProperty([0,0])
-    dataBus = ObjectProperty(None)
+    data_bus = ObjectProperty(None)
     
     _popup = None
 
@@ -72,7 +72,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
         
-        self.dataBus = kwargs.get('dataBus')
+        self.data_bus = kwargs.get('dataBus')
         self.settings = kwargs.get('settings')
         self.channel = kwargs.get('channel')
         self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
@@ -106,7 +106,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self._remove_customization_bubble()        
         channel = self.channel
         if channel:
-            self.dataBus.removeChannelListener(channel, self.setValue)
+            self.data_bus.removeChannelListener(channel, self.setValue)
         self.channel = None        
 
     def customizeGauge(self, *args):
@@ -207,7 +207,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     
     def channel_selected(self, instance, value):
         if self.channel:
-            self.dataBus.removeChannelListener(self.channel, self.setValue)
+            self.data_bus.removeChannelListener(self.channel, self.setValue)
         self.value = None        
         self.channel = value
         self._dismiss_popup()
@@ -262,7 +262,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
             print('Failed to update gauge min/max ' + str(e))
         
     def _update_channel_binding(self):
-        dataBus = self.dataBus
+        dataBus = self.data_bus
         channel = self.channel
         if dataBus and channel:
             dataBus.addChannelListener(str(channel), self.setValue)

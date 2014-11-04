@@ -9,7 +9,7 @@ class DataBusTest(unittest.TestCase):
 		sample = Sample()
 		
 		meta = ChannelMeta(name='RPM')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1234, meta)]
 		
 		dataBus.updateSample(sample, False)
@@ -26,7 +26,7 @@ class DataBusTest(unittest.TestCase):
 		sample = Sample()
 		
 		meta = ChannelMeta(name='RPM')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1111, meta)]
 
 
@@ -50,7 +50,7 @@ class DataBusTest(unittest.TestCase):
 		
 		sample = Sample()
 		meta = ChannelMeta(name='RPM')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1111, meta)]
 		
 		dataBus.updateSample(sample, False)
@@ -70,7 +70,7 @@ class DataBusTest(unittest.TestCase):
 		sample = Sample()
 		metaRpm = ChannelMeta(name='RPM')
 		metaEngineTemp = ChannelMeta(name='EngineTemp')
-		sample.channelMetas = [metaRpm, metaEngineTemp]
+		sample.channel_metas = [metaRpm, metaEngineTemp]
 		sample.samples = [SampleValue(1111, metaRpm)]
 			
 		dataBus = DataBus()
@@ -92,7 +92,7 @@ class DataBusTest(unittest.TestCase):
 
 		sample = Sample()
 		meta = ChannelMeta(name='EngineTemp')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(200, meta)]
 		
 		dataBus = DataBus()

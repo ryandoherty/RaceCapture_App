@@ -48,5 +48,5 @@ class GaugeView(Screen):
         gauges = self.findActiveGauges()
         for gauge in gauges:
             gauge.settings = settings
-            gauge.dataBus = dataBus
+            gauge.data_bus = dataBus
  

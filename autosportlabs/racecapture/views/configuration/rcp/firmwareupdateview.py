@@ -40,7 +40,7 @@ class FirmwareUpdateView(BaseConfigView):
     def select_file(self):
         #Inside a try block since this will fail if there is no device detected
         try:
-            self.dataBusPump.rcApi.stop_msessage_rx_worker()
+            self.dataBusPump.rc_api.stop_msessage_rx_worker()
         except:
             pass
         content = LoadDialog(ok=self.update_fw, cancel=self.dismiss_popup,
@@ -53,14 +53,14 @@ class FirmwareUpdateView(BaseConfigView):
 
     def _teardown_json_serial(self):
         self.dataBusPump.stopDataPump()
-        self.dataBusPump.rcApi.resetDevice(bootloader=True)
-        self.dataBusPump.rcApi.comms.close()
+        self.dataBusPump.rc_api.resetDevice(bootloader=True)
+        self.dataBusPump.rc_api.comms.close()
         sleep(5)
 
     def _restart_json_serial(self):
-        self.dataBusPump.rcApi.run_auto_detect()
-        self.dataBusPump.startDataPump(self.dataBusPump.dataBus,
-                                       self.dataBusPump.rcApi)
+        self.dataBusPump.rc_api.run_auto_detect()
+        self.dataBusPump.startDataPump(self.dataBusPump.data_bus,
+                                       self.dataBusPump.rc_api)
                         
     def _update_thread(self, instance):
         try:
