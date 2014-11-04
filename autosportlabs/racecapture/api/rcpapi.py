@@ -104,8 +104,6 @@ class RcpApi:
             
     def msg_rx_worker(self):
         print('msg_rx_worker started')
-        retryMax = 3
-        retries = 0
         msg = ''
         comms = self.comms
         while self._running.is_set():
@@ -116,18 +114,21 @@ class RcpApi:
                     print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
-                    retries = 0
                     for messageName in msgJson.keys():
                         print('processing message ' + messageName)
                         listeners = self.msgListeners.get(messageName, None)
                         if listeners:
                             for listener in listeners:
-                                listener(msgJson)
-                                break
+                                try:
+                                    listener(msgJson)
+                                except Exception as e:
+                                    print('Message Listener Exception for {}: ' + str(e))
+                                    traceback.print_exc()
+                            break
                     msg = ''
             except Exception:
-                #print('Message Rx Exception: ' + str(Exception))
-                #traceback.print_exc()
+                print('Message rx worker exception: ' + str(Exception))
+                traceback.print_exc()
                 sleep(0.5)
                 msg = ''
                     
@@ -543,8 +544,11 @@ class RcpApi:
         print('in getVersion')
         self.executeSingle(RcpCmd('ver', self.sendGetVersion), winCallback, failCallback)
 
-    def sample(self, includeMeta):
-        if includeMeta:
+    def get_meta(self):
+        self.sendCommand({'getMeta':None})
+        
+    def sample(self, include_meta=False):
+        if include_meta:
             self.sendCommand({'s':{'meta':1}})
         else:
             self.sendCommand({'s':0})

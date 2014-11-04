@@ -44,7 +44,6 @@ class ChannelMeta(object):
 
 class ChannelMetaCollection(object):
     channel_metas = []
-    
     def fromJson(self, metaJson):
         channel_metas = self.channel_metas
         del channel_metas[:]
@@ -86,14 +85,14 @@ STARTING_BITMAP = 1
 class Sample(object):
     tick = 0
     samples = []
-    channel_metas = ChannelMetaCollection()
+    metas = ChannelMetaCollection()
     updated_meta = False
     
     def __init__(self, **kwargs):
         self.tick = kwargs.get('tick', self.tick)
         self.samples = kwargs.get('samples', self.samples)
-        self.channel_metas = kwargs.get('channelMetas', self.channel_metas)
-        self.updated_meta = len(self.channel_metas) > 0
+        self.metas = kwargs.get('channelMetas', self.metas)
+        self.updated_meta = len(self.metas.channel_metas) > 0
         
     def fromJson(self, json):
         if json:
@@ -103,7 +102,7 @@ class Sample(object):
                 metaJson = sample.get('meta')
                 dataJson = sample.get('d')
                 if metaJson:
-                    self.channel_meta.fromJson(metaJson)
+                    self.metas.fromJson(metaJson)
                     self.updated_meta = True
                 else:
                     self.updated_meta = False
@@ -111,9 +110,8 @@ class Sample(object):
                     self.processData(dataJson)
     
     def processData(self, dataJson):
-        
-        channelConfigs = self.channel_metas
-        channelConfigCount = len(channelConfigs)        
+        metas = self.metas.channel_metas
+        channelConfigCount = len(metas)        
         bitmaskFieldCount = channelConfigCount / 32 + 1 if channelConfigCount % 32 > 0 else 0
         
         maxFieldCount = channelConfigCount + bitmaskFieldCount
@@ -135,12 +133,12 @@ class Sample(object):
         channelConfigIndex = 0
         bitmapIndex = 0
         fieldIndex = 0
-        channelConfigCount = len(channelConfigs)
+        channelConfigCount = len(metas)
         while channelConfigIndex < channelConfigCount:
             if (bitmaskFields[bitmapIndex] & mask) != 0:
                 value = float(fieldData[fieldIndex])
                 fieldIndex += 1
-                sample = SampleValue(value, channelConfigs[channelConfigIndex])
+                sample = SampleValue(value, metas[channelConfigIndex])
                 samples.append(sample)
             if (mask != 0):
                 mask <<= 1;

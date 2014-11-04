@@ -51,10 +51,10 @@ class RaceCaptureApp(App):
     rcpConfig  = RcpConfig()
     
     #RaceCapture serial I/O 
-    rc_api = RcpApi()
+    _rc_api = RcpApi()
     
     #dataBus provides an eventing / polling mechanism to parts of the system that care
-    data_bus = DataBus()
+    _data_bus = DataBus()
     
     #pumps data from rcApi to dataBus. kind of like a bridge
     dataBusPump = DataBusPump()
@@ -121,14 +121,14 @@ class RaceCaptureApp(App):
     #Logfile
     def on_poll_logfile(self, instance):
         try:
-            self.rc_api.getLogfile()
+            self._rc_api.getLogfile()
         except:
             pass
         
     
     def on_set_logfile_level(self, instance, level):
         try:
-            self.rc_api.setLogfileLevel(level, None, self.on_set_logfile_level_error)
+            self._rc_api.setLogfileLevel(level, None, self.on_set_logfile_level_error)
         except:
             logging.exception('')
             self._serial_warning()
@@ -138,7 +138,7 @@ class RaceCaptureApp(App):
         
     #Run Script
     def on_run_script(self, instance):
-        self.rc_api.runScript(self.on_run_script_complete, self.on_run_script_error)
+        self._rc_api.runScript(self.on_run_script_complete, self.on_run_script_error)
 
     def on_run_script_complete(self, result):
         print('run script complete: ' + str(result))
@@ -150,7 +150,7 @@ class RaceCaptureApp(App):
     def on_write_config(self, instance, *args):
         rcpConfig = self.rcpConfig
         try:
-            self.rc_api.writeRcpCfg(rcpConfig, self.on_write_config_complete, self.on_write_config_error)
+            self._rc_api.writeRcpCfg(rcpConfig, self.on_write_config_complete, self.on_write_config_error)
         except:
             logging.exception('')
             self._serial_warning()
@@ -167,7 +167,7 @@ class RaceCaptureApp(App):
     #Read Configuration        
     def on_read_config(self, instance, *args):
         try:
-            self.rc_api.getRcpCfg(self.rcpConfig, self.on_read_config_complete, self.on_read_config_error)
+            self._rc_api.getRcpCfg(self.rcpConfig, self.on_read_config_complete, self.on_read_config_error)
             self.showActivity("Reading configuration")
         except:
             logging.exception('')
@@ -241,7 +241,7 @@ class RaceCaptureApp(App):
         
         configView = ConfigView(name='config',
                                 rcpConfig=self.rcpConfig,
-                                rcpComms=self.rc_api,
+                                rcpComms=self._rc_api,
                                 dataBusPump=self.dataBusPump,
                                 settings=self.settings)
         configView.bind(on_read_config=self.on_read_config)
@@ -250,7 +250,7 @@ class RaceCaptureApp(App):
         configView.bind(on_poll_logfile=self.on_poll_logfile)
         configView.bind(on_set_logfile_level=self.on_set_logfile_level)
         
-        rcComms = self.rc_api
+        rcComms = self._rc_api
         rcComms.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: configView.on_logfile(value)))
         rcComms.on_progress = lambda value: statusBar.dispatch('on_progress', value)
         rcComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
@@ -258,12 +258,12 @@ class RaceCaptureApp(App):
             
         tracksView = TracksView(name='tracks')
         
-        dashView = DashboardView(name='dash', dataBus=self.data_bus, settings=self.settings)
+        dashView = DashboardView(name='dash', dataBus=self._data_bus, settings=self.settings)
         
         homepageView = HomePageView(name='home')
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
         
-        analysisView = AnalysisView(name='analysis', data_bus=self.data_bus, settings=self.settings)
+        analysisView = AnalysisView(name='analysis', data_bus=self._data_bus, settings=self.settings)
         
         screenMgr = kvFind(self.root, 'rcid', 'main')
         
@@ -298,12 +298,12 @@ class RaceCaptureApp(App):
     def initRcComms(self):
         port = self.getAppArg('port')
         comms = comms_factory(port)
-        self.rc_api.initSerial(comms, self.rcDetectWin, self.rcDetectFail)
+        self._rc_api.initSerial(comms, self.rcDetectWin, self.rcDetectFail)
     
     def rcDetectWin(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         Clock.schedule_once(lambda dt: self.on_read_config(self), 1.0)
-        self.dataBusPump.startDataPump(self.data_bus, self.rc_api)
+        self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
 
         
     def rcDetectFail(self):
