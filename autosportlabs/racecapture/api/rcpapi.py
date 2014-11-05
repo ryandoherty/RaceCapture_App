@@ -545,6 +545,7 @@ class RcpApi:
         self.executeSingle(RcpCmd('ver', self.sendGetVersion), winCallback, failCallback)
 
     def get_meta(self):
+        print("sending meta")
         self.sendCommand({'getMeta':None})
         
     def sample(self, include_meta=False):

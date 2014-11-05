@@ -1,6 +1,7 @@
 import unittest
 from autosportlabs.racecapture.databus.databus import DataBus
-from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, SampleValue
+from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, SampleValue,\
+	ChannelMetaCollection
 
 class DataBusTest(unittest.TestCase):
 	def test_update_value(self):
@@ -106,11 +107,12 @@ class DataBusTest(unittest.TestCase):
 		def metaListener(channel):
 			self.channelMeta = channel
 
-		meta = [ChannelMeta(name='RPM')]
+		metas = ChannelMetaCollection()
+		metas.channel_metas = [ChannelMeta(name='RPM')]
 
 		dataBus.addMetaListener(metaListener)
-		dataBus.updateMeta(meta, False)
-		self.assertEqual(self.channelMeta['RPM'], meta[0])
+		dataBus.updateMeta(metas, False)
+		self.assertEqual(self.channelMeta['RPM'], metas.channel_metas[0])
 		
 def main():
 	unittest.main()

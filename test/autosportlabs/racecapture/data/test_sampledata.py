@@ -13,7 +13,7 @@ class SampleDataTest(unittest.TestCase):
         
         self.assertEqual(sampleJson['s']['t'], sample.tick)
         sampleCount = len(sampleJson['s']['meta'])
-        self.assertEqual(sampleCount, len(sample.channel_metas))
+        self.assertEqual(sampleCount, len(sample.metas.channel_metas))
         self.assertEqual(sampleCount, len(sample.samples))
         
         metaJson = sampleJson["s"]["meta"]
