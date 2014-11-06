@@ -34,7 +34,7 @@ class Comms():
     def open(self):
         connection = self.connection
         print('Opening connection ' + str(self.port))
-        connection.open(self.port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
+        connection.open(self.port, self.timeout, self.writeTimeout) 
         connection.flushInput()
         connection.flushOutput()
     

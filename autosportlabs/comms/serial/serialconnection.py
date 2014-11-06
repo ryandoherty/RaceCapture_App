@@ -20,6 +20,7 @@ class SerialConnection():
         return not self.ser == None
     
     def open(self, port, timeout, writeTimeout):
+        print('open: ' + str(timeout) + ' ' + str(writeTimeout))
         ser = serial.Serial(port, timeout=timeout, writeTimeout = writeTimeout) 
         self.ser = ser
             
