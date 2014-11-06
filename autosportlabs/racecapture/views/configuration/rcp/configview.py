@@ -9,6 +9,7 @@ from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
+from kivy.clock import Clock
 import os
 
 from kivy import platform
@@ -36,15 +37,16 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPo
 from autosportlabs.racecapture.config.rcpconfig import *
 from channels import *
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/configview.kv')
-
 RCP_CONFIG_FILE_EXTENSION = '.rcp'
+
+Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/configview.kv')
 
 class LinkedTreeViewLabel(TreeViewLabel):
     view = None
 
 class ConfigView(Screen):
     #file save/load
+    loaded = False
     loadfile = ObjectProperty(None)
     savefile = ObjectProperty(None)
     text_input = ObjectProperty(None)
@@ -71,8 +73,6 @@ class ConfigView(Screen):
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_config_modified')
         self.content = kvFind(self, 'rcid', 'content')
-        self.menu = kvFind(self, 'rcid', 'menu')
-        self.createConfigViews(self.menu)
         self.register_event_type('on_read_config')
         self.register_event_type('on_write_config')
         self.register_event_type('on_run_script')
@@ -91,8 +91,14 @@ class ConfigView(Screen):
     def updateControls(self):
         kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
         
-            
-    def createConfigViews(self, tree):
+    def on_enter(self):
+        if not self.loaded:
+            self.createConfigViews()
+            self.loaded = True
+        
+    def createConfigViews(self):
+
+        tree = kvFind(self, 'rcid', 'menu')
         
         def create_tree(text):
             return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))

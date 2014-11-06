@@ -218,8 +218,8 @@ class RaceCaptureApp(App):
         pass
     
     def on_start(self):
-        #self.initData()
-        self.initRcComms()        
+        self.initData()
+        self.initRcComms()
                 
     def build(self):
         Builder.load_file('racecapture.kv')
@@ -274,7 +274,7 @@ class RaceCaptureApp(App):
         #WipeTransition
         #FallOutTransition
         #RiseInTransition
-        screenMgr.transition=WipeTransition()
+        screenMgr.transition=FadeTransition(duration=.2)
         
         screenMgr.add_widget(homepageView)
         screenMgr.add_widget(configView)

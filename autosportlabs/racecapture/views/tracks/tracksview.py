@@ -86,13 +86,19 @@ class TrackInfoView(BoxLayout):
             self.track = track
     
 class TracksView(Screen):
+    loaded = False
     def __init__(self, **kwargs):
         super(TracksView, self).__init__(**kwargs)
         self.trackManager = kwargs.get('trackManager')
         self.register_event_type('on_tracks_updated')
                 
+    def on_enter(self):
+        if not self.loaded:
+            kvFind(self, 'rcid', 'browser').init_view()
+            self.loaded = True
+            
     def on_tracks_updated(self, trackmanager):
-        kvFind(self, 'rcid', 'browser').on_tracks_updated(trackmanager)
+        kvFind(self, 'rcid', 'browser').set_trackmanager(trackmanager)
         
 class TracksBrowser(BoxLayout):
     trackmap = None
@@ -106,13 +112,14 @@ class TracksBrowser(BoxLayout):
     selectedTrackIds = None
     def __init__(self, **kwargs):
         super(TracksBrowser, self).__init__(**kwargs)
-        self.register_event_type('on_tracks_updated')
         self.register_event_type('on_track_selected')
         self.lastNameSearch = ''
         self.selectedTrackIds = set()
-            
-    def on_tracks_updated(self, trackmanager):        
-        self.trackManager = trackmanager
+         
+    def set_trackmanager(self, track_manager):
+        self.trackManager = track_manager
+           
+    def init_view(self):        
         self.initRegionsList()
         self.initTrackListForSelectedRegion()
         self.initialized = True
@@ -122,8 +129,8 @@ class TracksBrowser(BoxLayout):
         kvFind(self, 'rcid', 'regions').disabled = disabled
         searchFilter = kvFind(self, 'rcid', 'namefilter')
         searchFilter.disabled = disabled
-        if not disabled:
-            searchFilter.focus = True
+        #if not disabled:
+         #   searchFilter.focus = True
         
     
     def dismissPopups(self):

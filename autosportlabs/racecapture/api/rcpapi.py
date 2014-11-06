@@ -135,7 +135,7 @@ class RcpApi:
             except Exception:
                 print('Message rx worker exception: ' + str(Exception))
                 traceback.print_exc()
-                sleep(0.5)
+                sleep(1.0)
                 msg = ''
                     
         print("RxWorker exiting")
