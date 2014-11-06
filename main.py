@@ -218,7 +218,7 @@ class RaceCaptureApp(App):
         pass
     
     def on_start(self):
-        self.initData()
+        #self.initData()
         self.initRcComms()        
                 
     def build(self):
