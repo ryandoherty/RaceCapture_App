@@ -46,5 +46,5 @@ class LaptimeView(Screen):
         gauges = self.findActiveGauges()
         for gauge in gauges:
             gauge.settings = settings
-            gauge.dataBus = dataBus
+            gauge._data_bus = dataBus
  

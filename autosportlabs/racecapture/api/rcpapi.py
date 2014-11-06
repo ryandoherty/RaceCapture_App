@@ -17,7 +17,10 @@ SCRIPT_ADD_MODE_IN_PROGRESS = 1
 SCRIPT_ADD_MODE_COMPLETE = 2
 
 DEFAULT_LEVEL2_RETRIES = 4
-DEFAULT_MSG_RX_TIMEOUT = 5.0
+DEFAULT_MSG_RX_TIMEOUT = 2.0
+
+AUTODETECT_MSG_RX_TIMEOUT = 0.250
+AUTODETECT_LEVEL2_RETRIES = 0
 
 class RcpCmd:
     name = None
@@ -47,7 +50,8 @@ class RcpApi:
     on_progress = lambda self, value: value
     on_tx = lambda self, value: None
     on_rx = lambda self, value: None
-    level_2_retries = 0
+    level_2_retries = DEFAULT_LEVEL2_RETRIES
+    msg_rx_timeout = DEFAULT_MSG_RX_TIMEOUT
     _cmd_sequence_thread = None
     _msg_rx_thread = None
     _auto_detect_event = Event()
@@ -82,10 +86,12 @@ class RcpApi:
 
     def detect_win(self, detect_win, version_info):
         self.level_2_retries = DEFAULT_LEVEL2_RETRIES
+        self.msg_rx_timeout = DEFAULT_MSG_RX_TIMEOUT
         detect_win(version_info)
         
     def run_auto_detect(self):
-        self.level_2_retries = 0
+        self.level_2_retries = AUTODETECT_LEVEL2_RETRIES
+        self.msg_rx_timeout = AUTODETECT_MSG_RX_TIMEOUT
         self._auto_detect_event.set()                
 
     def addListener(self, messageName, callback):
@@ -104,8 +110,6 @@ class RcpApi:
             
     def msg_rx_worker(self):
         print('msg_rx_worker started')
-        retryMax = 3
-        retries = 0
         msg = ''
         comms = self.comms
         while self._running.is_set():
@@ -113,21 +117,24 @@ class RcpApi:
                 msg += comms.read(1)
                 if msg[-2:] == '\r\n':
                     msg = msg[:-2]
-                    print('msg_rx_worker Rx: ' + str(msg))
+                   # print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
-                    retries = 0
                     for messageName in msgJson.keys():
-                        print('processing message ' + messageName)
+                        #print('processing message ' + messageName)
                         listeners = self.msgListeners.get(messageName, None)
                         if listeners:
                             for listener in listeners:
-                                listener(msgJson)
-                                break
+                                try:
+                                    listener(msgJson)
+                                except Exception as e:
+                                    print('Message Listener Exception for {}: ' + str(e))
+                                    traceback.print_exc()
+                            break
                     msg = ''
             except Exception:
-                #print('Message Rx Exception: ' + str(Exception))
-                #traceback.print_exc()
+                print('Message rx worker exception: ' + str(Exception))
+                traceback.print_exc()
                 sleep(0.5)
                 msg = ''
                     
@@ -202,7 +209,7 @@ class RcpApi:
                             retry = 0
                             while not result and retry < self.comms.DEFAULT_READ_RETRIES:
                                 try:
-                                    result = q.get(True, DEFAULT_MSG_RX_TIMEOUT)
+                                    result = q.get(True, self.msg_rx_timeout)
                                     msgName = result.keys()[0]
                                     if not msgName == name:
                                         print('rx message did not match expected name ' + str(name) + '; ' + str(msgName))
@@ -249,7 +256,7 @@ class RcpApi:
             comms.flushInput()
 
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
-            print('send cmd: ' + cmdStr)
+            #print('send cmd: ' + cmdStr)
             comms.write(cmdStr)
         finally:
             self.sendCommandLock.release()
@@ -288,7 +295,7 @@ class RcpApi:
                               RcpCmd('scriptCfg',   self.getScript),
                               RcpCmd('connCfg',     self.getConnectivityCfg),
                               RcpCmd('trackDb',     self.getTrackDb),
-                              RcpCmd('channels',    self.getChannels)
+                              RcpCmd('channels',    self.getChannels)                              
                            ]
                 
         self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)            
@@ -543,8 +550,12 @@ class RcpApi:
         print('in getVersion')
         self.executeSingle(RcpCmd('ver', self.sendGetVersion), winCallback, failCallback)
 
-    def sample(self, includeMeta):
-        if includeMeta:
+    def get_meta(self):
+        print("sending meta")
+        self.sendCommand({'getMeta':None})
+        
+    def sample(self, include_meta=False):
+        if include_meta:
             self.sendCommand({'s':{'meta':1}})
         else:
             self.sendCommand({'s':0})

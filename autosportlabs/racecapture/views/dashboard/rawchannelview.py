@@ -38,12 +38,12 @@ class RawChannelView(Screen):
     _gauges = {}
     _grid = None
     _bgCurrent = RAW_GRID_BGCOLOR_1
-    dataBus = None
+    _data_bus = None
     settings = None
     
     def __init__(self, **kwargs):
         super(RawChannelView, self).__init__(**kwargs)
-        self.dataBus = kwargs.get('dataBus', None)
+        self._data_bus = kwargs.get('dataBus', None)
         self.settings = kwargs.get('settings', None)
         self.initScreen()
     
@@ -66,7 +66,7 @@ class RawChannelView(Screen):
             self._addGauge(channelMeta)
             
     def initScreen(self):
-        dataBus = self.dataBus
+        dataBus = self._data_bus
         dataBus.addMetaListener(self.on_meta)
         dataBus.addSampleListener(self.on_sample)
         
@@ -81,7 +81,7 @@ class RawChannelView(Screen):
         
     def _addGauge(self, channelMeta):
         channel = channelMeta.name
-        gauge = RawGauge(dataBus=self.dataBus, settings=self.settings)
+        gauge = RawGauge(dataBus=self._data_bus, settings=self.settings)
         gauge.channel=channel
         gridView = self._gridView
         gauge.precision = channelMeta.precision

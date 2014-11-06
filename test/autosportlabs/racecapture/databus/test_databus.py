@@ -1,6 +1,7 @@
 import unittest
 from autosportlabs.racecapture.databus.databus import DataBus
-from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, SampleValue
+from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, SampleValue,\
+	ChannelMetaCollection
 
 class DataBusTest(unittest.TestCase):
 	def test_update_value(self):
@@ -9,7 +10,7 @@ class DataBusTest(unittest.TestCase):
 		sample = Sample()
 		
 		meta = ChannelMeta(name='RPM')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1234, meta)]
 		
 		dataBus.updateSample(sample, False)
@@ -26,7 +27,7 @@ class DataBusTest(unittest.TestCase):
 		sample = Sample()
 		
 		meta = ChannelMeta(name='RPM')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1111, meta)]
 
 
@@ -50,7 +51,7 @@ class DataBusTest(unittest.TestCase):
 		
 		sample = Sample()
 		meta = ChannelMeta(name='RPM')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1111, meta)]
 		
 		dataBus.updateSample(sample, False)
@@ -70,7 +71,7 @@ class DataBusTest(unittest.TestCase):
 		sample = Sample()
 		metaRpm = ChannelMeta(name='RPM')
 		metaEngineTemp = ChannelMeta(name='EngineTemp')
-		sample.channelMetas = [metaRpm, metaEngineTemp]
+		sample.channel_metas = [metaRpm, metaEngineTemp]
 		sample.samples = [SampleValue(1111, metaRpm)]
 			
 		dataBus = DataBus()
@@ -92,7 +93,7 @@ class DataBusTest(unittest.TestCase):
 
 		sample = Sample()
 		meta = ChannelMeta(name='EngineTemp')
-		sample.channelMetas = [meta]
+		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(200, meta)]
 		
 		dataBus = DataBus()
@@ -106,11 +107,12 @@ class DataBusTest(unittest.TestCase):
 		def metaListener(channel):
 			self.channelMeta = channel
 
-		meta = [ChannelMeta(name='RPM')]
+		metas = ChannelMetaCollection()
+		metas.channel_metas = [ChannelMeta(name='RPM')]
 
 		dataBus.addMetaListener(metaListener)
-		dataBus.updateMeta(meta, False)
-		self.assertEqual(self.channelMeta['RPM'], meta[0])
+		dataBus.updateMeta(metas, False)
+		self.assertEqual(self.channelMeta['RPM'], metas.channel_metas[0])
 		
 def main():
 	unittest.main()
