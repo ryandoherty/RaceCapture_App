@@ -274,7 +274,7 @@ class RaceCaptureApp(App):
         #WipeTransition
         #FallOutTransition
         #RiseInTransition
-        screenMgr.transition=FadeTransition(duration=.2)
+        screenMgr.transition=NoTransition()
         
         screenMgr.add_widget(homepageView)
         screenMgr.add_widget(configView)
