@@ -1,4 +1,5 @@
 import serial
+from serial import SerialException
 from serial.tools import list_ports
 
 class SerialConnection():
@@ -31,7 +32,13 @@ class SerialConnection():
         self.ser = None
 
     def read(self, count):
-        return self.ser.read(count)
+        try:
+            return self.ser.read(count)
+        except SerialException as e:
+            if str(e).startswith('device reports readiness'):
+                return ''
+            else: 
+                raise
     
     def write(self, data):
         return self.ser.write(data)
