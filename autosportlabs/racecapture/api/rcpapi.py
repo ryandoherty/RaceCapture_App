@@ -17,9 +17,9 @@ SCRIPT_ADD_MODE_IN_PROGRESS = 1
 SCRIPT_ADD_MODE_COMPLETE = 2
 
 DEFAULT_LEVEL2_RETRIES = 4
-DEFAULT_MSG_RX_TIMEOUT = 2.0
+DEFAULT_MSG_RX_TIMEOUT = 1.0
 
-AUTODETECT_MSG_RX_TIMEOUT = 0.250
+AUTODETECT_MSG_RX_TIMEOUT = 0.5
 AUTODETECT_LEVEL2_RETRIES = 0
 
 class RcpCmd:
@@ -133,9 +133,9 @@ class RcpApi:
                             break
                     msg = ''
             except Exception:
-                print('Message rx worker exception: ' + str(Exception))
+                print('Message rx worker exception: {} | {}'.format(msg, str(Exception)))
                 traceback.print_exc()
-                sleep(1.0)
+                sleep(0.2)
                 msg = ''
                     
         print("RxWorker exiting")
