@@ -1,4 +1,7 @@
+import os
+import traceback
 import kivy
+from time import sleep
 kivy.require('1.8.0')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
@@ -6,12 +9,10 @@ from utils import *
 from copy import *
 from kivy.metrics import dp
 from kivy.uix.treeview import TreeView, TreeViewLabel
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
-import os
-
 from kivy import platform
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
@@ -46,12 +47,13 @@ class LinkedTreeViewLabel(TreeViewLabel):
 
 class ConfigView(Screen):
     #file save/load
-    loaded = False
+    config = ObjectProperty(None)
+    loaded = BooleanProperty(False)
     loadfile = ObjectProperty(None)
     savefile = ObjectProperty(None)
     text_input = ObjectProperty(None)
-        
-            
+    writeStale = BooleanProperty(False)
+    
     #List of config views
     configViews = []
     content = None
@@ -59,7 +61,7 @@ class ConfigView(Screen):
     channels = None
     rcpConfig = None
     scriptView = None
-    writeStale = False
+
     def __init__(self, **kwargs):
         self.channels = kwargs.get('channels', None)
         self.rcpConfig = kwargs.get('rcpConfig', None)
@@ -82,22 +84,44 @@ class ConfigView(Screen):
 
     def on_config_written(self, *args):
         self.writeStale = False
-        self.updateControls()
         
     def on_config_modified(self, *args):
+        print("modified " + str(args))
         self.writeStale = True
+
+    def on_channels_updated(self, channels):
+        for view in self.configViews:
+            channelWidgets = list(kvquery(view, __class__=ChannelNameSpinner))
+            for channelWidget in channelWidgets:
+                channelWidget.dispatch('on_channels_updated', channels)
+        
+    def on_config_updated(self, config):
+        self.config = config
+            
+    def on_config(self, instance, value):
+        self.update_config_views()
+    
+    def on_loaded(self, instance, value):
+        self.update_config_views()
+        
+    def on_writeStale(self, instance, value):
         self.updateControls()
+
+    def _reset_stale(self):
+        self.writeStale = False
         
-    def updateControls(self):
-        kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
-        
+    def update_config_views(self):
+        if self.config and self.loaded:        
+            for view in self.configViews:
+                view.dispatch('on_config_updated', self.config)
+            self.dispatch('on_channels_updated', self.config.channels)
+        Clock.schedule_once(lambda dt: self._reset_stale())
+                
     def on_enter(self):
         if not self.loaded:
-            self.createConfigViews()
-            self.loaded = True
+            Clock.schedule_once(lambda dt: self.createConfigViews(),0.1)
         
     def createConfigViews(self):
-
         tree = kvFind(self, 'rcid', 'menu')
         
         def create_tree(text):
@@ -149,19 +173,10 @@ class ConfigView(Screen):
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
+        self.loaded = True
         
-    def on_channels_updated(self, channels):
-        for view in self.configViews:
-            channelWidgets = list(kvquery(view, __class__=ChannelNameSpinner))
-            for channelWidget in channelWidgets:
-                channelWidget.dispatch('on_channels_updated', channels)
-        
-    def on_config_updated(self, config):
-        for view in self.configViews:
-            view.dispatch('on_config_updated', config)
-        self.writeStale = False
-        self.dispatch('on_channels_updated', config.channels)
-        self.updateControls()
+    def updateControls(self):
+        kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
         
     def on_tracks_updated(self, trackmanager):
         for view in self.configViews:
@@ -198,7 +213,7 @@ class ConfigView(Screen):
         self.dispatch('on_poll_logfile')
     
     def readConfig(self):
-        if self.writeStale:
+        if self.writeStale == True:
             popup = None 
             def _on_answer(instance, answer):
                 if answer:
