@@ -54,6 +54,7 @@ class ChannelMetaCollection(object):
         
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
+    channel_names = []
     unknownChannel = ChannelMeta(name='Unknown')
         
     def __init__(self, **kwargs):
@@ -61,12 +62,14 @@ class SystemChannels(EventDispatcher):
             systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
             channelsJson = systemChannelsJson.get('channels')
             channels = OrderedDict()
+            channel_names = []
             for channelJson in channelsJson:
                 channel = ChannelMeta()
                 channel.fromJson(channelJson) 
                 channels[channel.name] = channel
+                channel_names.append(str(channel))
             self.channels = channels
-            
+            self.channel_names = channel_names
         except Exception as detail:
             print('Error loading system channels: {}'.format(str(detail)))
 

@@ -48,7 +48,7 @@ class RaceCaptureApp(App):
     settings = None
 
     #Central RCP configuration object
-    rcpConfig  = RcpConfig()
+    rc_config  = RcpConfig()
     
     #RaceCapture serial I/O 
     _rc_api = RcpApi()
@@ -148,7 +148,7 @@ class RaceCaptureApp(App):
         
     #Write Configuration        
     def on_write_config(self, instance, *args):
-        rcpConfig = self.rcpConfig
+        rcpConfig = self.rc_config
         try:
             self._rc_api.writeRcpCfg(rcpConfig, self.on_write_config_complete, self.on_write_config_error)
         except:
@@ -157,7 +157,7 @@ class RaceCaptureApp(App):
             
     def on_write_config_complete(self, result):
         print('Write config complete: ' + str(result))
-        self.rcpConfig.stale = False
+        self.rc_config.stale = False
         Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_written'))
         
     def on_write_config_error(self, detail):
@@ -167,15 +167,15 @@ class RaceCaptureApp(App):
     #Read Configuration        
     def on_read_config(self, instance, *args):
         try:
-            self._rc_api.getRcpCfg(self.rcpConfig, self.on_read_config_complete, self.on_read_config_error)
+            self._rc_api.getRcpCfg(self.rc_config, self.on_read_config_complete, self.on_read_config_error)
             self.showActivity("Reading configuration")
         except:
             logging.exception('')
             self._serial_warning()
 
     def on_read_config_complete(self, rcpCfg):
-        Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_updated', self.rcpConfig))
-        self.rcpConfig.stale = False
+        Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_updated', self.rc_config))
+        self.rc_config.stale = False
         self.showActivity('')
         
     def on_read_config_error(self, detail):
@@ -240,8 +240,8 @@ class RaceCaptureApp(App):
         self.mainNav.anim_type = 'slide_above_anim'
         
         configView = ConfigView(name='config',
-                                rcpConfig=self.rcpConfig,
-                                rcpComms=self._rc_api,
+                                rcpConfig=self.rc_config,
+                                rc_api=self._rc_api,
                                 dataBusPump=self.dataBusPump,
                                 settings=self.settings)
         configView.bind(on_read_config=self.on_read_config)

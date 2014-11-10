@@ -21,7 +21,6 @@ Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/analogchann
 
 class AnalogChannelsView(BaseConfigView):
     editors = []    
-    channels = None
     accordion = None
     analogCfg = None
     accordionMapping = {}    
@@ -53,16 +52,14 @@ class AnalogChannelsView(BaseConfigView):
     
     def on_config_updated(self, rcpCfg):
         analogCfg = rcpCfg.analogConfig
-        channels = rcpCfg.channels
 
         analogChannelCount = analogCfg.channelCount
         for i in range(analogChannelCount):
             editor = self.editors[i]
             analogChannel = analogCfg.channels[i]
             self.setAccordionItemTitle(self.accordion, analogCfg.channels, analogChannel)
-            editor.on_config_updated(analogChannel, channels)
+            editor.on_config_updated(analogChannel)
     
-        self.channels = channels
         self.analogCfg = analogCfg
         
         
@@ -120,7 +117,7 @@ class AnalogChannel(BoxLayout):
                     
     def on_config_updated(self, channelConfig, channels):
         channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channels.getNameForId(channelConfig.channelId))
+        channelSpinner.setValue(channelConfig.name)
 
         sampleRateSpinner = kvFind(self, 'rcid', 'sr')
         sampleRateSpinner.setValue(channelConfig.sampleRate)

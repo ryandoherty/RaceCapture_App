@@ -16,7 +16,6 @@ from kivy.clock import Clock
 from kivy import platform
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
-from autosportlabs.racecapture.views.configuration.channels.channelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.imuchannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.gpschannelsview import *
@@ -59,28 +58,30 @@ class ConfigView(Screen):
     content = None
     menu = None
     channels = None
-    rcpConfig = None
+    rc_config = None
     scriptView = None
+    _settings = None    
 
     def __init__(self, **kwargs):
-        self.channels = kwargs.get('channels', None)
-        self.rcpConfig = kwargs.get('rcpConfig', None)
-        self.rcpComms = kwargs.get('rcpComms', None)
-        self.dataBusPump = kwargs.get('dataBusPump', None)
-
         super(ConfigView, self).__init__(**kwargs)
+
+        self.rc_config = kwargs.get('rcpConfig', None)
+        self.rc_api = kwargs.get('rc_api', None)
+        self.dataBusPump = kwargs.get('dataBusPump', None)
+        self._settings = kwargs.get('settings')        
+
         self.register_event_type('on_config_updated')
         self.register_event_type('on_channels_updated')
         self.register_event_type('on_config_written')
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_config_modified')
-        self.content = kvFind(self, 'rcid', 'content')
         self.register_event_type('on_read_config')
         self.register_event_type('on_write_config')
         self.register_event_type('on_run_script')
         self.register_event_type('on_poll_logfile')
         self.register_event_type('on_set_logfile_level')
         
+        self.content = kvFind(self, 'rcid', 'content')
 
     def on_config_written(self, *args):
         self.writeStale = False
@@ -89,11 +90,14 @@ class ConfigView(Screen):
         print("modified " + str(args))
         self.writeStale = True
 
-    def on_channels_updated(self, channels):
+    def update_system_channels(self, system_channels):
         for view in self.configViews:
             channelWidgets = list(kvquery(view, __class__=ChannelNameSpinner))
             for channelWidget in channelWidgets:
-                channelWidget.dispatch('on_channels_updated', channels)
+                channelWidget.dispatch('on_channels_updated', system_channels)
+        
+    def on_channels_updated(self, system_channels):
+        self.update_system_channels(system_channels)
         
     def on_config_updated(self, config):
         self.config = config
@@ -149,8 +153,8 @@ class ConfigView(Screen):
             view.bind(on_config_modified=self.on_config_modified)
             return tree.add_node(label, n)
 
-        defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView(rcpComms=self.rcpComms))
-        attach_node('GPS', None, GPSChannelsView(rcpComms=self.rcpComms))
+        defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView(rcpComms=self.rc_api))
+        attach_node('GPS', None, GPSChannelsView(rcpComms=self.rc_api))
         attach_node('Lap Statistics', None, LapStatsView())        
         attach_node('Analog Sensors', None, AnalogChannelsView(channelCount=8, channels=self.channels))
         attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channelCount=3, channels=self.channels))
@@ -167,12 +171,14 @@ class ConfigView(Screen):
         scriptView.bind(on_set_logfile_level=self.setLogFileLevel)
         attach_node('Scripting', None, scriptView)
         self.scriptView = scriptView
-        attach_node('Channels', None, ChannelsView(rcpComms=self.rcpComms))
         if FIRMWARE_UPDATABLE:
             attach_node('Firmware', None, FirmwareUpdateView(dataBusPump=self.dataBusPump))
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
+        
+        system_channels = self._settings.systemChannels
+        self.update_system_channels(system_channels)
         self.loaded = True
         
     def updateControls(self):
@@ -224,7 +230,7 @@ class ConfigView(Screen):
             self.dispatch('on_read_config', None)
 
     def writeConfig(self):
-        if self.rcpConfig.loaded:
+        if self.rc_config.loaded:
             self.dispatch('on_write_config', None)
         else:
             alertPopup('Warning', 'Please load or read a configuration before writing')
@@ -246,7 +252,7 @@ class ConfigView(Screen):
         self._popup.open()        
     
     def saveConfig(self):
-        if self.rcpConfig.loaded:
+        if self.rc_config.loaded:
             content = SaveDialog(ok=self.save, cancel=self.dismiss_popup,filters=['*' + RCP_CONFIG_FILE_EXTENSION])
             self._popup = Popup(title="Save file", content=content, size_hint=(0.9, 0.9))
             self._popup.open()
@@ -261,8 +267,8 @@ class ConfigView(Screen):
             if filename:
                 with open(filename) as stream:
                     rcpConfigJsonString = stream.read()
-                    self.rcpConfig.fromJsonString(rcpConfigJsonString)
-                    self.dispatch('on_config_updated', self.rcpConfig)
+                    self.rc_config.fromJsonString(rcpConfigJsonString)
+                    self.dispatch('on_config_updated', self.rc_config)
                     self.on_config_modified()
             else:
                 alertPopup('Error Loading', 'No config file selected')
@@ -277,7 +283,7 @@ class ConfigView(Screen):
                 filename = os.path.join(instance.path, filename)
                 if not filename.endswith(RCP_CONFIG_FILE_EXTENSION): filename += RCP_CONFIG_FILE_EXTENSION
                 with open(filename, 'w') as stream:
-                    configJson = self.rcpConfig.toJsonString()
+                    configJson = self.rc_config.toJsonString()
                     stream.write(configJson)
         except Exception as detail:
             alertPopup('Error Saving', 'Failed to save:\n\n' + str(detail))

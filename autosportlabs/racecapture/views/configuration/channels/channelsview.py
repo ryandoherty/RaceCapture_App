@@ -117,14 +117,14 @@ class ChannelsView(BaseConfigView):
     def on_config_updated(self, rcpCfg):
         self.on_channels_updated(rcpCfg.channels)
         
-    def on_channels_updated(self, channels):
+    def on_channels_updated(self, system_channels):
         self.channelsContainer.clear_widgets()
-        for channel in channels.items:
+        for channel in system_channels.items:
             channelView = ChannelView(channel=channel)
             channelView.bind(on_delete_channel = self.on_delete_channel)
             channelView.bind(on_modified=self.on_modified)
             self.channelsContainer.add_widget(channelView)
-        self.channels = channels
+        self.channels = system_channels
         kvFind(self, 'rcid', 'addChan').disabled = False
             
     def on_delete_channel(self, instance, value):
