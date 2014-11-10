@@ -1,8 +1,32 @@
 import json
 from copy import copy
-from channels import *
-
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+
+class BaseChannel(object):
+    def __init__(self, **kwargs):
+        self.name = 'Unknown'
+        self.units = ''
+        self.min = -1000
+        self.max = 1000
+        self.precision = 0
+        self.sampleRate = 0
+        self.stale = False
+        
+    def fromJson(self, json_dict):
+        self.name = json_dict.get('nm', self.name) 
+        self.units = json_dict.get('ut', self.units)
+        self.min = json_dict.get('min', self.min)
+        self.max = json_dict.get('max', self.max)
+        self.precision = json_dict.get('prec', self.precision)
+        self.sampleRate = json_dict.get('sr', self.sampleRate)
+    
+    def appendJson(self, json_dict):
+        json_dict['nm'] = self.name
+        json_dict['ut'] = self.units
+        json_dict['min'] = self.min
+        json_dict['max'] = self.max
+        json_dict['prec'] = self.precision
+        json_dict['sr'] = self.sampleRate        
 
 MAX_ANALOG_RAW_VALUE = 1023
 MIN_ANALOG_RAW_VALUE = 0
@@ -84,39 +108,36 @@ ANALOG_SCALING_MODE_RAW     = 0
 ANALOG_SCALING_MODE_LINEAR  = 1
 ANALOG_SCALING_MODE_MAP     = 2
 
-class AnalogChannel(object):
+class AnalogChannel(BaseChannel):
     def __init__(self, **kwargs):
-        self.stale = False
-        self.channelId = 0
-        self.sampleRate = 0
+        super(AnalogChannel, self).__init__(**kwargs)        
         self.scalingMode = 0
         self.linearScaling = 0
         self.linearOffset = 0
         self.alpha = 0
         self.scalingMap = ScalingMap()
     
-    def fromJson(self, json):
-        self.channelId = json.get('id', self.channelId)
-        self.sampleRate = json.get('sr', self.sampleRate)
-        self.scalingMode = json.get('scalMod', self.scalingMode)
-        self.linearScaling = json.get('scaling', self.linearScaling)
-        self.linearOffset = json.get('offset', self.linearOffset)
-        self.alpha = json.get('alpha', self.alpha)
-        mapJson = json.get('map', None)
-        if mapJson:
-            self.scalingMap.fromJson(mapJson)
-        self.stale = False
+    def fromJson(self, json_dict):
+        if json_dict:
+            super(AnalogChannel, self).fromJson(json_dict)
+            self.scalingMode = json_dict.get('scalMod', self.scalingMode)
+            self.linearScaling = json_dict.get('scaling', self.linearScaling)
+            self.linearOffset = json_dict.get('offset', self.linearOffset)
+            self.alpha = json_dict.get('alpha', self.alpha)
+            scaling_map_json = json_dict.get('map', None)
+            if scaling_map_json:
+                self.scalingMap.fromJson(scaling_map_json)
+            self.stale = False
         
     def toJson(self):
-        channelJson = {}
-        channelJson['id'] = self.channelId
-        channelJson['sr'] = self.sampleRate
-        channelJson['scalMod'] = self.scalingMode
-        channelJson['scaling'] = self.linearScaling
-        channelJson['offset'] = self.linearOffset
-        channelJson['alpha'] = self.alpha
-        channelJson['map'] = self.scalingMap.toJson()
-        return channelJson
+        json_dict = {}
+        super(AnalogChannel, self).appendJson(json_dict)
+        json_dict['scalMod'] = self.scalingMode
+        json_dict['scaling'] = self.linearScaling
+        json_dict['offset'] = self.linearOffset
+        json_dict['alpha'] = self.alpha
+        json_dict['map'] = self.scalingMap.toJson()
+        return json_dict
     
 ANALOG_CHANNEL_COUNT = 8
 
@@ -153,31 +174,31 @@ class AnalogConfig(object):
         for channel in self.channels:
             channel.stale = value    
     
-class ImuChannel(object):
+class ImuChannel(BaseChannel):
     def __init__(self, **kwargs):
-        self.stale = False
-        self.sampleRate = 0
+        super(ImuChannel, self).__init__(**kwargs)
         self.mode = 0
         self.chan = 0
         self.zeroValue = 0
         self.alpha = 0
-
-    def fromJson(self, imuChannelJson):
-        self.sampleRate =  imuChannelJson.get('sr', self.sampleRate)
-        self.mode = imuChannelJson.get('mode', self.mode)
-        self.chan = imuChannelJson.get('chan', self.chan)
-        self.zeroValue = imuChannelJson.get('zeroVal', self.zeroValue)
-        self.alpha = imuChannelJson.get('alpha', self.alpha)
-        self.stale = False
+        
+    def fromJson(self, json_dict):
+        if json_dict:
+            super(ImuChannel, self).fromJson(json_dict)
+            self.mode = json_dict.get('mode', self.mode)
+            self.chan = json_dict.get('chan', self.chan)
+            self.zeroValue = json_dict.get('zeroVal', self.zeroValue)
+            self.alpha = json_dict.get('alpha', self.alpha)
+            self.stale = False
         
     def toJson(self):
-        jsonCfg = {}
-        jsonCfg['sr'] = self.sampleRate
-        jsonCfg['mode'] = self.mode
-        jsonCfg['chan'] = self.chan
-        jsonCfg['zeroVal'] = self.zeroValue
-        jsonCfg['alpha'] = self.alpha
-        return jsonCfg
+        json_dict = {}
+        super(ImuChannel, self).appendJson(json_dict)
+        json_dict['mode'] = self.mode
+        json_dict['chan'] = self.chan
+        json_dict['zeroVal'] = self.zeroValue
+        json_dict['alpha'] = self.alpha
+        return json_dict
     
 IMU_CHANNEL_COUNT = 4
 IMU_ACCEL_CHANNEL_IDS   = [0,1,2]
@@ -221,19 +242,17 @@ class ImuConfig(object):
         for channel in self.channels:
             channel.stale = value
           
-class LapConfigChannel(object):
+class LapConfigChannel(BaseChannel):
     def __init__(self, **kwargs):
-        self.sampleRate = 0
-        self.id = 0
+        super(LapConfigChannel, self).__init__(**kwargs)        
         
-    def fromJson(self, jsonCfg):
-        if jsonCfg:
-            self.sampleRate = int(jsonCfg.get('sr', self.sampleRate))
-            self.id = int(jsonCfg.get('id', self.id))
+    def fromJson(self, json_dict):
+        super(LapConfigChannel, self).fromJson(json_dict)        
         
     def toJson(self):
-        return {'id': self.id, 'sr':self.sampleRate}
-        
+        json_dict = {}
+        super(LapConfigChannel, self).appendJson(json_dict)
+        return json_dict                
         
 class LapConfig(object):
     def __init__(self, **kwargs):
@@ -315,35 +334,34 @@ class GpsConfig(object):
     
 TIMER_CHANNEL_COUNT = 3
 
-class TimerChannel(object):
+class TimerChannel(BaseChannel):
     def __init__(self, **kwargs):
-        self.stale = False
-        self.channelId = 0
-        self.sampleRate = 0
+        super(TimerChannel, self).__init__(**kwargs)        
         self.mode = 0
         self.divider = 0
         self.pulsePerRev = 0
         self.slowTimer = 0
+        self.alpha = 0
         
-    def fromJson(self, timerJson):
-        if (timerJson):
-            self.channelId = timerJson.get('id', self.channelId)
-            self.sampleRate = timerJson.get('sr', self.sampleRate)
-            self.mode = timerJson.get('mode', self.mode)
-            self.divider = timerJson.get('div', self.divider)
-            self.pulsePerRev = timerJson.get('ppr', self.pulsePerRev)
-            self.slowTimer = timerJson.get('st', self.slowTimer)
+    def fromJson(self, json_dict):
+        if json_dict:
+            super(TimerChannel, self).fromJson(json_dict)            
+            self.mode = json_dict.get('mode', self.mode)
+            self.divider = json_dict.get('div', self.divider)
+            self.pulsePerRev = json_dict.get('ppr', self.pulsePerRev)
+            self.slowTimer = json_dict.get('st', self.slowTimer)
+            self.alpha = json_dict.get('alpha', self.alpha)            
             self.stale = False
             
     def toJson(self):
-        timerJson = {}
-        timerJson['id'] = self.channelId
-        timerJson['sr'] = self.sampleRate
-        timerJson['mode'] = self.mode
-        timerJson['ppr'] = self.pulsePerRev
-        timerJson['div'] = self.divider
-        timerJson['st'] = self.slowTimer
-        return timerJson
+        json_dict = {}
+        super(TimerChannel, self).appendJson(json_dict)        
+        json_dict['mode'] = self.mode
+        json_dict['ppr'] = self.pulsePerRev
+        json_dict['div'] = self.divider
+        json_dict['st'] = self.slowTimer
+        json_dict['alpha'] = self.alpha
+        return json_dict
 
 class TimerConfig(object):
     def __init__(self, **kwargs):
@@ -378,26 +396,24 @@ class TimerConfig(object):
         for channel in self.channels:
             channel.stale = value
         
-class GpioChannel(object):
+class GpioChannel(BaseChannel):
     def __init__(self, **kwargs):
-        self.stale = False
-        self.channelId = 0
-        self.sampleRate = 0
+        super(GpioChannel, self).__init__(**kwargs)        
         self.mode = 0
         
-    def fromJson(self, json):
-        if (json):
-            self.channelId = json.get('id', self.channelId)
-            self.sampleRate = json.get('sr', self.sampleRate)
-            self.mode = json.get('mode', self.mode)
+    def fromJson(self, json_dict):
+        if json_dict:
+            super(GpioChannel, self).fromJson(json_dict)            
+            self.mode = json_dict.get('mode', self.mode)
             self.stale = False
             
     def toJson(self):
-        gpioJson = {}
-        gpioJson['sr'] = self.sampleRate
-        gpioJson['id'] = self.channelId
-        gpioJson['mode'] = self.mode
-        return gpioJson
+        json_dict = {}
+        super(GpioChannel, self).appendJson(json_dict)        
+        json_dict['sr'] = self.sampleRate
+        json_dict['id'] = self.channelId
+        json_dict['mode'] = self.mode
+        return json_dict
          
 GPIO_CHANNEL_COUNT = 3
 
@@ -434,35 +450,33 @@ class GpioConfig(object):
         for channel in self.channels:
             channel.stale = value
     
-class PwmChannel(object):
+class PwmChannel(BaseChannel):
     def __init__(self, **kwargs):
-        self.stale = False
-        self.channelId = 0
-        self.sampleRate = 0
+        super(PwmChannel, self).__init__(**kwargs)        
         self.outputMode = 0
         self.loggingMode = 0
         self.startupPeriod = 0
         self.startupDutyCycle = 0
         
-    def fromJson(self, pwmChannelJson):
-        if (pwmChannelJson):
-            self.channelId = pwmChannelJson.get('id', self.channelId)
-            self.sampleRate = pwmChannelJson.get('sr', self.sampleRate)
-            self.outputMode = pwmChannelJson.get('outMode', self.outputMode)
-            self.loggingMode = pwmChannelJson.get('logMode', self.loggingMode)
-            self.startupDutyCycle = pwmChannelJson.get('stDutyCyc', self.startupDutyCycle)
-            self.startupPeriod = pwmChannelJson.get('stPeriod', self.startupPeriod)
+    def fromJson(self, json_dict):
+        if json_dict:
+            super(PwmChannel, self).fromJson(json_dict)                        
+            self.outputMode = json_dict.get('outMode', self.outputMode)
+            self.loggingMode = json_dict.get('logMode', self.loggingMode)
+            self.startupDutyCycle = json_dict.get('stDutyCyc', self.startupDutyCycle)
+            self.startupPeriod = json_dict.get('stPeriod', self.startupPeriod)
             self.stale = False
             
     def toJson(self):
-        pwmChannelJson = {}
-        pwmChannelJson['id'] = self.channelId
-        pwmChannelJson['sr'] = self.sampleRate
-        pwmChannelJson['outMode'] = self.outputMode
-        pwmChannelJson['logMode'] = self.loggingMode
-        pwmChannelJson['stDutyCyc'] = self.startupDutyCycle
-        pwmChannelJson['stPeriod'] = self.startupPeriod
-        return pwmChannelJson
+        json_dict = {}
+        super(PwmChannel, self).appendJson(json_dict)        
+        json_dict['id'] = self.channelId
+        json_dict['sr'] = self.sampleRate
+        json_dict['outMode'] = self.outputMode
+        json_dict['logMode'] = self.loggingMode
+        json_dict['stDutyCyc'] = self.startupDutyCycle
+        json_dict['stPeriod'] = self.startupPeriod
+        return json_dict
 
 PWM_CHANNEL_COUNT = 4   
 
@@ -827,7 +841,6 @@ class RcpConfig(object):
         self.obd2Config = Obd2Config()
         self.scriptConfig = LuaScript()
         self.trackDb = TracksDb()
-        self.channels = Channels()
 
     @property
     def stale(self):
@@ -843,8 +856,7 @@ class RcpConfig(object):
                 self.canConfig.stale or
                 self.obd2Config.stale or
                 self.scriptConfig.stale or
-                self.trackDb.stale or
-                self.channels.stale)
+                self.trackDb.stale)
     
     @stale.setter
     def stale(self, value):
@@ -861,7 +873,6 @@ class RcpConfig(object):
         self.obd2Config.stale = value
         self.scriptConfig.stale = value
         self.trackDb.stale = value
-        self.channels.stale = value
         
     def fromJson(self, rcpJson):
         if rcpJson:
@@ -922,11 +933,7 @@ class RcpConfig(object):
                 trackDbJson = rcpJson.get('trackDb', None)
                 if trackDbJson:
                     self.trackDb.fromJson(trackDbJson)
-                    
-                channelsJson = rcpJson.get('channels', None)
-                if channelsJson:
-                    self.channels.fromJson({'channels':channelsJson})
-                    
+                                        
                 print('RCP config version ' + str(self.versionConfig.major) + '.' + str(self.versionConfig.minor) + '.' + str(self.versionConfig.bugfix) + ' Loaded')
                 self.loaded = True
     
@@ -952,8 +959,7 @@ class RcpConfig(object):
                              'connCfg':self.connectivityConfig.toJson().get('connCfg'),
                              'trackCfg':self.trackConfig.toJson().get('trackCfg'),
                              'scriptCfg':self.scriptConfig.toJson().get('scriptCfg'),
-                             'trackDb': self.trackDb.toJson().get('trackDb'),
-                             'channels': self.channels.toJson().get('channels')
+                             'trackDb': self.trackDb.toJson().get('trackDb')
                              }
                    }
         return rcpJson

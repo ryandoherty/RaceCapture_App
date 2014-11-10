@@ -7,9 +7,6 @@ from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from functools import partial
 
-CHANNEL_ADD_MODE_IN_PROGRESS = 1    
-CHANNEL_ADD_MODE_COMPLETE = 2
-
 TRACK_ADD_MODE_IN_PROGRESS = 1
 TRACK_ADD_MODE_COMPLETE = 2
 
@@ -294,8 +291,7 @@ class RcpApi:
                               RcpCmd('obd2Cfg',     self.getObd2Cfg),
                               RcpCmd('scriptCfg',   self.getScript),
                               RcpCmd('connCfg',     self.getConnectivityCfg),
-                              RcpCmd('trackDb',     self.getTrackDb),
-                              RcpCmd('channels',    self.getChannels)                              
+                              RcpCmd('trackDb',     self.getTrackDb)
                            ]
                 
         self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)            
@@ -364,11 +360,7 @@ class RcpApi:
         trackDb = cfg.trackDb
         if trackDb.stale:
             self.sequenceWriteTrackDb(trackDb.toJson(), cmdSequence)
-        
-        channels = cfg.channels
-        if channels.stale:
-            self.sequenceWriteChannels(channels.toJson(), cmdSequence)
-        
+                
         cmdSequence.append(RcpCmd('flashCfg', self.sendFlashConfig))
         
         self._queue_multiple(cmdSequence, 'setRcpCfg', winCallback, failCallback)        
@@ -494,31 +486,6 @@ class RcpApi:
             
     def sendFlashConfig(self):
         self.sendCommand({'flashCfg': None})
-
-    def getChannels(self):
-        self.sendGet('getChannels')
-        
-    def getChannelList(self, winCallback, failCallback):
-        self.executeSingle(RcpCmd('channels', self.getChannels), winCallback, failCallback)
-                
-    def sequenceWriteChannels(self, channels, cmdSequence):
-        
-        channels = channels.get('channels', None)
-        if channels:
-            index = 0
-            channelCount = len(channels)
-            for channel in channels:
-                mode = CHANNEL_ADD_MODE_IN_PROGRESS if index < channelCount - 1 else CHANNEL_ADD_MODE_COMPLETE
-                cmdSequence.append(RcpCmd('addChannel', self.addChannel, channel, index, mode))
-                index += 1        
-                    
-    def addChannel(self, channelJson, index, mode):
-        return self.sendCommand({'addChannel': 
-                                 {'index': index, 
-                                 'mode': mode,
-                                 'channel': channelJson
-                                 }
-                                 })
     
     def sequenceWriteTrackDb(self, tracksDbJson, cmdSequence):
         trackDbJson = tracksDbJson.get('trackDb')
