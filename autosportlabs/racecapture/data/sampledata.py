@@ -67,7 +67,7 @@ class SystemChannels(EventDispatcher):
                 channel = ChannelMeta()
                 channel.fromJson(channelJson) 
                 channels[channel.name] = channel
-                channel_names.append(str(channel))
+                channel_names.append(channel.name)
             self.channels = channels
             self.channel_names = channel_names
         except Exception as detail:

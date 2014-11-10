@@ -10,6 +10,7 @@ Builder.load_file('channelnameselectorview.kv')
 
 class ChannelNameSelectorView(BoxLayout):
     channel_type = NumericProperty(CHANNEL_TYPE_UNKNOWN)
+    
     def __init__(self, **kwargs):
         super(ChannelNameSelectorView, self).__init__(**kwargs)
         self.register_event_type('on_channel')
@@ -21,6 +22,7 @@ class ChannelNameSelectorView(BoxLayout):
     
     def setValue(self, value):
         spinner = kvFind(self, 'rcid', 'id')
+        print('spinner set value ' + value)
         spinner.text = value
 
     def onSelect(self, instance, value):

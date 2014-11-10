@@ -28,9 +28,6 @@ class BaseChannel(object):
         json_dict['prec'] = self.precision
         json_dict['sr'] = self.sampleRate        
 
-MAX_ANALOG_RAW_VALUE = 1023
-MIN_ANALOG_RAW_VALUE = 0
-
 class ScalingMap(object):
     def __init__(self, **kwargs):
         points = 5
@@ -74,22 +71,10 @@ class ScalingMap(object):
         return mapJson 
         
     def getVolts(self, mapBin):
-        try:
-            return (5.0 * self.raw[mapBin]) / 1024.0
-        except IndexError:
-            print('Index error getting volts')
-            return 0
+        return self.raw[mapBin]
      
     def setVolts(self, mapBin, value):
-        try:
-            value = float(value)
-            raw = value * 204.6
-            raw = int(raw)
-            raw = MAX_ANALOG_RAW_VALUE if raw >= MAX_ANALOG_RAW_VALUE else raw
-            raw = MIN_ANALOG_RAW_VALUE if raw <= MIN_ANALOG_RAW_VALUE else raw
-            self.raw[mapBin] = raw
-        except IndexError:
-            print('Index error setting bin')
+        self.raw[mapBin] = value
             
     def getScaled(self, mapBin):
         try:

@@ -53,19 +53,19 @@ class AnalogChannelsView(BaseConfigView):
     def on_config_updated(self, rcpCfg):
         analogCfg = rcpCfg.analogConfig
 
-        analogChannelCount = analogCfg.channelCount
-        for i in range(analogChannelCount):
+        channel_count = analogCfg.channelCount
+        for i in range(channel_count):
             editor = self.editors[i]
-            analogChannel = analogCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, analogCfg.channels, analogChannel)
-            editor.on_config_updated(analogChannel)
+            channel_config = analogCfg.channels[i]
+            self.setAccordionItemTitle(self.accordion, analogCfg.channels, channel_config)
+            editor.on_config_updated(channel_config)
     
         self.analogCfg = analogCfg
         
         
-    def on_modified(self, instance, channelConfig):
-        self.setAccordionItemTitle(self.accordion, self.analogCfg.channels, channelConfig)
-        super(AnalogChannelsView, self).on_modified(self, instance, channelConfig)
+    def on_modified(self, instance, channel_config):
+        self.setAccordionItemTitle(self.accordion, self.analogCfg.channels, channel_config)
+        super(AnalogChannelsView, self).on_modified(self, instance, channel_config)
         
 class AnalogChannel(BoxLayout):
     channelConfig = None
@@ -81,7 +81,7 @@ class AnalogChannel(BoxLayout):
     
     def on_channel(self, instance, value):
         if self.channelConfig:
-            self.channelConfig.channelId = self.channels.getIdForName(value)
+            self.channelConfig.name = value
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
 
@@ -115,7 +115,7 @@ class AnalogChannel(BoxLayout):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                     
-    def on_config_updated(self, channelConfig, channels):
+    def on_config_updated(self, channelConfig):
         channelSpinner = kvFind(self, 'rcid', 'chanId')
         channelSpinner.setValue(channelConfig.name)
 
@@ -146,7 +146,6 @@ class AnalogChannel(BoxLayout):
         mapEditor.bind(on_map_updated=self.on_map_updated)
 
         self.channelConfig = channelConfig
-        self.channels = channels
         
     def on_map_updated(self, *args):
         self.channelConfig.stale = True

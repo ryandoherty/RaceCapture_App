@@ -28,7 +28,8 @@ class OBD2Channel(BoxLayout):
 
     def on_channel(self, instance, value):
         if self.obd2Channel:
-            self.obd2Channel.channelId = self.channels.getIdForName(value)
+            
+            self.obd2Channel.name = value
             pid = self.obd2Settings.getPidForChannelName(value)
             self.obd2Channel.pidId = pid
             self.dispatch('on_modified')            
@@ -85,9 +86,6 @@ class OBD2ChannelsView(BaseConfigView):
                     
     def on_config_updated(self, rcpCfg):
         obd2Cfg = rcpCfg.obd2Config
-
-        channels = rcpCfg.channels
-        self.channels = channels
         
         kvFind(self, 'rcid', 'obd2enable').setValue(obd2Cfg.enabled)
         

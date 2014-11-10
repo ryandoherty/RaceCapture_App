@@ -16,7 +16,7 @@ SCRIPT_ADD_MODE_COMPLETE = 2
 DEFAULT_LEVEL2_RETRIES = 4
 DEFAULT_MSG_RX_TIMEOUT = 1.0
 
-AUTODETECT_MSG_RX_TIMEOUT = 0.5
+AUTODETECT_MSG_RX_TIMEOUT = 1.0
 AUTODETECT_LEVEL2_RETRIES = 0
 
 class RcpCmd:
@@ -114,11 +114,11 @@ class RcpApi:
                 msg += comms.read(1)
                 if msg[-2:] == '\r\n':
                     msg = msg[:-2]
-                   # print('msg_rx_worker Rx: ' + str(msg))
+                    print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
                     for messageName in msgJson.keys():
-                        #print('processing message ' + messageName)
+                        print('processing message ' + messageName)
                         listeners = self.msgListeners.get(messageName, None)
                         if listeners:
                             for listener in listeners:

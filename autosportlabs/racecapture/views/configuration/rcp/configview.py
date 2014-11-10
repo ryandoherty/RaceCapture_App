@@ -118,7 +118,6 @@ class ConfigView(Screen):
         if self.config and self.loaded:        
             for view in self.configViews:
                 view.dispatch('on_config_updated', self.config)
-            self.dispatch('on_channels_updated', self.config.channels)
         Clock.schedule_once(lambda dt: self._reset_stale())
                 
     def on_enter(self):

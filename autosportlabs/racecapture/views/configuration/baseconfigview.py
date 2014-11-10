@@ -20,16 +20,16 @@ class BaseConfigView(BoxLayout):
     def on_tracks_updated(self, trackmanager):
         pass
 
-    def setAccordionItemTitle(self, accordion, channels, channelConfig):
-            i = channels.index(channelConfig)
-            accordionChildren = accordion.children
-            accordionItem = accordionChildren[len(accordionChildren) - i - 1]
-            accordionItem.title = self.createTitleForChannel(self.channels, channelConfig, i)
+    def setAccordionItemTitle(self, accordion, channel_configs, config):
+            i = channel_configs.index(config)
+            accordion_children = accordion.children
+            accordion_item = accordion_children[len(accordion_children) - i - 1]
+            accordion_item.title = self.createTitleForChannel(config)
         
-    def createTitleForChannel(self, channels, channel, index):
+    def createTitleForChannel(self, channel_config):
         try:
-            sampleRate = channel.sampleRate
-            sampleRateInfo = 'Disabled' if sampleRate == 0 else (str(sampleRate) + 'Hz')
-            return self.channels.getNameForId(channel.channelId) + ' ( ' + sampleRateInfo + ' )'
+            sample_rate = channel_config.sampleRate
+            sample_rate_info = 'Disabled' if sample_rate == 0 else (str(sample_rate) + 'Hz')
+            return '{} ({})'.format(channel_config.name, sample_rate_info)
         except:
             return 'Unknown Channel'

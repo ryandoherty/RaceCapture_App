@@ -20,7 +20,6 @@ class GPIOModeSpinner(MappedSpinner):
         
 class GPIOChannel(BoxLayout):
     channelConfig = None
-    channels = None
     def __init__(self, **kwargs):
         super(GPIOChannel, self).__init__(**kwargs)
         kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
@@ -32,7 +31,7 @@ class GPIOChannel(BoxLayout):
         
     def on_channel(self, instance, value):
         if self.channelConfig:
-            self.channelConfig.channelId = self.channels.getIdForName(value)
+            self.channelConfig.name = value
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
             
@@ -48,19 +47,18 @@ class GPIOChannel(BoxLayout):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
             
-    def on_config_updated(self, channelConfig, channels):
+    def on_config_updated(self, channelConfig):
 
         sampleRateSpinner = kvFind(self, 'rcid', 'sr')
         sampleRateSpinner.setValue(channelConfig.sampleRate)
     
         channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channels.getNameForId(channelConfig.channelId))
+        channelSpinner.setValue(channelConfig.name)
         
         modeSpinner = kvFind(self, 'rcid', 'mode')
         modeSpinner.setFromValue(channelConfig.mode)
 
         self.channelConfig = channelConfig
-        self.channels = channels
         
         
 class GPIOChannelsView(BaseConfigView):
@@ -93,22 +91,20 @@ class GPIOChannelsView(BaseConfigView):
         self.add_widget(sv)
 
 
-    def on_modified(self, instance, channelConfig):
-        self.setAccordionItemTitle(self.accordion, self.gpioCfg.channels, channelConfig)
-        super(GPIOChannelsView, self).on_modified(self, instance, channelConfig)
+    def on_modified(self, instance, channel_config):
+        self.setAccordionItemTitle(self.accordion, self.gpioCfg.channels, channel_config)
+        super(GPIOChannelsView, self).on_modified(self, instance, channel_config)
 
     def on_config_updated(self, rcpCfg):
         gpioCfg = rcpCfg.gpioConfig
-        channels = rcpCfg.channels
 
-        gpioChannelCount = gpioCfg.channelCount
-        for i in range(gpioChannelCount):
+        channel_count = gpioCfg.channelCount
+        for i in range(channel_count):
             editor = self.editors[i]
-            gpioChannel = gpioCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, gpioCfg.channels, gpioChannel)            
-            editor.on_config_updated(gpioChannel, channels)
+            channel_config = gpioCfg.channels[i]
+            self.setAccordionItemTitle(self.accordion, gpioCfg.channels, channel_config)            
+            editor.on_config_updated(channel_config)
             
-        self.channels = channels 
         self.gpioCfg = gpioCfg
             
             

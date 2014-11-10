@@ -26,7 +26,6 @@ class PwmLoggingModeSpinner(MappedSpinner):
     
 class AnalogPulseOutputChannel(BoxLayout):
     channelConfig = None
-    channels = None    
     def __init__(self, **kwargs):
         super(AnalogPulseOutputChannel, self).__init__(**kwargs)
         kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
@@ -38,7 +37,7 @@ class AnalogPulseOutputChannel(BoxLayout):
 
     def on_channel(self, instance, value):
         if self.channelConfig:
-            self.channelConfig.channelId = self.channels.getIdForName(value)
+            self.channelConfig.name = value
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                         
@@ -78,9 +77,9 @@ class AnalogPulseOutputChannel(BoxLayout):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                         
-    def on_config_updated(self, channelConfig, channels ):
+    def on_config_updated(self, channelConfig ):
         channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channels.getNameForId(channelConfig.channelId))
+        channelSpinner.setValue(channelConfig.name)
 
         sampleRateSpinner = kvFind(self, 'rcid', 'sr')
         sampleRateSpinner.setValue(channelConfig.sampleRate)
@@ -98,7 +97,6 @@ class AnalogPulseOutputChannel(BoxLayout):
         loggingModeSpinner.setFromValue(channelConfig.loggingMode)
         
         self.channelConfig = channelConfig
-        self.channels = channels
         
 class AnalogPulseOutputChannelsView(BaseConfigView):
     editors = None
@@ -129,20 +127,18 @@ class AnalogPulseOutputChannelsView(BaseConfigView):
         sv.add_widget(accordion)
         self.add_widget(sv)
 
-    def on_modified(self, instance, channelConfig):
-        self.setAccordionItemTitle(self.accordion, self.pwmCfg.channels, channelConfig)
-        super(AnalogPulseOutputChannelsView, self).on_modified(self, instance, channelConfig)
+    def on_modified(self, instance, channel_config):
+        self.setAccordionItemTitle(self.accordion, self.pwmCfg.channels, channel_config)
+        super(AnalogPulseOutputChannelsView, self).on_modified(self, instance, channel_config)
 
     def on_config_updated(self, rcpCfg):
         pwmCfg = rcpCfg.pwmConfig
-        channels = rcpCfg.channels
-        self.channels = channels
         self.pwmCfg = pwmCfg
         
         channelCount = pwmCfg.channelCount
         for i in range(channelCount):
             editor = self.editors[i]
-            pwmChannel = pwmCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, pwmCfg.channels, pwmChannel)
-            editor.on_config_updated(pwmChannel, channels)
+            channel_config = pwmCfg.channels[i]
+            self.setAccordionItemTitle(self.accordion, pwmCfg.channels, channel_config)
+            editor.on_config_updated(channel_config)
             

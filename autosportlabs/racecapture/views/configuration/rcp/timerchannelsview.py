@@ -33,7 +33,6 @@ class PulsePerRevSpinner(MappedSpinner):
     
 class PulseChannel(BoxLayout):
     channelConfig = None
-    channels = None
     def __init__(self, **kwargs):
         super(PulseChannel, self).__init__(**kwargs)
         kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
@@ -46,7 +45,7 @@ class PulseChannel(BoxLayout):
 
     def on_channel(self, instance, value):
         if self.channelConfig:
-            self.channelConfig.channelId = self.channels.getIdForName(value)
+            self.channelConfig.name = value
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                                     
@@ -74,28 +73,26 @@ class PulseChannel(BoxLayout):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                             
-    def on_config_updated(self, channelConfig, channels):
-        sampleRateSpinner = kvFind(self, 'rcid', 'sr')
-        sampleRateSpinner.setValue(channelConfig.sampleRate)
+    def on_config_updated(self, channel_config):
+        sample_rate_spinner = kvFind(self, 'rcid', 'sr')
+        sample_rate_spinner.setValue(channel_config.sampleRate)
     
-        channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channels.getNameForId(channelConfig.channelId))
+        channel_spinner = kvFind(self, 'rcid', 'chanId')
+        channel_spinner.setValue(channel_config.name)
         
-        modeSpinner = kvFind(self, 'rcid', 'mode')
-        modeSpinner.setFromValue(channelConfig.mode)
+        mode_spinner = kvFind(self, 'rcid', 'mode')
+        mode_spinner.setFromValue(channel_config.mode)
         
-        dividerSpinner = kvFind(self, 'rcid', 'divider')
-        dividerSpinner.setFromValue(channelConfig.divider)
+        divider_spinner = kvFind(self, 'rcid', 'divider')
+        divider_spinner.setFromValue(channel_config.divider)
         
-        pulsePerRevSpinner = kvFind(self, 'rcid', 'ppr')
-        pulsePerRevSpinner.setFromValue(channelConfig.pulsePerRev)
+        pulse_per_rev_spinner = kvFind(self, 'rcid', 'ppr')
+        pulse_per_rev_spinner.setFromValue(channel_config.pulsePerRev)
         
-        self.channelConfig = channelConfig
-        self.channels = channels
+        self.channelConfig = channel_config
 
 class PulseChannelsView(BaseConfigView):
     editors = []
-    channels = None
     accordion = None
     timerCfg = None
     def __init__(self, **kwargs):
@@ -124,19 +121,17 @@ class PulseChannelsView(BaseConfigView):
         sv.add_widget(accordion)
         self.add_widget(sv)
 
-    def on_modified(self, instance, channelConfig):
-        self.setAccordionItemTitle(self.accordion, self.timerCfg.channels, channelConfig)
-        super(PulseChannelsView, self).on_modified(self, instance, channelConfig)
+    def on_modified(self, instance, channel_config):
+        self.setAccordionItemTitle(self.accordion, self.timerCfg.channels, channel_config)
+        super(PulseChannelsView, self).on_modified(self, instance, channel_config)
 
     def on_config_updated(self, rcpCfg):
         timerCfg = rcpCfg.timerConfig
-        channels = rcpCfg.channels
-        self.channels = rcpCfg.channels
         self.timerCfg = timerCfg
         
         channelCount = timerCfg.channelCount
         for i in range(channelCount):
             editor = self.editors[i]
-            timerChannel = timerCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, timerCfg.channels, timerChannel)            
-            editor.on_config_updated(timerChannel, channels)
+            timer_channel = timerCfg.channels[i]
+            self.setAccordionItemTitle(self.accordion, timerCfg.channels, timer_channel)            
+            editor.on_config_updated(timer_channel)
