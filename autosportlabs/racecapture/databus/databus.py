@@ -84,7 +84,7 @@ class DataBus(object):
     def addMetaListener(self, callback):
         self.metaListeners.append(callback)
 
-SAMPLE_POLL_TEST_TIMEOUT       = 2.0
+SAMPLE_POLL_TEST_TIMEOUT       = 5.0
 SAMPLE_POLL_INTERVAL_TIMEOUT   = 0.1 #10Hz polling
 SAMPLE_POLL_EXCEPTION_RECOVERY = 2.0
 SAMPLES_TO_WAIT_FOR_META       = 10
