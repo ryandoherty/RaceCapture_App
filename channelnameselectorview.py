@@ -22,7 +22,6 @@ class ChannelNameSelectorView(BoxLayout):
     
     def setValue(self, value):
         spinner = kvFind(self, 'rcid', 'id')
-        print('spinner set value ' + value)
         spinner.text = value
 
     def onSelect(self, instance, value):
