@@ -125,7 +125,7 @@ class RcpApi:
                                 try:
                                     listener(msgJson)
                                 except Exception as e:
-                                    print('Message Listener Exception for {}: ' + str(e))
+                                    print('Message Listener Exception for')
                                     traceback.print_exc()
                             break
                     msg = ''
