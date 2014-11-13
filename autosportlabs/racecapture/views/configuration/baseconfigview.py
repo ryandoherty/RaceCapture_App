@@ -20,22 +20,8 @@ class BaseConfigView(BoxLayout):
     def on_config_modified(self, *args):
         pass
     
-    def on_tracks_updated(self, trackmanager):
+    def on_tracks_updated(self, track_manager):
         pass
-
-    def setAccordionItemTitle(self, accordion, channel_configs, config):
-            i = channel_configs.index(config)
-            accordion_children = accordion.children
-            accordion_item = accordion_children[len(accordion_children) - i - 1]
-            accordion_item.title = self.createTitleForChannel(config)
-        
-    def createTitleForChannel(self, channel_config):
-        try:
-            sample_rate = channel_config.sampleRate
-            sample_rate_info = 'Disabled' if sample_rate == 0 else (str(sample_rate) + 'Hz')
-            return '{} ({})'.format(channel_config.name, sample_rate_info)
-        except:
-            return 'Unknown Channel'
         
 
 class LazyloadAccordionItem(AccordionItem):

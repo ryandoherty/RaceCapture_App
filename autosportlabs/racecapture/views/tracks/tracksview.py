@@ -97,8 +97,8 @@ class TracksView(Screen):
             kvFind(self, 'rcid', 'browser').init_view()
             self.loaded = True
             
-    def on_tracks_updated(self, trackmanager):
-        kvFind(self, 'rcid', 'browser').set_trackmanager(trackmanager)
+    def on_tracks_updated(self, track_manager):
+        kvFind(self, 'rcid', 'browser').set_trackmanager(track_manager)
         
 class TracksBrowser(BoxLayout):
     trackmap = None

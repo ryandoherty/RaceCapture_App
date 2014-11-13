@@ -52,6 +52,7 @@ class ConfigView(Screen):
     savefile = ObjectProperty(None)
     text_input = ObjectProperty(None)
     writeStale = BooleanProperty(False)
+    tracks_manager = ObjectProperty(None)
     
     #List of config views
     configViews = []
@@ -100,11 +101,15 @@ class ConfigView(Screen):
     def on_config_updated(self, config):
         self.config = config
             
+    def on_tracks_manager(self, instance, value):
+        self.update_tracks()
+        
     def on_config(self, instance, value):
         self.update_config_views()
     
     def on_loaded(self, instance, value):
         self.update_config_views()
+        self.update_tracks()
         
     def on_writeStale(self, instance, value):
         self.updateControls()
@@ -113,9 +118,10 @@ class ConfigView(Screen):
         self.writeStale = False
         
     def update_config_views(self):
-        if self.config and self.loaded:        
+        config = self.config
+        if config and self.loaded:        
             for view in self.configViews:
-                view.dispatch('on_config_updated', self.config)
+                view.dispatch('on_config_updated', config)
         Clock.schedule_once(lambda dt: self._reset_stale())
                 
     def on_enter(self):
@@ -181,10 +187,14 @@ class ConfigView(Screen):
     def updateControls(self):
         kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
         
-    def on_tracks_updated(self, trackmanager):
-        for view in self.configViews:
-            view.dispatch('on_tracks_updated', trackmanager)
-        pass
+    def update_tracks(self):
+        track_manager = self.track_manager
+        if track_manager and self.loaded:
+            for view in self.configViews:
+                view.dispatch('on_tracks_updated', track_manager)
+        
+    def on_tracks_updated(self, track_manager):
+        self.track_manager = track_manager
     
     def on_read_config(self, instance, *args):
         pass
