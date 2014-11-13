@@ -47,7 +47,7 @@ class RcpApi:
     msgListeners = {}
     cmdSequenceQueue = Queue.Queue()
     _command_queue = Queue.Queue()
-    _send_command_lock = RLock()
+    sendCommandLock = RLock()
     on_progress = lambda self, value: value
     on_tx = lambda self, value: None
     on_rx = lambda self, value: None
@@ -280,7 +280,7 @@ class RcpApi:
                 
     def sendCommand(self, cmd):
         try:
-            self._send_command_lock.acquire()
+            self.sendCommandLock.acquire()
             rsp = None
             
             comms = self.comms
@@ -293,7 +293,7 @@ class RcpApi:
         except Exception:
             self.recover_connection()
         finally:
-            self._send_command_lock.release()
+            self.sendCommandLock.release()
             self.on_tx(True)
         
         
