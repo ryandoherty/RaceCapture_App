@@ -84,7 +84,7 @@ class DataBus(object):
     def addMetaListener(self, callback):
         self.metaListeners.append(callback)
 
-SAMPLE_POLL_TEST_TIMEOUT       = 5.0
+SAMPLE_POLL_TEST_TIMEOUT       = 10.0
 SAMPLE_POLL_INTERVAL_TIMEOUT   = 0.1 #10Hz polling
 SAMPLE_POLL_EXCEPTION_RECOVERY = 2.0
 SAMPLES_TO_WAIT_FOR_META       = 10
@@ -167,7 +167,7 @@ class DataBusPump(object):
                     sample_event.clear()
                     sleep(SAMPLE_POLL_INTERVAL_TIMEOUT)
                 except Exception as e:
-                    time.sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
+                    sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
                     print('Exception in sample_worker: ' + str(e))
                 finally:
                     sample_event.clear()
