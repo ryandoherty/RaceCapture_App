@@ -4,68 +4,33 @@ kivy.require('1.8.0')
 from math import sin
 from installfix_garden_graph import Graph, MeshLinePlot
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.utils import get_color_from_hex as rgb
 from kivy.app import Builder
 from valuefield import *
 from utils import *
 from channels import *
-from kivy.metrics import dp
 from channelnameselectorview import ChannelNameSelectorView
 from channelnamespinner import ChannelNameSpinner
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
-from autosportlabs.widgets.scrollcontainer import ScrollContainer
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/analogchannelsview.kv')
-
-class AnalogChannelsView(BaseConfigView):
-    editors = []    
-    accordion = None
-    analogCfg = None
-    accordionMapping = {}    
+        
+class AnalogChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):
         super(AnalogChannelsView, self).__init__(**kwargs)
-        self.register_event_type('on_config_updated')
-
-        self.channelCount = kwargs['channelCount']
-
-        accordion = Accordion(orientation='vertical', size_hint=(1.0, None), height=80 * self.channelCount)
-
-        editors = []    
-        for i in range(self.channelCount):
-            channel = AccordionItem(title='Analog ' + str(i + 1))
-            editor = AnalogChannel(id='analog' + str(i))
-            editor.bind(on_modified=self.on_modified)
-            channel.add_widget(editor)
-            accordion.add_widget(channel)
-            editors.append(editor)
+        self.channel_title = 'Analog '
+        self.accordion_item_height = 80
             
-        self.editors = editors
-        accordion.select(accordion.children[-1])
-        
-        #create a scroll view, with a size < size of the grid
-        sv = ScrollContainer(size_hint=(1.0,1.0), do_scroll_x=False)
-        sv.add_widget(accordion)
-        self.accordion = accordion
-        self.add_widget(sv)
-    
-    def on_config_updated(self, rcpCfg):
-        analogCfg = rcpCfg.analogConfig
-
-        channel_count = analogCfg.channelCount
-        for i in range(channel_count):
-            editor = self.editors[i]
-            channel_config = analogCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, analogCfg.channels, channel_config)
-            editor.on_config_updated(channel_config)
-    
-        self.analogCfg = analogCfg
-        
-        
-    def on_modified(self, instance, channel_config):
-        self.setAccordionItemTitle(self.accordion, self.analogCfg.channels, channel_config)
-        super(AnalogChannelsView, self).on_modified(self, instance, channel_config)
+    def channel_builder(self, index):
+        editor = AnalogChannel(id='analog' + str(index))
+        editor.bind(on_modified=self.on_modified)
+        if self.config:
+            editor.on_config_updated(self.config.channels[index])
+        return editor
+            
+    def get_specific_config(self, rcp_cfg):
+        return rcp_cfg.analogConfig
         
 class AnalogChannel(BoxLayout):
     channelConfig = None

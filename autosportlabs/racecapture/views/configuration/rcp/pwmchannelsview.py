@@ -10,9 +10,26 @@ from fieldlabel import FieldLabel
 from valuefield import IntegerValueField
 from mappedspinner import MappedSpinner
 from utils import *
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/pwmchannelsview.kv')
+
+class AnalogPulseOutputChannelsView(BaseMultiChannelConfigView):
+    def __init__(self, **kwargs):
+        super(AnalogPulseOutputChannelsView, self).__init__(**kwargs)
+        self.channel_title = 'Pulse / Analog Output '
+        self.accordion_item_height = 100
+        
+    def channel_builder(self, index):
+        editor = AnalogPulseOutputChannel(id='pwm' + str(index))
+        editor.bind(on_modified=self.on_modified)
+        if self.config:
+            editor.on_config_updated(self.config.channels[index])
+        return editor
+            
+    def get_specific_config(self, rcp_cfg):
+        return rcp_cfg.pwmConfig
+
     
 class PwmOutputModeSpinner(MappedSpinner):
     def __init__(self, **kwargs):
@@ -98,47 +115,3 @@ class AnalogPulseOutputChannel(BoxLayout):
         
         self.channelConfig = channelConfig
         
-class AnalogPulseOutputChannelsView(BaseConfigView):
-    editors = None
-    channels = None
-    accordion = None
-    pwmCfg = None
-    def __init__(self, **kwargs):
-        self.register_event_type('on_config_updated')
-        self.channelCount = kwargs['channelCount']
-        
-        super(AnalogPulseOutputChannelsView, self).__init__(**kwargs)
-        accordion = Accordion(orientation='vertical', size_hint=(1.0, None), height=100 * self.channelCount)
-        self.accordion = accordion
-        editors = []
-        for i in range(self.channelCount):
-            channel = AccordionItem(title='Pulse / Analog Output ' + str(i + 1))
-            editor = AnalogPulseOutputChannel(id='pwm' + str(i))
-            editors.append(editor)
-            editor.bind(on_modified=self.on_modified) 
-            channel.add_widget(editor)
-            accordion.add_widget(channel)
-    
-        accordion.select(accordion.children[-1])
-        self.editors = editors
-    
-        #create a scroll view, with a size < size of the grid
-        sv = ScrollView(size_hint=(1.0,1.0), do_scroll_x=False)
-        sv.add_widget(accordion)
-        self.add_widget(sv)
-
-    def on_modified(self, instance, channel_config):
-        self.setAccordionItemTitle(self.accordion, self.pwmCfg.channels, channel_config)
-        super(AnalogPulseOutputChannelsView, self).on_modified(self, instance, channel_config)
-
-    def on_config_updated(self, rcpCfg):
-        pwmCfg = rcpCfg.pwmConfig
-        self.pwmCfg = pwmCfg
-        
-        channelCount = pwmCfg.channelCount
-        for i in range(channelCount):
-            editor = self.editors[i]
-            channel_config = pwmCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, pwmCfg.channels, channel_config)
-            editor.on_config_updated(channel_config)
-            

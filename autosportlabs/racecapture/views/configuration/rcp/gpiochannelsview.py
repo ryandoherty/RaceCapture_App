@@ -7,12 +7,28 @@ from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.uix.scrollview import ScrollView
 from kivy.app import Builder
 from utils import *
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
 from mappedspinner import MappedSpinner
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/gpiochannelsview.kv')
 
+class GPIOChannelsView(BaseMultiChannelConfigView):
+    def __init__(self, **kwargs):
+        super(GPIOChannelsView, self).__init__(**kwargs)
+        self.channel_title = 'Digital Input/Output '
+        self.accordion_item_height = 90
+
+    def channel_builder(self, index):
+        editor = GPIOChannel(id = 'gpio' + str(index))
+        editor.bind(on_modified = self.on_modified)
+        if self.config:
+            editor.on_config_updated(self.config.channels[index])
+        return editor
+    
+    def get_specific_config(self, rcp_cfg):
+        return rcp_cfg.gpioConfig
+    
 class GPIOModeSpinner(MappedSpinner):
     def __init__(self, **kwargs):
         super(GPIOModeSpinner, self).__init__(**kwargs)
@@ -59,56 +75,3 @@ class GPIOChannel(BoxLayout):
         modeSpinner.setFromValue(channelConfig.mode)
 
         self.channelConfig = channelConfig
-        
-        
-class GPIOChannelsView(BaseConfigView):
-    editors = []
-    channels = None
-    accordion = None
-    gpioCfg = None
-    def __init__(self, **kwargs):
-        super(GPIOChannelsView, self).__init__(**kwargs)
-        self.register_event_type('on_config_updated')
-        self.channelCount = kwargs['channelCount']
-        
-        accordion = Accordion(orientation='vertical', size_hint=(1.0, None), height=90 * self.channelCount)
-        self.accordion = accordion
-        
-        editors = []
-        for i in range(self.channelCount):
-            channel = AccordionItem(title='Digital Input/Output ' + str(i + 1))
-            editor = GPIOChannel(id='gpio' + str(i))
-            editors.append(editor)
-            editor.bind(on_modified=self.on_modified)            
-            channel.add_widget(editor)
-            accordion.add_widget(channel)
-        
-        accordion.select(accordion.children[-1])
-        self.editors = editors
-        
-        sv = ScrollView(size_hint=(1.0,1.0), do_scroll_x=False)
-        sv.add_widget(accordion)
-        self.add_widget(sv)
-
-
-    def on_modified(self, instance, channel_config):
-        self.setAccordionItemTitle(self.accordion, self.gpioCfg.channels, channel_config)
-        super(GPIOChannelsView, self).on_modified(self, instance, channel_config)
-
-    def on_config_updated(self, rcpCfg):
-        gpioCfg = rcpCfg.gpioConfig
-
-        channel_count = gpioCfg.channelCount
-        for i in range(channel_count):
-            editor = self.editors[i]
-            channel_config = gpioCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, gpioCfg.channels, channel_config)            
-            editor.on_config_updated(channel_config)
-            
-        self.gpioCfg = gpioCfg
-            
-            
-            
-
-            
- 

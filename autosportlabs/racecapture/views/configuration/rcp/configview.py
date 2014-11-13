@@ -57,7 +57,6 @@ class ConfigView(Screen):
     configViews = []
     content = None
     menu = None
-    channels = None
     rc_config = None
     scriptView = None
     _settings = None    
@@ -87,7 +86,6 @@ class ConfigView(Screen):
         self.writeStale = False
         
     def on_config_modified(self, *args):
-        print("modified " + str(args))
         self.writeStale = True
 
     def update_system_channels(self, system_channels):
@@ -155,13 +153,13 @@ class ConfigView(Screen):
         defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView(rcpComms=self.rc_api))
         attach_node('GPS', None, GPSChannelsView(rcpComms=self.rc_api))
         attach_node('Lap Statistics', None, LapStatsView())        
-        attach_node('Analog Sensors', None, AnalogChannelsView(channelCount=8, channels=self.channels))
-        attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channelCount=3, channels=self.channels))
-        attach_node('Digital In/Out', None, GPIOChannelsView(channelCount=3, channels=self.channels))
+        attach_node('Analog Sensors', None, AnalogChannelsView())
+        attach_node('Pulse/RPM Sensors', None, PulseChannelsView())
+        attach_node('Digital In/Out', None, GPIOChannelsView())
         attach_node('Accelerometer/Gyro', None, ImuChannelsView())
-        attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView(channelCount=4, channels=self.channels))
+        attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView())
         attach_node('CAN Bus', None, CANConfigView())
-        attach_node('OBDII', None, OBD2ChannelsView(channels=self.channels))
+        attach_node('OBDII', None, OBD2ChannelsView())
         attach_node('Wireless', None, WirelessConfigView())
         attach_node('Telemetry', None, TelemetryConfigView())
         scriptView = LuaScriptingView()

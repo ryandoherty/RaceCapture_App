@@ -69,7 +69,6 @@ class OBD2ChannelsView(BaseConfigView):
         obd2Enable.bind(on_setting=self.on_obd2_enabled)
         obd2Enable.setControl(SettingsSwitch())
         
-        self.channels = kwargs['channels']
         self.obd2Settings = OBD2Settings()
         
         self.update_view_enabled()

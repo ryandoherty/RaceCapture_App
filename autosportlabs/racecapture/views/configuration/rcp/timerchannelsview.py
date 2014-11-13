@@ -8,10 +8,27 @@ from kivy.uix.spinner import Spinner
 from kivy.app import Builder
 from mappedspinner import MappedSpinner
 from utils import *
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/timerchannelsview.kv')
+
+class PulseChannelsView(BaseMultiChannelConfigView):
+    def __init__(self, **kwargs):
+        super(PulseChannelsView, self).__init__(**kwargs)
+        self.channel_title = 'Timer '
+        self.accordion_item_height = 110
+
+    def channel_builder(self, index):
+        editor = PulseChannel(id='timer' + str(index))
+        editor.bind(on_modified=self.on_modified)
+        if self.config:
+            editor.on_config_updated(self.config.channels[index])
+        return editor
+    
+    def get_specific_config(self, rcp_cfg):
+        return rcp_cfg.timerConfig
+
 
 class TimerModeSpinner(MappedSpinner):
     def __init__(self, **kwargs):
@@ -91,47 +108,3 @@ class PulseChannel(BoxLayout):
         
         self.channelConfig = channel_config
 
-class PulseChannelsView(BaseConfigView):
-    editors = []
-    accordion = None
-    timerCfg = None
-    def __init__(self, **kwargs):
-        super(PulseChannelsView, self).__init__(**kwargs)
-        self.register_event_type('on_config_updated')
-        self.channelCount = kwargs['channelCount']
-        
-        accordion = Accordion(orientation='vertical', size_hint=(1.0, None), height=110 * 3)
-        self.accordion = accordion
-        
-        editors = []
-        # add button into that grid
-        for i in range(self.channelCount):
-            channel = AccordionItem(title='Pulse Input ' + str(i + 1))
-            editor = PulseChannel(id='timer' + str(i))
-            channel.add_widget(editor)
-            editor.bind(on_modified=self.on_modified)            
-            accordion.add_widget(channel)
-            editors.append(editor)
-    
-        accordion.select(accordion.children[-1])
-    
-        self.editors = editors
-        #create a scroll view, with a size < size of the grid
-        sv = ScrollView(size_hint=(1.0,1.0), do_scroll_x=False)
-        sv.add_widget(accordion)
-        self.add_widget(sv)
-
-    def on_modified(self, instance, channel_config):
-        self.setAccordionItemTitle(self.accordion, self.timerCfg.channels, channel_config)
-        super(PulseChannelsView, self).on_modified(self, instance, channel_config)
-
-    def on_config_updated(self, rcpCfg):
-        timerCfg = rcpCfg.timerConfig
-        self.timerCfg = timerCfg
-        
-        channelCount = timerCfg.channelCount
-        for i in range(channelCount):
-            editor = self.editors[i]
-            timer_channel = timerCfg.channels[i]
-            self.setAccordionItemTitle(self.accordion, timerCfg.channels, timer_channel)            
-            editor.on_config_updated(timer_channel)
