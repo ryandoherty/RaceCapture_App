@@ -1,6 +1,8 @@
+import termios
 import serial
 from serial import SerialException
 from serial.tools import list_ports
+from autosportlabs.comms.comms import PortNotOpenException, CommsErrorException
 
 class SerialConnection():
     ser = None
@@ -18,22 +20,24 @@ class SerialConnection():
         self.ser = None
         
     def isOpen(self):
-        return not self.ser == None
+        return self.ser != None
     
     def open(self, port, timeout, writeTimeout):
-        print('open: ' + str(timeout) + ' ' + str(writeTimeout))
         ser = serial.Serial(port, timeout=timeout, writeTimeout = writeTimeout) 
         self.ser = ser
             
     def close(self):
-        print('closing serial')
         if self.ser != None:
             self.ser.close()
         self.ser = None
 
     def read(self, count):
+        ser = self.ser
+        if ser == None: raise PortNotOpenException()
         try:
-            return self.ser.read(count)
+            return ser.read(count)
+        except termios.error:
+            raise CommsErrorException()
         except SerialException as e:
             if str(e).startswith('device reports readiness'):
                 return ''
@@ -41,10 +45,20 @@ class SerialConnection():
                 raise
     
     def write(self, data):
-        return self.ser.write(data)
+        try:
+            return self.ser.write(data)
+        except termios.error:
+            raise CommsErrorException()
+            
     
     def flushInput(self):
-        self.ser.flushInput()
+        try:
+            self.ser.flushInput()
+        except termios.error:
+            raise CommsErrorException()
     
     def flushOutput(self):
-        self.ser.flushOutput()
+        try:
+            self.ser.flushOutput()
+        except termios.error:
+            raise CommsErrorException()

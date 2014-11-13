@@ -294,20 +294,27 @@ class RaceCaptureApp(App):
         
         print("build() complete")
         
-            
+
     def initRcComms(self):
         port = self.getAppArg('port')
         comms = comms_factory(port)
-        self._rc_api.initSerial(comms, self.rcDetectWin, self.rcDetectFail)
+        rc_api = self._rc_api
+        rc_api.detect_win_callback = self.rc_detect_win
+        rc_api.detect_fail_callback = self.rc_detect_fail
+        rc_api.detect_activity_callback = self.rc_detect_activity
+        rc_api.initSerial(comms)
     
-    def rcDetectWin(self, rcpVersion):
+    def rc_detect_win(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         Clock.schedule_once(lambda dt: self.on_read_config(self), 1.0)
         self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
-
         
-    def rcDetectFail(self):
+    def rc_detect_fail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)
+    
+    def rc_detect_activity(self, info):
+        self.showActivity('Searching {}'.format(info))
+            
 if __name__ == '__main__':
 
     RaceCaptureApp().run()

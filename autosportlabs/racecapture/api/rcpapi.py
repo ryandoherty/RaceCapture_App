@@ -5,6 +5,7 @@ import Queue
 from time import sleep
 from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.comms.comms import PortNotOpenException, CommsErrorException
 from functools import partial
 
 TRACK_ADD_MODE_IN_PROGRESS = 1
@@ -14,7 +15,7 @@ SCRIPT_ADD_MODE_IN_PROGRESS = 1
 SCRIPT_ADD_MODE_COMPLETE = 2
 
 DEFAULT_LEVEL2_RETRIES = 4
-DEFAULT_MSG_RX_TIMEOUT = 1.0
+DEFAULT_MSG_RX_TIMEOUT = 0.5
 
 AUTODETECT_MSG_RX_TIMEOUT = 1.0
 AUTODETECT_LEVEL2_RETRIES = 0
@@ -36,14 +37,17 @@ class CommandSequence():
     command_list = None
     rootName = None
     winCallback = None
-    failCallback = None    
+    failCallback = None
             
 class RcpApi:
+    detect_win_callback = None
+    detect_fail_callback = None
+    detect_activity_callback = None
     comms = None   
     msgListeners = {}
     cmdSequenceQueue = Queue.Queue()
     _command_queue = Queue.Queue()
-    sendCommandLock = RLock()
+    _send_command_lock = RLock()
     on_progress = lambda self, value: value
     on_tx = lambda self, value: None
     on_rx = lambda self, value: None
@@ -57,6 +61,17 @@ class RcpApi:
         self.comms = kwargs.get('comms', self.comms)
         self._running = Event()
         self._running.clear()
+        
+    def recover_connection(self):
+        print("attempting to recover connection")
+        try:
+            if self.detect_activity_callback: self.detect_activity_callback('')
+            self.comms.close()
+            self.comms.open()
+        except:
+            print("Failed to immediately recover; running auto-detect")
+            self.run_auto_detect()
+            raise            
 
     def _start_message_rx_worker(self):
         self._running.set()
@@ -74,17 +89,17 @@ class RcpApi:
         self._cmd_sequence_thread.daemon = True
         self._cmd_sequence_thread.start()
 
-    def initSerial(self, comms, detect_win, detect_fail):
+    def initSerial(self, comms):
         self.comms = comms
         self._start_message_rx_worker()
         self._start_cmd_sequence_worker()
-        self.start_auto_detect_worker(lambda version_info: self.detect_win(detect_win, version_info), detect_fail)
+        self.start_auto_detect_worker()
         self.run_auto_detect()
 
-    def detect_win(self, detect_win, version_info):
+    def detect_win(self, version_info):
         self.level_2_retries = DEFAULT_LEVEL2_RETRIES
         self.msg_rx_timeout = DEFAULT_MSG_RX_TIMEOUT
-        detect_win(version_info)
+        if self.detect_win_callback: self.detect_win_callback(version_info)
         
     def run_auto_detect(self):
         self.level_2_retries = AUTODETECT_LEVEL2_RETRIES
@@ -109,6 +124,7 @@ class RcpApi:
         print('msg_rx_worker started')
         msg = ''
         comms = self.comms
+        error_count = 0
         while self._running.is_set():
             try:
                 msg += comms.read(1)
@@ -117,6 +133,7 @@ class RcpApi:
                     #print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
+                    error_count = 0
                     for messageName in msgJson.keys():
                         #print('processing message ' + messageName)
                         listeners = self.msgListeners.get(messageName, None)
@@ -129,11 +146,22 @@ class RcpApi:
                                     traceback.print_exc()
                             break
                     msg = ''
+            except PortNotOpenException:
+                print("Port not open...")
+                msg=''
+                sleep(1.0)
             except Exception:
                 print('Message rx worker exception: {} | {}'.format(msg, str(Exception)))
                 traceback.print_exc()
-                sleep(0.2)
                 msg = ''
+                error_count += 1
+                if error_count > 5:
+                    print("Too many Rx exceptions; re-opening connection")
+                    self.recover_connection()
+                else:
+                    sleep(0.25)
+
+                    
                     
         print("RxWorker exiting")
                     
@@ -173,8 +201,11 @@ class RcpApi:
                 rootName = command.rootName
                 winCallback = command.winCallback
                 failCallback = command.failCallback
+                comms = self.comms
                 
                 print('Execute Sequence begin')
+                
+                if not comms.isOpen(): self.run_auto_detect()
                         
                 q = self.cmdSequenceQueue
                 
@@ -204,7 +235,7 @@ class RcpApi:
                                 rcpCmd.cmd()
         
                             retry = 0
-                            while not result and retry < self.comms.DEFAULT_READ_RETRIES:
+                            while not result and retry < comms.DEFAULT_READ_RETRIES:
                                 try:
                                     result = q.get(True, self.msg_rx_timeout)
                                     msgName = result.keys()[0]
@@ -212,6 +243,7 @@ class RcpApi:
                                         print('rx message did not match expected name ' + str(name) + '; ' + str(msgName))
                                         result = None
                                 except Exception as e:
+                                    traceback.print_exc()                                    
                                     print('Read message timeout ' + str(e))
                                     self.recoverTimeout()
                                     retry += 1
@@ -233,6 +265,9 @@ class RcpApi:
                         winCallback({rootName: responseResults})
                     else:
                         winCallback(responseResults)
+                    
+                except CommsErrorException:
+                    self.recover_connection()
                 except Exception as detail:
                     print('Command sequence exception: ' + str(detail))
                     traceback.print_exc()
@@ -245,7 +280,7 @@ class RcpApi:
                 
     def sendCommand(self, cmd):
         try:
-            self.sendCommandLock.acquire()
+            self._send_command_lock.acquire()
             rsp = None
             
             comms = self.comms
@@ -255,9 +290,12 @@ class RcpApi:
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
             #print('send cmd: ' + cmdStr)
             comms.write(cmdStr)
+        except Exception:
+            self.recover_connection()
         finally:
-            self.sendCommandLock.release()
+            self._send_command_lock.release()
             self.on_tx(True)
+        
         
     def sendGet(self, name, index = None):
         if index == None:
@@ -527,24 +565,22 @@ class RcpApi:
         else:
             self.sendCommand({'s':0})
             
-    def start_auto_detect_worker(self, winCallback, failCallback):
+    def start_auto_detect_worker(self):
         self._auto_detect_event.clear()
-        t = Thread(target=self.auto_detect_worker, args=(self.getVersion, winCallback, failCallback))
+        t = Thread(target=self.auto_detect_worker)
         t.daemon = True
         t.start()        
         
-    def auto_detect_worker(self, getVersion, winCallback = None, failCallback = None):
+    def auto_detect_worker(self):
 
         class VersionResult(object):
             version_json = None
 
         def on_ver_win(value):
-            print('get_ver_success ' + str(value))
             version_result.version_json = value
             version_result_event.set()
             
         def on_ver_fail(value):
-            print('on_ver_fail ' + str(value))
             version_result_event.set()
         
         while True:
@@ -567,13 +603,13 @@ class RcpApi:
                 for p in ports:
                     try:
                         print "Trying", p
+                        if self.detect_activity_callback: self.detect_activity_callback(str(p))
                         comms.port = p
                         comms.open()
-                        getVersion(on_ver_win, on_ver_fail)
+                        self.getVersion(on_ver_win, on_ver_fail)
                         version_result_event.wait()
                         version_result_event.clear()
                         if version_result.version_json != None:
-                            print('get ver success!')
                             testVer.fromJson(version_result.version_json.get('ver', None))
                             if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
                                 break
@@ -588,14 +624,14 @@ class RcpApi:
         
                 if version_result.version_json != None:
                     print "Found device version " + testVer.toString() + " on port:", comms.port
-                    print(str(winCallback))
-                    if winCallback: winCallback(testVer)
+                    self.detect_win(testVer)
                 else:
+                    comms.close()
                     comms.port = None
-                    if failCallback: failCallback()
+                    if self.detect_fail_callback: self.detect_fail_callback()
             except Exception as e:
                 print ('Error running auto detect: ' + str(e))
                 traceback.print_exc()
             finally: 
-                print("auto detect finished")
+                print("auto detect finished. port=" + str(comms.port))
             

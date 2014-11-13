@@ -7,8 +7,9 @@ BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
 BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
 UUID = autoclass('java.util.UUID')
 
+from autosportlabs.comms.comms import PortNotOpenException
 
-class BluetoothConnection():
+class BluetoothConnection(object):
     ser = None
     recv_stream = None
     send_stream = None
@@ -97,7 +98,9 @@ class BluetoothConnection():
 
 
     def read(self, count):
-        c = self.recv_stream.read()
+        recv_stream = self.recv_stream
+        if recv_stream == None: raise PortNotOpenException()
+        c = recv_stream.read()
         if c == -1:
             self.close()
             raise Exception('Socket reported EOF')

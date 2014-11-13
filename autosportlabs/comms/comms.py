@@ -1,6 +1,12 @@
 from threading import Thread, RLock, Event
 from time import sleep
 
+class PortNotOpenException(Exception):
+    pass
+
+class CommsErrorException(Exception):
+    pass
+
 class Comms():
     DEFAULT_READ_RETRIES = 2
     DEFAULT_WRITE_TIMEOUT = 1

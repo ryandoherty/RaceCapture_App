@@ -86,8 +86,8 @@ class DataBus(object):
 
 SAMPLE_POLL_TEST_TIMEOUT       = 10.0
 SAMPLE_POLL_INTERVAL_TIMEOUT   = 0.1 #10Hz polling
-SAMPLE_POLL_EXCEPTION_RECOVERY = 2.0
-SAMPLES_TO_WAIT_FOR_META       = 10
+SAMPLE_POLL_EXCEPTION_RECOVERY = 10.0
+SAMPLES_TO_WAIT_FOR_META       = 5.0
 
 class DataBusPump(object):
     _rc_api = None
@@ -102,16 +102,17 @@ class DataBusPump(object):
         super(DataBusPump, self).__init__(**kwargs)
 
     def startDataPump(self, data_bus, rc_api):
-        self._rc_api = rc_api
-        self._data_bus = data_bus
-
-        rc_api.addListener('s', self.on_sample)
-        rc_api.addListener('meta', self.on_meta)
-        
-        self._running.set()
-        self._sample_thread = Thread(target=self.sample_worker)
-        self._sample_thread.daemon = True
-        self._sample_thread.start()
+        if self._sample_thread == None:
+            self._rc_api = rc_api
+            self._data_bus = data_bus
+    
+            rc_api.addListener('s', self.on_sample)
+            rc_api.addListener('meta', self.on_meta)
+            
+            self._running.set()
+            self._sample_thread = Thread(target=self.sample_worker)
+            self._sample_thread.daemon = True
+            self._sample_thread.start()
 
     def on_meta(self, meta_json):
         metas = self.sample.metas
