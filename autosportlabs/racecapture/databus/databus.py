@@ -86,6 +86,7 @@ class DataBus(object):
 
 SAMPLE_POLL_TEST_TIMEOUT       = 10.0
 SAMPLE_POLL_INTERVAL_TIMEOUT   = 0.1 #10Hz polling
+SAMPLE_POLL_EVENT_TIMEOUT      = 1.0
 SAMPLE_POLL_EXCEPTION_RECOVERY = 10.0
 SAMPLES_TO_WAIT_FOR_META       = 5.0
 
@@ -164,7 +165,7 @@ class DataBusPump(object):
                     #RaceCapture. If we don't get an asynchronous sample, then we will timeout
                     #and request a sample anyway.
                     rc_api.sample()
-                    sample_event.wait(SAMPLE_POLL_INTERVAL_TIMEOUT)
+                    sample_event.wait(SAMPLE_POLL_EVENT_TIMEOUT)
                     sample_event.clear()
                     sleep(SAMPLE_POLL_INTERVAL_TIMEOUT)
                 except Exception as e:

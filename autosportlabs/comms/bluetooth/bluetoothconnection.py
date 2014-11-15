@@ -27,17 +27,14 @@ class BluetoothConnection(object):
             
     def get_available_ports(self):
         return ['RaceCapturePro']
-        
-    def reset(self):
-        self.close()
-        
+                
     def isOpen(self):
         return self.socket != None
     
     port_to_open = None
     error_message = None
 
-    def open(self, port, timeout, writeTimeout):
+    def open(self, port):
         self.port_to_open = port
         self.error_message = None
         self.open_request_event.set()

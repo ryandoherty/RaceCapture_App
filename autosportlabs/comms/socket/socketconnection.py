@@ -7,10 +7,7 @@ class SerialConnection():
     
     def get_available_ports(self):
         pass
-        
-    def reset(self):
-        self.close()
-        
+                
     def isOpen(self):
         pass
     

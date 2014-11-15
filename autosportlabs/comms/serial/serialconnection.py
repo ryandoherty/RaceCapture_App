@@ -5,6 +5,11 @@ from serial.tools import list_ports
 from autosportlabs.comms.comms import PortNotOpenException, CommsErrorException
 
 class SerialConnection():
+    DEFAULT_WRITE_TIMEOUT = 1
+    DEFAULT_READ_TIMEOUT = 1
+    timeout = DEFAULT_READ_TIMEOUT
+    writeTimeout = DEFAULT_WRITE_TIMEOUT 
+    
     ser = None
     
     def __init__(self, **kwargs):
@@ -13,16 +18,12 @@ class SerialConnection():
     def get_available_ports(self):
         ports = [x[0] for x in list_ports.comports()]
         return ports
-    
-    def reset(self):
-        self.close()
-        self.ser = None
-        
+            
     def isOpen(self):
         return self.ser != None
     
-    def open(self, port, timeout, writeTimeout):
-        ser = serial.Serial(port, timeout=timeout, writeTimeout = writeTimeout) 
+    def open(self, port):
+        ser = serial.Serial(port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
         self.ser = ser
             
     def close(self):

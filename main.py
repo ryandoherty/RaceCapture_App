@@ -112,7 +112,7 @@ class RaceCaptureApp(App):
     def loadCurrentTracksError(self, details):
         alertPopup('Error Loading Tracks', str(details))        
         
-    def initData(self):
+    def init_data(self):
         self.trackManager.init(None, self.loadCurrentTracksSuccess, self.loadCurrentTracksError)
 
     def _serial_warning(self):
@@ -218,9 +218,12 @@ class RaceCaptureApp(App):
         pass
     
     def on_start(self):
-        self.initData()
-        self.initRcComms()
+        self.init_data()
+        self.init_rc_comms()
                 
+    def on_stop(self):
+        self._rc_api.shutdown_comms()
+                        
     def build(self):
         Builder.load_file('racecapture.kv')
         statusBar = kvFind(self.root, 'rcid', 'statusbar')
@@ -295,14 +298,14 @@ class RaceCaptureApp(App):
         print("build() complete")
         
 
-    def initRcComms(self):
+    def init_rc_comms(self):
         port = self.getAppArg('port')
         comms = comms_factory(port)
         rc_api = self._rc_api
         rc_api.detect_win_callback = self.rc_detect_win
         rc_api.detect_fail_callback = self.rc_detect_fail
         rc_api.detect_activity_callback = self.rc_detect_activity
-        rc_api.initSerial(comms)
+        rc_api.init_comms(comms)
     
     def rc_detect_win(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)

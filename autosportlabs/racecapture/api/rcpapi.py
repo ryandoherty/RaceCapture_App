@@ -20,6 +20,8 @@ DEFAULT_MSG_RX_TIMEOUT = 1.0
 AUTODETECT_MSG_RX_TIMEOUT = 1.0
 AUTODETECT_LEVEL2_RETRIES = 0
 
+DEFAULT_READ_RETRIES = 2
+
 class RcpCmd:
     name = None
     cmd = None
@@ -79,7 +81,7 @@ class RcpApi:
         self._msg_rx_thread.daemon = True
         self._msg_rx_thread.start()
 
-    def stop_msessage_rx_worker(self):
+    def stop_message_rx_worker(self):
         print('Stopping msg rx worker')
         self._running.clear()
         self._msg_rx_thread.join()
@@ -89,13 +91,20 @@ class RcpApi:
         self._cmd_sequence_thread.daemon = True
         self._cmd_sequence_thread.start()
 
-    def initSerial(self, comms):
+    def init_comms(self, comms):
         self.comms = comms
         self._start_message_rx_worker()
         self._start_cmd_sequence_worker()
         self.start_auto_detect_worker()
         self.run_auto_detect()
-
+        
+    def shutdown_comms(self):
+        try:
+            self.comms.close()
+            self.comms.port = None
+        except:
+            pass
+        
     def detect_win(self, version_info):
         self.level_2_retries = DEFAULT_LEVEL2_RETRIES
         self.msg_rx_timeout = DEFAULT_MSG_RX_TIMEOUT
@@ -129,7 +138,7 @@ class RcpApi:
             try:
                 msg = comms.read_message()
                 if msg:
-                    #print('msg_rx_worker Rx: ' + str(msg))
+                    print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
                     error_count = 0
@@ -159,8 +168,6 @@ class RcpApi:
                     self.recover_connection()
                 else:
                     sleep(0.25)
-
-                    
                     
         print("RxWorker exiting")
                     
@@ -169,7 +176,7 @@ class RcpApi:
                 
     def recoverTimeout(self):
         print('POKE')
-        self.comms.write(' ')
+        self.comms.write_message(' ')
 
     def notifyProgress(self, count, total):
         if self.on_progress:
@@ -234,7 +241,7 @@ class RcpApi:
                                 rcpCmd.cmd()
         
                             retry = 0
-                            while not result and retry < comms.DEFAULT_READ_RETRIES:
+                            while not result and retry < DEFAULT_READ_RETRIES:
                                 try:
                                     result = q.get(True, self.msg_rx_timeout)
                                     msgName = result.keys()[0]
@@ -242,7 +249,6 @@ class RcpApi:
                                         print('rx message did not match expected name ' + str(name) + '; ' + str(msgName))
                                         result = None
                                 except Exception as e:
-                                    traceback.print_exc()                                    
                                     print('Read message timeout ' + str(e))
                                     self.recoverTimeout()
                                     retry += 1
@@ -283,8 +289,6 @@ class RcpApi:
             rsp = None
             
             comms = self.comms
-            comms.flushOutput()
-            comms.flushInput()
 
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
             #print('send cmd: ' + cmdStr)
@@ -580,6 +584,7 @@ class RcpApi:
             version_result_event.set()
             
         def on_ver_fail(value):
+            print('on_ver_fail')
             version_result_event.set()
         
         while True:
@@ -601,7 +606,7 @@ class RcpApi:
                 testVer = VersionConfig()
                 for p in ports:
                     try:
-                        print "Trying", p
+                        print('Trying' + str(p))
                         if self.detect_activity_callback: self.detect_activity_callback(str(p))
                         comms.port = p
                         comms.open()
@@ -611,13 +616,18 @@ class RcpApi:
                         if version_result.version_json != None:
                             testVer.fromJson(version_result.version_json.get('ver', None))
                             if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
-                                break
+                                break #we found something!
+                        else:
+                            try:
+                                print ('Giving up on ' + str(p))
+                                comms.close()
+                            finally:
+                                pass
         
                     except Exception as detail:
                         print('Not found on ' + str(p) + " " + str(detail))
                         try:
                             comms.close()
-                            comms.port = None
                         finally:
                             pass
         
@@ -625,6 +635,7 @@ class RcpApi:
                     print "Found device version " + testVer.toString() + " on port:", comms.port
                     self.detect_win(testVer)
                 else:
+                    print('Did not find device')
                     comms.close()
                     comms.port = None
                     if self.detect_fail_callback: self.detect_fail_callback()

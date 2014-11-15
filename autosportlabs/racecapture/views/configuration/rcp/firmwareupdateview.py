@@ -52,15 +52,12 @@ class FirmwareUpdateView(BaseConfigView):
         kvFind(self, 'rcid', 'fw_progress').value = int(percent)
 
     def _teardown_json_serial(self):
-        self.dataBusPump.stopDataPump()
         self.dataBusPump._rc_api.resetDevice(bootloader=True)
-        self.dataBusPump._rc_api.comms.close()
+        self.dataBusPump._rc_api.shutdown_comms()
         sleep(5)
 
     def _restart_json_serial(self):
         self.dataBusPump._rc_api.run_auto_detect()
-        self.dataBusPump.startDataPump(self.dataBusPump._data_bus,
-                                       self.dataBusPump._rc_api)
                         
     def _update_thread(self, instance):
         try:
