@@ -29,10 +29,7 @@ class RawGauge(DigitalGauge):
         
     def updateColors(self):
         color = self.select_alert_color()
-        if (self.channel == 'LapTime'): print(self.channel + ' ' + str(color))
         self.valueView.color = color
- 
-        
         
 class RawChannelView(Screen):
     _gauges = {}
