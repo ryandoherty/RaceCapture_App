@@ -48,37 +48,16 @@ class Comms():
         print('closing connection')
         self.connection.close()
 
+    def read_message(self):
+        return self.connection.read_line()
+    
+    def write_message(self, message):
+        self.connection.write(message)
+    
     def read(self, count):
         ret = self.connection.read(count)
         return ret
-    
-    def readLine(self):
-        connection = self.connection
-        eol2 = b'\r'
-        retryCount = 0
-        line = bytearray()
-
-        while True:
-            c = connection.read(1)
-            print(str(c))
-            if  c == eol2:
-                break
-            elif c == '':
-                print('empty character received...')
-                if retryCount >= self.retryCount:
-                    raise Exception('Could not read line')
-                retryCount +=1
-                print('Timeout - retry: ' + str(retryCount))
-                print("POKE")
-                connection.write(' ')
-            else:
-                line += c
-        print('returning line')
-        line = bytes(line).strip()
-        line = line.replace('\r', '')
-        line = line.replace('\n', '')
-        return line
-    
+        
     def write(self, data):
         return self.connection.write(data)
     

@@ -122,14 +122,13 @@ class RcpApi:
             
     def msg_rx_worker(self):
         print('msg_rx_worker started')
-        msg = ''
         comms = self.comms
         error_count = 0
         while self._running.is_set():
+            msg = None
             try:
-                msg += comms.read(1)
-                if msg[-2:] == '\r\n':
-                    msg = msg[:-2]
+                msg = comms.read_message()
+                if msg:
                     #print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
@@ -289,7 +288,7 @@ class RcpApi:
 
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
             #print('send cmd: ' + cmdStr)
-            comms.write(cmdStr)
+            comms.write_message(cmdStr)
         except Exception:
             self.recover_connection()
         finally:

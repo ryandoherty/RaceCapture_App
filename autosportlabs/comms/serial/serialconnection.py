@@ -9,7 +9,6 @@ class SerialConnection():
     
     def __init__(self, **kwargs):
         pass
-
     
     def get_available_ports(self):
         ports = [x[0] for x in list_ports.comports()]
@@ -43,6 +42,17 @@ class SerialConnection():
                 return ''
             else: 
                 raise
+    
+    def read_line(self):
+        msg = ''
+        while True:
+            c = self.read(1)
+            if c == '':
+                return None
+            msg += c
+            if msg[-2:] == '\r\n':
+                msg = msg[:-2]
+                return msg
     
     def write(self, data):
         try:
