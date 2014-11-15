@@ -9,8 +9,6 @@ class PortNotOpenException(Exception):
 class CommsErrorException(Exception):
     pass
 
-
-
 def connection_process_message_reader(rx_queue, connection, should_run):
     print('connection process message reader started')
     
@@ -18,7 +16,6 @@ def connection_process_message_reader(rx_queue, connection, should_run):
         try:
             msg = connection.read_line()
             if msg:
-                print('got message: ' + str(msg))
                 rx_queue.put(msg)
         except:
             print('Exception in connection_process_message_reader')
