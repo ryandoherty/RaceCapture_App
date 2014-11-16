@@ -156,6 +156,8 @@ class ConfigView(Screen):
             view.bind(on_config_modified=self.on_config_modified)
             return tree.add_node(label, n)
 
+        system_channels = self._settings.systemChannels
+
         defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView(rcpComms=self.rc_api))
         attach_node('GPS', None, GPSChannelsView(rcpComms=self.rc_api))
         attach_node('Lap Statistics', None, LapStatsView())        
@@ -165,7 +167,7 @@ class ConfigView(Screen):
         attach_node('Accelerometer/Gyro', None, ImuChannelsView())
         attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView())
         attach_node('CAN Bus', None, CANConfigView())
-        attach_node('OBDII', None, OBD2ChannelsView())
+        attach_node('OBDII', None, OBD2ChannelsView(channels=system_channels))
         attach_node('Wireless', None, WirelessConfigView())
         attach_node('Telemetry', None, TelemetryConfigView())
         scriptView = LuaScriptingView()
@@ -180,7 +182,6 @@ class ConfigView(Screen):
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
         
-        system_channels = self._settings.systemChannels
         self.update_system_channels(system_channels)
         self.loaded = True
         

@@ -636,25 +636,22 @@ class CanConfig(object):
         canCfgJson['en'] = 1 if self.enabled else 0
         canCfgJson['baud'] = self.baudRate
         return {'canCfg':canCfgJson}        
-    
-        
-class PidConfig(object):
+            
+class PidConfig(BaseChannel):
     def __init__(self, **kwargs):
-        self.channelId = 0
-        self.sampleRate = 0
+        super(PidConfig, self).__init__(**kwargs)        
         self.pidId = 0
         
-    def fromJson(self, json):
-        self.channelId = json.get("id", self.channelId)
-        self.sampleRate = json.get("sr", self.sampleRate)
-        self.pid = json.get("pid", self.pidId)
+    def fromJson(self, json_dict):
+        if json_dict:
+            super(PidConfig, self).fromJson(json_dict)
+            self.pid = json_dict.get("pid", self.pidId)
         
     def toJson(self):
-        pidJson = {}
-        pidJson['id'] = self.channelId
-        pidJson['sr'] = self.sampleRate
-        pidJson['pid'] = self.pidId
-        return pidJson
+        json_dict = {}
+        super(PidConfig, self).appendJson(json_dict)
+        json_dict['pid'] = self.pidId
+        return json_dict
 
 OBD2_CONFIG_MAX_PIDS = 20
 
@@ -665,9 +662,10 @@ class Obd2Config(object):
         self.stale = False
         self.enabled = False
     
-    def fromJson(self, obd2CfgJson):
-        self.enabled = obd2CfgJson.get('en', self.enabled) 
-        pidsJson = obd2CfgJson.get("pids", None)
+    def fromJson(self, json_dict):
+        print("obd2 json " + str(json_dict))
+        self.enabled = json_dict.get('en', self.enabled) 
+        pidsJson = json_dict.get("pids", None)
         if pidsJson:
             del self.pids[:]
             for pidJson in pidsJson:
