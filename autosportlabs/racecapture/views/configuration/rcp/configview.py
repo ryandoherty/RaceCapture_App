@@ -52,7 +52,7 @@ class ConfigView(Screen):
     savefile = ObjectProperty(None)
     text_input = ObjectProperty(None)
     writeStale = BooleanProperty(False)
-    tracks_manager = ObjectProperty(None)
+    track_manager = ObjectProperty(None)
     
     #List of config views
     configViews = []

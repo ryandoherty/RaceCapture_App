@@ -86,20 +86,21 @@ class TrackDbItemView(BoxLayout):
         self.dispatch('on_remove_track', self.index)
         
 class TrackSelectionPopup(BoxLayout):
-    trackBrowser = None
+    track_browser = None
     def __init__(self, **kwargs):
         super(TrackSelectionPopup, self).__init__(**kwargs)
-        trackManager = kwargs.get('trackManager', None)
-        trackBrowser = kvFind(self, 'rcid', 'browser')
-        trackBrowser.on_tracks_updated(trackManager)
         self.register_event_type('on_tracks_selected')
-        self.trackBrowser = trackBrowser
+        track_manager = kwargs.get('track_manager', None)
+        track_browser = kvFind(self, 'rcid', 'browser')
+        track_browser.set_trackmanager(track_manager)
+        track_browser.init_view()
+        self.track_browser = track_browser
         
     def on_tracks_selected(self, selectedTrackIds):
         pass
     
     def confirmAddTracks(self):
-        self.dispatch('on_tracks_selected', self.trackBrowser.selectedTrackIds)        
+        self.dispatch('on_tracks_selected', self.track_browser.selectedTrackIds)        
         
             
 class AutomaticTrackConfigScreen(Screen):
@@ -147,7 +148,7 @@ class AutomaticTrackConfigScreen(Screen):
             self.dispatch('on_modified')
                     
     def on_add_track_db(self):
-        trackSelectionPopup = TrackSelectionPopup(trackManager=self.trackManager)
+        trackSelectionPopup = TrackSelectionPopup(track_manager=self.trackManager)
         popup = Popup(title = 'Add Race Tracks', content = trackSelectionPopup, size_hint=(0.9, 0.9))
         trackSelectionPopup.bind(on_tracks_selected=self.on_tracks_selected)
         popup.open()
