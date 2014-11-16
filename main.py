@@ -310,7 +310,7 @@ class RaceCaptureApp(App):
     def rc_detect_win(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
-        Clock.schedule_once(lambda dt: self.on_read_config(self), 3.0)
+        Clock.schedule_once(lambda dt: self.on_read_config(self))
         
         
     def rc_detect_fail(self):
