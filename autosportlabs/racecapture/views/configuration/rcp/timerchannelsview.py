@@ -8,7 +8,7 @@ from kivy.uix.spinner import Spinner
 from kivy.app import Builder
 from mappedspinner import MappedSpinner
 from utils import *
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/timerchannelsview.kv')
@@ -20,7 +20,7 @@ class PulseChannelsView(BaseMultiChannelConfigView):
         self.accordion_item_height = 110
 
     def channel_builder(self, index):
-        editor = PulseChannel(id='timer' + str(index))
+        editor = PulseChannel(id='timer' + str(index), channels=self.channels)
         editor.bind(on_modified=self.on_modified)
         if self.config:
             editor.on_config_updated(self.config.channels[index])
@@ -48,30 +48,10 @@ class PulsePerRevSpinner(MappedSpinner):
             valueMap[i] = str(i)
         self.setValueMap(valueMap, '1');
     
-class PulseChannel(BoxLayout):
-    channelConfig = None
+class PulseChannel(BaseChannelView):
     def __init__(self, **kwargs):
         super(PulseChannel, self).__init__(**kwargs)
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
-        kvFind(self, 'rcid', 'chanId').bind(on_channel = self.on_channel)
-        self.register_event_type('on_modified')
-        self.register_event_type('on_modified')
-    
-    def on_modified(self, channelConfig):
-        pass
-
-    def on_channel(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.name = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
-                                    
-    def on_sample_rate(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.sampleRate = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
-            
+                
     def on_pulse_per_rev(self, instance, value):
         if self.channelConfig:
             self.channelConfig.pulsePerRev = int(value)

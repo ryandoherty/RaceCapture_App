@@ -11,8 +11,9 @@ from utils import *
 from channels import *
 from channelnameselectorview import ChannelNameSelectorView
 from channelnamespinner import ChannelNameSpinner
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
+from kivy.metrics import dp
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/analogchannelsview.kv')
         
@@ -20,10 +21,10 @@ class AnalogChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):
         super(AnalogChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Analog '
-        self.accordion_item_height = 80
+        self.accordion_item_height = dp(80)
             
     def channel_builder(self, index):
-        editor = AnalogChannel(id='analog' + str(index))
+        editor = AnalogChannel(id='analog' + str(index), channels=self.channels)
         editor.bind(on_modified=self.on_modified)
         if self.config:
             editor.on_config_updated(self.config.channels[index])
@@ -32,23 +33,9 @@ class AnalogChannelsView(BaseMultiChannelConfigView):
     def get_specific_config(self, rcp_cfg):
         return rcp_cfg.analogConfig
         
-class AnalogChannel(BoxLayout):
-    channelConfig = None
-    channels = None
+class AnalogChannel(BaseChannelView):
     def __init__(self, **kwargs):
         super(AnalogChannel, self).__init__(**kwargs)
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
-        kvFind(self, 'rcid', 'chanId').bind(on_channel = self.on_channel)
-        self.register_event_type('on_modified')
-    
-    def on_modified(self, channelConfig):
-        pass
-    
-    def on_channel(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.name = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
 
     def on_linear_map_value(self, instance, value):
         if self.channelConfig:
@@ -56,11 +43,6 @@ class AnalogChannel(BoxLayout):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
             
-    def on_sample_rate(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.sampleRate = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
                     
     def on_scaling_type_raw(self, instance, value):
         if self.channelConfig and value:

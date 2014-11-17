@@ -1,3 +1,4 @@
+import time
 import kivy
 kivy.require('1.8.0')
 
@@ -5,11 +6,41 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.accordion import Accordion, AccordionItem
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.metrics import dp
-import time
+from utils import *
 
+class BaseChannelView(BoxLayout):
+    channelConfig = None
+    channels = None
+    def __init__(self, **kwargs):
+        super(BaseChannelView, self).__init__(**kwargs)
+        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
+        channel_selector=kvFind(self, 'rcid', 'chanId')
+        self.channels = kwargs.get('channels')
+        channel_selector.bind(on_channel = self.on_channel)
+        channel_selector.dispatch('on_channels_updated', self.channels)
+        self.register_event_type('on_modified')
+    
+    def on_modified(self, channelConfig):
+        pass
+    
+    def on_channel(self, instance, value):
+        if self.channelConfig:
+            self.channelConfig.name = value
+            self.channelConfig.stale = True
+            self.dispatch('on_modified', self.channelConfig)
+
+    def on_sample_rate(self, instance, value):
+        if self.channelConfig:
+            self.channelConfig.sampleRate = value
+            self.channelConfig.stale = True
+            self.dispatch('on_modified', self.channelConfig)
+
+        
 class BaseConfigView(BoxLayout):
+    channels = None
     def __init__(self, **kwargs):    
         super(BaseConfigView, self).__init__(**kwargs)
+        self.channels = kwargs.get('channels')
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_modified')
         self.register_event_type('on_config_modified')

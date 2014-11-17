@@ -14,7 +14,7 @@ Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/obd2channel
 
 class OBD2Channel(BoxLayout):
     obd2Channel = None
-    system_channels = None
+    channels = None
     obd2Settings = None
     pidIndex = 0
     def __init__(self, **kwargs):
@@ -47,7 +47,7 @@ class OBD2Channel(BoxLayout):
     def set_channel(self, pidIndex, channel, channels):
         self.obd2Channel = channel
         self.pidIndex = pidIndex
-        self.system_channels = channels
+        self.channels = channels
         kvFind(self, 'rcid', 'pidIndex').text = str(pidIndex + 1)
         kvFind(self, 'rcid', 'sr').setFromValue(channel.sampleRate)
         channelSpinner = kvFind(self, 'rcid', 'chanId')
@@ -57,13 +57,11 @@ class OBD2Channel(BoxLayout):
         #self.dispatch('on_modified')
                 
 class OBD2ChannelsView(BaseConfigView):
-    system_channels = None
     obd2Cfg = None
     obd2Grid = None
     obd2Settings = None
     def __init__(self, **kwargs):
         super(OBD2ChannelsView, self).__init__(**kwargs)
-        self.system_channels = kwargs.get('channels')
         self.register_event_type('on_config_updated')
         self.obd2Grid = kvFind(self, 'rcid', 'obd2grid')
         obd2Enable = kvFind(self, 'rcid', 'obd2enable')
@@ -119,7 +117,7 @@ class OBD2ChannelsView(BaseConfigView):
     def add_obd2_channel(self, index, pidConfig):
         obd2Channel = OBD2Channel(obd2Settings = self.obd2Settings)
         obd2Channel.bind(on_delete_pid=self.on_delete_pid)
-        obd2Channel.set_channel(index, pidConfig, self.system_channels)
+        obd2Channel.set_channel(index, pidConfig, self.channels)
         obd2Channel.bind(on_modified=self.on_modified)
         self.obd2Grid.add_widget(obd2Channel)
         

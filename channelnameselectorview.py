@@ -13,8 +13,12 @@ class ChannelNameSelectorView(BoxLayout):
     
     def __init__(self, **kwargs):
         super(ChannelNameSelectorView, self).__init__(**kwargs)
+        self.register_event_type('on_channels_updated')        
         self.register_event_type('on_channel')
         self.bind(channel_type = self.on_channel_type)
+
+    def on_channels_updated(self, system_channels):
+        kvFind(self, 'rcid', 'id').dispatch('on_channels_updated', system_channels)        
     
     def on_channel_type(self, instance, value):
         spinner = kvFind(self, 'rcid', 'id')

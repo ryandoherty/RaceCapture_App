@@ -7,7 +7,7 @@ from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.uix.scrollview import ScrollView
 from kivy.app import Builder
 from utils import *
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
 from mappedspinner import MappedSpinner
 
@@ -20,7 +20,7 @@ class GPIOChannelsView(BaseMultiChannelConfigView):
         self.accordion_item_height = 90
 
     def channel_builder(self, index):
-        editor = GPIOChannel(id = 'gpio' + str(index))
+        editor = GPIOChannel(id = 'gpio' + str(index), channels=self.channels)
         editor.bind(on_modified = self.on_modified)
         if self.config:
             editor.on_config_updated(self.config.channels[index])
@@ -34,28 +34,9 @@ class GPIOModeSpinner(MappedSpinner):
         super(GPIOModeSpinner, self).__init__(**kwargs)
         self.setValueMap({0:'Input', 1:'Output'}, 'Input')
         
-class GPIOChannel(BoxLayout):
-    channelConfig = None
+class GPIOChannel(BaseChannelView):
     def __init__(self, **kwargs):
         super(GPIOChannel, self).__init__(**kwargs)
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
-        kvFind(self, 'rcid', 'chanId').bind(on_channel = self.on_channel)
-        self.register_event_type('on_modified')
-    
-    def on_modified(self, channelConfig):
-        pass
-        
-    def on_channel(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.name = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
-            
-    def on_sample_rate(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.sampleRate = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
                     
     def on_mode(self, instance, value):
         if self.channelConfig:

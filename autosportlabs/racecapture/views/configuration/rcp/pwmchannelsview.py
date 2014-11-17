@@ -10,7 +10,7 @@ from fieldlabel import FieldLabel
 from valuefield import IntegerValueField
 from mappedspinner import MappedSpinner
 from utils import *
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/pwmchannelsview.kv')
 
@@ -21,7 +21,7 @@ class AnalogPulseOutputChannelsView(BaseMultiChannelConfigView):
         self.accordion_item_height = 100
         
     def channel_builder(self, index):
-        editor = AnalogPulseOutputChannel(id='pwm' + str(index))
+        editor = AnalogPulseOutputChannel(id='pwm' + str(index), channels=self.channels)
         editor.bind(on_modified=self.on_modified)
         if self.config:
             editor.on_config_updated(self.config.channels[index])
@@ -41,28 +41,9 @@ class PwmLoggingModeSpinner(MappedSpinner):
         super(PwmLoggingModeSpinner, self).__init__(**kwargs)
         self.setValueMap({0:'Period', 1:'Duty Cycle', 2:'Volts'}, 'Duty Cycle')
     
-class AnalogPulseOutputChannel(BoxLayout):
-    channelConfig = None
+class AnalogPulseOutputChannel(BaseChannelView):
     def __init__(self, **kwargs):
         super(AnalogPulseOutputChannel, self).__init__(**kwargs)
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
-        kvFind(self, 'rcid', 'chanId').bind(on_channel = self.on_channel)
-        self.register_event_type('on_modified')
-    
-    def on_modified(self, channelConfig):
-        pass
-
-    def on_channel(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.name = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
-                        
-    def on_sample_rate(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.sampleRate = value
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
                         
     def on_output_mode(self, instance, value):
         if self.channelConfig:
