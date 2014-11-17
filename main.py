@@ -156,7 +156,6 @@ class RaceCaptureApp(App):
             self._serial_warning()
             
     def on_write_config_complete(self, result):
-        print('Write config complete: ' + str(result))
         self.rc_config.stale = False
         Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_written'))
         
@@ -218,8 +217,8 @@ class RaceCaptureApp(App):
         pass
     
     def on_start(self):
-        self.init_data()
-        self.init_rc_comms()
+        Clock.schedule_once(lambda dt: self.init_data())
+        Clock.schedule_once(lambda dt: self.init_rc_comms())
                 
     def on_stop(self):
         self._rc_api.shutdown_comms()
