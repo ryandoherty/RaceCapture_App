@@ -71,7 +71,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
-        
+
         self._data_bus = kwargs.get('dataBus')
         self.settings = kwargs.get('settings')
         self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
@@ -196,10 +196,8 @@ class Gauge(ButtonBehavior, AnchorLayout):
         popup.open()
         self._popup = popup
         self._dismiss_customization_popup_trigger()
-        
-    
+
     def channel_selected(self, instance, value):
-        print "Channel selected for " +self.rcid
         if self.channel:
             self._data_bus.removeChannelListener(self.channel, self.setValue)
         self.value = None        

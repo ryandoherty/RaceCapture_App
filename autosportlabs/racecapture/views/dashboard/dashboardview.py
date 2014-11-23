@@ -71,7 +71,6 @@ class DashboardView(Screen):
         for gauge in gauges:
             gauge.settings = self._settings
             gauge._data_bus = dataBus
-            print "Gauge: "+gauge.rcid
             channel = self._settings.userPrefs.get_gauge_config(gauge.rcid)
             if channel:
                 gauge.channel = channel
@@ -82,7 +81,6 @@ class DashboardView(Screen):
         self._laptimeView = laptimeView
         self._comboView = comboView
         self._screen_mgr = screenMgr
-
 
     def on_nav_left(self):
         self._screen_mgr.current = self._screen_mgr.previous()
