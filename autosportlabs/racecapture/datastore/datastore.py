@@ -52,7 +52,13 @@ class DataSet(object):
     def fetch_records(self, count, start=0):
         chanmap = self.fetch_columns(count, start)
 
-        return zip(*chanmap.values())
+        #We have to pull the channel datapoint lists out in the order
+        #that you'd expect to find them in the data cursor
+        zlist = []
+        for ch in self.channels:
+            zlist.append(chanmap[ch])
+            
+        return zip(*zlist)
 
 #Channel container classes
 class intv(object):

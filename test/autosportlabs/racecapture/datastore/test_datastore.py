@@ -93,5 +93,4 @@ class DataStoreTest(unittest.TestCase):
         records = dataset.fetch_records(100)
 
         self.assertEqual(len(records), 100)
-
         
