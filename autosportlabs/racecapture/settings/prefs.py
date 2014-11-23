@@ -42,7 +42,7 @@ class UserPrefs(EventDispatcher):
     UNITS_KM = 'km'
     UNITS_MILE = 'mile'
     _schedule_save = None
-    _prefs_dict = {'range_alerts': {}}
+    _prefs_dict = {'range_alerts': {}, 'gauge_settings':{}}
     store = None
     prefs_file_name = 'prefs.json'
     prefs_file = None
@@ -65,28 +65,43 @@ class UserPrefs(EventDispatcher):
     def get_range_alert(self, key, default=None):
         return self._prefs_dict["range_alerts"].get(key, default)
 
+    def set_gauge_config(self, gauge_id, channel):
+        self._prefs_dict["gauge_settings"][gauge_id] = channel
+        self._schedule_save()
+
+    def get_gauge_config(self, gauge_id):
+        return self._prefs_dict["gauge_settings"].get(gauge_id, False)
+
     def save(self, *largs):
         with open(self.prefs_file, 'w+') as prefs_file:
             data = self.to_json()
             prefs_file.write(data)
 
     def load(self):
-        self._prefs_dict = {'range_alerts': {}}
+        self._prefs_dict = {'range_alerts': {}, 'gauge_settings':{}}
         try:
             with open(self.prefs_file, 'r') as data:
                 content = data.read()
                 content_dict = json.loads(content)
 
-                for name, settings in content_dict["range_alerts"].iteritems():
-                    self._prefs_dict["range_alerts"][name] = Range.from_dict(settings)
+                if content_dict.has_key("range_alerts"):
+                    for name, settings in content_dict["range_alerts"].iteritems():
+                        self._prefs_dict["range_alerts"][name] = Range.from_dict(settings)
+
+                if content_dict.has_key("gauge_settings"):
+                    for id, channel in content_dict["gauge_settings"].iteritems():
+                        self._prefs_dict["gauge_settings"][id] = channel
 
         except IOError:
             pass
 
     def to_json(self):
-        data = {'range_alerts': {}}
+        data = {'range_alerts': {}, 'gauge_settings':{}}
 
         for name, range_alert in self._prefs_dict["range_alerts"].iteritems():
             data["range_alerts"][name] = range_alert.to_dict()
+
+        for id, channel in self._prefs_dict["gauge_settings"].iteritems():
+            data["gauge_settings"][id] = channel
 
         return json.dumps(data)

@@ -7,6 +7,7 @@ from kivy.uix.screenmanager import Screen
 from utils import kvFind, kvFindClass
 from autosportlabs.racecapture.views.dashboard.widgets.roundgauge import RoundGauge
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+from autosportlabs.racecapture.views.dashboard.widgets.digitalgauge import DigitalGauge
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/gaugeview.kv')
 
@@ -38,15 +39,16 @@ class GaugeView(Screen):
 
     def findActiveGauges(self):
         return list(kvFindClass(self, Gauge))
-        
+
     def initScreen(self):
         dataBus = self._databus
-        settings = self._settings
         dataBus.addMetaListener(self.on_meta)
         dataBus.addSampleListener(self.on_sample)
         
         gauges = self.findActiveGauges()
         for gauge in gauges:
-            gauge.settings = settings
+            gauge.settings = self._settings
             gauge._data_bus = dataBus
- 
+            channel = self._settings.userPrefs.get_gauge_config(gauge.rcid)
+            if channel:
+                gauge.channel = channel

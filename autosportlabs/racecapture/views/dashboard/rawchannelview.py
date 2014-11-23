@@ -90,7 +90,3 @@ class RawChannelView(Screen):
         gridView.add_widget(gauge)
         self._gauges[channel] = gauge
         self._enableNoDataStatus(False)
-        
-        
-        
-        

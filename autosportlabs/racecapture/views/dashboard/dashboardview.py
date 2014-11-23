@@ -65,7 +65,17 @@ class DashboardView(Screen):
         screenMgr.add_widget(laptimeView)
         screenMgr.add_widget(comboView)
         screenMgr.add_widget(rawChannelView)
-        
+
+        gauges = list(kvFindClass(self, DigitalGauge))
+
+        for gauge in gauges:
+            gauge.settings = self._settings
+            gauge._data_bus = dataBus
+            print "Gauge: "+gauge.rcid
+            channel = self._settings.userPrefs.get_gauge_config(gauge.rcid)
+            if channel:
+                gauge.channel = channel
+
         self._gaugeView = gaugeView
         self._tachView = tachView
         self._rawchannelView = rawChannelView
