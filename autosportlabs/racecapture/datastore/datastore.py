@@ -37,7 +37,7 @@ class DataSet(object):
     def channels(self):
         return [x[0] for x in self._cur.description]
 
-    def fetch(self, count, start=0):
+    def fetch_columns(self, count, start=0):
         chanmap = {}
         channels = [x[0] for x in self._cur.description]
 
@@ -48,6 +48,11 @@ class DataSet(object):
             chanmap[c] = [x[idx] for x in dset]
 
         return chanmap
+
+    def fetch_records(self, count, start=0):
+        chanmap = self.fetch_columns(count, start)
+
+        return zip(*chanmap.values())
 
 #Channel container classes
 class intv(object):

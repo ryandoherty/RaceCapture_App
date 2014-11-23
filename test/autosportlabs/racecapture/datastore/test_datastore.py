@@ -80,7 +80,18 @@ class DataStoreTest(unittest.TestCase):
         dataset = self.ds.query(channels=['Coolant', 'RPM', 'MAP'],
                                 data_filter=f)
 
-        samples = dataset.fetch(100)
+        samples = dataset.fetch_columns(100)
 
         for k in samples.keys():
             self.assertEqual(len(samples[k]), 100)
+
+    def test_dataset_record_oriented(self):
+        f = Filter().lt('LapCount', 1)
+        dataset = self.ds.query(channels=['Coolant', 'RPM', 'MAP'],
+                                data_filter=f)
+
+        records = dataset.fetch_records(100)
+
+        self.assertEqual(len(records), 100)
+
+        
