@@ -65,14 +65,19 @@ class DashboardView(Screen):
         screenMgr.add_widget(laptimeView)
         screenMgr.add_widget(comboView)
         screenMgr.add_widget(rawChannelView)
-        
+
+        gauges = list(kvFindClass(self, DigitalGauge))
+
+        for gauge in gauges:
+            gauge.settings = self._settings
+            gauge._data_bus = dataBus
+
         self._gaugeView = gaugeView
         self._tachView = tachView
         self._rawchannelView = rawChannelView
         self._laptimeView = laptimeView
         self._comboView = comboView
         self._screen_mgr = screenMgr
-
 
     def on_nav_left(self):
         self._screen_mgr.current = self._screen_mgr.previous()
