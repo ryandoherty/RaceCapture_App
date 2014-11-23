@@ -33,6 +33,10 @@ class DataSet(object):
     def __init__(self, cursor):
         self._cur = cursor
 
+    @property
+    def channels(self):
+        return [x[0] for x in self._cur.description]
+
     def fetch(self, count, start=0):
         chanmap = {}
         channels = [x[0] for x in self._cur.description]
@@ -44,12 +48,12 @@ class DataSet(object):
             chanmap[c] = [x[idx] for x in dset]
 
         return chanmap
-    
+
 #Channel container classes
 class intv(object):
     def __init__(self, chan):
         self.chan = chan
-    
+
     def __str__(self):
         return self.chan
 
@@ -82,25 +86,25 @@ class Filter(object):
     def eq(self, chan, val):
         self._cmd_seq += '{} = {} '.format(chan, val)
         return self
-         
+
     @add_combop
     @chan_adj
     def lt(self, chan, val):
-        self._cmd_seq += '{} < {} '.format(chan, val) 
+        self._cmd_seq += '{} < {} '.format(chan, val)
         return self
-       
+
     @add_combop
     @chan_adj
     def gt(self, chan, val):
         self._cmd_seq += '{} > {} '.format(chan, val)
         return self
-        
+
     @add_combop
     @chan_adj
     def lteq(self, chan, val):
         self._cmd_seq += '{} <= {} '.format(chan, val)
         return self
-        
+
     @add_combop
     @chan_adj
     def gteq(self, chan, val):
@@ -121,7 +125,7 @@ class Filter(object):
 
     @add_combop
     def group(self, filterchain):
-        self._cmd_seq += '({})'.format(str(filterchain))
+        self._cmd_seq += '({})'.format(str(filterchain).strip())
         return self
 
 
@@ -133,13 +137,12 @@ class DatalogChannel(object):
         self.sample_rate = sample_rate
         self.enabled = en
 
+
 class DatalogHeader(object):
     def __init__(self, channel_name='', units='', sample_rate=0):
         self.channel_name = channel_name
         self.units = units
         self.sample_rate = sample_rate
-
-
 
 
 class DataStore(object):
@@ -497,7 +500,7 @@ class DataStore(object):
 
         self._conn.commit()
 
-        
+
     @timing
     def import_datalog(self, path, name, notes='', progress_listener=None):
         try:
@@ -508,10 +511,10 @@ class DataStore(object):
         header = dl.readline()
 
         headers = self._parse_datalog_headers(header)
-        
+
         #Create an event to be tagged to these records
         ses_id = self._create_session(name, notes)
-        
+
         self._handle_data(dl, headers, ses_id)
 
     def query(self, channels=[], data_filter=None):
@@ -525,7 +528,7 @@ class DataStore(object):
         #of the channels
         if len(channels) == 0 or '*' in channels:
             channels = [x.chan_name for x in self._headers]
-        
+
         for ch in channels:
             #TODO: Make sure we have a record of this channel
             chanst = str(ch)
@@ -539,7 +542,7 @@ class DataStore(object):
 
         #Point out where we're pulling this from
         sel_st += '\nFROM datalog\n'
-        
+
         #Add our joins
         datapoint_tables = ['datapoint_interp', 'datapoint_extrap']
         for tbl in datapoint_tables:
@@ -557,17 +560,3 @@ class DataStore(object):
         c = self._conn.cursor()
         c.execute(sel_st)
         return DataSet(c)
-
-if __name__ == '__main__':
-    ds = DataStore()
-
-    if os.path.exists('rctest.sql3'):
-        os.remove('rctest.sql3')
-
-    ds.new('rctest.sql3')
-    ds.import_datalog('rc_adj.log', 'rc_adj')
-    a = Filter().lt('LapCount', 1)
-    data_cursor = ds.query(channels=[intv('Coolant'), intv('RPM'), intv('MAP')], data_filter=a)
-    print data_cursor.fetchmany(10)
-    
-    ds.close()
