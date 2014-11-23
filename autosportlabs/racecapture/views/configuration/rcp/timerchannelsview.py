@@ -35,10 +35,10 @@ class TimerModeSpinner(MappedSpinner):
         super(TimerModeSpinner, self).__init__(**kwargs)
         self.setValueMap({0:'RPM', 1:'Frequency', 2:'Period (ms)', 3:'Period (us)'}, 'RPM')
             
-class DividerSpinner(MappedSpinner):
+class TimerSpeedSpinner(MappedSpinner):
     def __init__(self, **kwargs):
-        super(DividerSpinner, self).__init__(**kwargs)
-        self.setValueMap({2:'2', 8:'8', 32:'32', 128:'128', 1024:'1024'}, '128')
+        super(TimerSpeedSpinner, self).__init__(**kwargs)
+        self.setValueMap({0:'Slow', 1:'Medium', 2:'Fast'}, 'Medium')
     
 class PulsePerRevSpinner(MappedSpinner):
     def __init__(self, **kwargs):
@@ -64,13 +64,14 @@ class PulseChannel(BaseChannelView):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                         
-    def on_divider(self, instance, value):
+    def on_speed(self, instance, value):
         if self.channelConfig:
-            self.channelConfig.divider = int(value)
+            self.channelConfig.speed = int(instance.getValueFromKey(value))
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                             
     def on_config_updated(self, channel_config):
+        
         sample_rate_spinner = kvFind(self, 'rcid', 'sr')
         sample_rate_spinner.setValue(channel_config.sampleRate)
     
@@ -80,8 +81,8 @@ class PulseChannel(BaseChannelView):
         mode_spinner = kvFind(self, 'rcid', 'mode')
         mode_spinner.setFromValue(channel_config.mode)
         
-        divider_spinner = kvFind(self, 'rcid', 'divider')
-        divider_spinner.setFromValue(channel_config.divider)
+        speed_spinner = kvFind(self, 'rcid', 'speed')
+        speed_spinner.setFromValue(channel_config.speed)
         
         pulse_per_rev_spinner = kvFind(self, 'rcid', 'ppr')
         pulse_per_rev_spinner.setFromValue(channel_config.pulsePerRev)

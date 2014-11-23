@@ -52,32 +52,6 @@ class ChannelMetaCollection(object):
             channel_meta.fromJson(ch)
             channel_metas.append(channel_meta)
         
-class SystemChannels(EventDispatcher):
-    channels = ObjectProperty(None)
-    channel_names = []
-    unknownChannel = ChannelMeta(name='Unknown')
-        
-    def __init__(self, **kwargs):
-        try:
-            systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
-            channelsJson = systemChannelsJson.get('channels')
-            channels = OrderedDict()
-            channel_names = []
-            for channelJson in channelsJson:
-                channel = ChannelMeta()
-                channel.fromJson(channelJson) 
-                channels[channel.name] = channel
-                channel_names.append(channel.name)
-            self.channels = channels
-            self.channel_names = channel_names
-        except Exception as detail:
-            print('Error loading system channels: {}'.format(str(detail)))
-
-    def findChannelMeta(self, channel):
-        channelMeta = self.channels.get(channel)
-        if not channelMeta: channelMeta = self.unknownChannel
-        return channelMeta
-
 class SampleValue(object):
     def __init__(self, value, channelMeta):
         self.value = value
@@ -152,16 +126,31 @@ class Sample(object):
                     raise Exception("channel count overflowed number of bitmap fields available")
             channelConfigIndex+=1
 
+
         
-    def toJson(self):
-        gpsJson = {'gpsCfg':{
-                              'sr' : self.sampleRate,
-                              'pos' : self.positionEnabled,
-                              'speed' : self.speedEnabled,
-                              'time' : self.timeEnabled,
-                              'dist' : self.distanceEnabled,
-                              'sats' : self.satellitesEnabled
-                              }
-                    }
-                   
-        return gpsJson
+
+class SystemChannels(EventDispatcher):
+    channels = ObjectProperty(None)
+    channel_names = []
+    unknownChannel = ChannelMeta(name='Unknown')
+        
+    def __init__(self, **kwargs):
+        try:
+            systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
+            channelsJson = systemChannelsJson.get('channels')
+            channels = OrderedDict()
+            channel_names = []
+            for channelJson in channelsJson:
+                channel = ChannelMeta()
+                channel.fromJson(channelJson) 
+                channels[channel.name] = channel
+                channel_names.append(channel.name)
+            self.channels = channels
+            self.channel_names = channel_names
+        except Exception as detail:
+            print('Error loading system channels: {}'.format(str(detail)))
+
+    def findChannelMeta(self, channel):
+        channelMeta = self.channels.get(channel)
+        if not channelMeta: channelMeta = self.unknownChannel
+        return channelMeta

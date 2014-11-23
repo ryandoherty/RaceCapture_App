@@ -323,7 +323,7 @@ class TimerChannel(BaseChannel):
     def __init__(self, **kwargs):
         super(TimerChannel, self).__init__(**kwargs)        
         self.mode = 0
-        self.divider = 0
+        self.speed = 0
         self.pulsePerRev = 0
         self.slowTimer = 0
         self.alpha = 0
@@ -332,7 +332,7 @@ class TimerChannel(BaseChannel):
         if json_dict:
             super(TimerChannel, self).fromJson(json_dict)            
             self.mode = json_dict.get('mode', self.mode)
-            self.divider = json_dict.get('div', self.divider)
+            self.speed = json_dict.get('speed', self.speed)
             self.pulsePerRev = json_dict.get('ppr', self.pulsePerRev)
             self.slowTimer = json_dict.get('st', self.slowTimer)
             self.alpha = json_dict.get('alpha', self.alpha)            
@@ -343,7 +343,7 @@ class TimerChannel(BaseChannel):
         super(TimerChannel, self).appendJson(json_dict)        
         json_dict['mode'] = self.mode
         json_dict['ppr'] = self.pulsePerRev
-        json_dict['div'] = self.divider
+        json_dict['speed'] = self.speed
         json_dict['st'] = self.slowTimer
         json_dict['alpha'] = self.alpha
         return json_dict
