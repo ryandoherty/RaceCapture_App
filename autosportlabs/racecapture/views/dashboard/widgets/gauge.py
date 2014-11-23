@@ -222,6 +222,13 @@ class Gauge(ButtonBehavior, AnchorLayout):
         except Exception as e:
             print('Error setting channel {} {}'.format(value, str(e)))
 
+    def on_settings(self, instance, value):
+        #Do I have an id so I can track my settings?
+        if self.rcid:
+            channel = self.settings.userPrefs.get_gauge_config(self.rcid)
+            if channel:
+                self.channel = channel
+
     def on_dataBus(self, instance, value):
         self._update_channel_binding()
 

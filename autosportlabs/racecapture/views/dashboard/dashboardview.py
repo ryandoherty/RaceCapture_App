@@ -71,9 +71,6 @@ class DashboardView(Screen):
         for gauge in gauges:
             gauge.settings = self._settings
             gauge._data_bus = dataBus
-            channel = self._settings.userPrefs.get_gauge_config(gauge.rcid)
-            if channel:
-                gauge.channel = channel
 
         self._gaugeView = gaugeView
         self._tachView = tachView
