@@ -139,7 +139,7 @@ class RcpApi:
                 msg = comms.read_message()
                 if msg:
                     
-                    print('msg_rx_worker Rx: ' + str(msg))
+                    #print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
                     error_count = 0
