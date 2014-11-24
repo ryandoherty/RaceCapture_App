@@ -395,8 +395,6 @@ class GpioChannel(BaseChannel):
     def toJson(self):
         json_dict = {}
         super(GpioChannel, self).appendJson(json_dict)        
-        json_dict['sr'] = self.sampleRate
-        json_dict['id'] = self.channelId
         json_dict['mode'] = self.mode
         return json_dict
          
@@ -455,8 +453,6 @@ class PwmChannel(BaseChannel):
     def toJson(self):
         json_dict = {}
         super(PwmChannel, self).appendJson(json_dict)        
-        json_dict['id'] = self.channelId
-        json_dict['sr'] = self.sampleRate
         json_dict['outMode'] = self.outputMode
         json_dict['logMode'] = self.loggingMode
         json_dict['stDutyCyc'] = self.startupDutyCycle
