@@ -38,12 +38,12 @@ class CANConfigView(BaseConfigView):
     
     def on_can_baud(self, instance, value):
         if self.canConfig:
-            self.canConfig.baudRate = value
+            self.canConfig.baudRate[0] = value
             self.canConfig.stale = True
             self.dispatch('on_modified')
     
     def on_config_updated(self, rcpCfg):
         canConfig = rcpCfg.canConfig
         kvFind(self, 'rcid', 'canEnabled').setValue(canConfig.enabled)
-        kvFind(self, 'rcid', 'canBaud').setValue(canConfig.baudRate)
+        kvFind(self, 'rcid', 'canBaud').setValue(canConfig.baudRate[0])
         self.canConfig = canConfig

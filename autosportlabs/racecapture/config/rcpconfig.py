@@ -620,17 +620,23 @@ class CanConfig(object):
     def __init__(self, **kwargs):
         self.stale = False
         self.enabled = False
-        self.baudRate = 0
+        self.baudRate = [0,0]
     
     def fromJson(self, canCfgJson):
-        self.enabled = True if canCfgJson.get('en', self.enabled) == 1 else False 
-        self.baudRate = canCfgJson.get('baud', self.baudRate)
+        self.enabled = True if canCfgJson.get('en', self.enabled) == 1 else False
+        bauds = canCfgJson.get('baud')
+        self.baudRate = []
+        for baud in bauds:
+            self.baudRate.append(int(baud))
         self.stale = False
         
     def toJson(self):
         canCfgJson = {}
         canCfgJson['en'] = 1 if self.enabled else 0
-        canCfgJson['baud'] = self.baudRate
+        bauds = []
+        for baud in self.baudRate:
+            bauds.append(baud)
+        canCfgJson['baud'] = bauds
         return {'canCfg':canCfgJson}        
             
 class PidConfig(BaseChannel):
