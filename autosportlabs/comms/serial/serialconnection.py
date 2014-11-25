@@ -1,4 +1,3 @@
-import termios
 import serial
 from serial import SerialException
 from serial.tools import list_ports
@@ -37,8 +36,6 @@ class SerialConnection():
         if ser == None: raise PortNotOpenException()
         try:
             return ser.read(count)
-        except termios.error:
-            raise CommsErrorException()
         except SerialException as e:
             if str(e).startswith('device reports readiness'):
                 return ''
