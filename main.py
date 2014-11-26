@@ -1,45 +1,43 @@
 #!/usr/bin/python
 __version__ = "1.0.0"
-import logging
-import sys
-import argparse
-import kivy
-from kivy.properties import AliasProperty
-from functools import partial
-from kivy.clock import Clock
-from kivy.config import Config
 if __name__ == '__main__':
+    import logging
+    import sys
+    import argparse
+    import kivy
+    from kivy.properties import AliasProperty
+    from functools import partial
+    from kivy.clock import Clock
+    from kivy.config import Config
     kivy.require('1.8.0')
     Config.set('graphics', 'width', '1024')
     Config.set('graphics', 'height', '576')
     Config.set('kivy', 'exit_on_escape', 0)
+    from kivy.core.window import Window
+    from kivy.app import App, Builder
+    from kivy.uix.boxlayout import BoxLayout
+    from kivy.uix.label import Label
+    from kivy.uix.popup import Popup
+    from kivy.uix.screenmanager import *
+    from utils import *
+    from installfix_garden_navigationdrawer import NavigationDrawer
+    from autosportlabs.racecapture.views.util.alertview import alertPopup
+    from autosportlabs.racecapture.views.tracks.tracksview import TracksView
+    from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
+    from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
+    from autosportlabs.racecapture.views.analysis.analysisview import AnalysisView
+    from autosportlabs.racecapture.menu.mainmenu import MainMenu
 
-from kivy.core.window import Window
-from kivy.app import App, Builder
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.uix.popup import Popup
-from kivy.uix.screenmanager import *
-
-from installfix_garden_navigationdrawer import NavigationDrawer
-from autosportlabs.racecapture.views.util.alertview import alertPopup
-
-from autosportlabs.racecapture.api.rcpapi import RcpApi
-from autosportlabs.comms.commsfactory import comms_factory
-from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
-
-from utils import *
-from autosportlabs.racecapture.tracks.trackmanager import TrackManager
-from autosportlabs.racecapture.views.tracks.tracksview import TracksView
-from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
-from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
-from autosportlabs.racecapture.views.analysis.analysisview import AnalysisView
-from autosportlabs.racecapture.menu.mainmenu import MainMenu
-from autosportlabs.racecapture.menu.homepageview import HomePageView
-from autosportlabs.racecapture.config.rcpconfig import RcpConfig
-from autosportlabs.racecapture.settings.systemsettings import SystemSettings
-from autosportlabs.racecapture.settings.prefs import Range
-from toolbarview import ToolbarView
+    from autosportlabs.racecapture.api.rcpapi import RcpApi
+    from autosportlabs.comms.commsfactory import comms_factory
+    from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
+    
+    from autosportlabs.racecapture.tracks.trackmanager import TrackManager
+    from autosportlabs.racecapture.menu.homepageview import HomePageView
+    from autosportlabs.racecapture.config.rcpconfig import RcpConfig
+    from autosportlabs.racecapture.settings.systemsettings import SystemSettings
+    from autosportlabs.racecapture.settings.prefs import Range
+    from toolbarview import ToolbarView
 
     
 class RaceCaptureApp(App):
