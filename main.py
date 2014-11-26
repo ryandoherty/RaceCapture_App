@@ -5,16 +5,10 @@ import sys
 import argparse
 import kivy
 from kivy.properties import AliasProperty
-kivy.require('1.8.0')
 from functools import partial
 from kivy.clock import Clock
 from kivy.config import Config
-Config.set('graphics', 'width', '1024')
-Config.set('graphics', 'height', '576')
-Config.set('kivy', 'exit_on_escape', 0)
-
 from kivy.core.window import Window
-
 from kivy.app import App, Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
@@ -316,5 +310,8 @@ class RaceCaptureApp(App):
         self.showActivity('Searching {}'.format(info))
             
 if __name__ == '__main__':
-
+    kivy.require('1.8.0')
+    Config.set('graphics', 'width', '1024')
+    Config.set('graphics', 'height', '576')
+    Config.set('kivy', 'exit_on_escape', 0)
     RaceCaptureApp().run()
