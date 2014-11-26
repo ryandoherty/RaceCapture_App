@@ -27,10 +27,9 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
     from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
     from autosportlabs.racecapture.views.analysis.analysisview import AnalysisView
+    from autosportlabs.racecapture.views.preferences.preferences import PreferencesView
     from autosportlabs.racecapture.menu.mainmenu import MainMenu
-
     from autosportlabs.comms.commsfactory import comms_factory
-    
     from autosportlabs.racecapture.tracks.trackmanager import TrackManager
     from autosportlabs.racecapture.menu.homepageview import HomePageView
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
@@ -79,6 +78,8 @@ class RaceCaptureApp(App):
 
     #application arguments - initialized upon startup     
     app_args = []
+
+    use_kivy_settings = False
     
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
@@ -184,8 +185,9 @@ class RaceCaptureApp(App):
 
 
     def on_tracks_updated(self, track_manager):
-        for view in self.mainViews.itervalues():
-            view.dispatch('on_tracks_updated', track_manager)
+        pass
+        # for view in self.mainViews.itervalues():
+        #     view.dispatch('on_tracks_updated', track_manager)
             
     def notifyTracksUpdated(self):
         self.dispatch('on_tracks_updated', self.trackManager)
@@ -268,6 +270,7 @@ class RaceCaptureApp(App):
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
         
         analysisView = AnalysisView(name='analysis', data_bus=self._data_bus, settings=self.settings)
+        preferences_view = PreferencesView(self.settings, name='preferences')
         
         screenMgr = kvFind(self.root, 'rcid', 'main')
         
@@ -285,11 +288,13 @@ class RaceCaptureApp(App):
         screenMgr.add_widget(tracksView)
         screenMgr.add_widget(dashView)
         screenMgr.add_widget(analysisView)
+        screenMgr.add_widget(preferences_view)
         
         self.mainViews = {'config' : configView, 
                           'tracks': tracksView,
                           'dash': dashView,
-                          'analysis': analysisView}
+                          'analysis': analysisView,
+                          'preferences': preferences_view}
         
         self.screenMgr = screenMgr
 
@@ -316,6 +321,9 @@ class RaceCaptureApp(App):
     
     def rc_detect_activity(self, info):
         self.showActivity('Searching {}'.format(info))
-            
+
+    def open_settings(self, *largs):
+        self.switchMainView('preferences')
+
 if __name__ == '__main__':
     RaceCaptureApp().run()
