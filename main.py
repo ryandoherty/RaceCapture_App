@@ -14,7 +14,6 @@ if __name__ == '__main__':
     Config.set('graphics', 'height', '576')
     Config.set('kivy', 'exit_on_escape', 0)
     from kivy.core.window import Window
-    from kivy.app import App, Builder
     from kivy.uix.boxlayout import BoxLayout
     from kivy.uix.label import Label
     from kivy.uix.popup import Popup
@@ -28,17 +27,18 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.views.analysis.analysisview import AnalysisView
     from autosportlabs.racecapture.menu.mainmenu import MainMenu
 
-    from autosportlabs.racecapture.api.rcpapi import RcpApi
     from autosportlabs.comms.commsfactory import comms_factory
-    from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
     
     from autosportlabs.racecapture.tracks.trackmanager import TrackManager
     from autosportlabs.racecapture.menu.homepageview import HomePageView
-    from autosportlabs.racecapture.config.rcpconfig import RcpConfig
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
     from toolbarview import ToolbarView
 
+from kivy.app import App, Builder
+from autosportlabs.racecapture.config.rcpconfig import RcpConfig
+from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
+from autosportlabs.racecapture.api.rcpapi import RcpApi
     
 class RaceCaptureApp(App):
     
