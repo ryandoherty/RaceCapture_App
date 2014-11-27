@@ -33,6 +33,12 @@ class DataStoreTest(unittest.TestCase):
             self.ds.import_datalog(log_path, 'rc_adj')
             success = True
         except:
+            import sys, traceback
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+
             success = False
 
         self.assertEqual(success, True)
@@ -40,7 +46,7 @@ class DataStoreTest(unittest.TestCase):
     def test_basic_filter(self):
         f = Filter().lt('LapCount', 1)
 
-        expected_output = 'datapoint_extrap.LapCount < 1'
+        expected_output = 'datapoint.LapCount < 1'
         filter_text = str(f).strip()
 
         self.assertSequenceEqual(filter_text, expected_output)
@@ -48,7 +54,7 @@ class DataStoreTest(unittest.TestCase):
     def test_chained_filter(self):
         f = Filter().lt('LapCount', 1).gt('Coolant', 212).or_().eq('RPM', 9001)
 
-        expected_output = 'datapoint_extrap.LapCount < 1 AND datapoint_extrap.Coolant > 212 OR datapoint_extrap.RPM = 9001'
+        expected_output = 'datapoint.LapCount < 1 AND datapoint.Coolant > 212 OR datapoint.RPM = 9001'
         filter_text = str(f).strip()
 
         self.assertSequenceEqual(filter_text, expected_output)
@@ -56,7 +62,7 @@ class DataStoreTest(unittest.TestCase):
     def test_grouped_filter(self):
         f = Filter().lt('LapCount', 1).group(Filter().gt('Coolant', 212).or_().gt('RPM', 9000))
 
-        expected_output = 'datapoint_extrap.LapCount < 1 AND (datapoint_extrap.Coolant > 212 OR datapoint_extrap.RPM > 9000)'
+        expected_output = 'datapoint.LapCount < 1 AND (datapoint.Coolant > 212 OR datapoint.RPM > 9000)'
         filter_text = str(f).strip()
 
         self.assertSequenceEqual(filter_text, expected_output)

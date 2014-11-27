@@ -60,14 +60,6 @@ class DataSet(object):
 
         return zip(*zlist)
 
-#Channel container classes
-class intv(object):
-    def __init__(self, chan):
-        self.chan = chan
-
-    def __str__(self):
-        return self.chan
-
 
 #Filter container class
 #TODO: add a list of channels
@@ -86,7 +78,7 @@ class Filter(object):
 
     def chan_adj(f):
         def wrap(self, chan, val):
-            prefix = 'datapoint_interp.' if 'intv' in type(chan).__name__ else 'datapoint_extrap.'
+            prefix = 'datapoint.'
             chan = prefix+str(chan)
             ret = f(self, chan, val)
             return ret
@@ -186,15 +178,10 @@ class DataStore(object):
         max_sample_rate INTEGER NOT NULL, time_offset INTEGER NOT NULL,
         name TEXT NOT NULL, notes TEXT NULL)""")
 
-        self._conn.execute("""CREATE TABLE datapoint_extrap
+        self._conn.execute("""CREATE TABLE datapoint
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
         datalog_id INTEGER NOT NULL,
         ts REAL NOT NULL) """)
-
-        self._conn.execute("""CREATE TABLE datapoint_interp
-        (id INTEGER PRIMARY KEY AUTOINCREMENT,
-        datalog_id INTEGER NOT NULL,
-        ts REAL NOT NULL)""")
 
         self._conn.execute("""CREATE TABLE datalog
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -222,9 +209,7 @@ class DataStore(object):
     def _extend_datalog_channels(self, channel_names):
         #print "Adding channels: ", channel_names
         for channel_name in channel_names:
-            self._conn.execute("""ALTER TABLE datapoint_extrap
-            ADD {} REAL""".format(channel_name))
-            self._conn.execute("""ALTER TABLE datapoint_interp
+            self._conn.execute("""ALTER TABLE datapoint
             ADD {} REAL""".format(channel_name))
 
         self._conn.commit()
@@ -286,40 +271,37 @@ class DataStore(object):
         #self._conn.commit()
 
         #Insert the datapoints into their tables
-        interp_vals = [datalog_id] + [x[0] for x in record]
-        extrap_vals = [datalog_id] + [x[1] for x in record]
+        extrap_vals = [datalog_id] + record
 
         #Now, insert the record into the datalog table using the ID
         #list we built up in the previous iteration
+            
+        #Put together an insert statement containing the column names
+        base_sql = "INSERT INTO datapoint ("
+        base_sql += ','.join(['datalog_id'] + [x.channel_name for x in headers])
+        base_sql += ') VALUES ('
 
-        for tbl in [('datapoint_interp', interp_vals), ('datapoint_extrap', extrap_vals)]:
-            #Put together an insert statement containing the column names
-            base_sql = "INSERT INTO {} (".format(tbl[0])
-            base_sql += ','.join(['datalog_id'] + [x.channel_name for x in headers])
-            base_sql += ') VALUES ('
+        #insert the values
+        base_sql += ','.join([str(x) for x in extrap_vals])
+        base_sql += ')'
 
-            #insert the values
-            base_sql += ','.join([str(x) for x in tbl[1]])
-            base_sql += ')'
-
-            #print "Executing SQL Statement: \n{}".format(base_sql)
-            self._conn.execute(base_sql)
-
+        #print "Executing SQL Statement: \n{}".format(base_sql)
+        self._conn.execute(base_sql)
 
         #TODO: should this commit be at the end of inserting all of
         #the records instead?
         #self._conn.commit()
 
-    def _interp_extrap_datapoints(self, datapoints):
+    def _extrap_datapoints(self, datapoints):
         """
-        Takes a list of datapoints, and returns a new list of interpolated+extrapolated datapoints
+        Takes a list of datapoints, and returns a new list of extrapolated datapoints
 
         i.e: '3, nil, nil, nil, 7' (as a column) will become:
-        [(3, 3), (4, 3), (5, 3), (6, 3), (7, 7)]
+        [3, 3, 3, 3, 7]
 
          In the event of the 'start' of the dataset, we may have something like:
         [nil, nil, nil, 5], in this case, we will just back extrapolate, so:
-        [nil, nil, nil, 5] becomes [(5, 5), (5, 5), (5, 5), (5, 5)]
+        [nil, nil, nil, 5] becomes [5, 5, 5, 5]
 
         """
 
@@ -328,7 +310,7 @@ class DataStore(object):
         # first we need to handle the 'start of dataset, begin on a
         # miss' case
         if datapoints[0] == None:
-            ret_list = [(datapoints[-1], datapoints[-1]) for x in datapoints]
+            ret_list = [datapoints[-1] for x in datapoints]
             return ret_list
 
         # Next, we need to handle the case where there are only two
@@ -336,46 +318,35 @@ class DataStore(object):
         # duplicate the values in the tuple for each entry and return
         # that
         if len(datapoints) == 2:
-            ret_list = [(x, x) for x in datapoints]
+            ret_list = [x for x in datapoints]
             return ret_list
 
         # If we're here, it means we actually have a start and end
         # point to this data sample, have blanks in between and need
         # to interpolate+extrapolate the bits in between
 
-        # Get the slope of the change so we can properly interpolate
-        slope = _get_interp_slope(start = datapoints[0], finish = datapoints[-1], num_samples = len(datapoints))
-
-        interp_list = []
-        for p in range(len(datapoints)):
-            interp_val = datapoints[0] + (p * slope)
-            interp_list.append(interp_val)
-
         extrap_list = []
         for e in range(len(datapoints) - 1):
             extrap_list.append(datapoints[0])
         extrap_list.append(datapoints[-1])
 
-        ret_list = zip(interp_list, extrap_list)
-        return ret_list
+        return extrap_list
 
 
     def _desparsified_data_generator(self, data_file):
         """
         Takes a racecapture pro CSV file and removes sparsity from the dataset.
-        This function yields samples that have been interpolated/extrapolated from the
-        parent dataset.  These samples will come in the form of a list of tuples in the form
-        (interpolated, extrapolated)
+        This function yields samples that have been extrapolated from the
+        parent dataset.
 
-        'interpolated' means that given [3, nil, nil, nil, 7] in a column, you will receive: [3, 4, 5, 6, 7]
         'extrapolated' means that we'll just carry all values forward: [3, nil, nil, nil, 7] -> [3, 3, 3, 3, 7, 7, 7...]
 
         So to summarize: '3, nil, nil, nil, 7' (as a column) will become:
-        [(3, 3), (4, 3), (5, 3), (6, 3), (7, 7)]
+        [3, 3, 3, 3, 7]
 
         In the event of the 'start' of the dataset, we may have something like:
         [nil, nil, nil, 5], in this case, we will just back extrapolate, so:
-        [nil, nil, nil, 5] becomes [(5, 5), (5, 5), (5, 5), (5, 5)]
+        [nil, nil, nil, 5] becomes [5, 5, 5, 5]
         """
 
         # Notes on this algorithm: The basic idea is that we're going
@@ -387,7 +358,7 @@ class DataStore(object):
         # A data point containing a NIL is a 'miss', a data point
         # containing some value is a 'hit'.  We continue to file until
         # we get a 'hit'.  When that happens, we take the slice of the
-        # columnar list [0:hit], interpolate and extrapolate the
+        # columnar list [0:hit], extrapolate the
         # values in between, then take the slice [0:hit-1] and insert
         # it into the second container list (in the same respective
         # column).  We shift container list 1's respective columnar
@@ -443,7 +414,7 @@ class DataStore(object):
                 # If we have a hit at the end of the list, get the
                 # extraploated/interpolated list of datapoints
                 if not work_list[c][-1] == None:
-                    mod_list = self._interp_extrap_datapoints(work_list[c])
+                    mod_list = self._extrap_datapoints(work_list[c])
 
                     #Now copy everything but the last point in the
                     #modified list into the yield_list
@@ -529,7 +500,7 @@ class DataStore(object):
         for ch in channels:
             #TODO: Make sure we have a record of this channel
             chanst = str(ch)
-            tbl_prefix = 'datapoint_interp.' if 'intv' in type(ch).__name__ else 'datapoint_extrap.'
+            tbl_prefix = 'datapoint.'
             alias = ' as {}'.format(chanst)
             columns.append(tbl_prefix+chanst+alias)
             joins.append(tbl_prefix+chanst)
@@ -541,9 +512,7 @@ class DataStore(object):
         sel_st += '\nFROM datalog\n'
 
         #Add our joins
-        datapoint_tables = ['datapoint_interp', 'datapoint_extrap']
-        for tbl in datapoint_tables:
-            sel_st += 'JOIN {} ON {}.datalog_id=datalog.id\n'.format(tbl, tbl)
+        sel_st += 'JOIN datapoint ON datapoint.datalog_id=datalog.id\n'
 
         #Add our filter
         sel_st += 'WHERE '
