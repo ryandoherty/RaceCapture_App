@@ -59,7 +59,7 @@ class DashboardView(Screen):
         comboView = ComboView(name='comboView', dataBus=dataBus, settings=settings)
         rawChannelView = RawChannelView(name='rawchannelView', dataBus=dataBus, settings=settings)
         
-        screenMgr.transition=WipeTransition()
+        #screenMgr.transition=WipeTransition()
         screenMgr.add_widget(gaugeView)
         screenMgr.add_widget(tachView)
         screenMgr.add_widget(laptimeView)
