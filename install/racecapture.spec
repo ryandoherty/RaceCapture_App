@@ -15,7 +15,7 @@ def addDataFiles():
             extraDatas.append(file)
     return extraDatas
 
-a = Analysis(['..//racecapture.py'],
+a = Analysis(['..//main.py'],
              pathex=['..//'],
              hiddenimports=[],
              runtime_hooks=None)
