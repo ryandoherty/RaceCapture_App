@@ -57,7 +57,7 @@ class DataSet(object):
         zlist = []
         for ch in self.channels:
             zlist.append(chanmap[ch])
-            
+
         return zip(*zlist)
 
 #Channel container classes
@@ -141,16 +141,7 @@ class Filter(object):
 
 
 class DatalogChannel(object):
-    def __init__(self, name, chantype='Value', description='', sample_rate=0, en=True):
-        self.name = name
-        self.chantype = chantype
-        self.description = description
-        self.sample_rate = sample_rate
-        self.enabled = en
-
-
-class DatalogHeader(object):
-    def __init__(self, channel_name='', units='', sample_rate=0):
+    def __init__(self, channel_name='', units='', sample_rate=0, smoothing=0):
         self.channel_name = channel_name
         self.units = units
         self.sample_rate = sample_rate
@@ -247,18 +238,13 @@ class DataStore(object):
             for i in range(1, len(channels)+1):
                 name, units, samplerate = channels[i -1].replace('"', '').split('|')
                 #print name, units, samplerate
-                header = DatalogHeader(name, units, int(samplerate))
+                header = DatalogChannel(name, units, int(samplerate), 0)
                 headers.append(header)
                 if not name in [x.channel_name for x in self._headers] and not name == 'ts':
                     new_channels.append(name)
                     self._headers.append(header)
             self._extend_datalog_channels(new_channels)
         except:
-            import sys, traceback
-            print "Exception in user code:"
-            print '-'*60
-            traceback.print_exc(file=sys.stdout)
-            print '-'*60
             raise Exception("Unable to import datalog, bad metadata")
 
         return headers
