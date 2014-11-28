@@ -69,7 +69,7 @@ class TrackInfoView(BoxLayout):
             trackLabel.text = track.name
             
             trackConfigLabel = kvFind(self, 'rcid', 'configuration')
-            trackConfigLabel.text = 'Default' if not track.configuration else track.configuration 
+            trackConfigLabel.text = 'Main Configuration' if not track.configuration else track.configuration 
             
             lengthLabel = kvFind(self, 'rcid', 'length')
             lengthLabel.text = str(track.length) + ' mi.'
