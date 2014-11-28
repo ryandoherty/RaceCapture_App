@@ -56,7 +56,7 @@ class SerialConnection():
     def write(self, data):
         try:
             return self.ser.write(data)
-        except termios.error:
+        except SerialException as e:
             raise CommsErrorException()
             
     
