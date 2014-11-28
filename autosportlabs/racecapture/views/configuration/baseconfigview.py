@@ -114,7 +114,6 @@ class BaseMultiChannelConfigView(BaseConfigView):
 
         self.config = config
         elapsed_time = time.time() - start_time
-        print(str(self) + " load time: " + str(elapsed_time))
         
     def on_modified(self, instance, channel_config):
         self.setAccordionItemTitle(self._accordion, self.config.channels, channel_config)
