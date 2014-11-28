@@ -102,7 +102,7 @@ class ConfigView(Screen):
         self.config = config
         self.update_config_views()        
             
-    def on_tracks_manager(self, instance, value):
+    def on_track_manager(self, instance, value):
         self.update_tracks()
         
     def on_config(self, instance, value):
@@ -184,6 +184,7 @@ class ConfigView(Screen):
         tree.select_node(defaultNode)
         
         self.update_system_channels(system_channels)
+        self.update_tracks()
         self.loaded = True
         
     def updateControls(self):
