@@ -100,6 +100,7 @@ class ConfigView(Screen):
         
     def on_config_updated(self, config):
         self.config = config
+        self.update_config_views()        
             
     def on_tracks_manager(self, instance, value):
         self.update_tracks()
