@@ -43,7 +43,7 @@ class DashboardView(Screen):
         
         for gauge in activeGauges:
             gauge.settings = settings
-            gauge._data_bus = dataBus
+            gauge.data_bus = dataBus
          
     def init_view(self):
         screenMgr = kvFind(self, 'rcid', 'screens')
@@ -70,7 +70,7 @@ class DashboardView(Screen):
 
         for gauge in gauges:
             gauge.settings = self._settings
-            gauge._data_bus = dataBus
+            gauge.data_bus = dataBus
 
         self._gaugeView = gaugeView
         self._tachView = tachView

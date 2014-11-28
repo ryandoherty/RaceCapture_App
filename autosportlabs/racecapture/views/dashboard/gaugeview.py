@@ -43,12 +43,12 @@ class GaugeView(Screen):
     def initScreen(self):
         dataBus = self._databus
         dataBus.addMetaListener(self.on_meta)
-        dataBus.addSampleListener(self.on_sample)
-        
+        dataBus.addSampleListener(self.on_sample)        
+    
         gauges = self.findActiveGauges()
         for gauge in gauges:
             gauge.settings = self._settings
-            gauge._data_bus = dataBus
+            gauge.data_bus = dataBus
             channel = self._settings.userPrefs.get_gauge_config(gauge.rcid)
             if channel:
                 gauge.channel = channel
