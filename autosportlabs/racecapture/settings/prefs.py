@@ -8,17 +8,19 @@ import json
 class Range(EventDispatcher):
     DEFAULT_WARN_COLOR = [1.0, 0.84, 0.0, 1.0]
     DEFAULT_ALERT_COLOR = [1.0, 0.0, 0.0, 1.0]
-    max = NumericProperty(0)
-    min = NumericProperty(0)
+    max = NumericProperty(None)
+    min = NumericProperty(None)
     color = ListProperty([1.0, 1.0, 1.0, 1.0])
     
-    def __init__(self, minimum=0, maximum=0, **kwargs):
+    def __init__(self, minimum=None, maximum=None, **kwargs):
         self.min = minimum
         self.max = maximum
         self.color = kwargs.get('color', self.color)
 
     def is_in_range(self, value):
-        return self.min <= value <= self.max
+        min = self.min
+        max = self.max
+        return (min and max) and self.min <= value <= self.max
 
     def to_json(self):
         return json.dumps(self.to_dict())
