@@ -3,6 +3,7 @@ kivy.require('1.8.0')
 from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.stacklayout import StackLayout
+from pygments.formatters.bbcode import BBCodeFormatter #explicit import to make pyinstaller work. do not remove
 from kivy.uix.codeinput import CodeInput
 from kivy.app import Builder
 from kivy.extras.highlight import KivyLexer
