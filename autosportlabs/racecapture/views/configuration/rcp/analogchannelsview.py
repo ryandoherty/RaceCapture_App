@@ -205,12 +205,14 @@ class AnalogScalingMapEditor(BoxLayout):
         pass
     
     def on_volts(self, mapBin, instance, value):
+        value = float(value)
         if self.scalingMap:
             self.scalingMap.setVolts(mapBin, value)
             self.dispatch('on_map_updated')
             self.regen_plot()
         
     def on_scaled(self, mapBin, instance, value):
+        value = float(value)
         if self.scalingMap:
             self.scalingMap.setScaled(mapBin, value)
             self.dispatch('on_map_updated')
