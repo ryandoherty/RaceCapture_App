@@ -144,7 +144,7 @@ class ConfigView(Screen):
     
             try:
                 self.content.clear_widgets()
-                self.content.add_widget(value.view)
+                Clock.schedule_once(lambda dt: self.content.add_widget(value.view))
             except Exception, e:
                 print e
             
