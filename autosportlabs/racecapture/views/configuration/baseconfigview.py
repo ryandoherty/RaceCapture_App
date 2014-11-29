@@ -78,6 +78,7 @@ class BaseMultiChannelConfigView(BaseConfigView):
     
     _accordion = None
     _channel_count = 0
+    _channel_editors = []
     
     def __init__(self, **kwargs):    
         super(BaseMultiChannelConfigView, self).__init__(**kwargs)
@@ -91,29 +92,30 @@ class BaseMultiChannelConfigView(BaseConfigView):
     def update_channel_editors(self, channel_count):
         accordion = self._accordion
         if self._channel_count != channel_count:
+            self._channel_editors = []
             accordion.height = dp(self.accordion_item_height) * channel_count
             title = self.channel_title
             for i in range(channel_count):
                 channel = LazyloadAccordionItem(title=title + str(i + 1), builder=self.channel_builder, channel_index=i)
                 accordion.add_widget(channel)
+                self._channel_editors.append(channel)
             self._channel_count = channel_count
+            
 
     def on_config_updated(self, rc_cfg):
-        start_time = time.time()
         config = self.get_specific_config(rc_cfg)
         channel_count = len(config.channels)
         self.update_channel_editors(channel_count)
         accordion = self._accordion
         for i in range(channel_count):
             channel_config = config.channels[i]
-            accordion_item = accordion.children[i]
+            accordion_item = self._channel_editors[i]
             if accordion_item.editor != None:
                 accordion_item.editor.on_config_updated(channel_config)
             
             self.setAccordionItemTitle(accordion, config.channels, channel_config)
 
         self.config = config
-        elapsed_time = time.time() - start_time
         
     def on_modified(self, instance, channel_config):
         self.setAccordionItemTitle(self._accordion, self.config.channels, channel_config)
