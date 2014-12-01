@@ -940,8 +940,10 @@ class MeshLinePlot(Plot):
         ymin = funcy(params['ymin'])
         diff = len(points) - len(vert) // 4
         size = params['size']
-        ratiox = (size[2] - size[0]) / float(funcx(params['xmax']) - xmin)
-        ratioy = (size[3] - size[1]) / float(funcy(params['ymax']) - ymin)
+        xdiff = float(funcx(params['xmax']) - xmin)
+        ydiff = float(funcy(params['ymax']) - ymin)
+        ratiox = 0 if xdiff == 0 else (size[2] - size[0]) / xdiff
+        ratioy = 0 if ydiff == 0 else (size[3] - size[1]) / ydiff
         if diff < 0:
             del vert[4 * len(points):]
             del ind[len(points):]
