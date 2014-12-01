@@ -38,10 +38,13 @@ class AnalogChannel(BaseChannelView):
         super(AnalogChannel, self).__init__(**kwargs)
 
     def on_linear_map_value(self, instance, value):
-        if self.channelConfig:
-            self.channelConfig.linearScaling = float(value)
-            self.channelConfig.stale = True
-            self.dispatch('on_modified', self.channelConfig)
+        try:
+            if self.channelConfig:
+                self.channelConfig.linearScaling = float(value)
+                self.channelConfig.stale = True
+                self.dispatch('on_modified', self.channelConfig)
+        except:
+            pass
             
                     
     def on_scaling_type_raw(self, instance, value):
