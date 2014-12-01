@@ -1,6 +1,8 @@
 #!/usr/bin/python
 __version__ = "1.0.0"
+from multiprocessing import freeze_support
 if __name__ == '__main__':
+    freeze_support()
     import logging
     import sys
     import argparse
@@ -93,11 +95,13 @@ class RaceCaptureApp(App):
     def _on_keyboard_down(self, keyboard, keycode, *args):
         if keycode == 27:
             self.switchMainView('home')
-            
         
     def processArgs(self):
         parser = argparse.ArgumentParser(description='Autosport Labs Race Capture App')
         parser.add_argument('-p','--port', help='Port', required=False)
+        if sys.platform == 'win32':
+            parser.add_argument('--multiprocessing-fork', required=False, action='store_true')
+        
         self.app_args = vars(parser.parse_args())
 
     def getAppArg(self, name):
