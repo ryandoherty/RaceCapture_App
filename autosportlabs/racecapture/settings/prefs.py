@@ -53,7 +53,7 @@ class UserPrefs(EventDispatcher):
     speed_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
     distance_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
     
-    def __init__(self, data_dir, save_timeout=10, **kwargs):
+    def __init__(self, data_dir, save_timeout=2, **kwargs):
         self._schedule_save = Clock.create_trigger(self.save, save_timeout)
         self.bind(speed_units=self._schedule_save)
         self.bind(distance_units=self._schedule_save)
