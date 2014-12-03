@@ -62,11 +62,15 @@ class DataSet(object):
 
 
 #Filter container class
-#TODO: add a list of channels
 class Filter(object):
     def __init__(self):
         self._cmd_seq = ''
         self._comb_op = 'AND '
+        self._channels = []
+
+    @property
+    def channels(self):
+        return self._channels[:]
 
     def add_combop(f):
         def wrap(self, *args, **kwargs):
@@ -78,6 +82,7 @@ class Filter(object):
 
     def chan_adj(f):
         def wrap(self, chan, val):
+            self._channels.append(chan)
             prefix = 'datapoint.'
             chan = prefix+str(chan)
             ret = f(self, chan, val)
@@ -134,7 +139,7 @@ class Filter(object):
 
 class DatalogChannel(object):
     def __init__(self, channel_name='', units='', sample_rate=0, smoothing=0):
-        self.channel_name = channel_name
+        self.name = channel_name
         self.units = units
         self.sample_rate = sample_rate
 
@@ -142,11 +147,10 @@ class DatalogChannel(object):
 class DataStore(object):
     val_filters = ['lt', 'gt', 'eq', 'lt_eq', 'gt_eq']
     def __init__(self, name=':memory:'):
-        self._headers = []
+        self._channels = []
         self._isopen = False
         self.datalog_channels = {}
         self.datalogchanneltypes = {}
-
 
     def close(self):
         self._conn.close()
@@ -180,23 +184,18 @@ class DataStore(object):
 
         self._conn.execute("""CREATE TABLE datapoint
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
-        datalog_id INTEGER NOT NULL,
+        sample_id INTEGER NOT NULL,
         ts REAL NOT NULL) """)
 
-        self._conn.execute("""CREATE TABLE datalog
+        self._conn.execute("""CREATE TABLE sample
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id INTEGER NOT NULL)""")
 
-        self._conn.execute("""CREATE INDEX datalog_index_id on datalog(id)""")
+        self._conn.execute("""CREATE INDEX sample_index_id on sample(id)""")
 
-        self._conn.execute("""CREATE TABLE channel_types
+        self._conn.execute("""CREATE TABLE channel
         (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
-        units TEXT NOT NULL, smoothing INTEGER NOT NULL,
-        min REAL NULL, max REAL NULL)""")
-
-        self._conn.execute("""CREATE TABLE channels
-        (id INTEGER PRIMARY KEY, name TEXT NOT NULL,
-        type_id integer NOT NULL, description TEXT NULL)""")
+        units TEXT NOT NULL, smoothing INTEGER NOT NULL)""")
 
         self._conn.execute("""CREATE TABLE datalog_channel_map
         (datalog_id INTEGER NOT NULL, channel_id INTEGER NOT NULL)""")
@@ -206,33 +205,44 @@ class DataStore(object):
 
         self._conn.commit()
 
-    def _extend_datalog_channels(self, channel_names):
+    def _extend_datalog_channels(self, channels):
         #print "Adding channels: ", channel_names
-        for channel_name in channel_names:
+        for channel in channels:
+            #Extend the datapoint table to include the channel as a
+            #new field
             self._conn.execute("""ALTER TABLE datapoint
-            ADD {} REAL""".format(channel_name))
+            ADD {} REAL""".format(channel.name))
+
+            #Add the channel to the 'channel' table
+            self._conn.execute("""INSERT INTO channel (name, units, smoothing)
+            VALUES (?,?,?)""", (channel.name, channel.units, 1))
 
         self._conn.commit()
 
     def _parse_datalog_headers(self, header):
-        channels = header.split(',')
-        headers = []
+        raw_channels = header.split(',')
+        channels = []
 
         try:
             new_channels = []
-            for i in range(1, len(channels)+1):
-                name, units, samplerate = channels[i -1].replace('"', '').split('|')
+            for i in range(1, len(raw_channels)+1):
+                name, units, samplerate = raw_channels[i -1].replace('"', '').split('|')
                 #print name, units, samplerate
-                header = DatalogChannel(name, units, int(samplerate), 0)
-                headers.append(header)
-                if not name in [x.channel_name for x in self._headers] and not name == 'ts':
-                    new_channels.append(name)
-                    self._headers.append(header)
+                channel = DatalogChannel(name, units, int(samplerate), 0)
+                channels.append(channel)
+                if not name in [x.name for x in self._channels] and not name == 'ts':
+                    new_channels.append(channel)
+                    self._channels.append(channel)
             self._extend_datalog_channels(new_channels)
         except:
+            import sys, traceback
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
             raise Exception("Unable to import datalog, bad metadata")
 
-        return headers
+        return channels
 
     def _get_last_table_id(self, table_name):
         """
@@ -254,17 +264,17 @@ class DataStore(object):
         #print "Last datapoint ID =", dp_id
         return dl_id
 
-    def _insert_record(self, record, headers, session_id):
+    def _insert_record(self, record, channels, session_id):
         """
         Takes a record of interpolated+extrapolated channels and their header metadata
         and inserts it into the database
         """
-        datalog_id = self._get_last_table_id('datalog') + 1
+        datalog_id = self._get_last_table_id('sample') + 1
 
         #First, insert into the datalog table to give us a reference
         #point for the datapoint insertions
 
-        self._conn.execute("""INSERT INTO datalog
+        self._conn.execute("""INSERT INTO sample
         (session_id) VALUES (?)""", [session_id])
 
         #TODO: do we need to do this to ensure the datalog ID will be valid?
@@ -275,10 +285,10 @@ class DataStore(object):
 
         #Now, insert the record into the datalog table using the ID
         #list we built up in the previous iteration
-            
+
         #Put together an insert statement containing the column names
         base_sql = "INSERT INTO datapoint ("
-        base_sql += ','.join(['datalog_id'] + [x.channel_name for x in headers])
+        base_sql += ','.join(['sample_id'] + [x.name for x in channels])
         base_sql += ') VALUES ('
 
         #insert the values
@@ -468,6 +478,40 @@ class DataStore(object):
 
         self._conn.commit()
 
+    def get_channel_max(self, channel):
+        c = self._conn.cursor()
+
+        base_sql = "SELECT {} from datapoint ORDER BY {} DESC LIMIT 1;".format(channel, channel)
+        c.execute(base_sql)
+
+        res = c.fetchone()
+
+        if res == None:
+            chan_max = None
+        else:
+            chan_max = res[0]
+        return chan_max
+
+    def get_channel_min(self, channel):
+        c = self._conn.cursor()
+
+        base_sql = "SELECT {} from datapoint ORDER BY {} ASC LIMIT 1;".format(channel, channel)
+        c.execute(base_sql)
+
+        res = c.fetchone()
+
+        if res == None:
+            chan_min = None
+        else:
+            chan_min = res[0]
+        return chan_min
+
+    def set_channel_smoothing(self, channel, smoothing):
+        if smoothing < 1:
+            smoothing = 1
+
+        
+        pass
 
     @timing
     def import_datalog(self, path, name, notes='', progress_listener=None):
@@ -495,7 +539,7 @@ class DataStore(object):
         #If there are no channels, or if a '*' is passed, select all
         #of the channels
         if len(channels) == 0 or '*' in channels:
-            channels = [x.chan_name for x in self._headers]
+            channels = [x.chan_name for x in self._channels]
 
         for ch in channels:
             #TODO: Make sure we have a record of this channel
@@ -509,10 +553,10 @@ class DataStore(object):
         sel_st += ','.join(columns)
 
         #Point out where we're pulling this from
-        sel_st += '\nFROM datalog\n'
+        sel_st += '\nFROM sample\n'
 
         #Add our joins
-        sel_st += 'JOIN datapoint ON datapoint.datalog_id=datalog.id\n'
+        sel_st += 'JOIN datapoint ON datapoint.sample_id=sample.id\n'
 
         #Add our filter
         sel_st += 'WHERE '

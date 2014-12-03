@@ -99,4 +99,11 @@ class DataStoreTest(unittest.TestCase):
         records = dataset.fetch_records(100)
 
         self.assertEqual(len(records), 100)
+
+    def test_channel_min_max(self):
+        rpm_min = self.ds.get_channel_min('RPM')
+        rpm_max = self.ds.get_channel_max('RPM')
+
+        self.assertEqual(rpm_min, 776.0)
+        self.assertEqual(rpm_max, 6246.0)
         
