@@ -21,7 +21,7 @@ class DataStoreTest(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         self.ds.close()
-        os.remove(db_path)
+        #os.remove(db_path)
 
     def test_aaa_valid_import(self):
         #HACK
@@ -106,4 +106,24 @@ class DataStoreTest(unittest.TestCase):
 
         self.assertEqual(rpm_min, 776.0)
         self.assertEqual(rpm_max, 6246.0)
+
+    def test_channel_smoothing(self):
+        success = None
+        smoothing_rate = 0
+        #positive case, this would appropriately set the smoothing
+        
+        self.ds.set_channel_smoothing('RPM', 100)
+
+        smoothing_rate = self.ds.get_channel_smoothing('RPM')
+        
+        self.assertEqual(smoothing_rate, 100)
+
+        #Negative case, this would return an error
+        try:
+            self.ds.set_channel_smoothing('AverageSpeedOfASwallow', 9001)
+            success = True
+        except:
+            success = False
+
+        self.assertEqual(success, False)
         

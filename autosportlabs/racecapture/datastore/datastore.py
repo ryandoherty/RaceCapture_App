@@ -507,11 +507,41 @@ class DataStore(object):
         return chan_min
 
     def set_channel_smoothing(self, channel, smoothing):
+        """
+        Sets the smoothing rate on a per channel basis, this will be reflected in the returned dataset
+
+        The 'smoothing' rate details how many samples we should smooth out in the middle of a dataset, i.e:
+        [1, 1, 1, 1, 5] with a smoothing rate of '3', would mean we evaluate this list as:
+        [1, x, x, x, 5], which would then be interpolated as:
+        [1, 2, 3, 4, 5]
+        """
         if smoothing < 1:
             smoothing = 1
 
+        if not channel in [x.name for x in self._channels]:
+            raise Exception("Unknown channel: {}".format(channel))
+
+        self._conn.execute("""UPDATE channel
+        SET smoothing={}
+        WHERE name='{}'
+        """.format(smoothing, channel))
+
+    def get_channel_smoothing(self, channel):
+        if not channel in [x.name for x in self._channels]:
+            raise Exception("Unknown channel: {}".format(channel))
+
+        c = self._conn.cursor()
+
         
-        pass
+        base_sql = "SELECT smoothing from channel WHERE channel.name='{}';".format(channel)
+        c.execute(base_sql)
+
+        res = c.fetchone()
+
+        if res == None:
+            raise Exception("Unable to retrieve smoothing for channel: {}".format(channel))
+        else:
+            return res[0]
 
     @timing
     def import_datalog(self, path, name, notes='', progress_listener=None):
