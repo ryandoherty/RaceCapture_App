@@ -21,7 +21,7 @@ class DataStoreTest(unittest.TestCase):
     @classmethod
     def tearDownClass(self):
         self.ds.close()
-        #os.remove(db_path)
+        os.remove(db_path)
 
     def test_aaa_valid_import(self):
         #HACK
