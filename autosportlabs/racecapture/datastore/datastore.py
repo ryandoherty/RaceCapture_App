@@ -250,8 +250,7 @@ class DataStore(object):
 
         self._conn.execute("""CREATE TABLE datapoint
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sample_id INTEGER NOT NULL,
-        ts REAL NOT NULL) """)
+        sample_id INTEGER NOT NULL)""")
 
         self._conn.execute("""CREATE TABLE sample
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -296,7 +295,7 @@ class DataStore(object):
                 #print name, units, samplerate
                 channel = DatalogChannel(name, units, int(samplerate), 0)
                 channels.append(channel)
-                if not name in [x.name for x in self._channels] and not name == 'ts':
+                if not name in [x.name for x in self._channels]:
                     new_channels.append(channel)
                     self._channels.append(channel)
             self._extend_datalog_channels(new_channels)
