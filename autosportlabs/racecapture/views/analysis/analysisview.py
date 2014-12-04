@@ -24,11 +24,11 @@ class AnalysisView(Screen):
     def on_tracks_updated(self, track_manager):
         tracks = track_manager.getAllTrackIds()
 
-        if len(tracks) > 0:
-            trackId = track_manager.getAllTrackIds()[0]
-            track = track_manager.getTrackById(trackId)
-            self.ids.trackview.initMap(track)
-            self._trackmanager = track_manager
+#        if len(tracks) > 0:
+#            trackId = track_manager.getAllTrackIds()[0]
+#            track = track_manager.getTrackById(trackId)
+#            self.ids.trackview.initMap(track)
+#            self._trackmanager = track_manager
 
     def init_view(self):
         pass
