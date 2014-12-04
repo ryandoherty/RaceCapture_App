@@ -185,9 +185,8 @@ class RaceCaptureApp(App):
 
 
     def on_tracks_updated(self, track_manager):
-        pass
-        # for view in self.mainViews.itervalues():
-        #     view.dispatch('on_tracks_updated', track_manager)
+        for view in self.mainViews.itervalues():
+            view.dispatch('on_tracks_updated', track_manager)
             
     def notifyTracksUpdated(self):
         self.dispatch('on_tracks_updated', self.trackManager)
