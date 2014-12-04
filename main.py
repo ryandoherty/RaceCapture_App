@@ -299,7 +299,7 @@ class RaceCaptureApp(App):
         self.screenMgr = screenMgr
 
         self.configView = configView
-        self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')        
+        self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
@@ -314,8 +314,7 @@ class RaceCaptureApp(App):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
         Clock.schedule_once(lambda dt: self.on_read_config(self))
-        
-        
+
     def rc_detect_fail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)
     
@@ -325,5 +324,6 @@ class RaceCaptureApp(App):
     def open_settings(self, *largs):
         self.switchMainView('preferences')
 
+            
 if __name__ == '__main__':
     RaceCaptureApp().run()
