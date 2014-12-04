@@ -25,3 +25,7 @@ class PreferencesView(Screen):
 
         self.content = kvFind(self, 'rcid', 'preferences')
         self.content.add_widget(settings_view)
+        self.register_event_type('on_tracks_updated')
+    
+    def on_tracks_updated(self, track_manager):
+        pass
