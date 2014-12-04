@@ -188,6 +188,7 @@ class ConfigView(Screen):
         self.loaded = True
         
     def updateControls(self):
+        print('writestale ' + str(self.writeStale))
         kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
         
     def update_tracks(self):
@@ -278,8 +279,10 @@ class ConfigView(Screen):
                 with open(filename) as stream:
                     rcpConfigJsonString = stream.read()
                     self.rc_config.fromJsonString(rcpConfigJsonString)
+                    self.rc_config.stale = True
                     self.dispatch('on_config_updated', self.rc_config)
-                    self.on_config_modified()
+                    Clock.schedule_once(lambda dt: self.on_config_modified())
+                    
             else:
                 alertPopup('Error Loading', 'No config file selected')
         except Exception as detail:

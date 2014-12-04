@@ -55,7 +55,7 @@ class ChannelCustomizationView(FloatLayout):
     def setupSlider(self, slider, channelMeta, initialValue):
         min = channelMeta.min
         max = channelMeta.max
-        slider.value = initialValue
+        slider.value = initialValue if initialValue != None else min
         slider.min = min
         slider.max = max
         slider.step = (max - min) / 100
@@ -84,19 +84,26 @@ class ChannelCustomizationView(FloatLayout):
             self.warnRange = warnRange
         
     def _synchLabels(self, gaugeRange, lowSlider, highSlider, lowLabel, highLabel):
-        lowLabel.text = self.valueFormat.format(gaugeRange.min)
-        highLabel.text = self.valueFormat.format(gaugeRange.max)
-        lowSlider.value = gaugeRange.min
-        highSlider.value = gaugeRange.max
+        min_range = gaugeRange.min if gaugeRange.min != None else self.channelMeta.min
+#        if min_range: 
+        lowLabel.text = self.valueFormat.format(min_range)
+        lowSlider.value = min_range
+
+        max_range = gaugeRange.max if gaugeRange.max != None else self.channelMeta.max
+#        if max_range:
+        highLabel.text = self.valueFormat.format(max_range)
+        highSlider.value = max_range
 
     def _updateHighRange(self, gaugeRange, lowSlider, highSlider, lowLabel, highLabel, value):
         gaugeRange.max = value
+        if gaugeRange.min == None: gaugeRange.min = self.channelMeta.min
         if value < gaugeRange.min:
             gaugeRange.min = value
         self._synchLabels(gaugeRange, lowSlider, highSlider, lowLabel, highLabel)
                 
     def _updateLowRange(self, gaugeRange, lowSlider, highSlider, lowLabel, highLabel, value):
         gaugeRange.min = value
+        if gaugeRange.max == None: gaugeRange.max = self.channelMeta.min
         if value > gaugeRange.max:
             gaugeRange.max = value
         self._synchLabels(gaugeRange, lowSlider, highSlider, lowLabel, highLabel)
