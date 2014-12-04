@@ -1,7 +1,7 @@
 import unittest
 import os, os.path
 from autosportlabs.racecapture.datastore.datastore import DataStore, Filter, \
-    DataSet
+    DataSet, _interp_dpoints, _smooth_dataset
 
 fqp = os.path.dirname(os.path.realpath(__file__))
 db_path = os.path.join(fqp, 'rctest.sql3')
@@ -107,16 +107,44 @@ class DataStoreTest(unittest.TestCase):
         self.assertEqual(rpm_min, 776.0)
         self.assertEqual(rpm_max, 6246.0)
 
-    def test_channel_smoothing(self):
+    def test_interpolation(self):
+        dset = [1., 1., 1., 1., 5.]
+
+        smooth_list = _interp_dpoints(1, 5, 4)
+
+        self.assertListEqual(smooth_list, [1., 2., 3., 4., 5.])
+
+
+    def test_smoothing_even_bound(self):
+        dset = [1., 1., 1., 1., 5.]
+        smooth_list = _smooth_dataset(dset, 4)
+
+        self.assertListEqual(smooth_list, [1., 2., 3., 4., 5.])
+
+    def test_smoothing_offset_bound(self):
+        dset = [1., 1., 1., 1., 5., 5., 5., 2]
+        smooth_list = _smooth_dataset(dset, 4)
+
+        self.assertListEqual(smooth_list, [1., 2., 3., 4., 5., 4., 3., 2.])
+
+
+    def test_channel_set_get_smoothing(self):
         success = None
         smoothing_rate = 0
         #positive case, this would appropriately set the smoothing
-        
-        self.ds.set_channel_smoothing('RPM', 100)
+
+        self.ds.set_channel_smoothing('RPM', 10)
 
         smoothing_rate = self.ds.get_channel_smoothing('RPM')
+
+        self.assertEqual(smoothing_rate, 10)
+
+        #reset the smoothing rate so we don't interfere with other tests
+        self.ds.set_channel_smoothing('RPM', 1)
+
+        smoothing_rate = self.ds.get_channel_smoothing('RPM')
+        self.assertEqual(smoothing_rate, 1)
         
-        self.assertEqual(smoothing_rate, 100)
 
         #Negative case, this would return an error
         try:
@@ -126,4 +154,3 @@ class DataStoreTest(unittest.TestCase):
             success = False
 
         self.assertEqual(success, False)
-        

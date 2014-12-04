@@ -29,28 +29,94 @@ def _get_interp_slope(start, finish, num_samples):
 
     return float(start - finish) / float(1 - num_samples)
 
+def _interp_dpoints(start, finish, sample_skip):
+    slope = _get_interp_slope(start, finish, sample_skip + 1)
+
+    nlist = [start]
+    for i in range(sample_skip - 1):
+        nlist.append(float(nlist[-1] + slope))
+
+    nlist.append(finish)
+
+    return nlist
+
+def _smooth_dataset(dset, smoothing_rate):
+    #Throw an error if we got a bad smoothing rate
+    if not smoothing_rate or smoothing_rate < 2:
+        raise Exception("Invalid smoothing rate")
+
+    #This is the dataset that we'll be returning
+    new_dset = []
+
+    #Get every nth sample from the dataset where n==smoothing_rate
+    dpoints = dset[0::smoothing_rate]
+
+    #Now, loop through the target datapoints, interpolate the values
+    #between, and store them to the new dataset that we'll be
+    #returning
+    for index, val in enumerate(dpoints[:-1]):
+        #Get the start and end points of the interpolation
+        start = val
+        end = dpoints[index+1]
+
+        #Generate the smoothed dataset
+        smoothed_samples = _interp_dpoints(start, end, smoothing_rate)
+
+        #Append everything but the last datapoint in the smoothed
+        #samples to the new dataset
+        #(This will be the first item in the next dataset)
+        new_dset.extend(smoothed_samples[:-1])
+
+        #If the end was the last datapoint in the original set, append
+        #it as well
+        if index + 1 == len(dpoints) - 1:
+            new_dset.append(end)
+
+    #Now we need to smooth out the tail end of the list (if necessary)
+    if len(new_dset) < len(dset):
+        #calculate the difference in lengths between the original and
+        #new datasets
+        len_diff = len(dset) - len(new_dset)
+
+        #generate a new smoothed dataset for the missing elements
+        tail_dset = _interp_dpoints(new_dset[-1], dset[-1], len_diff)
+
+        #Extend our return list with everything but the tail of the
+        #new_dataset (as this would cause a duplicate)
+        new_dset.extend(tail_dset[1:])
+
+    return new_dset
+
 class DataSet(object):
-    def __init__(self, cursor):
+    def __init__(self, cursor, smoothing_map=None):
         self._cur = cursor
+        self._smoothing_map = smoothing_map
 
     @property
     def channels(self):
         return [x[0] for x in self._cur.description]
 
-    def fetch_columns(self, count, start=0):
+    #TODO: Do we want to offer a count of None to do a fetch all?
+    def fetch_columns(self, count):
         chanmap = {}
         channels = [x[0] for x in self._cur.description]
 
         dset = self._cur.fetchmany(count)
-
         for c in channels:
             idx = channels.index(c)
-            chanmap[c] = [x[idx] for x in dset]
+            chan_dataset =  [x[idx] for x in dset]
+
+            #If we received a smoothing map and the smoothing rate of
+            #the selected channel is > 1, smooth it out before
+            #returning it to the user
+            if self._smoothing_map and self._smoothing_map[c] > 1:
+                chan_dataset = _smooth_dataset(chan_dataset, self._smoothing_map[c])
+            chanmap[c] = chan_dataset
 
         return chanmap
 
-    def fetch_records(self, count, start=0):
-        chanmap = self.fetch_columns(count, start)
+    def fetch_records(self, count):
+        chanmap = self.fetch_columns(count)
 
         #We have to pull the channel datapoint lists out in the order
         #that you'd expect to find them in the data cursor
@@ -277,9 +343,6 @@ class DataStore(object):
         self._conn.execute("""INSERT INTO sample
         (session_id) VALUES (?)""", [session_id])
 
-        #TODO: do we need to do this to ensure the datalog ID will be valid?
-        #self._conn.commit()
-
         #Insert the datapoints into their tables
         extrap_vals = [datalog_id] + record
 
@@ -297,10 +360,6 @@ class DataStore(object):
 
         #print "Executing SQL Statement: \n{}".format(base_sql)
         self._conn.execute(base_sql)
-
-        #TODO: should this commit be at the end of inserting all of
-        #the records instead?
-        #self._conn.commit()
 
     def _extrap_datapoints(self, datapoints):
         """
@@ -510,8 +569,9 @@ class DataStore(object):
         """
         Sets the smoothing rate on a per channel basis, this will be reflected in the returned dataset
 
-        The 'smoothing' rate details how many samples we should smooth out in the middle of a dataset, i.e:
-        [1, 1, 1, 1, 5] with a smoothing rate of '3', would mean we evaluate this list as:
+        The 'smoothing' rate details how many samples we should skip and smooth out in the middle of a dataset, i.e:
+        [1, 1, 1, 1, 5] with a smoothing rate of '4', would mean we evaluate this list as:
+         0* 1  2  3  4*
         [1, x, x, x, 5], which would then be interpolated as:
         [1, 2, 3, 4, 5]
         """
@@ -572,7 +632,8 @@ class DataStore(object):
             channels = [x.chan_name for x in self._channels]
 
         for ch in channels:
-            #TODO: Make sure we have a record of this channel
+            if not ch in [x.name for x in self._channels]:
+                raise Exception("Unable to complete query. Unknown channel: {}".format(ch))
             chanst = str(ch)
             tbl_prefix = 'datapoint.'
             alias = ' as {}'.format(chanst)
@@ -599,4 +660,11 @@ class DataStore(object):
 
         c = self._conn.cursor()
         c.execute(sel_st)
-        return DataSet(c)
+
+        smoothing_map = {}
+        #Put together the smoothing map
+        for ch in channels:
+            sr = self.get_channel_smoothing(ch)
+            smoothing_map[ch] = sr
+        
+        return DataSet(c, smoothing_map)
