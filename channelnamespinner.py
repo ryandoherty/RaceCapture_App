@@ -11,4 +11,13 @@ class ChannelNameSpinner(Spinner):
         self.values = []
      
     def on_channels_updated(self, system_channels):
-        self.values = system_channels.channel_names
+        channel_names = system_channels.channel_names
+        filtered_channel_names = channel_names
+        if self.filterList != None:
+            filtered_channel_names = []
+            filter_list = self.filterList
+            for channel in channel_names:
+                if channel in filter_list:
+                    filtered_channel_names.append(channel)
+                    
+        self.values = filtered_channel_names
