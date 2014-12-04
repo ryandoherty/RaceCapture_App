@@ -294,7 +294,7 @@ class RaceCaptureApp(App):
         self.screenMgr = screenMgr
 
         self.configView = configView
-        self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')        
+        self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')        
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
