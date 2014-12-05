@@ -8,6 +8,7 @@ from mappedspinner import MappedSpinner
 from utils import *
 from valuefield import IntegerValueField, FloatValueField
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.config.rcpconfig import *
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/imuchannelsview.kv')
@@ -132,6 +133,15 @@ class ImuChannelsView(BaseConfigView):
             container.add_widget(editor)
             editor.bind(on_modified=self.on_modified)
             editors.append(editor)
+    
+    def on_calibrate(self):
+        self.rc_api.calibrate_imu(self.on_calibrate_win, self.on_calibrate_fail)
+        
+    def on_calibrate_win(self, result):
+        alertPopup('Calibration', 'Calibration Complete')
+        
+    def on_calibrate_fail(self, result):
+        alertPopup('Calibration', 'Calibration Failed:\n\n' + str(result))
         
     def on_sample_rate(self, instance, value):
         if self.imuCfg:

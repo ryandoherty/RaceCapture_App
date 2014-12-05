@@ -159,13 +159,13 @@ class ConfigView(Screen):
 
         system_channels = self._settings.systemChannels
 
-        defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView(rcpComms=self.rc_api))
-        attach_node('GPS', None, GPSChannelsView(rcpComms=self.rc_api))
+        defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView())
+        attach_node('GPS', None, GPSChannelsView())
         attach_node('Lap Statistics', None, LapStatsView())        
         attach_node('Analog Sensors', None, AnalogChannelsView(channels=system_channels))
         attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channels=system_channels))
         attach_node('Digital In/Out', None, GPIOChannelsView(channels=system_channels))
-        attach_node('Accelerometer/Gyro', None, ImuChannelsView())
+        attach_node('Accelerometer/Gyro', None, ImuChannelsView(rc_api=self.rc_api))
         attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView(channels=system_channels))
         attach_node('CAN Bus', None, CANConfigView())
         attach_node('OBDII', None, OBD2ChannelsView(channels=system_channels))

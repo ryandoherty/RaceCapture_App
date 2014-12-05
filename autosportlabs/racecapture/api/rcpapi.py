@@ -553,12 +553,20 @@ class RcpApi:
         self.sendGet('getTrackDb')
 
     def sendGetVersion(self):
-        rsp = self.sendCommand({"getVer":None})
+        self.sendCommand({"getVer":None})
 
     def getVersion(self, winCallback, failCallback):
-        print('in getVersion')
         self.executeSingle(RcpCmd('ver', self.sendGetVersion), winCallback, failCallback)
 
+    def sendCalibrateImu(self):
+        self.sendCommand({"calImu":1})
+        
+    def calibrate_imu(self, winCallback, failCallback):
+        cmd_sequence = []
+        cmd_sequence.append(RcpCmd('calImu', self.sendCalibrateImu))
+        cmd_sequence.append(RcpCmd('flashCfg', self.sendFlashConfig))
+        self._queue_multiple(cmd_sequence, 'calImu', winCallback, failCallback) 
+        
     def get_meta(self):
         print("sending meta")
         self.sendCommand({'getMeta':None})

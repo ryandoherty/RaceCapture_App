@@ -38,8 +38,10 @@ class BaseChannelView(BoxLayout):
         
 class BaseConfigView(BoxLayout):
     channels = None
+    rc_api = None
     def __init__(self, **kwargs):    
         super(BaseConfigView, self).__init__(**kwargs)
+        self.rc_api = kwargs.get('rc_api')
         self.channels = kwargs.get('channels')
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_modified')
