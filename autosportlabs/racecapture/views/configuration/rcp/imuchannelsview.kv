@@ -25,26 +25,38 @@
 	rcid: 'ac'
     orientation: 'vertical'
     size_hint: (1.0,0.6)
-    BoxLayout:
-        orientation: 'horizontal'
-        HSeparatorMinor:
-            text: ''
-        HSeparatorMinor:
-            text: 'Axis'
-        HSeparatorMinor:
-            text: 'Orientation'
-        HSeparatorMinor:
-            text: 'Physical Mapping'
-        HSeparatorMinor:
-            text: 'Zero Level'
 
 <GyroChannelsView>:
 	rcid: 'gc'
     orientation: 'vertical'
     size_hint: (1.0,0.3)
-    padding: [5,5]
-    spacing: [5,5]
+
+<ImuChannelsView>:
+	padding: (dp(10),dp(10))
+	spacing: dp(20)
+    orientation: 'vertical'
     BoxLayout:
+        size_hint_y: 0.15
+        orientation: 'horizontal'
+        BoxLayout:
+        	size_hint: 0.4, 0.5
+        	orientation: 'vertical'
+		    SampleRateSelectorView:
+		        rcid: 'sr'
+		BoxLayout:
+			size_hint_x: 0.3
+        BoxLayout:
+        	size_hint: 0.3, 1.0
+        	orientation: 'horizontal'
+        	spacing: dp(30)
+        	Button:
+        		size_hint_x: 0.6
+        		text: 'Calibrate'
+    HSeparator:
+        text: 'Channels'
+        size_hint_y: 0.05
+    BoxLayout:
+    	size_hint_y: 0.05
         orientation: 'horizontal'
         HSeparatorMinor:
             text: ''
@@ -57,22 +69,7 @@
         HSeparatorMinor:
             text: 'Zero Level'
 
-<ImuChannelsView>:
-	padding: (dp(10),dp(10))
-	spacing: dp(20)
-
-    orientation: 'vertical'
-    padding: [5,5]
-    SampleRateSelectorView:
-        size_hint_y: 0.15
-        rcid: 'sr'
-    HSeparator:
-        text: 'Accelerometer Channels'
     AccelChannelsView:
-
-    HSeparator:
-        text: 'Gyro Channels'
-    GyroChannelsView:        
-
-	Label:
-		size_hint_y: 0.1
+    	size_hint_y: 0.25
+    GyroChannelsView:
+    	size_hint_y: 0.25	        

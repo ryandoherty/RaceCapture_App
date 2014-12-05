@@ -113,7 +113,7 @@ class ImuChannel(BoxLayout):
 class ImuChannelsView(BaseConfigView):
     editors = []
     imuCfg = None
-    channelLabels = {0:'X', 1:'Y', 2:'Z', 3:'Yaw'}
+    channelLabels = {0:'X', 1:'Y', 2:'Z', 3:'Yaw',4:'Pitch',5:'Roll',6:'Compass'}
     def __init__(self, **kwargs):
         super(ImuChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')

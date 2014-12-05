@@ -185,9 +185,9 @@ class ImuChannel(BaseChannel):
         json_dict['alpha'] = self.alpha
         return json_dict
     
-IMU_CHANNEL_COUNT = 4
+IMU_CHANNEL_COUNT = 6
 IMU_ACCEL_CHANNEL_IDS   = [0,1,2]
-IMU_GYRO_CHANNEL_IDS    = [3]
+IMU_GYRO_CHANNEL_IDS    = [3,4,5]
 IMU_MODE_DISABLED       = 0
 IMU_MODE_NORMAL         = 1
 IMU_MODE_INVERTED       = 2
