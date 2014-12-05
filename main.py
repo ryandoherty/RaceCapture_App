@@ -27,10 +27,9 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
     from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
     from autosportlabs.racecapture.views.analysis.analysisview import AnalysisView
+    from autosportlabs.racecapture.views.preferences.preferences import PreferencesView
     from autosportlabs.racecapture.menu.mainmenu import MainMenu
-
     from autosportlabs.comms.commsfactory import comms_factory
-    
     from autosportlabs.racecapture.tracks.trackmanager import TrackManager
     from autosportlabs.racecapture.menu.homepageview import HomePageView
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
@@ -79,6 +78,8 @@ class RaceCaptureApp(App):
 
     #application arguments - initialized upon startup     
     app_args = []
+
+    use_kivy_settings = False
     
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
@@ -268,6 +269,7 @@ class RaceCaptureApp(App):
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
         
         analysisView = AnalysisView(name='analysis', data_bus=self._data_bus, settings=self.settings)
+        preferences_view = PreferencesView(self.settings, name='preferences')
         
         screenMgr = kvFind(self.root, 'rcid', 'main')
         
@@ -285,16 +287,18 @@ class RaceCaptureApp(App):
         screenMgr.add_widget(tracksView)
         screenMgr.add_widget(dashView)
         screenMgr.add_widget(analysisView)
+        screenMgr.add_widget(preferences_view)
         
         self.mainViews = {'config' : configView, 
                           'tracks': tracksView,
                           'dash': dashView,
-                          'analysis': analysisView}
+                          'analysis': analysisView,
+                          'preferences': preferences_view}
         
         self.screenMgr = screenMgr
 
         self.configView = configView
-        self.icon = ('resource/race_capture_icon_large.ico' if sys.platform == 'win32' else 'resource/race_capture_icon.png')        
+        self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')        
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
@@ -309,13 +313,16 @@ class RaceCaptureApp(App):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
         Clock.schedule_once(lambda dt: self.on_read_config(self))
-        
-        
+
     def rc_detect_fail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)
     
     def rc_detect_activity(self, info):
         self.showActivity('Searching {}'.format(info))
+
+    def open_settings(self, *largs):
+        self.switchMainView('preferences')
+
             
 if __name__ == '__main__':
     RaceCaptureApp().run()

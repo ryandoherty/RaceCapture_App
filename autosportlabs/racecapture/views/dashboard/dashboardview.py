@@ -56,14 +56,14 @@ class DashboardView(Screen):
         gaugeView = GaugeView(name='gaugeView', dataBus=dataBus, settings=settings)
         tachView = TachometerView(name='tachView', dataBus=dataBus, settings=settings)
         laptimeView = LaptimeView(name='laptimeView', dataBus=dataBus, settings=settings)
-        comboView = ComboView(name='comboView', dataBus=dataBus, settings=settings)
+        comboView = ComboView(name='comboView', dataBus=dataBus, settings=settings)  
         rawChannelView = RawChannelView(name='rawchannelView', dataBus=dataBus, settings=settings)
         
         #screenMgr.transition=WipeTransition()
         screenMgr.add_widget(gaugeView)
         screenMgr.add_widget(tachView)
-        screenMgr.add_widget(laptimeView)
-        screenMgr.add_widget(comboView)
+        screenMgr.add_widget(laptimeView) 
+        #screenMgr.add_widget(comboView) #TODO add support later
         screenMgr.add_widget(rawChannelView)
 
         gauges = list(kvFindClass(self, DigitalGauge))

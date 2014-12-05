@@ -17,7 +17,7 @@ def addDataFiles():
 
 a = Analysis(['..//main.py'],
              pathex=['..//'],
-             hiddenimports=[],
+             hiddenimports=['pygments.lexers.python.PythonLexer'],
              runtime_hooks=None)
 a.datas += addDataFiles()
 pyz = PYZ(a.pure)

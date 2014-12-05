@@ -284,13 +284,13 @@
             "ut": "Deg/Sec",
             "sys": 1,
             "type": 5,
-            "prec": 1,
+            "prec": 0,
             "min": -300,
             "max": 300
         },
         {
             "nm": "Pitch",
-            "ut": "G",
+            "ut": "Deg/Sec",
             "sys": 1,
             "type": 5,
             "prec": 0,
@@ -299,7 +299,7 @@
         },
         {
             "nm": "Roll",
-            "ut": "G",
+            "ut": "Deg/Sec",
             "sys": 1,
             "type": 5,
             "prec": 0,

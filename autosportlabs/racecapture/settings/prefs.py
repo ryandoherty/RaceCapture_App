@@ -2,8 +2,9 @@ from kivy.event import EventDispatcher
 from kivy.properties import OptionProperty, NumericProperty,\
     ListProperty
 from kivy.clock import Clock
+from kivy.config import ConfigParser
 import json
-
+import os
 
 class Range(EventDispatcher):
     DEFAULT_WARN_COLOR = [1.0, 0.84, 0.0, 1.0]
@@ -41,23 +42,18 @@ class Range(EventDispatcher):
         return Range(minimum=range_dict['min'], maximum=range_dict['max'], color=range_dict['color'])
     
 class UserPrefs(EventDispatcher):
-    UNITS_KM = 'km'
-    UNITS_MILE = 'mile'
     _schedule_save = None
     _prefs_dict = {'range_alerts': {}, 'gauge_settings':{}}
     store = None
     prefs_file_name = 'prefs.json'
     prefs_file = None
+    config = None
+    data_dir = '.'
 
-    #properties    
-    speed_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
-    distance_units = OptionProperty('mile', options=[UNITS_KM, UNITS_MILE], default=UNITS_MILE)
-    
     def __init__(self, data_dir, save_timeout=2, **kwargs):
         self._schedule_save = Clock.create_trigger(self.save, save_timeout)
-        self.bind(speed_units=self._schedule_save)
-        self.bind(distance_units=self._schedule_save)
         self.prefs_file = data_dir+'/'+self.prefs_file_name
+        self.data_dir = data_dir
         self.load()
 
     def set_range_alert(self, key, range_alert):
@@ -79,8 +75,20 @@ class UserPrefs(EventDispatcher):
             data = self.to_json()
             prefs_file.write(data)
 
+    def set_config_defaults(self):
+        self.config.adddefaultsection('preferences')
+        self.config.setdefault('preferences', 'distance_units', 'miles')
+        self.config.setdefault('preferences', 'temperature_units', 'Fahrenheit')
+        self.config.setdefault('preferences', 'show_laptimes', 1)
+        self.config.setdefault('preferences', 'startup_screen', 'Home Page')
+
     def load(self):
+        self.config = ConfigParser()
+        self.config.read(os.path.join(self.data_dir, 'preferences.ini'))
+        self.set_config_defaults()
+
         self._prefs_dict = {'range_alerts': {}, 'gauge_settings':{}}
+
         try:
             with open(self.prefs_file, 'r') as data:
                 content = data.read()
