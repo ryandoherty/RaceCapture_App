@@ -28,9 +28,15 @@ class BaseChannel(object):
         json_dict['prec'] = self.precision
         json_dict['sr'] = self.sampleRate        
 
+SCALING_MAP_POINTS = 5
+SCALING_MAP_MIN_VOLTS = 0
+
+class ScalingMapException(Exception):
+    pass
+
 class ScalingMap(object):
     def __init__(self, **kwargs):
-        points = 5
+        points = SCALING_MAP_POINTS
         raw = []
         scaled = []
         for i in range(points):
@@ -73,8 +79,19 @@ class ScalingMap(object):
     def getVolts(self, mapBin):
         return self.raw[mapBin]
      
-    def setVolts(self, mapBin, value):
-        self.raw[mapBin] = value
+    def setVolts(self, map_bin, value):
+        if map_bin < SCALING_MAP_POINTS - 1:
+            next_value = self.raw[map_bin+1]
+            if value >= next_value:
+                raise ScalingMapException("Must be less than {}".format(next_value))
+        if map_bin > 0:
+            prev_value = self.raw[map_bin - 1]
+            if value <= prev_value:
+                raise ScalingMapException("Must be greater than {}".format(prev_value))
+        if value < SCALING_MAP_MIN_VOLTS:
+            raise ScalingMapException('Must be greater than {}'.format(SCALING_MAP_MIN_VOLTS))
+        
+        self.raw[map_bin] = value
             
     def getScaled(self, mapBin):
         try:

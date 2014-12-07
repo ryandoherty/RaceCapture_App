@@ -4,8 +4,10 @@ kivy.require('1.8.0')
 from math import sin
 from installfix_garden_graph import Graph, MeshLinePlot
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
 from kivy.utils import get_color_from_hex as rgb
 from kivy.app import Builder
+from kivy.clock import Clock
 from valuefield import *
 from utils import *
 from channels import *
@@ -13,6 +15,8 @@ from channelnameselectorview import ChannelNameSelectorView
 from channelnamespinner import ChannelNameSpinner
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.racecapture.views.util.alertview import alertPopup
+from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble
 from kivy.metrics import dp
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/analogchannelsview.kv')
@@ -106,8 +110,28 @@ class AnalogScaler(Graph):
     def __init__(self, **kwargs):
         super(AnalogScaler, self).__init__(**kwargs)
     
+
+
+
+Builder.load_string('''
+<WarnLabel>
+    canvas.before:
+        Color:
+            rgba: (1.0, 0, 0, 0.5)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+            
+''')
+
+class WarnLabel(Label):
+    pass
+
+
+WARN_DISMISS_TIMEOUT = 3
+
 class AnalogScalingMapEditor(BoxLayout):
-    mapSize = 5
+    mapSize = SCALING_MAP_POINTS
     scalingMap = None
     plot = None
     def __init__(self, **kwargs):
@@ -127,6 +151,12 @@ class AnalogScalingMapEditor(BoxLayout):
                 voltsCellNext = voltsCellFirst
             scaledCell.set_next(voltsCellNext)
 
+    def set_volts_cell(self, cell_field, value):
+        cell_field.text = '{:.3g}'.format(value)
+        
+    def set_scaled_cell(self, scaled_field, value):
+        scaled_field.text = '{:.3g}'.format(value)
+        
     def on_config_changed(self, scalingMap):
         editor = kvFind(self, 'rcid', 'mapEditor')
         mapSize = self.mapSize
@@ -136,8 +166,8 @@ class AnalogScalingMapEditor(BoxLayout):
             scaled = scalingMap.getScaled(i)
             voltsCell = kvFind(editor, 'rcid', 'v_' + str(i))
             scaledCell = kvFind(editor, 'rcid', 's_' + str(i))
-            voltsCell.text = '{:.3g}'.format(volts)
-            scaledCell.text = '{:.3g}'.format(scaled)
+            self.set_volts_cell(voltsCell, volts)
+            self.set_scaled_cell(scaledCell, scaled)            
         self.scalingMap = scalingMap
         self.regen_plot()
 
@@ -207,15 +237,36 @@ class AnalogScalingMapEditor(BoxLayout):
     def on_map_updated(self):
         pass
     
-    def on_volts(self, mapBin, instance, value):
-        try:
-            value = float(value)
-            if self.scalingMap:
-                self.scalingMap.setVolts(mapBin, value)
-                self.dispatch('on_map_updated')
-                self.regen_plot()
-        except Exception as e:
-            print("Error updating chart with scaled value: " + str(e))
+    def _refocus(self, widget):
+        widget.focus = True
+        
+    def on_volts(self, mapBin, instance, focus_value):
+        if not focus_value:
+            value = instance.text.strip()
+            if value == '' or value == "." or value == "-": value = 0
+            try:
+                value = float(value)
+                if self.scalingMap:
+                    self.scalingMap.setVolts(mapBin, value)
+                    self.dispatch('on_map_updated')
+                    self.regen_plot()
+            except ScalingMapException as e:
+                warn = CenteredBubble()
+                warn.add_widget(WarnLabel(text=str(e)))
+                warn.auto_dismiss_timeout(WARN_DISMISS_TIMEOUT)
+                warn.background_color = (1, 0, 0, 1.0)
+                warn.size = (dp(200), dp(50))
+                warn.size_hint = (None,None)
+                self.get_root_window().add_widget(warn)
+                warn.center_on(instance)
+                original_value = self.scalingMap.getVolts(mapBin)
+                self.set_volts_cell(instance, original_value)
+                Clock.schedule_once(lambda dt: self._refocus(instance))
+            except Exception as e:
+                
+                alertPopup('Scaling Map', str(e))
+                original_value = self.scalingMap.getVolts(mapBin)
+                self.set_volts_cell(instance, original_value)
                     
     def on_scaled(self, mapBin, instance, value):
         try:

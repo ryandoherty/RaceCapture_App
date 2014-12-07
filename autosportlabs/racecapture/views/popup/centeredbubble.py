@@ -15,26 +15,48 @@ class BubblePos():
 class CenteredBubble(Bubble):
             
     def center_on(self, widget):
+        bubble_width = self.size[0]
+        bubble_height = self.size[1]
+        
+        pos = widget.center
+        pos = widget.to_window(*pos)
+        x = pos[0]
+        y = pos[1]
+        half_width = bubble_width / 2
+        half_height = bubble_height / 2
+        x = x - half_width
+        y = y + half_height
+
+        window = widget.get_root_window()
+        if x < 0: x = 0
+        if x > window.width: x = window.width - bubble_width
+        if y - bubble_height < 0: y = bubble_height
+        if y > window.height: y = window.height - bubble_height
+        self.x = x
+        self.y = y
+        
+        
+    def center_on_limited(self, widget):
                         
-	    bubble_width = self.size[0]
-	    bubble_height = self.size[1]
-	    
-	    window = widget.get_root_window()
-	    
-	    center = widget.center
-	    x = center[0]
-	    y = center[1]
-	    half_width = bubble_width / 2
-	    half_height = bubble_width / 2
-	    x = x - half_width
-	    y = y - half_height
-	    
-	    if x < 0: x = 0
-	    if x > window.width: x = window.width - bubble_width
-	    if y < 0: y = 0
-	    if y > window.height: y = window.height - bubble_height
-	
-	    self.limit_to = BubblePos(x=x,y=y,top=y + bubble_height, right=x + bubble_width)
+        bubble_width = self.size[0]
+        bubble_height = self.size[1]
+        
+        
+        center = widget.center
+        x = center[0]
+        y = center[1]
+        half_width = bubble_width / 2
+        half_height = bubble_height / 2
+        x = x - half_width
+        y = y - half_height
+        
+        window = widget.get_root_window()
+        if x < 0: x = 0
+        if x > window.width: x = window.width - bubble_width
+        if y < 0: y = 0
+        if y > window.height: y = window.height - bubble_height
+        
+        self.limit_to = BubblePos(x=x,y=y,top=y + bubble_height, right=x + bubble_width)
         
     def dismiss(self):
         try:

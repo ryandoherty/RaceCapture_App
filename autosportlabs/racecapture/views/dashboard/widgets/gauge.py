@@ -32,7 +32,7 @@ Builder.load_string('''
 <CustomizeGaugeBubble>
     orientation: 'vertical'
     size_hint: (None, None)
-    pos_hint: {'center_x': .5, 'y': .5}
+    #pos_hint: {'center_x': .5, 'y': .5}
     #arrow_pos: 'bottom_mid'
     #background_color: (1, 0, 0, 1.0) #50% translucent red
     #border: [0, 0, 0, 0]    
@@ -285,7 +285,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 bubble_height = dp(150)
                 bubble_width = dp(200)
                 bubble.size =  (bubble_width, bubble_height)
-                bubble.center_on(self)
+                bubble.center_on_limited(self)
                 bubble.auto_dismiss_timeout(POPUP_DISMISS_TIMEOUT_SHORT)
                 self._customizeGaugeBubble = bubble
                 self.add_widget(bubble)
