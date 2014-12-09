@@ -1,4 +1,3 @@
-from autosportlabs.comms.comms import Comms
 from kivy import platform
 if platform == 'android':
     from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnection
@@ -11,8 +10,10 @@ __all__ = ('comms_factory')
 
 def comms_factory(port):
     if platform == 'android':
-        return Comms(port=port, connection=BluetoothConnection())
+        from autosportlabs.comms.androidcomms import AndroidComms
+        return AndroidComms(port=port, connection=BluetoothConnection())
     elif platform == 'ios':
         return Comms(port=port, connection=SocketConnection())
     else:
+        from autosportlabs.comms.comms import Comms        
         return Comms(port=port, connection=SerialConnection())

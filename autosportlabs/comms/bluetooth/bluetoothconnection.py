@@ -103,6 +103,17 @@ class BluetoothConnection(object):
             raise Exception('Socket reported EOF')
         else:
             return chr(c)
+
+    def read_line(self):
+        msg = ''
+        while True:
+            c = self.read(1)
+            if c == '':
+                return None
+            msg += c
+            if msg[-2:] == '\r\n':
+                msg = msg[:-2]
+                return msg
     
     def write(self, data):
         self.send_stream.write(data)
