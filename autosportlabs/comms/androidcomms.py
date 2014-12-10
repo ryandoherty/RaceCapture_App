@@ -81,8 +81,8 @@ class AndroidComms(object):
         self._reader_should_run = reader_should_run
         self._reader_thread = reader_thread
         reader_thread.start()
-        sleep(5)
         self.send_service_command(SERVICE_CMD_OPEN)
+        sleep(5)
                                 
     def get_available_ports(self):
         return ['RaceCapturePro'] #TODO get this from the service directly
