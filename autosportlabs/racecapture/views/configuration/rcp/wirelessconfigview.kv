@@ -15,11 +15,11 @@
 		label_text: 'Bluetooth'
 		help_text: 'If the Bluetooth module add-on is connected to the expansion port, enable it here'
 		
-	SettingsView:
-		size_hint_y: 0.15
-		rcid: 'btconfig'
-		label_text: 'Configure Bluetooth device'
-		help_text: 'Configure Bluetooth device username and password.\nNote: ensure you are first connected via USB and Bluetooth is disconnected'
+#	SettingsView:
+#		size_hint_y: 0.15
+#		rcid: 'btconfig'
+#		label_text: 'Configure Bluetooth device'
+#		help_text: 'Configure Bluetooth device username and password.\nNote: ensure you are first connected via USB and Bluetooth is disconnected'
 
 	HSeparator:
 		text: 'Cellular Module Configuration'
@@ -43,7 +43,7 @@
 		FieldLabel:
 			size_hint_x: 0.25
 			text: 'Custom Settings'
-			font_size: 20
+			font_size: sp(20)
 		GridLayout:
 			spacing: (dp(30), dp(5))
 			size_hint_x: 0.6

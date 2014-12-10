@@ -30,9 +30,9 @@ class WirelessConfigView(BaseConfigView):
         btEnable.bind(on_setting=self.on_bt_enable)
         btEnable.setControl(SettingsSwitch())
         
-        btConfig = kvFind(self, 'rcid', 'btconfig')
-        btConfig.bind(on_setting=self.on_bt_configure)
-        btConfig.setControl(SettingsButton(text='Configure', disabled=True))
+        #btConfig = kvFind(self, 'rcid', 'btconfig')
+        #btConfig.bind(on_setting=self.on_bt_configure)
+        #btConfig.setControl(SettingsButton(text='Configure', disabled=True))
         
         cellEnable = kvFind(self, 'rcid', 'cellEnable')
         cellEnable.bind(on_setting=self.on_cell_enable)
