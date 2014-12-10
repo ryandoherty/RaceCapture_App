@@ -17,7 +17,8 @@ class SerialConnection():
     def get_available_ports(self):
         ports = [x[0] for x in list_ports.comports()]
         ports.sort()
-        return ports
+        filtered_ports = filter(lambda port: not port.startswith('/dev/ttyS'), ports)
+        return filtered_ports
             
     def isOpen(self):
         return self.ser != None
