@@ -5,6 +5,7 @@ from kivy.app import Builder
 from kivy.clock import Clock
 from kivy.uix.screenmanager import Screen
 from utils import kvFind, kvFindClass
+from kivy.metrics import dp
 from autosportlabs.racecapture.views.dashboard.widgets.roundgauge import RoundGauge
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 from autosportlabs.racecapture.views.dashboard.widgets.digitalgauge import DigitalGauge
@@ -22,6 +23,9 @@ class GaugeView(Screen):
         self._settings = kwargs.get('settings')
         self.initScreen()
 
+    def pct(self, p):
+        return pct_h(p)
+    
     def on_sample(self, sample):
         pass
         

@@ -9,10 +9,17 @@ __all__ = ('intersection', 'difference', 'curry', 'strtotuple',
            'is_color_transparent', 'boundary', 'dist',
            'deprecated', 'SafeList',
            'interpolate', 'OrderedDict', 'kvFind', 'kvFindClass', 'kvPrintAttr',
-           'breadth_first', 'walk_tree', 'filter_tree', 'kvquery')
+           'breadth_first', 'walk_tree', 'filter_tree', 'kvquery', 'pct_h', 'pct_w')
 
 from re import match, split
 from UserDict import DictMixin
+from kivy.core.window import Window
+
+def pct_h(pct):
+    return Window.height * pct
+
+def pct_w(pct):
+    return Window.width * pct
 
 def dist((x1, y1), (x2, y2)):
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 5
