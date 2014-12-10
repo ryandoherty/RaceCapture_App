@@ -13,7 +13,7 @@ def comms_factory(port):
         from autosportlabs.comms.androidcomms import AndroidComms
         return AndroidComms(port=port, connection=BluetoothConnection())
     elif platform == 'ios':
-        return Comms(port=port, connection=SocketConnection())
+        return AndroidComms(port=port, connection=SocketConnection())
     else:
         from autosportlabs.comms.comms import Comms        
         return Comms(port=port, connection=SerialConnection())
