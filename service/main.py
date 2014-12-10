@@ -1,6 +1,6 @@
 from time import sleep
 from kivy.lib import osc
-from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnection
+from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnection, PortNotOpenException
 import threading
 import traceback
 
@@ -17,24 +17,25 @@ SERVICE_CMD_CLOSE       = 'CLOSE'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
 
 def tx_api_callback(message, *args):
-    print('service tx received: ' + str(message))
+    message = message[2]
     bt_connection.write(message)
 
 def cmd_api_callback(message, *args):
+    message = message[2]
     print('service command received: ' + str(message))
     if message == 'EXIT':
         service_should_run.clear()
     elif message == 'OPEN':
-        bt_connection.open(args[0])
+        bt_connection.open('RaceCapturePro')
     elif message == 'CLOSE':
         bt_connection.close()
     elif message == 'GET_PORTS':
         ports = bt_connection.get_available_ports()
         osc.sendMsg(CMD_API, [ports ,], port=CLIENT_API_PORT)
 
-def osc_queue_processor_thread(should_run):
+def osc_queue_processor_thread():
     print('osc_queue_processor_thread started')
-    while should_run.is_set():
+    while service_should_run.is_set():
         try:
             osc.readQueue(oscid)
             sleep(0.1)
@@ -44,23 +45,26 @@ def osc_queue_processor_thread(should_run):
             sleep(0.5)
     print('osc_queue_processor_thread exited')
 
-def rx_message_thread(should_run):
+def rx_message_thread():
     print('rx_message_thread started')
     
-    while should_run.is_set():
+    while service_should_run.is_set():
         try:
             msg = bt_connection.read_line()
             if msg:
                 osc.sendMsg(RX_API, [msg, ], port=CLIENT_API_PORT)
-            print('bt read_line ' + str(msg))                
+        except PortNotOpenException:
+            sleep(1.0)
+            pass                
         except:
             print('Exception in rx_message_thread')
             traceback.print_exc()
-            #_rx_queue.put('##ERROR##')
-            sleep(0.5)
+            osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
+            sleep(1.0)
     print('rx_message_thread exited')            
       
 if __name__ == '__main__':
+    print("#####################Android Service Started############################")
     bt_connection = BluetoothConnection()
     osc.init()
     oscid = osc.listen(ipAddr='0.0.0.0', port=SERVICE_API_PORT)
@@ -70,8 +74,8 @@ if __name__ == '__main__':
     service_should_run = threading.Event()
     service_should_run.set()
 
-    osc_processor_thread = threading.Thread(target=osc_queue_processor_thread, args=(service_should_run))
+    osc_processor_thread = threading.Thread(target=osc_queue_processor_thread)
     osc_processor_thread.start()
     
-    rx_message_thread = threading.Thread(target=rx_message_thread, args=(service_should_run))
+    rx_message_thread = threading.Thread(target=rx_message_thread)
     rx_message_thread.start()

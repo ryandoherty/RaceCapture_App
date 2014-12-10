@@ -1,7 +1,7 @@
 import serial
 from serial import SerialException
 from serial.tools import list_ports
-from autosportlabs.comms.comms import PortNotOpenException, CommsErrorException
+from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 
 class SerialConnection():
     DEFAULT_WRITE_TIMEOUT = 1

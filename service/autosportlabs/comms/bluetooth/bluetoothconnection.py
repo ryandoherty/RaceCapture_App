@@ -1,4 +1,3 @@
-
 from jnius import autoclass
 from threading import Thread, Event
 
@@ -7,7 +6,12 @@ BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
 BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
 UUID = autoclass('java.util.UUID')
 
-from autosportlabs.comms.comms import PortNotOpenException
+
+class PortNotOpenException(Exception):
+    pass
+
+class CommsErrorException(Exception):
+    pass
 
 class BluetoothConnection(object):
     ser = None
@@ -116,7 +120,10 @@ class BluetoothConnection(object):
                 return msg
     
     def write(self, data):
-        self.send_stream.write(data)
+        try:
+            self.send_stream.write(data)
+        except Exception as e:
+            print('write error; stream not active ' + str(e))
     
     def flushInput(self):
         pass

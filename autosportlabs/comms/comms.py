@@ -3,11 +3,7 @@ import threading
 import multiprocessing
 from Queue import Empty
 from time import sleep
-class PortNotOpenException(Exception):
-    pass
-
-class CommsErrorException(Exception):
-    pass
+#from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 
 def connection_process_message_reader(rx_queue, connection, should_run):
     print('connection process message reader started')

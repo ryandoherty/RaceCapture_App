@@ -5,7 +5,7 @@ import Queue
 from time import sleep
 from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
-from autosportlabs.comms.comms import PortNotOpenException, CommsErrorException
+from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 from functools import partial
 
 TRACK_ADD_MODE_IN_PROGRESS = 1
@@ -17,8 +17,8 @@ SCRIPT_ADD_MODE_COMPLETE = 2
 DEFAULT_LEVEL2_RETRIES = 4
 DEFAULT_MSG_RX_TIMEOUT = 1.0
 
-AUTODETECT_MSG_RX_TIMEOUT = 1.5
-AUTODETECT_LEVEL2_RETRIES = 0
+AUTODETECT_MSG_RX_TIMEOUT = 10.0
+AUTODETECT_LEVEL2_RETRIES = 1
 
 DEFAULT_READ_RETRIES = 2
 

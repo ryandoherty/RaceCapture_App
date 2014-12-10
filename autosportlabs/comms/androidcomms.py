@@ -3,6 +3,7 @@ import threading
 import Queue
 from time import sleep
 from kivy.lib import osc
+from android import AndroidService
 
 CMD_API                 = '/rc_cmd'
 TX_API                  = '/rc_tx'
@@ -44,6 +45,8 @@ class AndroidComms(object):
     _rx_queue = None
     _command_queue = None    
     _oscid = None
+    _reader_thread = None
+    _service = None
     
     def __init__(self, **kwargs):
         self.port = kwargs.get('port')
@@ -55,29 +58,37 @@ class AndroidComms(object):
         osc.bind(oscid, self.on_rx, RX_API)
         osc.bind(oscid, self.on_command, CMD_API)
         self._oscid = oscid
+        
+        service = AndroidService('RC comms service', 'running')
+        service.start('service started')
+        self._service = service
 
     def on_command(self, message, *args):
-        print('androidcomms cmd ' + str(message))
+        message = message[2]
+        if message == 'ERROR':
+            print('Error on connection')
+            self.close()
         
     def on_rx(self, message, *args):
-        print('androidcomms rx ' + str(message))
+        message = message[2]
         self._rx_queue.put(message)
                 
     def start_connection_process(self):
         reader_should_run = threading.Event()
         reader_should_run.set()
     
-        reader_thread = threading.Thread(target=message_reader, args=(self._rx_queue, reader_should_run))
+        reader_thread = threading.Thread(target=message_reader, args=(self._rx_queue, self._oscid, reader_should_run))
         self._reader_should_run = reader_should_run
         self._reader_thread = reader_thread
         reader_thread.start()
+        sleep(5)
         self.send_service_command(SERVICE_CMD_OPEN)
                                 
     def get_available_ports(self):
         return ['RaceCapturePro'] #TODO get this from the service directly
     
     def isOpen(self):
-        return self._connection_process != None and self._connection_process.is_alive()
+        return self._reader_thread != None and self._reader_thread.is_alive()
     
     def open(self):
         print('Opening connection ' + str(self.port))
@@ -101,6 +112,9 @@ class AndroidComms(object):
         except: #returns Empty object if timeout is hit
             return None
     
+    def write_message(self, message):
+        self.send_service_tx_message(message)
+
     def send_service_command(self, cmd):
         osc.sendMsg(CMD_API, [cmd,], port=SERVICE_API_PORT)
         

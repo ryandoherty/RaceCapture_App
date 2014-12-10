@@ -1,10 +1,12 @@
 #!/usr/bin/python
 __version__ = "1.0.0"
-from multiprocessing import freeze_support
-if __name__ == '__main__':
+import sys
+if __name__ == '__main__' and sys.platform == 'win32':
+    from multiprocessing import freeze_support
     freeze_support()
+    
+if __name__ == '__main__':
     import logging
-    import sys
     import argparse
     import kivy
     from kivy.properties import AliasProperty
