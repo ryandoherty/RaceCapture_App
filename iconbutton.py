@@ -17,7 +17,7 @@ class IconButton(Button):
 class RoundedRect(BoxLayout):
     rect_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))
     corners = ListProperty([0, 0, 0, 0])
-    line_width = NumericProperty(1)
+    line_width = NumericProperty(10)
     resolution = NumericProperty(100)
     points = ListProperty([])
     
