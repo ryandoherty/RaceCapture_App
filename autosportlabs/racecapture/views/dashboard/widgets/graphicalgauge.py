@@ -8,19 +8,18 @@ from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 class GraphicalGauge(Gauge):
     _gaugeView = None
     gauge_size = NumericProperty(0)
-    gauge_pct = NumericProperty(0)
     
-    def _update_gauge_height(self, pct):
-        self.gauge_size = Window.height * self.gauge_pct
-        
-    def on_gauge_pct(self, instance, value):
-        self._update_gauge_height(value)
-    
+    def _update_gauge_size(self, size):
+        self.gauge_size = size
+            
     def __init__(self, **kwargs):
         super(GraphicalGauge, self).__init__(**kwargs)
 
-    def on_pos(self, instance, value):
-        self._update_gauge_height(self.gauge_pct)
+    def on_size(self, instance, value):
+        width = value[0]
+        height = value[1]
+        size = width if width < height else height
+        self._update_gauge_size(size)
         
     @property
     def graphView(self):
