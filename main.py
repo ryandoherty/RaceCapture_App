@@ -310,6 +310,8 @@ class RaceCaptureApp(App):
         rc_api.detect_fail_callback = self.rc_detect_fail
         rc_api.detect_activity_callback = self.rc_detect_activity
         rc_api.init_comms(comms)
+        rc_api.run_auto_detect()
+        
     
     def rc_detect_win(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
@@ -318,6 +320,7 @@ class RaceCaptureApp(App):
 
     def rc_detect_fail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)
+        Clock.schedule_once(lambda dt: self._rc_api.run_auto_detect(), 1.0)
     
     def rc_detect_activity(self, info):
         self.showActivity('Searching {}'.format(info))

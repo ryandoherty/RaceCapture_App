@@ -95,7 +95,7 @@ class BaseMultiChannelConfigView(BaseConfigView):
         accordion = self._accordion
         if self._channel_count != channel_count:
             self._channel_editors = []
-            accordion.height = dp(self.accordion_item_height) * channel_count
+            accordion.height = self.accordion_item_height * channel_count
             title = self.channel_title
             for i in range(channel_count):
                 channel = LazyloadAccordionItem(title=title + str(i + 1), builder=self.channel_builder, channel_index=i)

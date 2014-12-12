@@ -7,20 +7,21 @@ from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 from functools import partial
+from kivy.clock import Clock
 
-TRACK_ADD_MODE_IN_PROGRESS = 1
-TRACK_ADD_MODE_COMPLETE = 2
+TRACK_ADD_MODE_IN_PROGRESS      = 1
+TRACK_ADD_MODE_COMPLETE         = 2
 
-SCRIPT_ADD_MODE_IN_PROGRESS = 1
-SCRIPT_ADD_MODE_COMPLETE = 2
+SCRIPT_ADD_MODE_IN_PROGRESS     = 1
+SCRIPT_ADD_MODE_COMPLETE        = 2
 
-DEFAULT_LEVEL2_RETRIES = 4
-DEFAULT_MSG_RX_TIMEOUT = 1.0
+DEFAULT_LEVEL2_RETRIES          = 1
+DEFAULT_MSG_RX_TIMEOUT          = 1
 
-AUTODETECT_MSG_RX_TIMEOUT = 3.33
-AUTODETECT_LEVEL2_RETRIES = 3
+AUTODETECT_LEVEL2_RETRIES       = 1
+DEFAULT_READ_RETRIES            = 2
 
-DEFAULT_READ_RETRIES = 2
+COMMS_KEEP_ALIVE_TIMEOUT        = 2
 
 class RcpCmd:
     name = None
@@ -96,7 +97,7 @@ class RcpApi:
         self._start_message_rx_worker()
         self._start_cmd_sequence_worker()
         self.start_auto_detect_worker()
-        self.run_auto_detect()
+        Clock.schedule_interval(lambda dt: comms.keep_alive(), COMMS_KEEP_ALIVE_TIMEOUT)
         
     def shutdown_comms(self):
         try:
@@ -112,7 +113,7 @@ class RcpApi:
         
     def run_auto_detect(self):
         self.level_2_retries = AUTODETECT_LEVEL2_RETRIES
-        self.msg_rx_timeout = AUTODETECT_MSG_RX_TIMEOUT
+        self.msg_rx_timeout = self.comms.CONNECT_TIMEOUT
         self._auto_detect_event.set()                
 
     def addListener(self, messageName, callback):

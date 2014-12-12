@@ -15,8 +15,10 @@ CLIENT_API_PORT         = 3001
 SERVICE_CMD_EXIT        = 'EXIT'
 SERVICE_CMD_OPEN        = 'OPEN'
 SERVICE_CMD_CLOSE       = 'CLOSE'
+SERVICE_CMD_KEEP_ALIVE  = 'PING'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
 
+SERVICE_STARTUP_DELAY   = 5
 class PortNotOpenException(Exception):
     pass
 
@@ -39,11 +41,11 @@ def message_reader(rx_queue, oscid, should_run):
     print('connection process message reader exited')            
     
 class AndroidComms(object):
-    port = None
+    CONNECT_TIMEOUT = 10.0
     DEFAULT_TIMEOUT = 1.0
+    port = None
     _timeout = DEFAULT_TIMEOUT
     _rx_queue = None
-    _command_queue = None    
     _oscid = None
     _reader_thread = None
     _service = None
@@ -81,8 +83,8 @@ class AndroidComms(object):
         self._reader_should_run = reader_should_run
         self._reader_thread = reader_thread
         reader_thread.start()
+        sleep(SERVICE_STARTUP_DELAY)
         self.send_service_command(SERVICE_CMD_OPEN)
-        sleep(5)
                                 
     def get_available_ports(self):
         return ['RaceCapturePro'] #TODO get this from the service directly
@@ -93,6 +95,9 @@ class AndroidComms(object):
     def open(self):
         print('Opening connection ' + str(self.port))
         self.start_connection_process()
+    
+    def keep_alive(self):
+        self.send_service_command(SERVICE_CMD_KEEP_ALIVE)
     
     def close(self):
         print('comms.close()')

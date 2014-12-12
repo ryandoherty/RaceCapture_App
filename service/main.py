@@ -1,8 +1,9 @@
-from time import sleep
+from time import sleep, time
 from kivy.lib import osc
 from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnection, PortNotOpenException
 import threading
 import traceback
+
 
 CMD_API                 = '/rc_cmd'
 TX_API                  = '/rc_tx'
@@ -14,7 +15,12 @@ CLIENT_API_PORT         = 3001
 SERVICE_CMD_EXIT        = 'EXIT'
 SERVICE_CMD_OPEN        = 'OPEN'
 SERVICE_CMD_CLOSE       = 'CLOSE'
+SERVICE_CMD_KEEP_ALIVE  = 'PING'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
+
+KEEP_ALIVE_TIMEOUT = 10
+
+last_keep_alive_time = time()
 
 def tx_api_callback(message, *args):
     message = message[2]
@@ -22,7 +28,6 @@ def tx_api_callback(message, *args):
 
 def cmd_api_callback(message, *args):
     message = message[2]
-    print('service command received: ' + str(message))
     if message == 'EXIT':
         service_should_run.clear()
     elif message == 'OPEN':
@@ -32,12 +37,20 @@ def cmd_api_callback(message, *args):
     elif message == 'GET_PORTS':
         ports = bt_connection.get_available_ports()
         osc.sendMsg(CMD_API, [ports ,], port=CLIENT_API_PORT)
+    elif message == 'PING':
+        global last_keep_alive_time
+        last_keep_alive_time = time();
 
 def osc_queue_processor_thread():
     print('osc_queue_processor_thread started')
+    global last_keep_alive_time
     while service_should_run.is_set():
         try:
             osc.readQueue(oscid)
+            if time() > last_keep_alive_time + KEEP_ALIVE_TIMEOUT:
+                print("keep alive timeout!")
+                bt_connection.close()
+                service_should_run.clear()
             sleep(0.1)
         except Exception as e:
             print('Exception in osc_queue_processor_thread ' + str(e))

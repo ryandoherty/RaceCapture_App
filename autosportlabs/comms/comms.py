@@ -3,7 +3,10 @@ import threading
 import multiprocessing
 from Queue import Empty
 from time import sleep
-#from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
+
+STAY_ALIVE_TIMEOUT = 4
+COMMAND_CLOSE      = 'CLOSE'
+COMMAND_KEEP_ALIVE = 'PING'
 
 def connection_process_message_reader(rx_queue, connection, should_run):
     print('connection process message reader started')
@@ -55,12 +58,13 @@ def connection_message_process(connection, port, rx_queue, tx_queue, command_que
         should_run = True
         while should_run:
             try:
-                command = command_queue.get()
-                if command == 'close':
+                command = command_queue.get(True, STAY_ALIVE_TIMEOUT)
+                if command == COMMAND_CLOSE:
                     print('connection process: got close command')
                     should_run = False
             except Empty:
-                print('no command received')
+                print('keep alive timeout')
+                should_run = False
         print('connection worker exiting')
         
         reader_writer_should_run.clear()
@@ -79,6 +83,7 @@ def connection_message_process(connection, port, rx_queue, tx_queue, command_que
     
     
 class Comms():
+    CONNECT_TIMEOUT = 1.0    
     DEFAULT_TIMEOUT = 1.0
     _timeout = DEFAULT_TIMEOUT
     port = None
@@ -116,13 +121,19 @@ class Comms():
         print('Opening connection ' + str(self.port))
         self.start_connection_process()
     
+    def keep_alive(self):
+        try:
+            self._command_queue.put_nowait(COMMAND_KEEP_ALIVE)
+        except:
+            pass
+        
     def close(self):
         print('comms.close()')
         connection = self._connection
         if self.isOpen():
             try:
                 print('closing connection process')
-                self._command_queue.put_nowait('close')
+                self._command_queue.put_nowait(COMMAND_CLOSE)
                 self._connection_process.join(self._timeout * 2)
                 print('connection process joined')
             except:
