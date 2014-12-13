@@ -4,10 +4,10 @@
 title = Race Capture
 
 # (str) Package name
-package.name = RaceCapture
+package.name = racecapture
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = autosportlabs.com
+package.domain = com.autosportlabs
 
 # (str) Source code where the main.py live
 source.dir = .

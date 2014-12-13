@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.0.1"
+__version__ = "1.2.0"
 import sys
 if __name__ == '__main__' and sys.platform == 'win32':
     from multiprocessing import freeze_support
