@@ -57,24 +57,6 @@ def osc_queue_processor_thread():
             traceback.print_exc()
             sleep(0.5)
     print('osc_queue_processor_thread exited')
-
-def rx_message_thread():
-    print('rx_message_thread started')
-    
-    while service_should_run.is_set():
-        try:
-            msg = bt_connection.read_line()
-            if msg:
-                osc.sendMsg(RX_API, [msg, ], port=CLIENT_API_PORT)
-        except PortNotOpenException:
-            sleep(1.0)
-            pass                
-        except:
-            print('Exception in rx_message_thread')
-            traceback.print_exc()
-            osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
-            sleep(1.0)
-    print('rx_message_thread exited')            
       
 if __name__ == '__main__':
     print("#####################Android Service Started############################")
@@ -89,6 +71,20 @@ if __name__ == '__main__':
 
     osc_processor_thread = threading.Thread(target=osc_queue_processor_thread)
     osc_processor_thread.start()
-    
-    rx_message_thread = threading.Thread(target=rx_message_thread)
-    rx_message_thread.start()
+
+    while service_should_run.is_set():
+        try:
+            msg = bt_connection.read_line()
+            if msg:
+                osc.sendMsg(RX_API, [msg, ], port=CLIENT_API_PORT)
+        except PortNotOpenException:
+            sleep(1.0)
+            pass                
+        except Exception as e:
+            print('Exception in rx_message_thread')
+            traceback.print_exc()
+            osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
+            sleep(1.0)
+    print('service exiting')
+    sleep(1.0)
+    osc.dontListen(oscid)
