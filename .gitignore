@@ -1,3 +1,4 @@
+release_apk.sh
 .buildozer
 *.floo*
 *~
