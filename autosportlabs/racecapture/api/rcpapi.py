@@ -67,14 +67,8 @@ class RcpApi:
         
     def recover_connection(self):
         print("attempting to recover connection")
-        try:
-            if self.detect_activity_callback: self.detect_activity_callback('')
-            self.comms.close()
-            self.comms.open()
-        except:
-            print("Failed to immediately recover; running auto-detect")
-            self.run_auto_detect()
-            raise            
+        self.comms.close()
+        self.run_auto_detect()
 
     def _start_message_rx_worker(self):
         self._running.set()
@@ -168,6 +162,7 @@ class RcpApi:
                 if error_count > 5:
                     print("Too many Rx exceptions; re-opening connection")
                     self.recover_connection()
+                    sleep(5)
                 else:
                     sleep(0.25)
                     
@@ -255,7 +250,7 @@ class RcpApi:
                                     self.recoverTimeout()
                                     retry += 1
                             if not result:
-                                print('Level 2 retry for ' + name)
+                                print('Level 2 retry for (' + str(level2Retry) + ') ' + name)
                                 level2Retry += 1
         
         
@@ -601,7 +596,7 @@ class RcpApi:
             try:
                 self._auto_detect_event.wait()
                 self._auto_detect_event.clear()
-                
+                print("Starting auto-detect")
                 version_result = VersionResult()        
                 version_result_event = Event()
                 version_result_event.clear()

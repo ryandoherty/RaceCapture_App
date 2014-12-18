@@ -139,13 +139,13 @@ class Comms():
                 print('Timeout joining connection process')
 
     def read_message(self):
-        if not self.isOpen(): raise ("Comms Exception")
+        if not self.isOpen(): raise Exception("Comms Exception")
         try:
             return self._rx_queue.get(True, self._timeout)
         except: #returns Empty object if timeout is hit
             return None
     
     def write_message(self, message):
-        if not self.isOpen(): raise ("Comms Exception")
+        if not self.isOpen(): raise Exception("Comms Exception")
         self._tx_queue.put(message)
                     
