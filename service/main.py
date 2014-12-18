@@ -18,7 +18,7 @@ SERVICE_CMD_CLOSE       = 'CLOSE'
 SERVICE_CMD_KEEP_ALIVE  = 'PING'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
 
-KEEP_ALIVE_TIMEOUT = 10
+KEEP_ALIVE_TIMEOUT = 20
 
 last_keep_alive_time = time()
 
@@ -60,6 +60,7 @@ def osc_queue_processor_thread():
       
 if __name__ == '__main__':
     print("#####################Android Service Started############################")
+    
     bt_connection = BluetoothConnection()
     osc.init()
     oscid = osc.listen(ipAddr='0.0.0.0', port=SERVICE_API_PORT)
@@ -87,4 +88,6 @@ if __name__ == '__main__':
             sleep(1.0)
     print('service exiting')
     sleep(1.0)
+    bt_connection.close()
     osc.dontListen(oscid)
+    exit(0)
