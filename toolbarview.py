@@ -42,12 +42,13 @@ class ToolbarView(BoxLayout):
         self._rcTxDecay = Clock.create_trigger(self.on_rc_tx_decay, TOOLBAR_LED_DURATION)
         self._rcRxDecay = Clock.create_trigger(self.on_rc_rx_decay, TOOLBAR_LED_DURATION)                
         self._teleTxDecay = Clock.create_trigger(self.on_tele_tx_decay, TOOLBAR_LED_DURATION)
-        self._teleRxDecay = Clock.create_trigger(self.on_tele_rx_decay, TOOLBAR_LED_DURATION)                
-                                    
-
+        self._teleRxDecay = Clock.create_trigger(self.on_tele_rx_decay, TOOLBAR_LED_DURATION)
+        self._activityDecay = Clock.create_trigger(self.on_activity_decay, ACTIVITY_MESSAGE_LINGER_DURATION)                
+        self._progressDecay = Clock.create_trigger(self.on_progress_decay, PROGRESS_COMPLETE_LINGER_DURATION)
+        
     def on_activity(self, msg):
         self.setActivityMessage(msg)
-        Clock.schedule_once(lambda dt: self.setActivityMessage(''), ACTIVITY_MESSAGE_LINGER_DURATION)        
+        self._activityDecay()
         
     def setActivityMessage(self, msg):
         activityLabel = kvFind(self, 'rcid', 'activity')
@@ -61,13 +62,15 @@ class ToolbarView(BoxLayout):
         else:
             statusLabel.color = self.normalStatusColor
             
-        
-    def on_progress(self, value):
+    def update_progress(self, value):
         if not self.progressBar:
             self.progressBar = kvFind(self, 'rcid', 'pbar')
         self.progressBar.value = value
         if value == 100:
-            Clock.schedule_once(lambda dt: self.on_progress(0), PROGRESS_COMPLETE_LINGER_DURATION)
+            self._progressDecay()
+        
+    def on_progress(self, value):
+        self.update_progress(value)
         
     def on_main_menu(self, instance, *args):
         pass
@@ -75,6 +78,12 @@ class ToolbarView(BoxLayout):
     def mainMenu(self):
         self.dispatch('on_main_menu', None)
     
+    def on_progress_decay(self, dt):
+        self.update_progress(0)
+        
+    def on_activity_decay(self, dt):
+        self.setActivityMessage('')
+
     def on_rc_tx_decay(self, dt):
         self.on_rc_tx(False)
         
