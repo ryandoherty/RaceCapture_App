@@ -171,8 +171,11 @@ class RaceCaptureApp(App):
     #Read Configuration        
     def on_read_config(self, instance, *args):
         try:
-            self._rc_api.getRcpCfg(self.rc_config, self.on_read_config_complete, self.on_read_config_error)
-            self.showActivity("Reading configuration")
+            if self.rc_config.loaded == False:
+                self._rc_api.getRcpCfg(self.rc_config, self.on_read_config_complete, self.on_read_config_error)
+                self.showActivity("Reading configuration")
+            else:
+                self.showActivity('Connected')
         except:
             logging.exception('')
             self._serial_warning()

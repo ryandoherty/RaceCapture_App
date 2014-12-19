@@ -597,11 +597,14 @@ class RcpApi:
                 self._auto_detect_event.wait()
                 self._auto_detect_event.clear()
                 print("Starting auto-detect")
+                
+                comms = self.comms
+                if comms.isOpen(): continue  #if we're already open, skip auto-detect
+                
                 version_result = VersionResult()        
                 version_result_event = Event()
                 version_result_event.clear()
 
-                comms = self.comms
                 if comms.port:
                     ports = [comms.port]
                 else:
