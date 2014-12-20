@@ -167,15 +167,11 @@ class RaceCaptureApp(App):
     def on_write_config_error(self, detail):
         alertPopup('Error Writing', 'Could not write configuration:\n\n' + str(detail))
 
-    
     #Read Configuration        
     def on_read_config(self, instance, *args):
         try:
-            if self.rc_config.loaded == False:
-                self._rc_api.getRcpCfg(self.rc_config, self.on_read_config_complete, self.on_read_config_error)
-                self.showActivity("Reading configuration")
-            else:
-                self.showActivity('Connected')
+            self._rc_api.getRcpCfg(self.rc_config, self.on_read_config_complete, self.on_read_config_error)
+            self.showActivity("Reading configuration")
         except:
             logging.exception('')
             self._serial_warning()
@@ -319,7 +315,11 @@ class RaceCaptureApp(App):
     def rc_detect_win(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
-        Clock.schedule_once(lambda dt: self.on_read_config(self))
+
+        if self.rc_config.loaded == False:
+            Clock.schedule_once(lambda dt: self.on_read_config(self))
+        else:
+            self.showActivity('Connected')
 
     def rc_detect_fail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)
