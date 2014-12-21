@@ -79,7 +79,7 @@ class SettingsTextField(ValueField):
     
     
     
-class SettingsView(AnchorLayout):
+class SettingsView(BoxLayout):
     help_text = StringProperty('')
     label_text = StringProperty('')
     control = None
@@ -106,6 +106,7 @@ class SettingsView(AnchorLayout):
         label.text = value
         
     def setControl(self, widget):
+        widget.size_hint_y=1.0
         kvFind(self, 'rcid', 'control').add_widget(widget)
         widget.bind(on_control=self.on_control)
         self.control = widget

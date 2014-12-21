@@ -8,9 +8,10 @@
 	HSeparator:
 		text: 'Bluetooth Configuration'
 		halign: 'left'
+		size_hint_y: 0.05
 		
 	SettingsView:
-		size_hint_y: 0.20
+		size_hint_y: 0.15
 		rcid: 'btEnable'
 		label_text: 'Bluetooth'
 		help_text: 'If the Bluetooth module add-on is connected to the expansion port, enable it here'
@@ -24,6 +25,7 @@
 	HSeparator:
 		text: 'Cellular Module Configuration'
 		halign: 'left'
+		size_hint_y: 0.05
 		
 	SettingsView:
 		size_hint_y: 0.20
@@ -32,13 +34,13 @@
 		help_text: 'If the Real-Time telemetry module is installed, enable it here'
 
 	SettingsView:
-		size_hint_y: 0.10
+		size_hint_y: 0.25
 		rcid: 'cellprovider'
 		label_text: 'Cellular Provider'
-		help_text: 'Select the cellular provider used with the Real-Time module, or specify custom APN settings below'
+		help_text: 'Select the cellular provider, or specify custom APN settings below'
 	
 	BoxLayout:
-		size_hint_y: 0.27
+		size_hint_y: 0.30
 		orientation: 'horizontal'
 		FieldLabel:
 			size_hint_x: 0.25

@@ -19,14 +19,14 @@
 	orientation: 'vertical'
 	BoxLayout:
 		orientation: 'vertical'
-		size_hint_y: 0.20
+		size_hint_y: 0.19
 		spacing: dp(20)
 		SettingsView:
 			rcid: 'autoDetect'
 			label_text: 'Automatic track detection'
 			help_text: 'Automatically detect and configure the race track upon GPS lock, after power-up. If you want a fixed configuration, leave off and configure your start/finish and sector targets below'
 	HLineSeparator:
-		height: dp(5)
+		size_hint_y: 0.01
 	ScreenManager:
 		rcid: 'screenmgr'
 		size_hint_y: 0.80

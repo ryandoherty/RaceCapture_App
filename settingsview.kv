@@ -2,14 +2,12 @@
 
 <SettingsView>:
 	orientation: 'vertical'
-	spacing: 50
 	BoxLayout:
-		size_hint_y: 0.3
-		spacing: 40
+		size_hint_y: 0.25
 		rcid: 'fieldContainer'
 		orientation: 'horizontal'
 		FieldLabel:
-			size_hint: (0.5, None)
+			size_hint: (0.5, 1.0)
 			rcid: 'fieldLabel'
 			halign: 'right'
 			font_size: sp(20)
@@ -17,11 +15,10 @@
 		AnchorLayout:
 			anchor_x: 'center'
 			anchor_y: 'center'
-			size_hint: (0.5, None)
+			size_hint: (0.5, 1.0)
 			rcid: 'control'
 	HelpLabel:
-		padding: (dp(0), dp(10))
-		size_hint_y: 0.7
+		size_hint_y: 0.75
 		rcid: 'helpLabel'
 		halign: 'left'
 		text: ''
