@@ -179,6 +179,7 @@ class RcpApi:
                 if error_count > 5:
                     print("Too many Rx exceptions; re-opening connection")
                     self.recover_connection()
+                    sleep(5)
                 else:
                     sleep(0.25)
                     
@@ -266,7 +267,7 @@ class RcpApi:
                                     self.recoverTimeout()
                                     retry += 1
                             if not result:
-                                print('Level 2 retry for ' + name)
+                                print('Level 2 retry for (' + str(level2Retry) + ') ' + name)
                                 level2Retry += 1
         
         
@@ -613,12 +614,16 @@ class RcpApi:
                 self._auto_detect_event.wait()
                 self._auto_detect_event.clear()
                 self._enable_autodetect.wait()
+                print("Starting auto-detect")
+                
+                comms = self.comms
+                if comms and comms.isOpen():
+                    continue  #if we're already open, skip auto-detect
                 
                 version_result = VersionResult()        
                 version_result_event = Event()
                 version_result_event.clear()
 
-                comms = self.comms
                 if comms.port:
                     ports = [comms.port]
                 else:

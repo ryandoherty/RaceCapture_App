@@ -19,7 +19,7 @@ def connection_process_message_reader(rx_queue, connection, should_run):
         except:
             print('Exception in connection_process_message_reader')
             traceback.print_exc()
-            #_rx_queue.put('##ERROR##')
+            should_run.clear()
             sleep(0.5)
     print('connection process message reader exited')            
             
@@ -35,6 +35,7 @@ def connection_process_message_writer(tx_queue, connection, should_run):
         except Exception as e:
             print('Exception in connection_process_message_writer ' + str(e))
             traceback.print_exc()
+            should_run.clear()
             sleep(0.5)
     print('connection process message writer exited')
     
@@ -55,19 +56,18 @@ def connection_message_process(connection, port, rx_queue, tx_queue, command_que
         writer_thread = threading.Thread(target=connection_process_message_writer, args=(tx_queue, connection, reader_writer_should_run))
         writer_thread.start()
         
-        should_run = True
-        while should_run:
+        
+        while reader_writer_should_run.is_set():
             try:
                 command = command_queue.get(True, STAY_ALIVE_TIMEOUT)
                 if command == COMMAND_CLOSE:
                     print('connection process: got close command')
-                    should_run = False
+                    reader_writer_should_run.clear()
             except Empty:
                 print('keep alive timeout')
-                should_run = False
+                reader_writer_should_run.clear()
         print('connection worker exiting')
         
-        reader_writer_should_run.clear()
         reader_thread.join()
         writer_thread.join()
 
@@ -100,7 +100,7 @@ class Comms():
 
     def start_connection_process(self):
         rx_queue = multiprocessing.Queue()
-        tx_queue = multiprocessing.Queue()
+        tx_queue = multiprocessing.Queue(5)
         command_queue = multiprocessing.Queue()    
         connection_process = multiprocessing.Process(target=connection_message_process, args=(self._connection, self.port, rx_queue, tx_queue, command_queue))
         connection_process.start()
@@ -129,7 +129,6 @@ class Comms():
         
     def close(self):
         print('comms.close()')
-        connection = self._connection
         if self.isOpen():
             try:
                 print('closing connection process')
@@ -140,11 +139,13 @@ class Comms():
                 print('Timeout joining connection process')
 
     def read_message(self):
+        if not self.isOpen(): raise Exception("Comms Exception")
         try:
             return self._rx_queue.get(True, self._timeout)
         except: #returns Empty object if timeout is hit
             return None
     
     def write_message(self, message):
+        if not self.isOpen(): raise Exception("Comms Exception")
         self._tx_queue.put(message)
                     

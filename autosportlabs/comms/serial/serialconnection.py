@@ -15,6 +15,7 @@ class SerialConnection():
         pass
     
     def get_available_ports(self):
+        print("getting available ports")
         ports = [x[0] for x in list_ports.comports()]
         ports.sort()
         filtered_ports = filter(lambda port: not port.startswith('/dev/ttyS'), ports)
@@ -64,11 +65,11 @@ class SerialConnection():
     def flushInput(self):
         try:
             self.ser.flushInput()
-        except termios.error:
+        except SerialException as e:
             raise CommsErrorException()
     
     def flushOutput(self):
         try:
             self.ser.flushOutput()
-        except termios.error:
+        except SerialException as e:
             raise CommsErrorException()

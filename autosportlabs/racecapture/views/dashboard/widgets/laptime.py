@@ -31,10 +31,10 @@ class Laptime(Gauge):
                 intMinuteValue = int(value)
                 fractionMinuteValue = 60.0 * (value - float(intMinuteValue))
                 if value == MIN_LAP_TIME:
-                    view.text = NULL_LAP_TIME
+                    view.text = self.NULL_LAP_TIME
                 else:
                     view.text = '{}:{}'.format(intMinuteValue,'{0:2.3f}'.format(fractionMinuteValue))
-        self.updateColors(view)
+        self.updateColors()
 
     def on_halign(self, instance, value):
         self.valueView.halign = value 
