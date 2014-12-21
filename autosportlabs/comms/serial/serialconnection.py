@@ -1,5 +1,5 @@
 import serial
-from serial import SerialException, termios
+from serial import SerialException
 from serial.tools import list_ports
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 
