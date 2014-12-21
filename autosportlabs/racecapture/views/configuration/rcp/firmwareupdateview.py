@@ -8,6 +8,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.app import Builder
+from kivy import platform
+from autosportlabs.racecapture.views.util.alertview import confirmPopup, okPopup
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
@@ -26,6 +28,9 @@ class FirmwareUpdateView(BaseConfigView):
         super(FirmwareUpdateView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
+    def is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb(self):
+        return True if platform == 'win' else False
+    
     def on_config_updated(self, rcpCfg):
         pass
 
@@ -35,8 +40,28 @@ class FirmwareUpdateView(BaseConfigView):
                       size_hint=(None, None), size=(400, 400))
         popup.open()
 
+    def prompt_manual_restart(self):
+        popup = None
+        def _on_ok(*args):
+            popup.dismiss()
+            self._restart_json_serial()
+        popup = okPopup('Operation Complete', '1. Unplug RaceCapture from USB\n2. Wait 3 seconds\n3. Re-connect USB', _on_ok)
+        
+    def prompt_manual_bootloader_mode(self, instance):
+        self._popup.dismiss()
+        self._teardown_json_serial()
+        popup = None
+        def _on_answer(answer, *args):
+            popup.dismiss()
+            if answer:
+                self._start_update_fw(instance)
+            else:
+                self._restart_json_serial()                
+        popup = confirmPopup('Enable Bootloader Mode', '1. Disconnect 12v power\n2. Unplug RaceCapture from USB\n3. Wait 3 seconds\n4. While holding front panel button, re-connect USB', _on_answer)
+        
     def select_file(self):
-        content = LoadDialog(ok=self.update_fw, cancel=self.dismiss_popup,
+        content = LoadDialog(ok=self.prompt_manual_bootloader_mode if self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb() else self._start_update_fw, 
+                             cancel=self.dismiss_popup,
                              filters=['*' + '.ihex'])
         self._popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
         self._popup.open()
@@ -49,7 +74,8 @@ class FirmwareUpdateView(BaseConfigView):
         # we just need to disable the com port
         self.rc_api.disable_autorecover()
         try:
-            self.rc_api.resetDevice(True)
+            if not self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb():
+                self.rc_api.resetDevice(True)
             self.rc_api.shutdown_comms()
         except:
             pass
@@ -102,20 +128,23 @@ class FirmwareUpdateView(BaseConfigView):
                 fu.update_firmware(filename, port)
                 kvFind(self, 'rcid', 'fw_progress').title="Restarting"
 
+                if self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb():
+                    self.prompt_manual_restart()
                 #Sleep for a few seconds since we need to let USB re-enumerate
-                sleep(10)
+                sleep(3)
             else:
                 alertPopup('Error Loading', 'No firmware file selected')
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Firmware:\n\n' + str(detail))
 
-        self._restart_json_serial()
+        if not self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb():
+            self._restart_json_serial()
         kvFind(self, 'rcid', 'fw_progress').value = 0
         kvFind(self, 'rcid', 'fw_progress').title=""
 
 
 
-    def update_fw(self, instance):
+    def _start_update_fw(self, instance):
         self._popup.dismiss()
         #The comma is necessary since we need to pass in a sequence of args
         t = Thread(target=self._update_thread, args=(instance,))
