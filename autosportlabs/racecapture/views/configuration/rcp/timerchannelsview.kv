@@ -7,8 +7,9 @@
 <PulseChannel>:
     BoxLayout:
         orientation: 'horizontal'
+        spacing: dp(5)
         BoxLayout: 
-            padding: [5, 5]
+            spacing: dp(5)
             orientation: 'vertical'
             HSeparator:
                 text: 'Configuration'
@@ -20,12 +21,12 @@
             Label:
                 size_hint: (None, 1.0)
         BoxLayout:
-            padding: [5, 5]
+            spacing: dp(5)
             orientation: 'vertical'
             HSeparator:
                 text: 'Options'
             BoxLayout:
-                padding: [2, 2]
+                spacing: dp(5)
                 orientation: 'horizontal'
                 FieldLabel:
                     text: 'Channel Mode'
@@ -34,7 +35,7 @@
                 	rcid: 'mode'
                 	on_text: root.on_mode(*args)
             BoxLayout:
-                padding: [2, 2]
+                spacing: dp(5)
                 orientation: 'horizontal'
                 FieldLabel:
                     text: 'Timer Speed'
@@ -43,7 +44,7 @@
                 	rcid: 'speed'
                 	on_text: root.on_speed(*args)
             BoxLayout:
-                padding: [2, 2]
+                spacing: dp(5)
                 orientation: 'horizontal'
                 FieldLabel:
                     text: 'Pulse per Revolution'

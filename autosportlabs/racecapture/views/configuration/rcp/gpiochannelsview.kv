@@ -6,8 +6,9 @@
 <GPIOChannel>:
     BoxLayout:
         orientation: 'horizontal'
+        spacing: dp(5)
         BoxLayout: 
-            padding: [5, 5]
+            spacing: dp(5)
             size_hint: (1.0,1.0)
             orientation: 'vertical'
             HSeparator:
@@ -18,12 +19,13 @@
             SampleRateSelectorView:
             	rcid: 'sr'
         BoxLayout:
-            padding: [5, 5]
+            spacing: dp(5)
             size_hint: (1.0,1.0)
             orientation: 'vertical'
             HSeparator:
                 text: 'Options'
             BoxLayout:
+            	spacing: dp(5)
                 orientation: 'horizontal'
                 size_hint: (1.0,0.5)
                 FieldLabel:

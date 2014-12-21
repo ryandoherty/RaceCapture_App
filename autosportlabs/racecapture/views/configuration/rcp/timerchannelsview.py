@@ -8,6 +8,7 @@ from kivy.uix.spinner import Spinner
 from kivy.app import Builder
 from mappedspinner import MappedSpinner
 from utils import *
+from kivy.metrics import dp
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
 
@@ -17,7 +18,7 @@ class PulseChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):
         super(PulseChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Timer '
-        self.accordion_item_height = 110
+        self.accordion_item_height = dp(120)
 
     def channel_builder(self, index):
         editor = PulseChannel(id='timer' + str(index), channels=self.channels)

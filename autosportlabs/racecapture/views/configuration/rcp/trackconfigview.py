@@ -107,7 +107,7 @@ class AutomaticTrackConfigScreen(Screen):
     trackDb = None
     tracksGrid = None
     trackManager = None
-    trackItemMinHeight = 200
+    TRACK_ITEM_MIN_HEIGHT = 200
     searchRadiusMeters = 2000
     searchBearing = 360
     trackSelectionPopup = None
@@ -169,15 +169,15 @@ class AutomaticTrackConfigScreen(Screen):
             grid.clear_widgets()
             if len(matchedTracks) == 0:
                 grid.add_widget(EmptyTrackDbView())
-                self.tracksGrid.height = self.trackItemMinHeight
+                self.tracksGrid.height = dp(self.TRACK_ITEM_MIN_HEIGHT)
             else:
-                self.tracksGrid.height = self.trackItemMinHeight * (len(matchedTracks) + 1)
+                self.tracksGrid.height = dp(self.TRACK_ITEM_MIN_HEIGHT) * (len(matchedTracks) + 1)
                 index = 0
                 for track in matchedTracks:
                     trackDbView = TrackDbItemView(track=track, index=index)
                     trackDbView.bind(on_remove_track=self.on_remove_track)
                     trackDbView.size_hint_y = None
-                    trackDbView.height = self.trackItemMinHeight
+                    trackDbView.height = dp(self.TRACK_ITEM_MIN_HEIGHT)
                     grid.add_widget(trackDbView)
                     index += 1
                 
