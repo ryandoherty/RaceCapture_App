@@ -29,7 +29,8 @@ class FirmwareUpdateView(BaseConfigView):
         self.register_event_type('on_config_updated')
 
     def is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb(self):
-        return True if platform == 'win' else False
+        return True
+        #return True if platform == 'win' else False
     
     def on_config_updated(self, rcpCfg):
         pass
@@ -53,7 +54,7 @@ class FirmwareUpdateView(BaseConfigView):
         popup = None
         def _on_answer(answer, *args):
             popup.dismiss()
-            if answer:
+            if answer == True:
                 self._start_update_fw(instance)
             else:
                 self._restart_json_serial()                
