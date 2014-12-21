@@ -82,6 +82,7 @@ Section "Race Capture" SecRaceCapture
 
   CreateDirectory $SMPROGRAMS\$APP_SM
   CreateShortCut "$SMPROGRAMS\$APP_SM\${APP_NAME}.lnk" "$INSTDIR\raceCapture.exe"
+  CreateShortCut "$SMPROGRAMS\$APP_SM\CHANGELOG.lnk" "$INSTDIR\CHANGELOG.TXT"  
   CreateShortCut "$SMPROGRAMS\$APP_SM\Uninstall.lnk" "$INSTDIR\uninstall.exe"
 
   ;Store installation folder

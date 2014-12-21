@@ -1,0 +1,9 @@
+===1.2.1===
+* Further improvements of USB connection recovery
+* version update to make compatible with Google Play store for upcoming android app
+
+===1.0.1===
+* Improvements for re-detection and recovery of of USB connection
+
+===1.0.0===
+Initial Release
