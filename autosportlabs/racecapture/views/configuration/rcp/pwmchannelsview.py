@@ -10,6 +10,7 @@ from fieldlabel import FieldLabel
 from valuefield import IntegerValueField
 from mappedspinner import MappedSpinner
 from utils import *
+from kivy.metrics import dp
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/pwmchannelsview.kv')
@@ -18,7 +19,7 @@ class AnalogPulseOutputChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):
         super(AnalogPulseOutputChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Pulse / Analog Output '
-        self.accordion_item_height = 100
+        self.accordion_item_height = dp(120)
         
     def channel_builder(self, index):
         editor = AnalogPulseOutputChannel(id='pwm' + str(index), channels=self.channels)

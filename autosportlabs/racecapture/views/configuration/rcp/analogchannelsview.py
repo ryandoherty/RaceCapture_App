@@ -25,7 +25,7 @@ class AnalogChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):
         super(AnalogChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Analog '
-        self.accordion_item_height = pct_h(.15)
+        self.accordion_item_height = dp(90)
             
     def channel_builder(self, index):
         editor = AnalogChannel(id='analog' + str(index), channels=self.channels)

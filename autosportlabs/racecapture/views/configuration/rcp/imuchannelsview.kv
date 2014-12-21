@@ -2,8 +2,7 @@
 
 <ImuChannel>:
     orientation: 'horizontal'
-    padding: [5,5]
-    spacing: [5,5]
+    spacing: dp(5)
     Switch:
         rcid: 'enabled'
         on_active: root.on_enabled(*args)
@@ -36,7 +35,7 @@
 	spacing: dp(20)
     orientation: 'vertical'
     BoxLayout:
-        size_hint_y: 0.15
+        size_hint_y: 0.2
         orientation: 'horizontal'
         BoxLayout:
         	size_hint: 0.4, 0.5
@@ -71,6 +70,10 @@
             text: 'Zero Level'
 
     AccelChannelsView:
-    	size_hint_y: 0.25
+    	size_hint_y: 0.45
+    	spacing: dp(5)
     GyroChannelsView:
-    	size_hint_y: 0.25	        
+    	size_hint_y: 0.45
+    	spacing: dp(5)	        
+	BoxLayout:
+		size_hint_y: 0.3
