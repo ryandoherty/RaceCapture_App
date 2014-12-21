@@ -284,6 +284,7 @@ class RcpApi:
                     print('Command sequence exception: ' + str(detail))
                     traceback.print_exc()
                     failCallback(detail)
+                    self.recover_connection()
 
                 print('Execute Sequence complete')
                 
