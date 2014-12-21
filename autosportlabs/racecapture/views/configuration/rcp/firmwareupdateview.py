@@ -23,7 +23,6 @@ class FirmwareUpdateView(BaseConfigView):
     progress_gauge = ObjectProperty(None)
 
     def __init__(self, **kwargs):
-        self._rc_api = kwargs.get('rc_api', None)
         super(FirmwareUpdateView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
@@ -48,17 +47,17 @@ class FirmwareUpdateView(BaseConfigView):
     def _teardown_json_serial(self):
         # It's ok if this fails, in the event of no device being present,
         # we just need to disable the com port
-        self._rc_api.disable_autorecover()
+        self.rc_api.disable_autorecover()
         try:
-            self._rc_api.resetDevice(True)
-            self._rc_api.shutdown_comms()
+            self.rc_api.resetDevice(True)
+            self.rc_api.shutdown_comms()
         except:
             pass
         sleep(5)
 
     def _restart_json_serial(self):
-        self._rc_api.enable_autorecover()
-        self._rc_api.run_auto_detect()
+        self.rc_api.enable_autorecover()
+        self.rc_api.run_auto_detect()
 
     def _update_thread(self, instance):
         try:

@@ -78,14 +78,7 @@ class RcpApi:
     def recover_connection(self):
         if self._enable_autodetect.is_set():
             print("attempting to recover connection")
-            try:
-                if self.detect_activity_callback: self.detect_activity_callback('')
-                self.comms.close()
-                self.comms.open()
-            except:
-                print("Failed to immediately recover; running auto-detect")
-                self.run_auto_detect()
-                raise
+            self.run_auto_detect()
 
     def _start_message_rx_worker(self):
         self._running.set()
