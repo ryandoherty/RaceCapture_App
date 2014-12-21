@@ -23,8 +23,7 @@ class FirmwareUpdateView(BaseConfigView):
     progress_gauge = ObjectProperty(None)
 
     def __init__(self, **kwargs):
-        self.dataBusPump = kwargs.get('dataBusPump', None)
-
+        self._rc_api = kwargs.get('rc_api', None)
         super(FirmwareUpdateView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
@@ -38,11 +37,6 @@ class FirmwareUpdateView(BaseConfigView):
         popup.open()
 
     def select_file(self):
-        #Inside a try block since this will fail if there is no device detected
-        try:
-            self.dataBusPump._rc_api.stop_msessage_rx_worker()
-        except:
-            pass
         content = LoadDialog(ok=self.update_fw, cancel=self.dismiss_popup,
                              filters=['*' + '.ihex'])
         self._popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
@@ -52,13 +46,20 @@ class FirmwareUpdateView(BaseConfigView):
         kvFind(self, 'rcid', 'fw_progress').value = int(percent)
 
     def _teardown_json_serial(self):
-        self.dataBusPump._rc_api.resetDevice(bootloader=True)
-        self.dataBusPump._rc_api.shutdown_comms()
+        # It's ok if this fails, in the event of no device being present,
+        # we just need to disable the com port
+        self._rc_api.disable_autorecover()
+        try:
+            self._rc_api.resetDevice(True)
+            self._rc_api.shutdown_comms()
+        except:
+            pass
         sleep(5)
 
     def _restart_json_serial(self):
-        self.dataBusPump._rc_api.run_auto_detect()
-                        
+        self._rc_api.enable_autorecover()
+        self._rc_api.run_auto_detect()
+
     def _update_thread(self, instance):
         try:
             selection = instance.selection
@@ -84,10 +85,16 @@ class FirmwareUpdateView(BaseConfigView):
                 fu = fw_update.FwUpdater()
                 fu.register_progress_callback(self._update_progress_gauge)
 
-                #Find our bootloader
-                port = fu.scan_for_device()
+                retries = 5
+                port = None
+                while retries > 0 and not port:
+                    #Find our bootloader
+                    port = fu.scan_for_device()
 
-                #Bail if we can't find an active loader
+                    if not port:
+                        retries -= 1
+                        sleep(2)
+
                 if not port:
                     kvFind(self, 'rcid', 'fw_progress').title=""
                     raise Exception("Unable to locate bootloader")

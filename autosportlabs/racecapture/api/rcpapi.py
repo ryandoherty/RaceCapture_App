@@ -64,17 +64,28 @@ class RcpApi:
         self.comms = kwargs.get('comms', self.comms)
         self._running = Event()
         self._running.clear()
+        self._enable_autodetect = Event()
+        self._enable_autodetect.set()
+
+    def enable_autorecover(self):
+        print("Enabling auto recover")
+        self._enable_autodetect.set()
+
+    def disable_autorecover(self):
+        print("Disabling auto recover")
+        self._enable_autodetect.clear()
         
     def recover_connection(self):
-        print("attempting to recover connection")
-        try:
-            if self.detect_activity_callback: self.detect_activity_callback('')
-            self.comms.close()
-            self.comms.open()
-        except:
-            print("Failed to immediately recover; running auto-detect")
-            self.run_auto_detect()
-            raise            
+        if self._enable_autodetect.is_set():
+            print("attempting to recover connection")
+            try:
+                if self.detect_activity_callback: self.detect_activity_callback('')
+                self.comms.close()
+                self.comms.open()
+            except:
+                print("Failed to immediately recover; running auto-detect")
+                self.run_auto_detect()
+                raise
 
     def _start_message_rx_worker(self):
         self._running.set()
@@ -601,6 +612,7 @@ class RcpApi:
             try:
                 self._auto_detect_event.wait()
                 self._auto_detect_event.clear()
+                self._enable_autodetect.wait()
                 
                 version_result = VersionResult()        
                 version_result_event = Event()

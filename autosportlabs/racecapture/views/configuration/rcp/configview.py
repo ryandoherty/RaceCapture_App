@@ -178,7 +178,7 @@ class ConfigView(Screen):
         attach_node('Scripting', None, scriptView)
         self.scriptView = scriptView
         if FIRMWARE_UPDATABLE:
-            attach_node('Firmware', None, FirmwareUpdateView(dataBusPump=self.dataBusPump))
+            attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api))
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
