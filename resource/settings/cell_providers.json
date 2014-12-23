@@ -9,6 +9,17 @@
             "apn_host": "wap.cingular",
             "apn_user": "wap@cingulargprs.com",
             "apn_pass": "cingular1"
+        },
+        "AT&T (USA) Alt #1": {
+            "apn_host": "broadband",
+            "apn_user": "",
+            "apn_pass": ""
+        },
+        "AT&T (USA) Alt #2": {
+            "apn_host": "phone",
+            "apn_user": "",
+            "apn_pass": ""
         }
+        
     }
 }
