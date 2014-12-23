@@ -2,6 +2,7 @@ import kivy
 kivy.require('1.8.0')
 
 from kivy.properties import ObjectProperty
+from kivy import platform
 from settingsview import SettingsMappedSpinner, SettingsSwitch
 from mappedspinner import MappedSpinner
 from kivy.uix.boxlayout import BoxLayout
@@ -20,6 +21,10 @@ from threading import Thread
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/firmwareupdateview.kv')
 
+if platform == 'win':
+    RESET_DELAY = 5000
+else:
+    RESET_DELAY = 1000
 #TODO: MK1 support
 class FirmwareUpdateView(BaseConfigView):
     progress_gauge = ObjectProperty(None)
@@ -28,9 +33,6 @@ class FirmwareUpdateView(BaseConfigView):
         super(FirmwareUpdateView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
-    def is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb(self):
-        return True if platform == 'win' else False
-    
     def on_config_updated(self, rcpCfg):
         pass
 
@@ -45,7 +47,9 @@ class FirmwareUpdateView(BaseConfigView):
         def _on_ok(*args):
             popup.dismiss()
             self._restart_json_serial()
-        popup = okPopup('Operation Complete', '1. Unplug RaceCapture from USB\n2. Wait 3 seconds\n3. Re-connect USB', _on_ok)
+        popup = okPopup('Operation Complete',
+                        '1. Unplug RaceCapture from USB\n2. Wait 3 seconds\n3. Re-connect USB',
+                        _on_ok)
         
     def prompt_manual_bootloader_mode(self, instance):
         self._popup.dismiss()
@@ -57,10 +61,17 @@ class FirmwareUpdateView(BaseConfigView):
                 self._start_update_fw(instance)
             else:
                 self._restart_json_serial()                
-        popup = confirmPopup('Enable Bootloader Mode', '1. Disconnect 12v power\n2. Unplug RaceCapture from USB\n3. Wait 3 seconds\n4. While holding front panel button, re-connect USB', _on_answer)
+        popup = confirmPopup('Enable Bootloader Mode',
+                             '1. Disconnect 12v power\n2. Unplug RaceCapture from USB\n' \
+                             '3. Wait 3 seconds\n4. While holding front panel button, re-connect USB',
+                             _on_answer)
         
     def select_file(self):
-        content = LoadDialog(ok=self.prompt_manual_bootloader_mode if self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb() else self._start_update_fw, 
+        if platform == 'win':
+            ok_cb = self.prompt_manual_bootloader_mode
+        else:
+            ok_cb = self._start_update_fw
+        content = LoadDialog(ok=ok_cb, 
                              cancel=self.dismiss_popup,
                              filters=['*' + '.ihex'])
         self._popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
@@ -74,8 +85,10 @@ class FirmwareUpdateView(BaseConfigView):
         # we just need to disable the com port
         self.rc_api.disable_autorecover()
         try:
-            if not self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb():
-                self.rc_api.resetDevice(True)
+            #Windows workaround (because windows sucks at enumerating
+            #USB in a timely fashion)
+            if not platform == 'win':
+                self.rc_api.resetDevice(True, RESET_DELAY)
             self.rc_api.shutdown_comms()
         except:
             pass
@@ -128,7 +141,8 @@ class FirmwareUpdateView(BaseConfigView):
                 fu.update_firmware(filename, port)
                 kvFind(self, 'rcid', 'fw_progress').title="Restarting"
 
-                if self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb():
+                #Windows workaround
+                if platform == 'win':
                     self.prompt_manual_restart()
                 #Sleep for a few seconds since we need to let USB re-enumerate
                 sleep(3)
@@ -137,7 +151,7 @@ class FirmwareUpdateView(BaseConfigView):
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Firmware:\n\n' + str(detail))
 
-        if not self.is_manual_bootloader_mode_required_because_windows_sucks_and_cannot_properly_enumerate_usb():
+        if not platform == 'win':
             self._restart_json_serial()
         kvFind(self, 'rcid', 'fw_progress').value = 0
         kvFind(self, 'rcid', 'fw_progress').title=""

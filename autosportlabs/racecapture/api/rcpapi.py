@@ -414,13 +414,13 @@ class RcpApi:
         
         self._queue_multiple(cmdSequence, 'setRcpCfg', winCallback, failCallback)        
 
-    def resetDevice(self, bootloader=False):
+    def resetDevice(self, bootloader=False, reset_delay=0):
         if bootloader:
             loaderint = 1
         else:
             loaderint = 0
             
-        self.sendCommand({'sysReset': {'loader':loaderint}})
+        self.sendCommand({'sysReset': {'loader':loaderint, 'reset_delay_ms':reset_delay}})
                 
     def getAnalogCfg(self, channelId = None):
         self.sendGet('getAnalogCfg', channelId)
