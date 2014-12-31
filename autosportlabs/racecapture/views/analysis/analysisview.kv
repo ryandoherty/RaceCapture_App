@@ -1,23 +1,16 @@
+			
 <AnalysisView>:
 	BoxLayout:
 		orientation: 'vertical'
-		FieldLabel:
-			font_size: dp(20)
-			halign: 'center'
-			text: "coming next release! (SOON)"
-			
-#<AnalysisView_disabled>:
-#	BoxLayout:
-#		orientation: 'vertical'
-#		BoxLayout:
-#			orientation: 'horizontal'
-#			RaceTrackView:
-#				id: trackview
-#				size_hint_x: 0.75
-#			Label:
-#				size_hint_x: 0.25
-#				text: 'secondary chart'
-#		BoxLayout:
-#			orientation: 'vertical'
-#			Label:
-#				text: 'chart'
+		BoxLayout:
+			orientation: 'horizontal'
+			RaceTrackView:
+				id: trackview
+				size_hint_x: 0.75
+			Label:
+				size_hint_x: 0.25
+				text: 'secondary chart'
+		BoxLayout:
+			orientation: 'vertical'
+			Label:
+				text: 'chart'
