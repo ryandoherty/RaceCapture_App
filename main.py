@@ -156,6 +156,7 @@ class RaceCaptureApp(App):
         rcpConfig = self.rc_config
         try:
             self._rc_api.writeRcpCfg(rcpConfig, self.on_write_config_complete, self.on_write_config_error)
+            self.showActivity("Writing configuration")
         except:
             logging.exception('')
             self._serial_warning()
