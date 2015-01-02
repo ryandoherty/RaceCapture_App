@@ -22,6 +22,7 @@ class CANBaudRateSpinner(SettingsMappedSpinner):
     
 class CANConfigView(BaseConfigView):
     can_config = None
+    can_settings = []
     
     def __init__(self, **kwargs):    
         super(CANConfigView, self).__init__(**kwargs)
@@ -57,16 +58,18 @@ class CANConfigView(BaseConfigView):
         current_children = can_baud_container.children
         can_channel_count = capabilities.channels.can
         if len(current_children) != can_channel_count:
+            self.can_settings = []
             can_baud_container.clear_widgets
             for i in range(0, can_channel_count):
                 can_baud_rate_setting = CANBaudRateSettings()
+                self.can_settings.append(can_baud_rate_setting)
                 can_baud_rate_setting.channel_id = i
                 can_baud_rate_setting.label_text = 'CAN {} Baud Rate'.format(i + 1)
                 can_baud_rate_setting.setControl(CANBaudRateSpinner())
                 can_baud_rate_setting.bind(on_setting=self.on_can_baud)        
                 can_baud_container.add_widget(can_baud_rate_setting)
                 
-        for settings, baud in zip(current_children, can_config.baudRate):
+        for settings, baud in zip(self.can_settings, can_config.baudRate):
             settings.setValue(baud)                
             
 
