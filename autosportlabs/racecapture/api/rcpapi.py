@@ -328,6 +328,7 @@ class RcpApi:
         
     def getRcpCfg(self, cfg, winCallback, failCallback):
         cmdSequence = [       RcpCmd('ver',         self.sendGetVersion),
+                              RcpCmd('capabilities',self.getCapabilities),
                               RcpCmd('analogCfg',   self.getAnalogCfg),
                               RcpCmd('imuCfg',      self.getImuCfg),
                               RcpCmd('gpsCfg',      self.getGpsCfg),
@@ -565,6 +566,9 @@ class RcpApi:
     def getVersion(self, winCallback, failCallback):
         self.executeSingle(RcpCmd('ver', self.sendGetVersion), winCallback, failCallback)
 
+    def getCapabilities(self):
+        self.sendGet('getCapabilities')
+        
     def sendCalibrateImu(self):
         self.sendCommand({"calImu":1})
         
