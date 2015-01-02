@@ -212,7 +212,7 @@ class DatalogChannel(object):
 
 class DataStore(object):
     val_filters = ['lt', 'gt', 'eq', 'lt_eq', 'gt_eq']
-    def __init__(self, name=':memory:'):
+    def __init__(self):
         self._channels = []
         self._isopen = False
         self.datalog_channels = {}

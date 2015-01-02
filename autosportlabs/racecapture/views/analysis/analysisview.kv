@@ -1,16 +1,74 @@
-			
+<LogImportWidget>:
+    size: root.size
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Datastore Location'
+                Label:
+                    text: 'Datalog Location'
+                Label:
+                    text: 'Session Name'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    TextInput:
+                    IconButton:
+                        id: 'save'
+                        text: '\357\203\207'
+                        rcid: 'savedatastore'
+                        #on_release: root.saveConfig()
+                BoxLayout:
+                    orientation: 'horizontal'
+                    TextInput:
+                    IconButton:
+                        id: 'open'
+                        text: '\357\204\225'
+                        rcid: 'opendatalog'
+                        #on_release: root.openConfig()
+                TextInput:
+        Label:
+            size_hint_y: .2
+            size_hint_x: .1
+            text: 'Notes'
+        TextInput:
+            size_hint_y: 2.5
+        Button:
+            size_hint_y: .3
+            text: 'Begin Import'
+        ProgressBar:
+            size_hint_y: .1
+
 <AnalysisView>:
-	BoxLayout:
-		orientation: 'vertical'
-		BoxLayout:
-			orientation: 'horizontal'
-			RaceTrackView:
-				id: trackview
-				size_hint_x: 0.75
-			Label:
-				size_hint_x: 0.25
-				text: 'secondary chart'
-		BoxLayout:
-			orientation: 'vertical'
-			Label:
-				text: 'chart'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            RaceTrackView:
+                id: trackview
+                size_hint_x: 0.75
+            Label:
+                size_hint_x: 0.25
+                text: 'secondary chart'
+        BoxLayout:
+            orientation: 'horizontal'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: 0.1
+                size_hint_x: 0.1
+                IconButton:
+                    id: 'open'
+                    text: '\357\204\225'
+                    rcid: 'opendatastore'
+                    on_release: root.open_datastore()
+                IconButton:
+                    id: 'read'
+                    text: '\357\202\223'
+                    rcid: 'readlog'
+                    on_release: root.import_datalog()
+            Label:
+                text: 'chart'
