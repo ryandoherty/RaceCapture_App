@@ -823,12 +823,87 @@ class VersionConfig(object):
     def toJson(self):
         versionJson = {'name': self.name, 'fname': self.friendlyName, 'major': self.major, 'minor': self.minor, 'bugfix': self.bugfix}
         return {'ver': versionJson}
+    
+class ChannelCapabilities(object):
+    analog = 0
+    imu = 0
+    gpio = 0
+    timer = 0
+    pwm = 0
+    can = 0
+
+    def from_json_dict(self, json_dict):
+        if json_dict:
+            self.analog = int(json_dict.get('analog', self.analog))
+            self.imu = int(json_dict.get('imu', self.imu))
+            self.gpio = int(json_dict.get('gpio', self.gpio))
+            self.pwm = int(json_dict.get('pwm', self.pwm))
+            self.can = int(json_dict.get('can', self.can))
         
+    def to_json_dict(self):
+        return {'analog':self.analog,
+                'imu':self.imu,
+                'gpio':self.gpio,
+                'timer':self.timer,
+                'pwm':self.pwm,
+                'can':self.can
+                }
+    
+class SampleRateCapabilities(object):
+    sensor = 0
+    gps = 0
+    
+    def from_json_dict(self, json_dict):
+        if json_dict:
+            self.sensor = json_dict.get('sensor', self.sensor)
+            self.gps = json_dict.get('gps', self.gps)
+    
+    def to_json_dict(self):
+        return {'gps': self.gps, 'sensor':self.sensor}
+      
+class StorageCapabilities():
+    tracks = 0
+    script = 0
+    
+    def from_json_dict(self, json_dict):
+        if json_dict:
+            self.tracks = json_dict.get('tracks', self.tracks)
+            self.script = json_dict.get('script', self.script)
+        
+    def to_json_dict(self):
+        return {'tracks': self.tracks, 'script': self.script}
+    
+class Capabilities(object): 
+    channels = ChannelCapabilities()
+    sample_rates = SampleRateCapabilities()
+    storage = StorageCapabilities()
+    
+    def from_json_dict(self, json_dict):
+        if json_dict:
+            channels = json_dict.get('channels')
+            if channels:
+                self.channels.from_json_dict(channels)
+            
+            sample_rates = json_dict.get('sampleRates')
+            if sample_rates:
+                self.sample_rates.from_json_dict(sample_rates)
+                
+            storage = json_dict.get('db')
+            if storage:
+                self.storage.from_json_dict(storage)
+        
+    def to_json_dict(self):
+        return {'channels': self.channels.to_json_dict(),
+                'sampleRates': self.sample_rates.to_json_dict(),
+                'db': self.storage.to_json_dict() 
+                }
+    
 class RcpConfig(object):
     loaded = False
     def __init__(self, **kwargs):
         
         self.versionConfig = VersionConfig()
+        self.capabilities = Capabilities()
         self.analogConfig = AnalogConfig()
         self.imuConfig = ImuConfig()
         self.gpsConfig = GpsConfig()
@@ -883,6 +958,8 @@ class RcpConfig(object):
                 if versionJson:
                     self.versionConfig.fromJson(versionJson)
         
+                self.capabilities.from_json_dict(rcpJson.get('capabilities'))
+                
                 analogCfgJson = rcpJson.get('analogCfg', None)
                 if analogCfgJson:
                     self.analogConfig.fromJson(analogCfgJson)
@@ -948,6 +1025,7 @@ class RcpConfig(object):
     def toJson(self):
         rcpJson = {'rcpCfg':{
                              'ver': self.versionConfig.toJson().get('ver'),
+                             'capabilities': self.capabilities.to_json_dict(),
                              'gpsCfg':self.gpsConfig.toJson().get('gpsCfg'),
                              'lapCfg':self.lapConfig.toJson().get('lapCfg'),
                              'imuCfg':self.imuConfig.toJson().get('imuCfg'),

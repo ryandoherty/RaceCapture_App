@@ -287,7 +287,8 @@ class ConfigView(Screen):
                 alertPopup('Error Loading', 'No config file selected')
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Configuration:\n\n' + str(detail))
-            
+            traceback.print_exc()
+                        
     def save(self, instance):
         self.dismiss_popup()
         try:        
@@ -300,6 +301,7 @@ class ConfigView(Screen):
                     stream.write(configJson)
         except Exception as detail:
             alertPopup('Error Saving', 'Failed to save:\n\n' + str(detail))
+            traceback.print_exc()
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()
