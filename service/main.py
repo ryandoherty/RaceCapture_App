@@ -4,7 +4,6 @@ from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnectio
 import threading
 import traceback
 
-
 CMD_API                 = '/rc_cmd'
 TX_API                  = '/rc_tx'
 RX_API                  = '/rc_rx'
@@ -18,7 +17,9 @@ SERVICE_CMD_CLOSE       = 'CLOSE'
 SERVICE_CMD_KEEP_ALIVE  = 'PING'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
 
-KEEP_ALIVE_TIMEOUT = 20
+KEEP_ALIVE_TIMEOUT = 30
+OSC_THREAD_JOIN_DELAY = 10
+OSC_THREAD_EXIT_DELAY = 5
 
 last_keep_alive_time = time()
 
@@ -56,6 +57,7 @@ def osc_queue_processor_thread():
             print('Exception in osc_queue_processor_thread ' + str(e))
             traceback.print_exc()
             sleep(0.5)
+    sleep(OSC_THREAD_EXIT_DELAY)            
     print('osc_queue_processor_thread exited')
       
 if __name__ == '__main__':
@@ -71,6 +73,7 @@ if __name__ == '__main__':
     service_should_run.set()
 
     osc_processor_thread = threading.Thread(target=osc_queue_processor_thread)
+    osc_processor_thread.daemon = True
     osc_processor_thread.start()
 
     while service_should_run.is_set():
@@ -86,8 +89,8 @@ if __name__ == '__main__':
             traceback.print_exc()
             osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
             sleep(1.0)
-    print('service exiting')
-    sleep(1.0)
-    bt_connection.close()
     osc.dontListen(oscid)
+    bt_connection.close()
+    bt_connection = None
+    print('service exiting')
     exit(0)
