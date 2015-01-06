@@ -10,7 +10,7 @@ from iconbutton import IconButton
 
 Builder.load_file('toolbarview.kv')
 
-TOOLBAR_LED_DURATION = 0.1
+TOOLBAR_LED_DURATION = 2.0
 PROGRESS_COMPLETE_LINGER_DURATION = 5.0
 ACTIVITY_MESSAGE_LINGER_DURATION = 10.0
 
