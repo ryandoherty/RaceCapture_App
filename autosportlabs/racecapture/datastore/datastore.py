@@ -217,6 +217,7 @@ class DataStore(object):
         self._isopen = False
         self.datalog_channels = {}
         self.datalogchanneltypes = {}
+        self._new_db = False
 
     def close(self):
         self._conn.close()
@@ -227,13 +228,36 @@ class DataStore(object):
             self.close()
 
         self.name = name
-        self._conn = sqlite3.connect(self.name)
+        self._conn = sqlite3.connect(self.name, check_same_thread=False)
+
+        if not self._new_db:
+            self._populate_channel_list()
 
         self._isopen = True
 
     def new(self, name=':memory:'):
+        self._new_db = True
         self.open_db(name)
         self._create_tables()
+
+    def _populate_channel_list(self):
+        c = self._conn.cursor()
+
+        c.execute("""SELECT name, units, smoothing
+        from channel""")
+
+        for ch in c.fetchall():
+            self._channels.append(DatalogChannel(channel_name=ch[0],
+                                                 units=ch[1],
+                                                 smoothing=ch[2]))
+
+    @property
+    def is_open(self):
+        return self._isopen
+
+    @property
+    def channel_list(self):
+        return self._channels[:]
 
     def _create_tables(self):
 
@@ -401,7 +425,7 @@ class DataStore(object):
         return extrap_list
 
 
-    def _desparsified_data_generator(self, data_file):
+    def _desparsified_data_generator(self, data_file, progress_cb=None):
         """
         Takes a racecapture pro CSV file and removes sparsity from the dataset.
         This function yields samples that have been extrapolated from the
@@ -445,6 +469,19 @@ class DataStore(object):
         work_list = []
         yield_list = []
 
+        #In order to facilitate a progress callback, we need to know
+        #the number of lines in the file
+
+        #Get the current file cursor position
+        start_pos = data_file.tell()
+
+        #Count the remaining lines in the file
+        line_count = sum(1 for line in data_file)
+        current_line = 0
+
+        #Reset the file cursor
+        data_file.seek(start_pos)
+        
         for line in data_file:
 
             # Strip the line and break it down into it's component
@@ -498,8 +535,12 @@ class DataStore(object):
             # new list containing the first item in every column,
             # shift all columns down one, and yield the new list
             if not 0 in [len(x) for x in yield_list]:
+                current_line += 1
                 ds_to_yield = [x[0] for x in yield_list]
                 map(lambda x: x.pop(0), yield_list)
+                if progress_cb:
+                    percent_complete = float(current_line) / line_count * 100
+                    progress_cb(percent_complete)
                 yield ds_to_yield
 
         #TODO: Finish off by extrapolating out the rest of the columns
@@ -521,14 +562,14 @@ class DataStore(object):
         print "Created session with ID: ", ses_id
         return ses_id
 
-    def _handle_data(self, data_file, headers, session_id):
+    def _handle_data(self, data_file, headers, session_id, progress_cb=None):
         """
         takes a raw dataset in the form of a CSV file and inserts the data
         into the sqlite database
         """
 
         #Create the generator for the desparsified data
-        newdata_gen = self._desparsified_data_generator(data_file)
+        newdata_gen = self._desparsified_data_generator(data_file, progress_cb)
 
         for record in newdata_gen:
             self._insert_record(record, headers, session_id)
@@ -591,7 +632,6 @@ class DataStore(object):
 
         c = self._conn.cursor()
 
-        
         base_sql = "SELECT smoothing from channel WHERE channel.name='{}';".format(channel)
         c.execute(base_sql)
 
@@ -603,7 +643,10 @@ class DataStore(object):
             return res[0]
 
     @timing
-    def import_datalog(self, path, name, notes='', progress_listener=None):
+    def import_datalog(self, path, name, notes='', progress_cb=None):
+        if not self._isopen:
+            raise Exception("Datastore is not open")
+
         try:
             dl = open(path, 'rb')
         except:
@@ -616,7 +659,7 @@ class DataStore(object):
         #Create an event to be tagged to these records
         ses_id = self._create_session(name, notes)
 
-        self._handle_data(dl, headers, ses_id)
+        self._handle_data(dl, headers, ses_id, progress_cb)
 
     def query(self, channels=[], data_filter=None):
         #Build our select statement
