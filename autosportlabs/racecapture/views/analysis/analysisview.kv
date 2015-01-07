@@ -19,6 +19,7 @@
                     orientation: 'horizontal'
                     TextInput:
                         id: dstore_path
+                        multiline: False
                     IconButton:
                         id: dstore_select
                         text: '\357\203\207'
@@ -28,6 +29,7 @@
                     orientation: 'horizontal'
                     TextInput:
                         id: log_path
+                        multiline: False
                     IconButton:
                         id: log_open
                         text: '\357\204\225'
@@ -46,6 +48,9 @@
             size_hint_y: .3
             text: 'Begin Import'
             on_release: root.load_log()
+        Label:
+            size_hint_y: .2
+            id: current_status
         ProgressBar:
             id: log_load_progress
             size_hint_y: .1

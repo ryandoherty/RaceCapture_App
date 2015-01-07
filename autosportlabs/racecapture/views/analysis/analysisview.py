@@ -56,7 +56,6 @@ class LogImportWidget(BoxLayout):
         self._log_select = None
 
     def set_log_path(self, instance):
-        print instance
         self.ids['log_path'].text = instance.selection[0]
         self._log_select.dismiss()
 
@@ -73,6 +72,8 @@ class LogImportWidget(BoxLayout):
         self._dismiss()
 
     def _update_progress(self, percent_complete=0):
+        if self.ids['current_status'].text != "Loading log records":
+            self.ids['current_status'].text = "Loading log records"
         self.ids['log_load_progress'].value = int(percent_complete)
         
 
@@ -111,6 +112,8 @@ class LogImportWidget(BoxLayout):
         if session_name == '':
             self.warn("No session name specified", "Please specify a name for this session")
             return
+
+        self.ids['current_status'].text = "Initializing Datastore"
 
         t = Thread(target=self._loader_thread, args=(logpath, session_name, session_notes))
         t.daemon = True
