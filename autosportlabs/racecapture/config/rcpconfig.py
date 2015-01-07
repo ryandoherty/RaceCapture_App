@@ -825,12 +825,12 @@ class VersionConfig(object):
         return {'ver': versionJson}
     
 class ChannelCapabilities(object):
-    analog = 0
-    imu = 0
-    gpio = 0
-    timer = 0
-    pwm = 0
-    can = 0
+    analog = 8
+    imu = 6
+    gpio = 3
+    timer = 3
+    pwm = 4
+    can = 2
 
     def from_json_dict(self, json_dict):
         if json_dict:
@@ -850,8 +850,8 @@ class ChannelCapabilities(object):
                 }
     
 class SampleRateCapabilities(object):
-    sensor = 0
-    gps = 0
+    sensor = 1000
+    gps = 50
     
     def from_json_dict(self, json_dict):
         if json_dict:
@@ -862,8 +862,8 @@ class SampleRateCapabilities(object):
         return {'gps': self.gps, 'sensor':self.sensor}
       
 class StorageCapabilities():
-    tracks = 0
-    script = 0
+    tracks = 240
+    script = 10240
     
     def from_json_dict(self, json_dict):
         if json_dict:
