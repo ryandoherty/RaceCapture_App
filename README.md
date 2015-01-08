@@ -102,7 +102,7 @@ Dependencies:
 
 ## running (Linux - Ubuntu)
 
-    python racecapture.py
+    python main.py
 
 
 ## Buildozer android APK build/install (Linux only)
