@@ -1,5 +1,5 @@
 https://github.com/Jeff-Ciesielski/ihexpy/archive/master.zip
-dependencies/asl_f4_loader-0.0.5.tar.gz
+dependencies/asl_f4_loader-0.0.6.tar.gz
 Kivy-Garden==0.1.1
 pyserial==2.7
 requests==2.2.1
