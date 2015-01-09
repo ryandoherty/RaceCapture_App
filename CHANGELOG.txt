@@ -1,3 +1,7 @@
+===1.2.3===
+* Updates to android background service (extend timeout)
+* Remember last config file load/save dir. it's the little things...
+
 ===1.2.2===
 * Ability to set baud rate for CAN2
 * Automatically limit size in log file view to prevent performance issues when log data is large

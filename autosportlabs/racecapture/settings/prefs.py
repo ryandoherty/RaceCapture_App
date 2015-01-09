@@ -5,6 +5,8 @@ from kivy.clock import Clock
 from kivy.config import ConfigParser
 import json
 import os
+from os.path import dirname, expanduser, sep
+from kivy.utils import platform
 
 class Range(EventDispatcher):
     DEFAULT_WARN_COLOR = [1.0, 0.84, 0.0, 1.0]
@@ -75,12 +77,22 @@ class UserPrefs(EventDispatcher):
             data = self.to_json()
             prefs_file.write(data)
 
+    def get_default_user_dir(self):
+        if platform() == 'win':
+            user_path = dirname(expanduser('~')) + sep + 'Documents'
+        else:
+            user_path = expanduser('~') + sep + 'Documents'
+        return user_path
+        
     def set_config_defaults(self):
         self.config.adddefaultsection('preferences')
         self.config.setdefault('preferences', 'distance_units', 'miles')
         self.config.setdefault('preferences', 'temperature_units', 'Fahrenheit')
         self.config.setdefault('preferences', 'show_laptimes', 1)
         self.config.setdefault('preferences', 'startup_screen', 'Home Page')
+        default_user_dir = self.get_default_user_dir()
+        self.config.setdefault('preferences', 'config_file_dir', default_user_dir )
+        self.config.setdefault('preferences', 'firmware_dir', default_user_dir )
 
     def load(self):
         self.config = ConfigParser()

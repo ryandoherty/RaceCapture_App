@@ -15,14 +15,10 @@ class SaveDialog(FloatLayout):
         super(SaveDialog, self).__init__(**kwargs)
         ok = kwargs.get('ok', None)
         cancel = kwargs.get('cancel', None)
-        if platform() == 'win':
-            user_path = dirname(expanduser('~')) + sep + 'Documents'
-        else:
-            user_path = expanduser('~') + sep + 'Documents'
+        user_path = kwargs.get('user_path', '.')
             
         browser = kvFind(self, 'rcid', 'browser')
         browser.path = user_path
-        browser.favorites = [(user_path, 'Documents')]
         browser.filters = kwargs.get('filters', ['*'])
         if ok: browser.bind(on_success = ok)
         if cancel: browser.bind(on_canceled = cancel)
