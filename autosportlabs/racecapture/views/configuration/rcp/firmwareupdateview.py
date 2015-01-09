@@ -28,9 +28,11 @@ else:
 #TODO: MK1 support
 class FirmwareUpdateView(BaseConfigView):
     progress_gauge = ObjectProperty(None)
-
+    _settings = None
+    
     def __init__(self, **kwargs):
         super(FirmwareUpdateView, self).__init__(**kwargs)
+        self._settings = kwargs.get('settings', None)
         self.register_event_type('on_config_updated')
 
     def on_config_updated(self, rcpCfg):
@@ -66,14 +68,23 @@ class FirmwareUpdateView(BaseConfigView):
                              '3. Wait 3 seconds\n4. While holding front panel button, re-connect USB',
                              _on_answer)
         
+    def set_firmware_file_path(self, path):
+        self._settings.userPrefs.set_pref('preferences', 'firmware_dir', path)
+        
+    def get_firmware_file_path(self):
+        return self._settings.userPrefs.get_pref('preferences', 'firmware_dir')
+        
     def select_file(self):
         if platform == 'win':
             ok_cb = self.prompt_manual_bootloader_mode
         else:
             ok_cb = self._start_update_fw
+        user_path= self.get_firmware_file_path()
+        print("the user path " + str(user_path))
         content = LoadDialog(ok=ok_cb, 
                              cancel=self.dismiss_popup,
-                             filters=['*' + '.ihex'])
+                             filters=['*' + '.ihex'],
+                             user_path=user_path)
         self._popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
         self._popup.open()
 
@@ -160,6 +171,8 @@ class FirmwareUpdateView(BaseConfigView):
 
     def _start_update_fw(self, instance):
         self._popup.dismiss()
+        self.set_firmware_file_path(instance.path)
+        print('path: ' + str(self.get_firmware_file_path()))        
         #The comma is necessary since we need to pass in a sequence of args
         t = Thread(target=self._update_thread, args=(instance,))
         t.daemon = True

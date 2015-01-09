@@ -178,7 +178,7 @@ class ConfigView(Screen):
         attach_node('Scripting', None, scriptView)
         self.scriptView = scriptView
         if FIRMWARE_UPDATABLE:
-            attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api))
+            attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
@@ -258,10 +258,10 @@ class ConfigView(Screen):
             self.doOpenConfig()
 
     def set_config_file_path(self, path):
-        self._settings.userPrefs.config.set('preferences', 'config_file_dir', path)
+        self._settings.userPrefs.set_pref('preferences', 'config_file_dir', path)
         
     def get_config_file_path(self):
-        return self._settings.userPrefs.config.get('preferences', 'config_file_dir')
+        return self._settings.userPrefs.get_pref('preferences', 'config_file_dir')
                 
     def doOpenConfig(self):
         content = LoadDialog(ok=self.load, cancel=self.dismiss_popup, filters=['*' + RCP_CONFIG_FILE_EXTENSION], user_path=self.get_config_file_path())
