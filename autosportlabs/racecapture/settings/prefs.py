@@ -120,6 +120,13 @@ class UserPrefs(EventDispatcher):
 
         except IOError:
             pass
+        
+    def get_pref(self, section, option):
+        return self.config.get(section, option)
+    
+    def set_pref(self, section, option, value):
+        self.config.set(section, option, value)
+        self.config.write()
 
     def to_json(self):
         data = {'range_alerts': {}, 'gauge_settings':{}}
