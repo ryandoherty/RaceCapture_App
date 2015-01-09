@@ -80,6 +80,10 @@ class UserPrefs(EventDispatcher):
     def get_default_user_dir(self):
         if platform() == 'win':
             user_path = dirname(expanduser('~')) + sep + 'Documents'
+        elif platform() == 'android':
+            from jnius import autoclass
+            env = autoclass('android.os.Environment')
+            user_path = env.getExternalStorageDirectory().getPath() 
         else:
             user_path = expanduser('~') + sep + 'Documents'
         return user_path

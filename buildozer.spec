@@ -56,7 +56,7 @@ fullscreen = 1
 #
 
 # (list) Permissions
-android.permissions = INTERNET, BLUETOOTH, BLUETOOTH_ADMIN 
+android.permissions = INTERNET, BLUETOOTH, BLUETOOTH_ADMIN , WRITE_EXTERNAL_STORAGE
 
 # (int) Android API to use
 #android.api = 14
