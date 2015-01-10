@@ -12,7 +12,7 @@ class Range(EventDispatcher):
     max = NumericProperty(None)
     min = NumericProperty(None)
     color = ListProperty([1.0, 1.0, 1.0, 1.0])
-    
+
     def __init__(self, minimum=None, maximum=None, **kwargs):
         self.min = minimum
         self.max = maximum
@@ -40,7 +40,7 @@ class Range(EventDispatcher):
     @staticmethod
     def from_dict(range_dict):
         return Range(minimum=range_dict['min'], maximum=range_dict['max'], color=range_dict['color'])
-    
+
 class UserPrefs(EventDispatcher):
     _schedule_save = None
     _prefs_dict = {'range_alerts': {}, 'gauge_settings':{}}
@@ -59,13 +59,16 @@ class UserPrefs(EventDispatcher):
     def set_range_alert(self, key, range_alert):
         self._prefs_dict["range_alerts"][key] = range_alert
         self._schedule_save()
-        
+
     def get_range_alert(self, key, default=None):
         return self._prefs_dict["range_alerts"].get(key, default)
 
     def set_gauge_config(self, gauge_id, channel):
         self._prefs_dict["gauge_settings"][gauge_id] = channel
         self._schedule_save()
+
+    def get_datastore_location(self):
+        return self.config.get('preferences', 'dstore_path')
 
     def get_gauge_config(self, gauge_id):
         return self._prefs_dict["gauge_settings"].get(gauge_id, False)
@@ -81,6 +84,8 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'temperature_units', 'Fahrenheit')
         self.config.setdefault('preferences', 'show_laptimes', 1)
         self.config.setdefault('preferences', 'startup_screen', 'Home Page')
+        self.config.setdefault('preferences', 'dstore_path', os.path.join(self.data_dir, 'datastore.sq3'))
+
 
     def load(self):
         self.config = ConfigParser()
@@ -113,5 +118,7 @@ class UserPrefs(EventDispatcher):
 
         for id, channel in self._prefs_dict["gauge_settings"].iteritems():
             data["gauge_settings"][id] = channel
+
+        data['datastore_path'] = self._prefs_dict['datastore_path']
 
         return json.dumps(data)

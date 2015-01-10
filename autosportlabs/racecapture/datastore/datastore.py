@@ -223,21 +223,25 @@ class DataStore(object):
         self._conn.close()
         self._isopen = False
 
-    def open_db(self, name):
+    @property
+    def db_path(self):
+        return self._db_path[:]
+
+    def open_db(self, db_path):
         if self._isopen:
             self.close()
 
-        self.name = name
-        self._conn = sqlite3.connect(self.name, check_same_thread=False)
+        self._db_path = db_path
+        self._conn = sqlite3.connect(db_path, check_same_thread=False)
 
         if not self._new_db:
             self._populate_channel_list()
 
         self._isopen = True
 
-    def new(self, name=':memory:'):
+    def new(self, db_path=':memory:'):
         self._new_db = True
-        self.open_db(name)
+        self.open_db(db_path)
         self._create_tables()
 
     def _populate_channel_list(self):

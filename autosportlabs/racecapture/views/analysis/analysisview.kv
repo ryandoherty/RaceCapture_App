@@ -7,24 +7,11 @@
             BoxLayout:
                 orientation: 'vertical'
                 Label:
-                    text: 'Datastore Location'
-                    id: dstore_loc_label
-                Label:
                     text: 'Datalog Location'
                 Label:
                     text: 'Session Name'
             BoxLayout:
                 orientation: 'vertical'
-                BoxLayout:
-                    orientation: 'horizontal'
-                    TextInput:
-                        id: dstore_path
-                        multiline: False
-                    IconButton:
-                        id: dstore_select
-                        text: '\357\203\207'
-                        rcid: 'savedatastore'
-                        on_release: root.select_dstore()
                 BoxLayout:
                     orientation: 'horizontal'
                     TextInput:
@@ -72,11 +59,6 @@
                 orientation: 'horizontal'
                 size_hint_y: 0.1
                 size_hint_x: 0.1
-                IconButton:
-                    id: 'open'
-                    text: '\357\204\225'
-                    rcid: 'opendatastore'
-                    on_release: root.open_datastore()
                 IconButton:
                     id: 'read'
                     text: '\357\202\223'

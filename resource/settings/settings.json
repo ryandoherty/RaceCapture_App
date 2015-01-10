@@ -33,5 +33,13 @@
         "key": "startup_screen",
         "true": "auto",
         "options": ["Home Page", "Dashboard", "Configuration", "Analysis"]
+    },
+    {
+	"type": "string",
+	"title": "Datastore Location",
+	"desc": "",
+	"section": "preferences",
+	"key": "dstore_path",
+	"true": "auto"
     }
 ]

@@ -22,10 +22,7 @@ class LogImportWidget(BoxLayout):
         super(LogImportWidget, self).__init__(**kwargs)
         self._dstore = kwargs.get('datastore')
         self._dismiss = kwargs.get('dismiss_cb')
-        if self._dstore.is_open:
-            self.remove_widget(self.ids['dstore_path'])
-            self.remove_widget(self.ids['dstore_select'])
-            self.remove_widget(self.ids['dstore_loc_label'])
+        self._settings = kwargs.get('settings')
 
     def warn(self, title='', text=''):
           content = Label(text=text)
@@ -75,13 +72,14 @@ class LogImportWidget(BoxLayout):
         if self.ids['current_status'].text != "Loading log records":
             self.ids['current_status'].text = "Loading log records"
         self.ids['log_load_progress'].value = int(percent_complete)
-        
+
 
     def load_log(self):
         logpath = self.ids['log_path'].text
-        dstore_path = self.ids['dstore_path'].text
         session_name = self.ids['session_name'].text
         session_notes = self.ids['session_notes'].text
+        
+        dstore_path = self._settings.userPrefs.get_datastore_location()
 
         if logpath == '':
             self.warn("No Log Specified",
@@ -94,14 +92,10 @@ class LogImportWidget(BoxLayout):
                       "Unable to find specified log file: {}. \nAre you sure it exists?".format(logpath))
             return
 
-        if not self._dstore.is_open:
-            if dstore_path == '':
-                self.warn("No Datastore Specified",
-                          "Please select a location to store the datastore using the button\n"\
-                          "to the right of 'Datastore Location' or enter a valid path into the text box.\n\n"\
-                          "You may also select an existing datstore to append lap data.")
-                return
-
+        if self._dstore.db_path != dstore_path:
+            if self._dstore.is_open:
+                self._dstore.close()
+            
             if os.path.isfile(dstore_path):
                 self._dstore.open_db(dstore_path)
             else:
@@ -146,25 +140,24 @@ class AnalysisView(Screen):
     def open_datastore(self):
         pass
 
-    def _log_import_thread(self):
-        self._datastore.import_datalog
-        pass
-
-    def _start_log_import(self, instance):
-        self._popup.dismiss()
-        #The comma is necessary since we need to pass in a sequence of args
-        t = Thread(target=self._log_import_thread, args=(instance,))
-        t.daemon = True
-        t.start()
-
     def import_datalog(self):
-        content = LogImportWidget(datastore=self._datastore, dismiss_cb=self.dismiss_popup)
+        content = LogImportWidget(datastore=self._datastore, dismiss_cb=self.dismiss_popup, settings=self._settings)
 
         self._popup = Popup(title="Import Datalog", content=content, size_hint=(0.9, 0.9))
         self._popup.open()
 
+    def _init_datastore(self, dstore_path):
+        self._datastore.new(dstore_path)
+
     def init_view(self):
-        pass
+        dstore_path = self._settings.userPrefs.get_datastore_location()
+        print "Datastore Path:", dstore_path
+        if os.path.isfile(dstore_path):
+            self._datastore.open_db(dstore_path)
+        else:
+            t = Thread(target=self._init_datastore, args=(dstore_path,))
+            t.daemon = True
+            t.start()
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()
