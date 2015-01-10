@@ -104,7 +104,7 @@ class DataStoreTest(unittest.TestCase):
         rpm_min = self.ds.get_channel_min('RPM')
         rpm_max = self.ds.get_channel_max('RPM')
 
-        self.assertEqual(rpm_min, 776.0)
+        self.assertEqual(rpm_min, 498.0)
         self.assertEqual(rpm_max, 6246.0)
 
     def test_interpolation(self):

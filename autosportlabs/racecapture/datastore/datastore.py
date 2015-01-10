@@ -547,8 +547,22 @@ class DataStore(object):
                     progress_cb(percent_complete)
                 yield ds_to_yield
 
-        #TODO: Finish off by extrapolating out the rest of the columns
-        #and yielding them
+        #now, finish off and extrapolate the remaining items in the
+        #work list and extend the yield list with the resultant values
+        for idx in range(len(work_list)):
+            set_len = len(work_list[idx])
+            work_list[idx] = [work_list[idx][0] for x in range(set_len)]
+            yield_list[idx].extend(work_list[idx])
+
+        #Yield off the remaining items in the yield list
+        while not 0 in [len(x) for x in yield_list]:
+            current_line += 1
+            ds_to_yield = [x[0] for x in yield_list]
+            map(lambda x: x.pop(0), yield_list)
+            if progress_cb:
+                percent_complete = float(current_line) / line_count * 100
+                progress_cb(percent_complete)
+            yield ds_to_yield
 
     def _create_session(self, name, notes=''):
         """
