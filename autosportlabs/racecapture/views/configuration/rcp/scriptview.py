@@ -17,6 +17,7 @@ from settingsview import SettingsMappedSpinner
 Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/scriptview.kv')
 
 LOGFILE_POLL_INTERVAL = 1
+LOGWINDOW_MAX_LENGTH = 20000
         
 class LogLevelSpinner(SettingsMappedSpinner):
     def __init__(self, **kwargs):    
@@ -64,7 +65,12 @@ class LuaScriptingView(BaseConfigView):
         pass
         
     def on_logfile(self, value):
-        self.logfileView.text += str(value)        
+        current_text = self.logfileView.text
+        current_text += str(value)
+        overflow = len(current_text) - LOGWINDOW_MAX_LENGTH
+        if overflow > 0:
+            current_text = current_text[overflow:]
+        self.logfileView.text = current_text        
         self.logfileScrollView.scroll_y = 0.0
     
     def clearLog(self):

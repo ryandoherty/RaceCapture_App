@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.2.1"
+__version__ = "1.2.3"
 import sys
 if __name__ == '__main__' and sys.platform == 'win32':
     from multiprocessing import freeze_support
@@ -156,6 +156,7 @@ class RaceCaptureApp(App):
         rcpConfig = self.rc_config
         try:
             self._rc_api.writeRcpCfg(rcpConfig, self.on_write_config_complete, self.on_write_config_error)
+            self.showActivity("Writing configuration")
         except:
             logging.exception('')
             self._serial_warning()

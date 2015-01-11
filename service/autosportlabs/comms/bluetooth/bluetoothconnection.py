@@ -2,8 +2,6 @@ from jnius import autoclass
 from threading import Thread, Event
 
 BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
-BluetoothDevice = autoclass('android.bluetooth.BluetoothDevice')
-BluetoothSocket = autoclass('android.bluetooth.BluetoothSocket')
 UUID = autoclass('java.util.UUID')
 
 

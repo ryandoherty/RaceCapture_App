@@ -5,6 +5,8 @@ from kivy.clock import Clock
 from kivy.config import ConfigParser
 import json
 import os
+from os.path import dirname, expanduser, sep
+from kivy.utils import platform
 
 class Range(EventDispatcher):
     DEFAULT_WARN_COLOR = [1.0, 0.84, 0.0, 1.0]
@@ -78,6 +80,17 @@ class UserPrefs(EventDispatcher):
             data = self.to_json()
             prefs_file.write(data)
 
+    def get_default_user_dir(self):
+        if platform() == 'win':
+            user_path = dirname(expanduser('~')) + sep + 'Documents'
+        elif platform() == 'android':
+            from jnius import autoclass
+            env = autoclass('android.os.Environment')
+            user_path = env.getExternalStorageDirectory().getPath() 
+        else:
+            user_path = expanduser('~') + sep + 'Documents'
+        return user_path
+        
     def set_config_defaults(self):
         self.config.adddefaultsection('preferences')
         self.config.setdefault('preferences', 'distance_units', 'miles')
@@ -85,7 +98,9 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'show_laptimes', 1)
         self.config.setdefault('preferences', 'startup_screen', 'Home Page')
         self.config.setdefault('preferences', 'dstore_path', os.path.join(self.data_dir, 'datastore.sq3'))
-
+        default_user_dir = self.get_default_user_dir()
+        self.config.setdefault('preferences', 'config_file_dir', default_user_dir )
+        self.config.setdefault('preferences', 'firmware_dir', default_user_dir )
 
     def load(self):
         self.config = ConfigParser()
@@ -109,6 +124,13 @@ class UserPrefs(EventDispatcher):
 
         except IOError:
             pass
+        
+    def get_pref(self, section, option):
+        return self.config.get(section, option)
+    
+    def set_pref(self, section, option, value):
+        self.config.set(section, option, value)
+        self.config.write()
 
     def to_json(self):
         data = {'range_alerts': {}, 'gauge_settings':{}}
