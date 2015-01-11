@@ -679,9 +679,12 @@ class DataStore(object):
 
         self._handle_data(dl, headers, ses_id, progress_cb)
 
-    def query(self, sessions=[], channels=[], data_filter=None):
+    def query(self, sessions=[], channels=[], data_filter=None, distinct_records=False):
         #Build our select statement
         sel_st  = 'SELECT '
+
+        if distinct_records:
+            sel_st += 'DISTINCT '
 
         columns = []
         joins = []

@@ -157,3 +157,26 @@ class DataStoreTest(unittest.TestCase):
             success = False
 
         self.assertEqual(success, False)
+
+    def test_distinct_queries(self):
+        """
+        This is a really basic test to ensure that we always obey the distinct keyword
+
+        Distinct should filter out duplicate results, leading to a much smaller dataset
+        """
+
+        f = Filter().gt('LapCount', 0)
+        dataset = self.ds.query(sessions=[1],
+                                channels=['LapCount', 'LapTime'],
+                                data_filter=f)
+
+        records = dataset.fetch_records()
+        self.assertEqual(len(records), 24667)
+
+        dataset = self.ds.query(sessions=[1],
+                                channels=['LapCount', 'LapTime'],
+                                data_filter=f,
+                                distinct_records=True)
+
+        records = dataset.fetch_records()
+        self.assertEqual(len(records), 37)
