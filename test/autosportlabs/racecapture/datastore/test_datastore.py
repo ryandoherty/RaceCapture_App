@@ -69,10 +69,11 @@ class DataStoreTest(unittest.TestCase):
 
     def test_dataset_columns(self):
         f = Filter().lt('LapCount', 1)
-        dataset = self.ds.query(channels=['Coolant', 'RPM', 'MAP'],
+        dataset = self.ds.query(sessions=[1],
+                                channels=['Coolant', 'RPM', 'MAP'],
                                 data_filter=f)
 
-        expected_channels = ['Coolant', 'RPM', 'MAP']
+        expected_channels = ['Coolant', 'RPM', 'MAP', 'session_id']
         dset_channels = dataset.channels
 
         #Sort both lists to ensure that they'll compare properly
@@ -83,7 +84,8 @@ class DataStoreTest(unittest.TestCase):
 
     def test_dataset_val_count(self):
         f = Filter().lt('LapCount', 1)
-        dataset = self.ds.query(channels=['Coolant', 'RPM', 'MAP'],
+        dataset = self.ds.query(sessions=[1],
+                                channels=['Coolant', 'RPM', 'MAP'],
                                 data_filter=f)
 
         samples = dataset.fetch_columns(100)
@@ -93,7 +95,8 @@ class DataStoreTest(unittest.TestCase):
 
     def test_dataset_record_oriented(self):
         f = Filter().lt('LapCount', 1)
-        dataset = self.ds.query(channels=['Coolant', 'RPM', 'MAP'],
+        dataset = self.ds.query(sessions=[1],
+                                channels=['Coolant', 'RPM', 'MAP'],
                                 data_filter=f)
 
         records = dataset.fetch_records(100)

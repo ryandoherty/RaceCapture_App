@@ -679,12 +679,16 @@ class DataStore(object):
 
         self._handle_data(dl, headers, ses_id, progress_cb)
 
-    def query(self, channels=[], data_filter=None):
+    def query(self, sessions=[], channels=[], data_filter=None):
         #Build our select statement
         sel_st  = 'SELECT '
 
         columns = []
         joins = []
+
+        #make sure that the sessions list exists
+        if type(sessions) != list or len(sessions) == 0:
+            raise Exception("Must provide a list of sessions to query!")
 
         #If there are no channels, or if a '*' is passed, select all
         #of the channels
@@ -699,6 +703,10 @@ class DataStore(object):
             alias = ' as {}'.format(chanst)
             columns.append(tbl_prefix+chanst+alias)
             joins.append(tbl_prefix+chanst)
+
+        #Make the session ID the first column
+        ses_sel = "sample.session_id as session_id"
+        columns.insert(0, ses_sel)
 
         #Add the columns to the select statement
         sel_st += ','.join(columns)
@@ -718,6 +726,17 @@ class DataStore(object):
 
             sel_st += str(data_filter)
 
+        #create the session filter
+        ses_st = "AND "
+        ses_filters = []
+        for s in sessions:
+            ses_filters.append('sample.session_id = {}'.format(s))
+
+        ses_st += 'OR '.join(ses_filters)
+
+        #Now add the session filter to the select statement
+        sel_st += ses_st
+
         c = self._conn.cursor()
         c.execute(sel_st)
 
@@ -726,5 +745,9 @@ class DataStore(object):
         for ch in channels:
             sr = self.get_channel_smoothing(ch)
             smoothing_map[ch] = sr
+
+        #add the session_id to the smoothing map with a smoothing rate
+        #of 0
+        smoothing_map['session_id'] = 0
         
         return DataSet(c, smoothing_map)
