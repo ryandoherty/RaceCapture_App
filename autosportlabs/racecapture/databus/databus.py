@@ -4,44 +4,51 @@ from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, Sampl
     ChannelMetaCollection
 from kivy.clock import Clock
 
+DEFAULT_DATABUS_UPDATE_INTERVAL = 0.1
+
 class DataBus(object):
     channelData = {}
     sampleListeners = []
     channelListeners = {}
     metaListeners = []
     channel_metas = {}
+    sample = None
+    meta_updated = False
 
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
 
-    def updateMeta(self, metas, async = True):
-        print('updating databus meta')
-        self.channel_metas.clear()
-        for meta in metas.channel_metas:
-            self.channel_metas[meta.name] = meta
-        if async: 
-            Clock.schedule_once(lambda dt: self.notifyMetaListeners(self.channel_metas))
-        else:
+    def start_update(self, interval = DEFAULT_DATABUS_UPDATE_INTERVAL):
+        Clock.schedule_interval(self.notify_listeners, interval)
+
+    def stop_update(self):
+        Clock.unschedule(self.notify_listeners)
+
+    def notify_listeners(self, dt):
+        if self.meta_updated:
+            print('updating databus meta')
             self.notifyMetaListeners(self.channel_metas)
+            self.meta_updated = False
 
-    def getMeta(self):
-        return self.channel_metas
-
-    def updateSample(self, sample, async = True):
+        sample = self.sample
+        if sample == None:
+            return        
         for sampleItem in sample.samples:
             channel = sampleItem.channelMeta.name
             value = sampleItem.value            
             self.channelData[channel] = value
-        if async:
-            Clock.schedule_once(lambda dt: self.notifySampleListeners(sample))
-        else:
             self.notifySampleListeners(sample)
-    
-    def getData(self, channel):
-        return self.channelData[channel]
+        
+    def updateMeta(self, metas):
+        self.channel_metas.clear()
+        for meta in metas.channel_metas:
+            self.channel_metas[meta.name] = meta
+        self.meta_updated = True
+
+    def updateSample(self, sample):
+        self.sample = sample   
 
     def notifySampleListeners(self, sample):
-
         for sampleItem in sample.samples:
             channel = sampleItem.channelMeta.name
             value = sampleItem.value
@@ -71,7 +78,6 @@ class DataBus(object):
         else:
             listeners.append(callback)
 
-
     def removeChannelListener(self, channel, callback):
         try:
             listeners = self.channelListeners.get(channel)
@@ -79,10 +85,15 @@ class DataBus(object):
                 listeners.remove(callback)
         except:
             pass
-            
                     
     def addMetaListener(self, callback):
         self.metaListeners.append(callback)
+
+    def getMeta(self):
+        return self.channel_metas
+
+    def getData(self, channel):
+        return self.channelData[channel]
 
 SAMPLE_POLL_TEST_TIMEOUT       = 3.0
 SAMPLE_POLL_INTERVAL_TIMEOUT   = 0.1 #10Hz polling

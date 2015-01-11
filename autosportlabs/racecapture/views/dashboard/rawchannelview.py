@@ -52,10 +52,6 @@ class RawChannelView(Screen):
 
     def on_sample(self, sample):
         pass
-#        for sampleValue in sample.samples:
-#            gauge = self._gauges.get(sampleValue.channelMeta.name)
-#            if gauge:
-                #gauge.value = sampleValue.value
         
     def on_meta(self, channelMetas):
         self._clearGauges()

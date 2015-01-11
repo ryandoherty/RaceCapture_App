@@ -178,7 +178,7 @@ class ConfigView(Screen):
         attach_node('Scripting', None, scriptView)
         self.scriptView = scriptView
         if FIRMWARE_UPDATABLE:
-            attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api))
+            attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
@@ -256,21 +256,28 @@ class ConfigView(Screen):
             popup = confirmPopup('Confirm', 'Configuration Modified  - Open Configuration?', _on_answer)
         else:
             self.doOpenConfig()
+
+    def set_config_file_path(self, path):
+        self._settings.userPrefs.set_pref('preferences', 'config_file_dir', path)
         
+    def get_config_file_path(self):
+        return self._settings.userPrefs.get_pref('preferences', 'config_file_dir')
+                
     def doOpenConfig(self):
-        content = LoadDialog(ok=self.load, cancel=self.dismiss_popup, filters=['*' + RCP_CONFIG_FILE_EXTENSION])
+        content = LoadDialog(ok=self.load, cancel=self.dismiss_popup, filters=['*' + RCP_CONFIG_FILE_EXTENSION], user_path=self.get_config_file_path())
         self._popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
         self._popup.open()        
     
     def saveConfig(self):
         if self.rc_config.loaded:
-            content = SaveDialog(ok=self.save, cancel=self.dismiss_popup,filters=['*' + RCP_CONFIG_FILE_EXTENSION])
+            content = SaveDialog(ok=self.save, cancel=self.dismiss_popup,filters=['*' + RCP_CONFIG_FILE_EXTENSION], user_path=self.get_config_file_path())
             self._popup = Popup(title="Save file", content=content, size_hint=(0.9, 0.9))
             self._popup.open()
         else:
             alertPopup('Warning', 'Please load or read a configuration before saving')
         
     def load(self, instance):
+        self.set_config_file_path(instance.path)
         self.dismiss_popup()
         try:
             selection = instance.selection
@@ -290,18 +297,29 @@ class ConfigView(Screen):
             traceback.print_exc()
                         
     def save(self, instance):
+        def _do_save_config(filename):
+            if not filename.endswith(RCP_CONFIG_FILE_EXTENSION): filename += RCP_CONFIG_FILE_EXTENSION
+            with open(filename, 'w') as stream:
+                configJson = self.rc_config.toJsonString()
+                stream.write(configJson)
+        
+        self.set_config_file_path(instance.path)        
         self.dismiss_popup()
-        try:        
-            filename = instance.filename
-            if len(filename):
-                filename = os.path.join(instance.path, filename)
-                if not filename.endswith(RCP_CONFIG_FILE_EXTENSION): filename += RCP_CONFIG_FILE_EXTENSION
-                with open(filename, 'w') as stream:
-                    configJson = self.rc_config.toJsonString()
-                    stream.write(configJson)
-        except Exception as detail:
-            alertPopup('Error Saving', 'Failed to save:\n\n' + str(detail))
-            traceback.print_exc()
+        config_filename = instance.filename
+        if len(config_filename):
+            try:        
+                config_filename = os.path.join(instance.path, config_filename)
+                if os.path.isfile(config_filename):
+                    def _on_answer(instance, answer):
+                        if answer:
+                            _do_save_config(config_filename)
+                        popup.dismiss()
+                    popup = confirmPopup('Confirm', 'File Exists - overwrite?', _on_answer)
+                else:
+                    _do_save_config(config_filename)
+            except Exception as detail:
+                alertPopup('Error Saving', 'Failed to save:\n\n' + str(detail))
+                traceback.print_exc()
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()

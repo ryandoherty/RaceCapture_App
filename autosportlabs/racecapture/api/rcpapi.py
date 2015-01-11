@@ -421,7 +421,7 @@ class RcpApi:
         else:
             loaderint = 0
             
-        self.sendCommand({'sysReset': {'loader':loaderint, 'reset_delay_ms':reset_delay}})
+        self.sendCommand({'sysReset': {'loader':loaderint, 'delay':reset_delay}})
                 
     def getAnalogCfg(self, channelId = None):
         self.sendGet('getAnalogCfg', channelId)

@@ -274,7 +274,7 @@ class ManualTrackConfigScreen(Screen):
         sectorsContainer = self.sectorsContainer
 
         sectorsContainer.clear_widgets()
-        for i in range(1, trackCfg.track.sectorCount):
+        for i in range(0, trackCfg.track.sectorCount):
             sectorView = SectorPointView(title = 'Sector ' + str(i))
             sectorView.bind(on_config_changed=self.on_config_changed)
             sectorsContainer.add_widget(sectorView)
