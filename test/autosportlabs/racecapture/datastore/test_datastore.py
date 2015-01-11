@@ -180,3 +180,17 @@ class DataStoreTest(unittest.TestCase):
 
         records = dataset.fetch_records()
         self.assertEqual(len(records), 37)
+
+    def test_no_filter(self):
+        """
+        This test ensures that we can query the entire datastore without a filter
+        """
+
+        dataset = self.ds.query(sessions=[1],
+                                channels=['Coolant', 'RPM', 'MAP'])
+
+        records = dataset.fetch_records()
+        print len(records)
+
+        self.assertEqual(len(records), 25691)
+        

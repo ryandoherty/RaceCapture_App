@@ -720,17 +720,20 @@ class DataStore(object):
         #Add our joins
         sel_st += 'JOIN datapoint ON datapoint.sample_id=sample.id\n'
 
-        #Add our filter
-        sel_st += 'WHERE '
-
         if not data_filter == None:
+            #Add our filter
+            sel_st += 'WHERE '
             if not 'Filter' in type(data_filter).__name__:
                 raise TypeError("data_filter must be of class Filter")
 
             sel_st += str(data_filter)
 
         #create the session filter
-        ses_st = "AND "
+        if data_filter == None:
+            ses_st = "WHERE "
+        else:
+            ses_st = "AND "
+            
         ses_filters = []
         for s in sessions:
             ses_filters.append('sample.session_id = {}'.format(s))
