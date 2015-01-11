@@ -514,8 +514,6 @@ class DataStore(object):
             # interpolate/extrapolate the column, then move everything
             # EXCEPT the last item into the yield list
 
-            # TODO: See about moving this part into the above loop to
-            # reduce algorithmic complexity
             for c in range(len(work_list)):
                 if len(work_list[c]) == 1:
                     continue
