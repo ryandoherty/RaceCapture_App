@@ -96,12 +96,14 @@ class DataSet(object):
     def channels(self):
         return [x[0] for x in self._cur.description]
 
-    #TODO: Do we want to offer a count of None to do a fetch all?
-    def fetch_columns(self, count):
+    def fetch_columns(self, count=None):
         chanmap = {}
         channels = [x[0] for x in self._cur.description]
 
-        dset = self._cur.fetchmany(count)
+        if count == None:
+            dset = self._cur.fetchall()
+        else:
+            dset = self._cur.fetchmany(count)
         for c in channels:
             idx = channels.index(c)
             chan_dataset =  [x[idx] for x in dset]
@@ -115,7 +117,7 @@ class DataSet(object):
 
         return chanmap
 
-    def fetch_records(self, count):
+    def fetch_records(self, count=None):
         chanmap = self.fetch_columns(count)
 
         #We have to pull the channel datapoint lists out in the order
