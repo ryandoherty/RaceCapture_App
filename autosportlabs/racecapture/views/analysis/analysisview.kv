@@ -1,8 +1,10 @@
 <LogImportWidget>:
     size: root.size
     BoxLayout:
+    	spacing: dp(5)
         orientation: 'vertical'
         BoxLayout:
+        	size_hint_y: 0.25
             orientation: 'horizontal'
             BoxLayout:
                 orientation: 'vertical'
@@ -25,18 +27,19 @@
                 TextInput:
                     id: session_name
         Label:
-            size_hint_y: .2
+            size_hint_y: .1
             size_hint_x: .1
             text: 'Notes'
         TextInput:
             id: session_notes
-            size_hint_y: 2.5
+            size_hint_y: 0.35
         Button:
-            size_hint_y: .3
+        	size_hint_x: 0.3
+        	size_hint_y: 0.1
             text: 'Begin Import'
             on_release: root.load_log()
         Label:
-            size_hint_y: .2
+            size_hint_y: .1
             id: current_status
         ProgressBar:
             id: log_load_progress

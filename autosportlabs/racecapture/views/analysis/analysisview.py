@@ -8,11 +8,15 @@ from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.racecapture.datastore import DataStore
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
+from autosportlabs.racecapture.views.util.alertview import alertPopup
 from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
+from kivy.clock import Clock
+
 import os.path
+
 from threading import Thread
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysisview.kv')
@@ -23,12 +27,11 @@ class LogImportWidget(BoxLayout):
         self._dstore = kwargs.get('datastore')
         self._dismiss = kwargs.get('dismiss_cb')
         self._settings = kwargs.get('settings')
+        self.register_event_type('on_import_complete')
 
-    def warn(self, title='', text=''):
-          content = Label(text=text)
-          popup = Popup(title=title, content=content , size_hint=(0.9, 0.9))
-          popup.open()
-
+    def on_import_complete(self, *args):
+        pass
+    
     def close_dstore_select(self, *args):
         self._dstore_select.dismiss()
         self._dstore_select = None
@@ -53,26 +56,37 @@ class LogImportWidget(BoxLayout):
         self._log_select = None
 
     def set_log_path(self, instance):
-        self.ids['log_path'].text = instance.selection[0]
+        path = instance.selection[0]
+        self.ids['log_path'].text = path
+        self.ids['session_name'].text = os.path.basename(path) 
+        
         self._log_select.dismiss()
+        self.set_import_file_path(instance.path)
 
+    def set_import_file_path(self, path):
+        self._settings.userPrefs.set_pref('preferences', 'import_datalog_dir', path)
+        
+    def get_import_file_path(self):
+        return self._settings.userPrefs.get_pref('preferences', 'import_datalog_dir')
+ 
     def select_log(self):
         ok_cb = self.close_log_select
         content = LoadDialog(ok=self.set_log_path,
                              cancel=self.close_log_select,
-                             filters=['*' + '.log'])
+                             filters=['*' + '.log'],
+                             user_path=self.get_import_file_path())
         self._log_select = Popup(title="Select Log", content=content, size_hint=(0.9, 0.9))
         self._log_select.open()
 
     def _loader_thread(self, logpath, session_name, session_notes):
         self._dstore.import_datalog(logpath, session_name, session_notes, self._update_progress)
+        Clock.schedule_once(lambda dt: self.dispatch('on_import_complete'))
         self._dismiss()
 
     def _update_progress(self, percent_complete=0):
         if self.ids['current_status'].text != "Loading log records":
             self.ids['current_status'].text = "Loading log records"
         self.ids['log_load_progress'].value = int(percent_complete)
-
 
     def load_log(self):
         logpath = self.ids['log_path'].text
@@ -82,13 +96,12 @@ class LogImportWidget(BoxLayout):
         dstore_path = self._settings.userPrefs.get_datastore_location()
 
         if logpath == '':
-            self.warn("No Log Specified",
-                      "Please select a log file using the button to the right of 'Datalog Location'"\
-                      ", or enter its path into the Datalog Location text box")
+            alertPopup("No Log Specified",
+                      "Please select a log file to import")
             return
 
         if not os.path.isfile(logpath):
-            self.warn("Invalid log specified",
+            alertPopup("Invalid log specified",
                       "Unable to find specified log file: {}. \nAre you sure it exists?".format(logpath))
             return
 
@@ -104,7 +117,7 @@ class LogImportWidget(BoxLayout):
         print "loading log", self.ids['log_path'].text
 
         if session_name == '':
-            self.warn("No session name specified", "Please specify a name for this session")
+            alertPopup("No session name specified", "Please specify a name for this session")
             return
 
         self.ids['current_status'].text = "Initializing Datastore"
@@ -140,10 +153,14 @@ class AnalysisView(Screen):
     def open_datastore(self):
         pass
 
+    def on_import_complete(self, *args):
+        print('import complete')
+        
     def import_datalog(self):
         content = LogImportWidget(datastore=self._datastore, dismiss_cb=self.dismiss_popup, settings=self._settings)
-
-        self._popup = Popup(title="Import Datalog", content=content, size_hint=(0.9, 0.9))
+        content.bind(on_import_complete=self.on_import_complete)
+        
+        self._popup = Popup(title="Import Datalog", content=content, size_hint=(0.6, 0.6))
         self._popup.open()
 
     def _init_datastore(self, dstore_path):
