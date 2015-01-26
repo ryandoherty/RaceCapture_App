@@ -128,7 +128,13 @@ class DataSet(object):
 
         return zip(*zlist)
 
-
+class Session(object):
+    def __init__(self, ses_id, name, notes = '', date = None):
+        self.ses_id = ses_id
+        self.name = name
+        self.notes = notes
+        self.date = date
+        
 #Filter container class
 class Filter(object):
     def __init__(self):
@@ -757,3 +763,12 @@ class DataStore(object):
         smoothing_map['session_id'] = 0
         
         return DataSet(c, smoothing_map)
+    
+    def get_sessions(self):
+        c = self._conn.cursor()
+
+        sessions = []
+        for row in c.execute('SELECT id, name, notes, date FROM session ORDER BY date ASC;'):
+            sessions.append(Session(ses_id=row[0], name=row[1], notes=row[2], date=row[3]))
+        
+        return sessions

@@ -30,7 +30,7 @@ class DataStoreTest(unittest.TestCase):
         # actually data in the database.  Since this can take several
         # seconds to populate, I don't want to waste everyone's time
         try:
-            self.ds.import_datalog(log_path, 'rc_adj')
+            self.ds.import_datalog(log_path, 'rc_adj', 'the notes')
             success = True
         except:
             import sys, traceback
@@ -210,4 +210,13 @@ class DataStoreTest(unittest.TestCase):
                 print str(c),
             print("")
 
+    def test_get_sessions(self):
+        sessions = self.ds.get_sessions()
+        self.assertEqual(len(sessions), 1)
+        session = sessions[0]
+        self.assertEqual(session.name, 'rc_adj')
+        self.assertEqual(session.ses_id, 1)
+        self.assertEqual(session.notes, 'the notes')
+        self.assertIsNotNone(session.date)
+        
         
