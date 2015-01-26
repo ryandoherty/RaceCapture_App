@@ -183,19 +183,21 @@ class AnalysisView(Screen):
         
     def refresh_session_list(self):
         try:
-            f = Filter().gt('LapCount', 0)
-            dataset = self._datastore.query(sessions=[1],
-                                    channels=['LapCount', 'LapTime'],
-                                    data_filter=f,
-                                    distinct_records=True)
-    
-            records = dataset.fetch_records()
-            sessions_view = self.ids.sessions
-            
-            for r in records:
-                lapcount = r[1]
-                laptime = r[2]
-                sessions_view.append_lap(lapcount, laptime)
+            sessions = self._datastore.get_sessions()
+            for session in sessions:
+                f = Filter().gt('LapCount', 0)
+                dataset = self._datastore.query(sessions=[session.ses_id],
+                                        channels=['LapCount', 'LapTime'],
+                                        data_filter=f,
+                                        distinct_records=True)
+        
+                records = dataset.fetch_records()
+                sessions_view = self.ids.sessions
+                
+                for r in records:
+                    lapcount = r[1]
+                    laptime = r[2]
+                    sessions_view.append_lap(lapcount, laptime)
         except:
             print("unable to fetch laps - possibly empty database")
         
