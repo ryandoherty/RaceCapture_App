@@ -5,7 +5,8 @@ from kivy.uix.screenmanager import Screen
 from installfix_garden_graph import Graph, MeshLinePlot
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.uix.track.trackmap import TrackMap
-from autosportlabs.racecapture.datastore import DataStore
+from autosportlabs.racecapture.datastore import DataStore, Filter
+from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser, SessionLapView
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
@@ -128,6 +129,7 @@ class LogImportWidget(BoxLayout):
 
 
 class AnalysisView(Screen):
+    INIT_DATASTORE_TIMEOUT = 10.0
     _settings = None
     _databus = None
     _trackmanager = None
@@ -155,6 +157,7 @@ class AnalysisView(Screen):
 
     def on_import_complete(self, *args):
         print('import complete')
+        self.refresh_session_list()
         
     def import_datalog(self):
         content = LogImportWidget(datastore=self._datastore, dismiss_cb=self.dismiss_popup, settings=self._settings)
@@ -163,18 +166,41 @@ class AnalysisView(Screen):
         self._popup = Popup(title="Import Datalog", content=content, size_hint=(0.6, 0.6))
         self._popup.open()
 
-    def _init_datastore(self, dstore_path):
-        self._datastore.new(dstore_path)
+    def init_datastore(self):
+        def _init_datastore(dstore_path):
+            if os.path.isfile(dstore_path):
+                self._datastore.open_db(dstore_path)
+            else:
+                print('creating datastore...')
+                self._datastore.new(dstore_path)
+            Clock.schedule_once(lambda dt: self.refresh_session_list())
 
-    def init_view(self):
         dstore_path = self._settings.userPrefs.get_datastore_location()
         print "Datastore Path:", dstore_path
-        if os.path.isfile(dstore_path):
-            self._datastore.open_db(dstore_path)
-        else:
-            t = Thread(target=self._init_datastore, args=(dstore_path,))
-            t.daemon = True
-            t.start()
+        t = Thread(target=_init_datastore, args=(dstore_path,))
+        t.daemon = True
+        t.start()
+        
+    def refresh_session_list(self):
+        try:
+            f = Filter().gt('LapCount', 0)
+            dataset = self._datastore.query(sessions=[1],
+                                    channels=['LapCount', 'LapTime'],
+                                    data_filter=f,
+                                    distinct_records=True)
+    
+            records = dataset.fetch_records()
+            sessions_view = self.ids.sessions
+            
+            for r in records:
+                lapcount = r[1]
+                laptime = r[2]
+                sessions_view.append_lap(lapcount, laptime)
+        except:
+            print("unable to fetch laps - possibly empty database")
+        
+    def init_view(self):
+        self.init_datastore()
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()

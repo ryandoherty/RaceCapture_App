@@ -190,7 +190,24 @@ class DataStoreTest(unittest.TestCase):
                                 channels=['Coolant', 'RPM', 'MAP'])
 
         records = dataset.fetch_records()
-        print len(records)
-
         self.assertEqual(len(records), 25691)
+        
+    def test_get_all_laptimes(self):
+        
+        f = Filter().gt('LapCount', 0)
+        dataset = self.ds.query(sessions=[1],
+                                channels=['LapCount', 'LapTime'],
+                                data_filter=f,
+                                distinct_records=True)
+
+        
+#        samples = dataset.fetch_columns()
+        records = dataset.fetch_records()
+        
+        print("records " + str(len(records)))
+        for r in records:
+            for c in r:
+                print str(c),
+            print("")
+
         

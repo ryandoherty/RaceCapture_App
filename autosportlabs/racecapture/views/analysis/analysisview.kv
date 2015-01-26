@@ -46,26 +46,32 @@
             size_hint_y: .1
 
 <AnalysisView>:
-    BoxLayout:
-        orientation: 'vertical'
-        BoxLayout:
-            orientation: 'horizontal'
-            RaceTrackView:
-                id: trackview
-                size_hint_x: 0.75
-            Label:
-                size_hint_x: 0.25
-                text: 'secondary chart'
-        BoxLayout:
-            orientation: 'horizontal'
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint_y: 0.1
-                size_hint_x: 0.1
-                IconButton:
-                    id: 'read'
-                    text: '\357\202\223'
-                    rcid: 'readlog'
-                    on_release: root.import_datalog()
-            Label:
-                text: 'chart'
+	BoxLayout:
+		orientation: 'horizontal'
+		SessionBrowser:
+			size_hint_x: 0.1
+			id: sessions
+	    BoxLayout:
+	        size_hint_x: 0.9
+	        orientation: 'vertical'
+	        BoxLayout:
+	            orientation: 'horizontal'
+	            RaceTrackView:
+	                id: trackview
+	                size_hint_x: 0.75
+	            Label:
+	                size_hint_x: 0.25
+	                text: 'secondary chart'
+	        BoxLayout:
+	            orientation: 'horizontal'
+	            BoxLayout:
+	                orientation: 'horizontal'
+	                size_hint_y: 0.1
+	                size_hint_x: 0.1
+	                IconButton:
+	                    id: 'read'
+	                    text: '\357\202\223'
+	                    rcid: 'readlog'
+	                    on_release: root.import_datalog()
+	            Label:
+	                text: 'chart'
