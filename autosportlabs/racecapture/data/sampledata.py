@@ -105,26 +105,26 @@ class Sample(object):
         samples = self.samples
         del samples[:]
         
-        mask = STARTING_BITMAP
-        
         channelConfigIndex = 0
         bitmapIndex = 0
         fieldIndex = 0
+        mask_index = 0
         channelConfigCount = len(metas)
         while channelConfigIndex < channelConfigCount:
+            if mask_index >= 32:            
+                mask_index = 0;
+                bitmapIndex += 1
+                if bitmapIndex > bitmaskFields.length:
+                    raise Exception("channel count overflowed number of bitmap fields available")
+            
+            mask = 1 << mask_index
             if (bitmaskFields[bitmapIndex] & mask) != 0:
                 value = float(fieldData[fieldIndex])
                 fieldIndex += 1
                 sample = SampleValue(value, metas[channelConfigIndex])
                 samples.append(sample)
-            if (mask != 0):
-                mask <<= 1;
-            else:
-                mask = STARTING_BITMAP;
-                bitmapIndex += 1
-                if bitmapIndex > bitmaskFields.length:
-                    raise Exception("channel count overflowed number of bitmap fields available")
-            channelConfigIndex+=1
+            channelConfigIndex += 1
+            mask_index += 1
 
 
         
