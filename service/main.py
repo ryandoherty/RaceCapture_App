@@ -3,6 +3,7 @@ from kivy.lib import osc
 from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnection, PortNotOpenException
 import threading
 import traceback
+import jnius
 
 CMD_API                 = '/rc_cmd'
 TX_API                  = '/rc_tx'
@@ -58,6 +59,7 @@ def osc_queue_processor_thread():
             traceback.print_exc()
             sleep(0.5)
     sleep(OSC_THREAD_EXIT_DELAY)            
+    jnius.detach()
     print('osc_queue_processor_thread exited')
       
 if __name__ == '__main__':
