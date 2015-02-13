@@ -29,7 +29,7 @@ Dependencies:
 
 ## running (OS X)
 
-    /Applications/Kivy.app/Contents/Resources/script racecapture.py
+    /Applications/Kivy.app/Contents/Resources/script main.py
 
 ## Preparing to build installers (OSX)
 
@@ -57,7 +57,7 @@ Dependencies:
 
 ## running (Win7)
 
-    kivy racecapture.py
+    kivy main.py
 	Note: If you get an error doing this ("cannot find text provider") then you might be like me and be unable to run RaceCapture inside a virtualenv for some reason. Try performing the above steps without the virtual env part.
 
 ## dev installation (Eclipse on Win7, but probably applies to Eclipse on any platform)
