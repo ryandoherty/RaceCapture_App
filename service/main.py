@@ -1,9 +1,11 @@
 from time import sleep, time
 from kivy.lib import osc
+from kivy.logger import Logger
 from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnection, PortNotOpenException
 from threading import Thread, Event
 import traceback
 import jnius
+import logging
 
 CMD_API                 = '/rc_cmd'
 TX_API                  = '/rc_tx'
@@ -18,40 +20,40 @@ SERVICE_CMD_CLOSE       = 'CLOSE'
 SERVICE_CMD_KEEP_ALIVE  = 'PING'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
 
-KEEP_ALIVE_TIMEOUT = 30
-OSC_THREAD_JOIN_DELAY = 10
-OSC_THREAD_EXIT_DELAY = 5
+KEEP_ALIVE_TIMEOUT      = 30
+RX_THREAD_JOIN_DELAY    = 10
+OSC_PROCESSING_INTERVAL = 0.01
 
 last_keep_alive_time = time()
 
 def tx_api_callback(message, *args):
     message = message[2]
     bt_connection.write(message)
-    jnius.detach()
 
 def cmd_api_callback(message, *args):
     message = message[2]
     if message == 'EXIT':
-        print("###############GOT EXIT CMD######################")
+        Logger.info('RC_SVC: ############################## GOT EXIT CMD #####################################')
         service_should_run.clear()
     elif message == 'OPEN':
         try:
+            Logger.info('RC_SVC: ############################## GOT OPEN CMD #####################################')
             bt_connection.open('RaceCapturePro')
         except Exception as e:
-            print("Failed to open Bluetooth connection: " + str(e))
+            Logger.info("RC_SVC:Failed to open Bluetooth connection: " + str(e))
     elif message == 'CLOSE':
-        print("###############GOT CLOSE CMD######################")
+        Logger.info('RC_SVC: ############################## GOT CLOSE CMD #####################################')
         bt_connection.close()
     elif message == 'GET_PORTS':
+        Logger.info('RC_SVC: ############################## GOT GET_PORTS CMD #####################################')
         ports = bt_connection.get_available_ports()
         osc.sendMsg(CMD_API, [ports ,], port=CLIENT_API_PORT)
     elif message == 'PING':
         global last_keep_alive_time
         last_keep_alive_time = time();
-    jnius.detach()        
 
 def bt_rx_thread():
-    print('bt_rx_thread started')
+    Logger.info('RC_SVC: ############################## bt_rx_thread started ##############################')
     while service_should_run.is_set():
         try:
             msg = bt_connection.read_line()
@@ -61,15 +63,15 @@ def bt_rx_thread():
             sleep(1.0)
             pass                
         except Exception as e:
-            print('Exception in rx_message_thread')
+            Logger.info('RC_SVC: Exception in rx_message_thread')
             traceback.print_exc()
             osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
             sleep(1.0)
-    jnius.detach()
-    print('################ bt_rx_thread exited ################')
+    jnius.detach() #detach the current thread from pyjnius, else hard crash occurs 
+    Logger.info('RC_SVC: ############################## bt_rx_thread exited ##############################')
               
 if __name__ == '__main__':
-    print("#####################Android Service Started############################")
+    Logger.info('RC_SVC: ############################## Android Service Started ##############################')
     
     bt_connection = BluetoothConnection()
     
@@ -88,15 +90,16 @@ if __name__ == '__main__':
         try:
             osc.readQueue(oscid)
             if time() > last_keep_alive_time + KEEP_ALIVE_TIMEOUT:
-                print("keep alive timeout!")
+                Logger.warn("RC_SVC: keep alive timeout!")
                 service_should_run.clear()
-            sleep(0.01)
+            sleep(OSC_PROCESSING_INTERVAL)
         except Exception as e:
-            print('Exception in osc_queue_processor_thread ' + str(e))
+            Logger.error('RC_SVC: Exception in OSC queue processing ' + str(e))
             traceback.print_exc()
-            sleep(0.5)
-    osc.dontListen(oscid)            
+            
+    osc.dontListen()            
     bt_connection.close()
-    bt_thread.join(5)
-    
-    print('#####################Android Service Exiting############################')
+    bt_thread.join(RX_THREAD_JOIN_DELAY)
+    del bt_thread
+    Logger.info('RC_SVC: ############################## Android Service Exiting ##############################')
+    exit(0) #This is needed else the service hangs around in a zombie like state forever
