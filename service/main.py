@@ -27,14 +27,17 @@ last_keep_alive_time = time()
 def tx_api_callback(message, *args):
     message = message[2]
     bt_connection.write(message)
+    jnius.detach()
 
 def cmd_api_callback(message, *args):
     message = message[2]
     if message == 'EXIT':
+        print("###############GOT EXIT CMD######################")
         service_should_run.clear()
     elif message == 'OPEN':
         bt_connection.open('RaceCapturePro')
     elif message == 'CLOSE':
+        print("###############GOT CLOSE CMD######################")
         bt_connection.close()
     elif message == 'GET_PORTS':
         ports = bt_connection.get_available_ports()
@@ -42,23 +45,27 @@ def cmd_api_callback(message, *args):
     elif message == 'PING':
         global last_keep_alive_time
         last_keep_alive_time = time();
+    jnius.detach()        
 
 def osc_queue_processor_thread():
     print('osc_queue_processor_thread started')
+    osc.init()
+    oscid = osc.listen(ipAddr='0.0.0.0', port=SERVICE_API_PORT)
+    osc.bind(oscid, tx_api_callback, TX_API)
+    osc.bind(oscid, cmd_api_callback, CMD_API)
     global last_keep_alive_time
     while service_should_run.is_set():
         try:
             osc.readQueue(oscid)
             if time() > last_keep_alive_time + KEEP_ALIVE_TIMEOUT:
                 print("keep alive timeout!")
-                bt_connection.close()
                 service_should_run.clear()
-            sleep(0.1)
+            sleep(0.01)
         except Exception as e:
             print('Exception in osc_queue_processor_thread ' + str(e))
             traceback.print_exc()
             sleep(0.5)
-    sleep(OSC_THREAD_EXIT_DELAY)            
+    osc.dontListen(oscid)            
     jnius.detach()
     print('osc_queue_processor_thread exited')
       
@@ -66,16 +73,11 @@ if __name__ == '__main__':
     print("#####################Android Service Started############################")
     
     bt_connection = BluetoothConnection()
-    osc.init()
-    oscid = osc.listen(ipAddr='0.0.0.0', port=SERVICE_API_PORT)
-    osc.bind(oscid, tx_api_callback, TX_API)
-    osc.bind(oscid, cmd_api_callback, CMD_API)
     
     service_should_run = threading.Event()
     service_should_run.set()
 
     osc_processor_thread = threading.Thread(target=osc_queue_processor_thread)
-    osc_processor_thread.daemon = True
     osc_processor_thread.start()
 
     while service_should_run.is_set():
@@ -91,8 +93,6 @@ if __name__ == '__main__':
             traceback.print_exc()
             osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
             sleep(1.0)
-    osc.dontListen(oscid)
+    osc_processor_thread.join(5)
     bt_connection.close()
-    bt_connection = None
-    print('service exiting')
-    exit(0)
+    print('#####################Android Service Exiting############################')
