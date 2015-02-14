@@ -1,7 +1,7 @@
 from time import sleep, time
 from kivy.lib import osc
 from autosportlabs.comms.bluetooth.bluetoothconnection import BluetoothConnection, PortNotOpenException
-import threading
+from threading import Thread, Event
 import traceback
 import jnius
 
@@ -67,17 +67,17 @@ def osc_queue_processor_thread():
             sleep(0.5)
     osc.dontListen(oscid)            
     jnius.detach()
-    print('osc_queue_processor_thread exited')
+    print('################ osc_queue_processor_thread exited ################')
       
 if __name__ == '__main__':
     print("#####################Android Service Started############################")
     
     bt_connection = BluetoothConnection()
     
-    service_should_run = threading.Event()
+    service_should_run = Event()
     service_should_run.set()
 
-    osc_processor_thread = threading.Thread(target=osc_queue_processor_thread)
+    osc_processor_thread = Thread(target=osc_queue_processor_thread)
     osc_processor_thread.start()
 
     while service_should_run.is_set():
@@ -95,4 +95,5 @@ if __name__ == '__main__':
             sleep(1.0)
     osc_processor_thread.join(5)
     bt_connection.close()
+    bt_connection.cleanup()
     print('#####################Android Service Exiting############################')
