@@ -35,7 +35,10 @@ def cmd_api_callback(message, *args):
         print("###############GOT EXIT CMD######################")
         service_should_run.clear()
     elif message == 'OPEN':
-        bt_connection.open('RaceCapturePro')
+        try:
+            bt_connection.open('RaceCapturePro')
+        except Exception as e:
+            print("Failed to open Bluetooth connection: " + str(e))
     elif message == 'CLOSE':
         print("###############GOT CLOSE CMD######################")
         bt_connection.close()
@@ -47,8 +50,35 @@ def cmd_api_callback(message, *args):
         last_keep_alive_time = time();
     jnius.detach()        
 
-def osc_queue_processor_thread():
-    print('osc_queue_processor_thread started')
+def bt_rx_thread():
+    print('bt_rx_thread started')
+    while service_should_run.is_set():
+        try:
+            msg = bt_connection.read_line()
+            if msg:
+                osc.sendMsg(RX_API, [msg, ], port=CLIENT_API_PORT)
+        except PortNotOpenException:
+            sleep(1.0)
+            pass                
+        except Exception as e:
+            print('Exception in rx_message_thread')
+            traceback.print_exc()
+            osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
+            sleep(1.0)
+    jnius.detach()
+    print('################ bt_rx_thread exited ################')
+              
+if __name__ == '__main__':
+    print("#####################Android Service Started############################")
+    
+    bt_connection = BluetoothConnection()
+    
+    service_should_run = Event()
+    service_should_run.set()
+
+    bt_thread = Thread(target=bt_rx_thread)
+    bt_thread.start()
+    
     osc.init()
     oscid = osc.listen(ipAddr='0.0.0.0', port=SERVICE_API_PORT)
     osc.bind(oscid, tx_api_callback, TX_API)
@@ -66,34 +96,7 @@ def osc_queue_processor_thread():
             traceback.print_exc()
             sleep(0.5)
     osc.dontListen(oscid)            
-    jnius.detach()
-    print('################ osc_queue_processor_thread exited ################')
-      
-if __name__ == '__main__':
-    print("#####################Android Service Started############################")
-    
-    bt_connection = BluetoothConnection()
-    
-    service_should_run = Event()
-    service_should_run.set()
-
-    osc_processor_thread = Thread(target=osc_queue_processor_thread)
-    osc_processor_thread.start()
-
-    while service_should_run.is_set():
-        try:
-            msg = bt_connection.read_line()
-            if msg:
-                osc.sendMsg(RX_API, [msg, ], port=CLIENT_API_PORT)
-        except PortNotOpenException:
-            sleep(1.0)
-            pass                
-        except Exception as e:
-            print('Exception in rx_message_thread')
-            traceback.print_exc()
-            osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
-            sleep(1.0)
-    osc_processor_thread.join(5)
     bt_connection.close()
-    bt_connection.cleanup()
+    bt_thread.join(5)
+    
     print('#####################Android Service Exiting############################')

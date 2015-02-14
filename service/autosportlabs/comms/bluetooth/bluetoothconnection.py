@@ -1,6 +1,4 @@
-import jnius
 from jnius import autoclass
-from threading import Thread, Event
 
 BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
 UUID = autoclass('java.util.UUID')
@@ -16,19 +14,10 @@ class BluetoothConnection(object):
     recv_stream = None
     send_stream = None
     socket = None
-    open_request_event = None
-    open_complete_event = None
+    error_message = None
     
     def __init__(self, **kwargs):
-        self.open_request_event = Event()
-        self.open_complete_event = Event()
-        self.open_request_event.clear()
-        self.open_complete_event.clear()
-        self.should_run = Event()
-        self.should_run.set()
-        
-        opener_thread = Thread(target=self.rf_comm_socket_opener)
-        opener_thread.start()
+        pass
             
     def get_available_ports(self):
         return ['RaceCapturePro']
@@ -36,66 +25,41 @@ class BluetoothConnection(object):
     def isOpen(self):
         return self.socket != None
     
-    port_to_open = None
-    error_message = None
 
     def open(self, port):
-        self.port_to_open = port
-        self.error_message = None
-        self.open_request_event.set()
-        print('waiting to open Bluetooth')
-        self.open_complete_event.wait(30.0)
-        self.open_complete_event.clear()
-        print('after waiting for Bluetooth open: ' + str(self.error_message))
-        if self.error_message != None:
-            raise Exception(self.error_message)
+        error_message = None
+        
+        try:
+            paired_devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
+            socket = None
+            print('attempting to open port::: ' + port)
+            for device in paired_devices:
+                if device.getName() == port:
+                    print('waiting to connect to device ' + port)
+                    socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
+                    print('after wait')
+                    recv_stream = socket.getInputStream()
+                    send_stream = socket.getOutputStream()
+                    break
+            if socket != None:
+                print('attempting to connect socket')
+                socket.connect()
+                print('socket connected')                    
+                self.socket = socket
+                self.recv_stream = recv_stream
+                self.send_stream = send_stream
+                error_message = None
+            else:
+                error_message = 'Could not detect device {}'.format(port)
+        except Exception as e:
+            print('error opening socket ' + str(e))
+            error_message = 'Error opening Bluetooth socket: {}'.format(str(e))
+
+        if error_message != None:
+            raise Exception(error_message)
         if self.socket == None:
             raise Exception("Timed out opening Bluetooth port")
-
-    
-    def rf_comm_socket_opener(self):
-        print('rf_comm_socket_opener starting')
-        while self.should_run.is_set():
-            if self.open_request_event.wait(1.0) == True:
-                self.open_request_event.clear()
-                try:
-                    paired_devices = BluetoothAdapter.getDefaultAdapter().getBondedDevices().toArray()
-                    socket = None
-                    port = self.port_to_open
-                    print('attempting to open port::: ' + port)
-                    for device in paired_devices:
-                        if device.getName() == port:
-                            print('waiting to connect to device ' + port)
-                            socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
-                            print('after wait')
-                            recv_stream = socket.getInputStream()
-                            send_stream = socket.getOutputStream()
-                            break
-                    if socket != None:
-                        print('attempting to connect socket')
-                        socket.connect()
-                        print('socket connected')                    
-                        self.socket = socket
-                        self.recv_stream = recv_stream
-                        self.send_stream = send_stream
-                        self.error_message = None
-                    else:
-                        self.error_message = 'Could not detect device {}'.format(port)
-                except Exception as e:
-                    print('error opening socket ' + str(e))
-                    self.error_message = 'Error opening Bluetooth socket: {}'.format(str(e))
-                finally:
-                    self.open_complete_event.set()
-            else:
-                print("foooooo")
-        jnius.detach()        
-        print('#################### rf_comm_socket_opener Exiting ####################')
-        
-                    
-    def cleanup(self):
-        print('bluetooth connection cleanup')
-        self.should_run.clear()
-                
+                                    
     def close(self):
         try:
             self.socket.close()
