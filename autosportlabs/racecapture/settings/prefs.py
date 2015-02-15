@@ -118,7 +118,7 @@ class UserPrefs(EventDispatcher):
                     for id, channel in content_dict["gauge_settings"].iteritems():
                         self._prefs_dict["gauge_settings"][id] = channel
 
-        except IOError:
+        except Exception:
             pass
         
     def get_pref(self, section, option):
