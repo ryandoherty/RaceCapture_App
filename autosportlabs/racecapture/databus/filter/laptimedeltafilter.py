@@ -11,7 +11,7 @@ class DeltaTimeFilter(object):
     A negative delta value means we are ahead of the last best lap
     """    
     lap_delta_meta = None
-    def __init__(self, value, channel_metas):
+    def __init__(self, channel_metas):
         self.lap_delta_meta = channel_metas.get_meta(LAP_DELTA_KEY)
         
     def reset(self):

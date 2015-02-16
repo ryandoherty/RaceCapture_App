@@ -4,7 +4,7 @@ class BestLapFilter(object):
     """Update BestLap if laptime is present and is faster than the current best"""
     best_laptime = 0
     best_laptime_meta = None
-    def __init__(self, value, channel_metas):
+    def __init__(self, channel_metas):
         self.best_laptime_meta = channel_metas.get_meta(BEST_LAPTIME_KEY)
         
     def get_channel_meta(self):
