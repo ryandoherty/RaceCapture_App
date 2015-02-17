@@ -70,7 +70,7 @@ class RawChannelView(Screen):
         
     def _addGauge(self, channelMeta):
         channel = channelMeta.name
-        gauge = RawGauge(rcid=None, dataBus=self._data_bus, settings=self.settings, channel=channel)
+        gauge = RawGauge(rcid=None, dataBus=self._data_bus, settings=self.settings, targetchannel=channel)
         gridView = self._gridView
         gauge.precision = channelMeta.precision
         

@@ -74,7 +74,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self.rcid = kwargs.get('rcid', self.rcid)
         self.data_bus = kwargs.get('dataBus', self.data_bus)
         self.settings = kwargs.get('settings', self.settings)
-        self.channel = kwargs.get('channel', self.channel)
+        self.channel = kwargs.get('targetchannel', self.channel)
         self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
 
     def _remove_customization_bubble(self, *args):
