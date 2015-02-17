@@ -24,11 +24,7 @@ class TachometerView(Screen):
         self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings')
         self.initScreen()        
-        
-
-    def on_sample(self, sample):
-        pass
-        
+                
     def on_meta(self, channelMetas):
         pass
  
@@ -36,7 +32,6 @@ class TachometerView(Screen):
         dataBus = self._databus
         settings = self._settings
         dataBus.addMetaListener(self.on_meta)
-        dataBus.addSampleListener(self.on_sample)        
         
         gauges = list(kvFindClass(self, Gauge))
         

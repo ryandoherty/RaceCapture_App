@@ -25,10 +25,7 @@ class GaugeView(Screen):
 
     def pct(self, p):
         return pct_h(p)
-    
-    def on_sample(self, sample):
-        pass
-        
+            
     def on_meta(self, channelMetas):
         gauges = self.findActiveGauges()
         
@@ -47,7 +44,6 @@ class GaugeView(Screen):
     def initScreen(self):
         dataBus = self._databus
         dataBus.addMetaListener(self.on_meta)
-        dataBus.addSampleListener(self.on_sample)        
     
         gauges = self.findActiveGauges()
         for gauge in gauges:

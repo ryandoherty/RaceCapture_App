@@ -49,9 +49,6 @@ class RawChannelView(Screen):
         if self._grid == None:
             self._grid = kvFind(self, 'rcid', 'grid')
         return self._grid
-
-    def on_sample(self, sample):
-        pass
         
     def on_meta(self, channelMetas):
         self._clearGauges()
@@ -61,7 +58,6 @@ class RawChannelView(Screen):
     def initScreen(self):
         dataBus = self._data_bus
         dataBus.addMetaListener(self.on_meta)
-        dataBus.addSampleListener(self.on_sample)
         
     def _enableNoDataStatus(self, enabled):
         statusView = kvFind(self, 'rcid', 'statusMsg')
@@ -74,8 +70,7 @@ class RawChannelView(Screen):
         
     def _addGauge(self, channelMeta):
         channel = channelMeta.name
-        gauge = RawGauge(dataBus=self._data_bus, settings=self.settings)
-        gauge.channel=channel
+        gauge = RawGauge(rcid=None, dataBus=self._data_bus, settings=self.settings, channel=channel)
         gridView = self._gridView
         gauge.precision = channelMeta.precision
         
