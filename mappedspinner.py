@@ -26,7 +26,7 @@ class MappedSpinner(Spinner):
         self.values = values
                     
     def setFromValue(self, value):
-        self.text = self.valueMappings.get(value, self.defaultValue)
+        self.text = str(self.valueMappings.get(value, self.defaultValue))
 
     def getValueFromKey(self, key):
         return self.keyMappings.get(key, None)

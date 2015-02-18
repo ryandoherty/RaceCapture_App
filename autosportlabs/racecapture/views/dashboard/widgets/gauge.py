@@ -64,16 +64,17 @@ class Gauge(ButtonBehavior, AnchorLayout):
     normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
     pressed = ListProperty([0,0])
     data_bus = ObjectProperty(None)
-    
+    rcid = None
     _popup = None
 
     _dismiss_customization_popup_trigger = None
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
-
+        self.rcid = kwargs.get('rcid', self.rcid)
         self.data_bus = kwargs.get('dataBus', self.data_bus)
         self.settings = kwargs.get('settings', self.settings)
+        self.channel = kwargs.get('targetchannel', self.channel)
         self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
 
     def _remove_customization_bubble(self, *args):

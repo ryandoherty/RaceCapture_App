@@ -226,7 +226,7 @@ class RaceCaptureApp(App):
         Clock.schedule_once(lambda dt: self.init_rc_comms())
 
     def on_stop(self):
-        self._rc_api.shutdown_comms()
+        self._rc_api.cleanup_comms()
 
     def build(self):
         Builder.load_file('racecapture.kv')
