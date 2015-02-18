@@ -8,7 +8,7 @@ class LaptimeDeltaFilterTest(unittest.TestCase):
     def test_laptime_delta_filter_meta(self):
         sample_filter = LaptimeDeltaFilter(self.system_channels)
         meta = sample_filter.get_channel_meta()
-        self.assertIsNotNone(meta)
+        self.assertIsNotNone(meta.get(LaptimeDeltaFilter.LAP_DELTA_KEY))
         
     def test_laptime_delta_default(self):
         sample_filter = LaptimeDeltaFilter(self.system_channels)

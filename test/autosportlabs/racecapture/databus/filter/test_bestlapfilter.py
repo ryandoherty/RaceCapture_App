@@ -8,7 +8,7 @@ class BestLapFilterTest(unittest.TestCase):
     def test_bestlap_meta(self):
         sample_filter = BestLapFilter(self.system_channels)
         meta = sample_filter.get_channel_meta()
-        self.assertIsNotNone(meta)
+        self.assertIsNotNone(meta.get(BestLapFilter.BEST_LAPTIME_KEY))
         
     def test_best_lap_default(self):
         sample_filter = BestLapFilter(self.system_channels)

@@ -13,7 +13,7 @@ class DataBusTest(unittest.TestCase):
 		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1234, meta)]
 		
-		dataBus.updateSample(sample)
+		dataBus.update_samples(sample)
 		dataBus.notify_listeners(None)
 		
 		value = dataBus.getData('RPM')
@@ -34,7 +34,7 @@ class DataBusTest(unittest.TestCase):
 
 		dataBus = DataBus()
 		dataBus.addChannelListener('RPM', listener)
-		dataBus.updateSample(sample)
+		dataBus.update_samples(sample)
 		dataBus.notify_listeners(None)
 		self.assertEqual(self.listenerVal0, 1111)
 	
@@ -56,7 +56,7 @@ class DataBusTest(unittest.TestCase):
 		sample.channel_metas = [meta]
 		sample.samples = [SampleValue(1111, meta)]
 		
-		dataBus.updateSample(sample)
+		dataBus.update_samples(sample)
 		dataBus.notify_listeners(None)
 		self.assertEqual(self.listenerVal1, 1111)
 		self.assertEqual(self.listenerVal2, 1111)
@@ -80,7 +80,7 @@ class DataBusTest(unittest.TestCase):
 		dataBus = DataBus()
 		dataBus.addChannelListener('RPM', listener3)
 		dataBus.addChannelListener('EngineTemp', listener4)
-		dataBus.updateSample(sample)
+		dataBus.update_samples(sample)
 		dataBus.notify_listeners(None)
 		#ensure we don't set the wrong listener
 		self.assertEqual(self.listenerVal3, 1111)
@@ -88,7 +88,7 @@ class DataBusTest(unittest.TestCase):
 		
 		sample.samples = [SampleValue(1111, metaRpm), SampleValue(199, metaEngineTemp)]
 		
-		dataBus.updateSample(sample)
+		dataBus.update_samples(sample)
 		dataBus.notify_listeners(None)
 		#ensure we don't affect unrelated channels
 		self.assertEqual(self.listenerVal3, 1111)
@@ -102,7 +102,7 @@ class DataBusTest(unittest.TestCase):
 		sample.samples = [SampleValue(200, meta)]
 		
 		dataBus = DataBus()
-		dataBus.updateSample(sample)
+		dataBus.update_samples(sample)
 		dataBus.notify_listeners(None)
 		#no listener for this channel, should not cause an error
 	
@@ -117,7 +117,7 @@ class DataBusTest(unittest.TestCase):
 		metas.channel_metas = [ChannelMeta(name='RPM')]
 
 		dataBus.addMetaListener(metaListener)
-		dataBus.updateMeta(metas)
+		dataBus.update_channel_meta(metas)
 		dataBus.notify_listeners(None)
 		self.assertEqual(self.channelMeta['RPM'], metas.channel_metas[0])
 		
