@@ -6,10 +6,10 @@ class BestLapFilter(object):
     best_laptime = 0
     best_laptime_meta = None
     def __init__(self, system_channels):
-        self.best_laptime_meta = system_channels.findChannelMeta(self.BEST_LAPTIME_KEY)
+        self.best_laptime_meta = system_channels.findChannelMeta(BestLapFilter.BEST_LAPTIME_KEY)
         
     def get_channel_meta(self):
-        return self.best_laptime_meta
+        return {BestLapFilter.BEST_LAPTIME_KEY: self.best_laptime_meta}
     
     def reset(self):
         self.best_laptime = 0
