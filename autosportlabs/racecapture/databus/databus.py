@@ -18,6 +18,12 @@ class DataBusFactory(object):
 class DataBus(object):
     """Central hub for current sample data. Receives data from DataBusPump
     Also contains the periodic updater for listeners. Updates occur in the UI thread via Clock.schedule_interval
+    Architecture:    
+    (DATA SOURCE) => DataBus => (LISTENERS)
+    
+    Typical use:
+    (CHANNEL LISTENERS) => DataBus.addChannelListener()  -- listeners receive updates with a particular channel's value
+    (META LISTENERS) => DataBus.addMetaListener() -- Listeners receive updates with meta data
     """
     channel_metas = {}
     channel_data = {}
@@ -120,6 +126,10 @@ SAMPLE_POLL_EXCEPTION_RECOVERY = 10.0
 SAMPLES_TO_WAIT_FOR_META       = 5.0
 
 class DataBusPump(object):
+    """Responsible for dispatching raw JSON API messages into a format the DataBus can consume.
+    Attempts to detect asynchronous messaging mode, where messages are streamed to the DataBusPump.
+    If Async mode not detected, a polling thread is created to simulate this.
+    """
     _rc_api = None
     _data_bus = None
     sample = Sample()
