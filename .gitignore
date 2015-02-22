@@ -41,3 +41,6 @@ nosetests.xml
 _ve/
 .vagrant/
 .idea
+
+# Sublime Text
+*.sublime*
