@@ -4,7 +4,6 @@
 	
 <FeatureButton>
 	title_font: 'resource/fonts/ASL_regular.ttf'
-	title_font_size: dp(25)
 	icon_color: (0.0, 0.0, 0.0, 1.0)
 	title_color: (0.2, 0.2, 0.2, 1.0)
 	line_width: 5
@@ -34,8 +33,8 @@
 					pos_hint: {'center_y':0.57}
 					text: 'Welcome To RaceCapture'
 		GridLayout:
-			padding: [dp(50), dp(50)]				
-			spacing: dp(60)
+			padding: [self.height * 0.1, self.height * 0.1]
+			spacing: self.height * 0.12
 			rows: 2
 			cols: 2
 			FeatureButton:
