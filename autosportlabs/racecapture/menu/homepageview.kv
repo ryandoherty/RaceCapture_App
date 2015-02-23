@@ -4,7 +4,6 @@
 	
 <FeatureButton>
 	title_font: 'resource/fonts/ASL_regular.ttf'
-	title_font_size: dp(25)
 	icon_color: (0.0, 0.0, 0.0, 1.0)
 	title_color: (0.2, 0.2, 0.2, 1.0)
 	line_width: 5
@@ -16,14 +15,12 @@
 		BoxLayout:
 			orientation: 'vertical'
 			AnchorLayout:
-				size_hint_y: 0.1
-				size_hint_x: 1.0
+				size_hint: 1.0, 0.1
 				anchor_x: 'left'
 				anchor_y: 'center'
 
 				Image:
 					source: 'resource/images/app_icon_menu.png'
-					height: dp(85)
 					size_hint_x: None	
 			HLineSeparator:
 				size_hint_y: 0.05
@@ -31,13 +28,13 @@
 				size_hint_y: 0.80
 				Label:
 					size_hint_y: None
-					font_size: dp(40)
+					font_size: self.height * 0.40
 					font_name: 'resource/fonts/ASL_regular.ttf'
 					pos_hint: {'center_y':0.57}
 					text: 'Welcome To RaceCapture'
 		GridLayout:
-			padding: [dp(50), dp(50)]				
-			spacing: dp(60)
+			padding: [self.height * 0.1, self.height * 0.1]
+			spacing: self.height * 0.12
 			rows: 2
 			cols: 2
 			FeatureButton:

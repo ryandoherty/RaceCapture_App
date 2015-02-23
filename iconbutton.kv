@@ -3,9 +3,8 @@
 	on_size: self.compute_points()
 	on_corners: self.compute_points()
 	on_resolution: self.compute_points()
-	corners: [dp(10), dp(10), dp(10), dp(10)]
-	line_width: dp(12)
-	resoultion: dp(100)
+	corners: [self.height * 0.1, self.height * 0.1, self.height * 0.1, self.height * 0.1]
+	line_width: self.height * 0.12
     canvas:
         Color: 
         	rgb: self.rect_color
@@ -22,13 +21,13 @@
 	    	id: icon
 	    	color: root.icon_color
 	    	size_hint_y: 0.7
-	    	font_size: dp(120)
+	    	font_size: self.height * 0.9
 	    	text: root.icon
 	    	on_press: root.on_button_press()
 	    Label:
 	    	id: label
 	    	font_name: root.title_font
-	    	font_size: root.title_font_size
+	    	font_size: self.height * 0.5
 	    	color: root.title_color
 	    	size_hint_y: 0.3
 	    	text: root.title	
