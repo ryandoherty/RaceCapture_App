@@ -103,6 +103,9 @@ class RcpApi:
         self.start_auto_detect_worker()
         Clock.schedule_interval(lambda dt: comms.keep_alive(), COMMS_KEEP_ALIVE_TIMEOUT)
         
+    def cleanup_comms(self):
+        self.comms.cleanup()
+        
     def shutdown_comms(self):
         try:
             self.comms.close()

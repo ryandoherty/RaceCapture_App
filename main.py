@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.2.3"
+__version__ = "1.2.4"
 import sys
 if __name__ == '__main__' and sys.platform == 'win32':
     from multiprocessing import freeze_support
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
 from kivy.app import App, Builder
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig
-from autosportlabs.racecapture.databus.databus import DataBus, DataBusPump
+from autosportlabs.racecapture.databus.databus import DataBusFactory, DataBusPump
 from autosportlabs.racecapture.api.rcpapi import RcpApi
 
 class RaceCaptureApp(App):
@@ -55,7 +55,7 @@ class RaceCaptureApp(App):
     _rc_api = RcpApi()
 
     #dataBus provides an eventing / polling mechanism to parts of the system that care
-    _data_bus = DataBus()
+    _data_bus = None
 
     #pumps data from rcApi to dataBus. kind of like a bridge
     dataBusPump = DataBusPump()
@@ -88,6 +88,7 @@ class RaceCaptureApp(App):
         #self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir)
+        self._data_bus = DataBusFactory().create_standard_databus(self.settings.systemChannels)        
 
         Window.bind(on_key_down=self._on_keyboard_down)
         self.register_event_type('on_tracks_updated')
@@ -226,7 +227,7 @@ class RaceCaptureApp(App):
         Clock.schedule_once(lambda dt: self.init_rc_comms())
 
     def on_stop(self):
-        self._rc_api.shutdown_comms()
+        self._rc_api.cleanup_comms()
 
     def build(self):
         Builder.load_file('racecapture.kv')

@@ -126,7 +126,10 @@ class Comms():
             self._command_queue.put_nowait(COMMAND_KEEP_ALIVE)
         except:
             pass
-        
+    
+    def cleanup(self):
+        pass
+    
     def close(self):
         print('comms.close()')
         if self.isOpen():

@@ -99,6 +99,10 @@ class AndroidComms(object):
     def keep_alive(self):
         self.send_service_command(SERVICE_CMD_KEEP_ALIVE)
     
+    def cleanup(self):
+        print('comms.cleanup()')
+        self.send_service_command(SERVICE_CMD_EXIT)
+        
     def close(self):
         print('comms.close()')
         if self.isOpen():
