@@ -1,15 +1,14 @@
 <RoundGauge>:
 	anchor_x: 'center'
 	anchor_y: 'center'
-    value_size: dp(50)
-    title_size: dp(25)
-    gauge_size: dp(100)
+    value_size: self.height * 0.16
+    title_size: self.height * 0.08
     FieldLabel:
     	id: add_gauge
     	halign: 'center'
     	text: '+'
     	color: (0.5, 0.5, 0.5, 1.0)
-    	font_size: dp(50)    
+    	font_size: self.height * 0.2
 	Label:
 		font_name: 'resource/fonts/dial-gauge.ttf'
 		rcid: 'gaugeShadow'
@@ -32,5 +31,3 @@
 			rcid: 'title'
 			font_size: root.title_size
 			halign: 'center'
-		
-		
