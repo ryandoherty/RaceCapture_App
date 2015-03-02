@@ -1,8 +1,9 @@
 <ToolbarView>:
     orientation: 'horizontal'
     BoxLayout:
-		#padding: (dp(5), 0)
-    	size_hint_x: 0.2
+		padding: self.height * 0.2, 0
+		spacing: self.height * 0.2
+    	size_hint_x: 0.1
     	orientation: 'horizontal'
 	    IconButton:
 		    background_color: [0.4, 0.05, 0.05, 1]
@@ -10,65 +11,67 @@
 	    	text: '\357\203\211'
 	    	on_release: root.mainMenu()
 	    	size_hint_x: None
-	    	width: dp(50)
-	    	text_size: (dp(50), None)
-	    	halign: 'center'
+	    	width: self.height * 1
+	    	font_size: self.height
 	    Button:
 		    background_color: [0.4, 0.05, 0.05, 1]
 		    background_down: ''
 	    	text: 'Menu'
 	    	size_hint_x: 0.0
-	    	width: dp(50)
-	    	text_size: (dp(50), None)
+	    	width: self.height * 2.0
+	    	font_size: self.height * 0.8
 	    	on_release: root.mainMenu()
 	    	
 	BoxLayout:
 		orientation: 'horizontal'
-		padding: (dp(5), 0)			
-		size_hint_x: 0.3
+		padding: self.height * 0.4, 0
+		size_hint_x: 0.38
 		FieldLabel:
 			halign: 'left'
 			text: ''
 			rcid: 'activity'
+			font_size: self.height * 0.6
 
 	BoxLayout:
 		orientation: 'horizontal'
-		padding: (dp(5), 0)			
-		size_hint_x: 0.3
+		padding: self.height * 0.4, 0
+		size_hint_x: 0.32
 		FieldLabel:
 			halign: 'right'
 			text: ''
 			rcid: 'status'
+			font_size: self.height * 0.6
 		
 	BoxLayout:
 		orientation: 'horizontal'
 		size_hint_x: 0.2
+		spacing: self.height * 0.2
 	    ProgressBar:
+	    	size_hint_x: 0.5
 			rcid: 'pbar'
-			width: dp(100)
 	    IconButton:
 	    	rcid: 'teleTxStatus'
 	    	text: '\357\203\256'
-	    	width: dp(30)
+	    	size_hint_x: 0.125
 	    	color: [0.0, 1.0, 0.0, 0.2]    	
-	    	size_hint_x: None
+	    	font_size: self.height * 0.7
 	    IconButton:
 	    	rcid: 'teleRxStatus'
 	    	text: '\357\203\255'
-	    	width: dp(30)
+	    	size_hint_x: 0.125
 	    	color: [0.0, 0.8, 1.0, 0.2]
-	    	size_hint_x: None
+	    	font_size: self.height * 0.7
 	    IconButton:
 	    	rcid: 'rcTxStatus'
 	    	text: '\357\200\231'
-	    	width: dp(30)
-	    	color: [0.0, 1.0, 0.0, 0.2]    	
-	    	size_hint_x: None
+	    	size_hint_x: 0.125
+	    	color: [0.0, 1.0, 0.0, 0.2]
+	    	font_size: self.height * 0.7   	
 	    IconButton:
 	    	rcid: 'rcRxStatus'
 	    	text: '\357\202\223'
-	    	width: dp(30)
-	    	color: [0.0, 0.8, 1.0, 0.2]    	
-	    	size_hint_x: None
+	    	size_hint_x: 0.125
+	    	color: [0.0, 0.8, 1.0, 0.2]
+	    	font_size: self.height * 0.7   	
 	    	
 	    	
