@@ -165,6 +165,7 @@ class TracksBrowser(BoxLayout):
             Clock.schedule_once(lambda dt: self.refreshTrackList())
 
     def showProgressPopup(self, title, content):
+        self.dismissPopups()
         if type(content) is str:
             content = Label(text=content)
         popup = Popup(title=title, content=content, auto_dismiss=False, size_hint=(None, None), size=(dp(400), dp(200)))
@@ -224,7 +225,7 @@ class TracksBrowser(BoxLayout):
             self.tracksGrid.add_widget(Label(text="No Tracks Found"))
             self.setViewDisabled(False)            
         else:
-            self.showProgressPopup("", "Searching")        
+            self.showProgressPopup("", "Loading")        
             self.addNextTrack(0, trackIds)
             
     def initRegionsList(self):
