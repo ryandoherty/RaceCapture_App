@@ -24,7 +24,7 @@ if __name__ == '__main__':
     from kivy.uix.screenmanager import *
     from utils import *
     from installfix_garden_navigationdrawer import NavigationDrawer
-    from autosportlabs.racecapture.views.util.alertview import alertPopup
+    from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
     from autosportlabs.racecapture.views.tracks.tracksview import TracksView
     from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
     from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
@@ -111,9 +111,19 @@ class RaceCaptureApp(App):
     def getAppArg(self, name):
         return self.app_args.get(name, None)
 
+    def first_time_setup(self):
+        popup = None 
+        def _on_answer(instance, answer):
+            popup.dismiss()
+            if answer:
+                self.showMainView('tracks')
+                Clock.schedule_once(lambda dt: self.mainViews['tracks'].check_for_update(), 0.5)
+        popup = confirmPopup('Race Tracks', 'Looks like this is your first time running.\n\nShould I update the Race Track database?', _on_answer)
+        self.settings.userPrefs.set_pref('preferences', 'first_time_setup', False)
+        
     def loadCurrentTracksSuccess(self):
         print('Curent Tracks Loaded')
-        Clock.schedule_once(lambda dt: self.notifyTracksUpdated())
+        Clock.schedule_once(lambda dt: self.notifyTracksUpdated())            
 
     def loadCurrentTracksError(self, details):
         alertPopup('Error Loading Tracks', str(details))
@@ -299,9 +309,13 @@ class RaceCaptureApp(App):
                           'preferences': preferences_view}
 
         self.screenMgr = screenMgr
-
         self.configView = configView
         self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')
+        self.check_first_time_setup()
+
+    def check_first_time_setup(self):
+        if self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'True':
+            Clock.schedule_once(lambda dt: self.first_time_setup(), 0.5)
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
