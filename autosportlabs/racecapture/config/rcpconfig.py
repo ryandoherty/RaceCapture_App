@@ -82,12 +82,12 @@ class ScalingMap(object):
     def setVolts(self, map_bin, value):
         if map_bin < SCALING_MAP_POINTS - 1:
             next_value = self.raw[map_bin+1]
-            if value >= next_value:
-                raise ScalingMapException("Must be less than {}".format(next_value))
+            if value > next_value:
+                raise ScalingMapException("Must be less or equal to {}".format(next_value))
         if map_bin > 0:
             prev_value = self.raw[map_bin - 1]
-            if value <= prev_value:
-                raise ScalingMapException("Must be greater than {}".format(prev_value))
+            if value < prev_value:
+                raise ScalingMapException("Must be greater or equal to {}".format(prev_value))
         if value < SCALING_MAP_MIN_VOLTS:
             raise ScalingMapException('Must be greater than {}'.format(SCALING_MAP_MIN_VOLTS))
         
