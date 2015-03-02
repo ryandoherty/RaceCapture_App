@@ -6,18 +6,35 @@ from kivy.clock import Clock
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image
+from kivy.uix.textinput import TextInput
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
 import json
 import sets
-from autosportlabs.racecapture.views.util.alertview import alertPopup
+from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
 from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from utils import *
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 Builder.load_file('autosportlabs/racecapture/views/tracks/tracksview.kv')
 
+class SearchInput(TextInput):
+    
+    def __init__(self, *args, **kwargs):
+        self.register_event_type('on_search')
+        super(SearchInput, self).__init__(*args, **kwargs)
+    
+    def _keyboard_on_key_down(self, window, keycode, text, modifiers):
+        key, key_str = keycode
+        if key in (9,13):
+            self.dispatch('on_search')
+        else:
+            super(SearchInput, self)._keyboard_on_key_down(window, keycode, text, modifiers)
+            
+    def on_search(self, *args):
+        pass
+    
 class TracksUpdateStatusView(BoxLayout):
     progressView = None
     messageView = None
@@ -87,6 +104,7 @@ class TrackInfoView(BoxLayout):
     
 class TracksView(Screen):
     loaded = False
+    
     def __init__(self, **kwargs):
         super(TracksView, self).__init__(**kwargs)
         self.trackManager = kwargs.get('trackManager')
@@ -94,26 +112,26 @@ class TracksView(Screen):
                 
     def on_enter(self):
         if not self.loaded:
-            kvFind(self, 'rcid', 'browser').init_view()
+            self.ids.browser.init_view()
             self.loaded = True
             
     def on_tracks_updated(self, track_manager):
-        kvFind(self, 'rcid', 'browser').set_trackmanager(track_manager)
+        self.ids.browser.set_trackmanager(track_manager)
+    
+    def check_for_update(self):
+        self.ids.browser.on_update_check()
         
 class TracksBrowser(BoxLayout):
     trackmap = None
     trackHeight = NumericProperty(dp(200))
     trackManager = None
     tracksUpdatePopup = None
-    lastNameSearch = None
-    searchDelay = 0.5
     initialized = False
     tracksGrid = None
     selectedTrackIds = None
     def __init__(self, **kwargs):
         super(TracksBrowser, self).__init__(**kwargs)
         self.register_event_type('on_track_selected')
-        self.lastNameSearch = ''
         self.selectedTrackIds = set()
          
     def set_trackmanager(self, track_manager):
@@ -121,48 +139,32 @@ class TracksBrowser(BoxLayout):
            
     def init_view(self):        
         self.initRegionsList()
-        self.initTrackListForSelectedRegion()
+        self.refreshTrackList()
+        self.ids.namefilter.bind(on_search=self.on_search_track_name)
         self.initialized = True
         
     def setViewDisabled(self, disabled):
-        kvFind(self, 'rcid', 'updatecheck').disabled = disabled
-        kvFind(self, 'rcid', 'regions').disabled = disabled
-        searchFilter = kvFind(self, 'rcid', 'namefilter')
-        searchFilter.disabled = disabled
-        #if not disabled:
-         #   searchFilter.focus = True
-        
+        self.ids.updatecheck.disabled = disabled
+        self.ids.regions.disabled = disabled
+        self.ids.namefilter.disabled = disabled
+        self.ids.search.disabled = disabled
     
     def dismissPopups(self):
         if self.tracksUpdatePopup:
             self.tracksUpdatePopup.dismiss()
          
-    def searchAndUpdate(self, dt):
-        foundTrackIds = self.trackManager.filterTracksByName(self.lastNameSearch, self.trackManager.getTrackIdsInRegion())
-        self.initTracksList(foundTrackIds)
-
     def loadAll(self, dt):
         self.initTracksList(self.trackManager.getTrackIdsInRegion())
         
-    def on_search_track_name(self, instance, search):
+    def on_search_track_name(self, *args):
+        self.showProgressPopup("", "Searching")        
         if self.initialized:
-            if search == '' and len(self.lastNameSearch) > 0:
-                Clock.unschedule(self.searchAndUpdate)
-                Clock.unschedule(self.loadAll)
-                Clock.schedule_once(self.loadAll, self.searchDelay)
-            elif not self.lastNameSearch == search:
-                self.lastNameSearch = search
-                Clock.unschedule(self.searchAndUpdate)
-                Clock.unschedule(self.loadAll)
-                Clock.schedule_once(self.searchAndUpdate, self.searchDelay)
-                
-        
-    def getSelectedRegion(self):
-        return kvFind(self, 'rcid', 'regions').text
-            
+            Clock.schedule_once(lambda dt: self.refreshTrackList())
+                    
     def on_region_selected(self, instance, search):
+        self.showProgressPopup("", "Searching")        
         if self.initialized:
-            self.initTrackListForSelectedRegion()
+            Clock.schedule_once(lambda dt: self.refreshTrackList())
 
     def showProgressPopup(self, title, content):
         if type(content) is str:
@@ -172,12 +174,12 @@ class TracksBrowser(BoxLayout):
         self.tracksUpdatePopup = popup
         
     def on_update_check_success(self):
-        self.initTrackListForSelectedRegion()
         self.tracksUpdatePopup.content.on_message('Processing...')
+        Clock.schedule_once(lambda dt: self.refreshTrackList())
         
     def on_update_check_error(self, details):
-        self.initTrackListForSelectedRegion()
         self.dismissPopups() 
+        Clock.schedule_once(lambda dt: self.refreshTrackList())
         print('Error updating: ' + str(details))       
         alertPopup('Error Updating', 'There was an error updating the track list.\n\nPlease check your network connection and try again')
         
@@ -200,9 +202,12 @@ class TracksBrowser(BoxLayout):
             self.dismissPopups()
             self.setViewDisabled(False)
         
-    def initTrackListForSelectedRegion(self):
-        region = self.getSelectedRegion();
+    def refreshTrackList(self):
+        region = self.ids.regions.text
         foundIds = self.trackManager.filterTracksByRegion(region)
+        search = self.ids.namefilter.text
+        if search != None and len(search) > 0:
+            foundIds = self.trackManager.filterTracksByName(search, foundIds)
         self.initTracksList(foundIds)
         
     def initTracksList(self, trackIds = None):
@@ -210,15 +215,22 @@ class TracksBrowser(BoxLayout):
         if trackIds == None:
             trackIds = self.trackManager.getAllTrackIds()
         trackCount = len(trackIds)
-        grid = kvFind(self, 'rcid', 'tracksgrid')
+        grid = self.ids.tracksgrid
         grid.height = self.trackHeight * (trackCount + 1)
         grid.clear_widgets()
         self.tracksGrid = grid
-        self.addNextTrack(0, trackIds)
+
+
+        if trackCount == 0:
+            self.tracksGrid.add_widget(Label(text="No Tracks Found"))
+            self.dismissPopups()
+            self.setViewDisabled(False)            
+        else:
+            self.addNextTrack(0, trackIds)
             
     def initRegionsList(self):
         regions = self.trackManager.regions
-        regionsSpinner = kvFind(self, 'rcid', 'regions')
+        regionsSpinner = self.ids.regions
         values = []
         for region in regions:
             name = region.name

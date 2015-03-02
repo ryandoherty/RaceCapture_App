@@ -100,17 +100,22 @@
     	Label:
     		size_hint_x: 0.1
     		text: 'Search'
-		TextInput:
+		SearchInput:
 			size_hint_x: 0.50
-			rcid: 'namefilter'
+			id: namefilter
 			multiline: False
-    		on_text: root.on_search_track_name(*args)
+        IconButton:
+            size_hint_x: 0.05
+            id: search
+            disabled: True
+            text: u'\uf002'
+            on_press: root.on_search_track_name()
 		Label:
 			size_hint_x: 0.15
 			text: 'Region'
 		Spinner:
 			size_hint_x: 0.25
-			rcid: 'regions'
+			id: regions
 			on_text: root.on_region_selected(*args)
 			 			
 	BoxLayout:
@@ -121,7 +126,7 @@
 		    do_scroll_x:False
 		    do_scroll_y:True
 		    GridLayout:
-		    	rcid: 'tracksgrid'
+		    	id: tracksgrid
 		        padding: [dp(20), dp(20)]
 		        spacing: [dp(10), dp(10)]
 		        size_hint_y: None
@@ -142,7 +147,7 @@
     		size_hint_x: 0.7
     	IconButton:
     		size_hint_x: 0.05
-    		rcid: 'updatecheck'
+    		id: updatecheck
     		disabled: True
     		text: '\357\203\255'
     		on_press: root.on_update_check()
@@ -161,4 +166,4 @@
 			size_hint_y: 0.01
 			Label:
 		TracksBrowser:
-			rcid: 'browser'
+		    id: browser
