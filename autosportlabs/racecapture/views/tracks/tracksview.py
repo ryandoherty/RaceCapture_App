@@ -155,7 +155,7 @@ class TracksBrowser(BoxLayout):
          
     def loadAll(self, dt):
         self.initTracksList(self.trackManager.getTrackIdsInRegion())
-        
+                        
     def on_search_track_name(self, *args):
         if self.initialized:
             Clock.schedule_once(lambda dt: self.refreshTrackList())
@@ -200,6 +200,8 @@ class TracksBrowser(BoxLayout):
         else:
             self.dismissPopups()
             self.setViewDisabled(False)
+            self.ids.namefilter.focus = True
+            
         
     def refreshTrackList(self):
         region = self.ids.regions.text
@@ -223,7 +225,8 @@ class TracksBrowser(BoxLayout):
         self.dismissPopups()
         if trackCount == 0:
             self.tracksGrid.add_widget(Label(text="No Tracks Found"))
-            self.setViewDisabled(False)            
+            self.setViewDisabled(False)
+            self.ids.namefilter.focus = True                        
         else:
             self.showProgressPopup("", "Loading")        
             self.addNextTrack(0, trackIds)
