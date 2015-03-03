@@ -102,6 +102,7 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'config_file_dir', default_user_dir )
         self.config.setdefault('preferences', 'firmware_dir', default_user_dir )
         self.config.setdefault('preferences', 'import_datalog_dir', default_user_dir )
+        self.config.setdefault('preferences', 'first_time_setup', True)
 
     def load(self):
         self.config = ConfigParser()

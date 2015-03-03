@@ -4,7 +4,7 @@ Utils
 
 '''
 
-__all__ = ('intersection', 'difference', 'curry', 'strtotuple',
+__all__ = ('is_mobile_platform', 'intersection', 'difference', 'curry', 'strtotuple',
            'get_color_from_hex', 'get_random_color',
            'is_color_transparent', 'boundary', 'dist',
            'deprecated', 'SafeList',
@@ -14,7 +14,11 @@ __all__ = ('intersection', 'difference', 'curry', 'strtotuple',
 from re import match, split
 from UserDict import DictMixin
 from kivy.core.window import Window
+from kivy import platform
 
+def is_mobile_platform():
+    return True if platform == 'android' or platform == 'ios' else False
+    
 def pct_h(pct):
     return Window.height * pct
 
