@@ -40,8 +40,8 @@ class TracksUpdateStatusView(BoxLayout):
     messageView = None
     def __init__(self, **kwargs):
         super(TracksUpdateStatusView, self).__init__(**kwargs)
-        self.progressView = kvFind(self, 'rcid', 'progress')
-        self.messageView = kvFind(self, 'rcid', 'updatemsg')
+        self.progressView = self.ids.progress
+        self.messageView = self.ids.updatemsg
         
     def on_progress(self, count, total, message = None):
         self.progressView.value = (float(count) / float(total) * 100)
@@ -57,7 +57,7 @@ class TrackItemView(BoxLayout):
     def __init__(self, **kwargs):
         super(TrackItemView, self).__init__(**kwargs)
         track = kwargs.get('track', None)
-        trackInfoView = kvFind(self, 'rcid', 'trackinfo')
+        trackInfoView = self.ids.trackinfo
         trackInfoView.setTrack(track)
         self.track = track
         self.trackInfoView = trackInfoView
@@ -70,7 +70,7 @@ class TrackItemView(BoxLayout):
         pass
     
     def setSelected(self, selected):
-        kvFind(self, 'rcid', 'select').active = selected
+        self.ids.active = selected
         
 class TrackInfoView(BoxLayout):
     track = None
@@ -79,19 +79,19 @@ class TrackInfoView(BoxLayout):
         
     def setTrack(self, track):
         if track:
-            raceTrackView = kvFind(self, 'rcid', 'track')
+            raceTrackView = self.ids.track
             raceTrackView.loadTrack(track)
             
-            trackLabel = kvFind(self, 'rcid', 'name')
+            trackLabel = self.ids.name
             trackLabel.text = track.name
             
-            trackConfigLabel = kvFind(self, 'rcid', 'configuration')
+            trackConfigLabel = self.ids.configuration
             trackConfigLabel.text = 'Main Configuration' if not track.configuration else track.configuration 
             
-            lengthLabel = kvFind(self, 'rcid', 'length')
+            lengthLabel = self.ids.length
             lengthLabel.text = str(track.length) + ' mi.'
             
-            flagImage = kvFind(self, 'rcid', 'flag')
+            flagImage = self.ids.flag
             cc = track.countryCode
             if cc:
                 cc = cc.lower()
@@ -155,18 +155,17 @@ class TracksBrowser(BoxLayout):
          
     def loadAll(self, dt):
         self.initTracksList(self.trackManager.getTrackIdsInRegion())
-        
+                        
     def on_search_track_name(self, *args):
-        self.showProgressPopup("", "Searching")        
         if self.initialized:
             Clock.schedule_once(lambda dt: self.refreshTrackList())
                     
     def on_region_selected(self, instance, search):
-        self.showProgressPopup("", "Searching")        
         if self.initialized:
             Clock.schedule_once(lambda dt: self.refreshTrackList())
 
     def showProgressPopup(self, title, content):
+        self.dismissPopups()
         if type(content) is str:
             content = Label(text=content)
         popup = Popup(title=title, content=content, auto_dismiss=False, size_hint=(None, None), size=(dp(400), dp(200)))
@@ -201,6 +200,8 @@ class TracksBrowser(BoxLayout):
         else:
             self.dismissPopups()
             self.setViewDisabled(False)
+            self.ids.namefilter.focus = True
+            
         
     def refreshTrackList(self):
         region = self.ids.regions.text
@@ -221,11 +222,13 @@ class TracksBrowser(BoxLayout):
         self.tracksGrid = grid
 
 
+        self.dismissPopups()
         if trackCount == 0:
             self.tracksGrid.add_widget(Label(text="No Tracks Found"))
-            self.dismissPopups()
-            self.setViewDisabled(False)            
+            self.setViewDisabled(False)
+            self.ids.namefilter.focus = True                        
         else:
+            self.showProgressPopup("", "Loading")        
             self.addNextTrack(0, trackIds)
             
     def initRegionsList(self):

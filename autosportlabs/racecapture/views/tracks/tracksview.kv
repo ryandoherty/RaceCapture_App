@@ -3,9 +3,9 @@
 <TracksUpdateStatusView>:
 	orientation: 'vertical'
 	ProgressBar:
-		rcid: 'progress'
+		id: progress
 	Label:
-		rcid: 'updatemsg'
+		id: updatemsg
 		
 <TrackInfoView>:
 	orientation: 'vertical'
@@ -21,7 +21,7 @@
     	bold: True
     	size_hint_y: 0.1
 		text: ''
-		rcid: 'name'
+		id: name
 	BoxLayout:
 		orientation: 'horizontal'
 		BoxLayout:
@@ -30,7 +30,7 @@
 			spacing: dp(30)
 			orientation: 'horizontal'
 			RaceTrackView:
-				rcid: 'track'
+				id: track
 				size_hint_x: 0.7
 		    BoxLayout:
             	spacing: dp(10)
@@ -55,7 +55,7 @@
 				            size: self.size
 					size_hint_x: 1.0
 	            	Image:
-	            		rcid: 'flag'
+	            		id: flag
 	            		size_hint_x: None	            	
 						
 
@@ -66,8 +66,11 @@
 					FieldLabel:
 						halign: 'center'
 						size_hint_x: 0.4
-						rcid: 'configuration'
+						id: configuration
 						text: ''
+
+				BoxLayout:
+					size_hint_y: 0.4
 
 				BoxLayout:
 					size_hint_y: 0.1
@@ -76,9 +79,7 @@
 					FieldLabel:
 						halign: 'center'
 						size_hint_x: 0.4
-						rcid: 'length'
-				BoxLayout:
-					size_hint_y: 0.4
+						id: length
 		
 <TrackItemView>:
 	BoxLayout:
@@ -86,9 +87,9 @@
 		CheckBox:
 			size_hint_x: 0.10
 			on_active: root.track_select(*args)
-			rcid: 'select'
+			id: select
 		TrackInfoView:
-			rcid: 'trackinfo'
+			id: trackinfo
 
 <TracksBrowser>:
 	orientation: 'vertical'
@@ -137,7 +138,7 @@
     	orientation: 'horizontal'
     	CheckBox:
     		size_hint_x: 0.05
-    		rcid: 'selectall'
+    		id: selectall
     		on_active: root.selectAll(*args)
     	FieldLabel:
     		size_hint_x: 0.25
