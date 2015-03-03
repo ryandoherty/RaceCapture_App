@@ -3,7 +3,7 @@ kivy.require('1.8.0')
 from kivy.app import Builder
 from kivy.utils import get_color_from_hex as rgb
 from kivy.uix.screenmanager import Screen
-from installfix_garden_graph import Graph, SmoothLinePlot
+from installfix_garden_graph import Graph, MeshLinePlot
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.racecapture.datastore import DataStore, Filter
@@ -229,13 +229,14 @@ class ChannelChart(Graph):
         
     def add_channel_data(self, samples, min, max):
         
-        plot = SmoothLinePlot(color=rgb('00FF00'))
+        plot = MeshLinePlot(color=rgb('00FF00'))
         self.add_plot(plot)
         self.plot = plot
         points = []
         sample_index = 0
         for sample in samples:
             points.append((sample_index, sample[1]))
+            print(str(sample[1]))
             sample_index += 1 
             
         self.ymin = min
