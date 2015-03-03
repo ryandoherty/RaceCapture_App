@@ -1,8 +1,9 @@
 import kivy
 kivy.require('1.8.0')
 from kivy.app import Builder
+from kivy.utils import get_color_from_hex as rgb
 from kivy.uix.screenmanager import Screen
-from installfix_garden_graph import Graph, MeshLinePlot
+from installfix_garden_graph import Graph, SmoothLinePlot
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.racecapture.datastore import DataStore, Filter
@@ -21,6 +22,7 @@ import os.path
 from threading import Thread
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysisview.kv')
+
 
 class LogImportWidget(BoxLayout):
     def __init__(self, **kwargs):
@@ -158,6 +160,16 @@ class AnalysisView(Screen):
     def on_import_complete(self, *args):
         print('import complete')
         self.refresh_session_list()
+    
+    def do_query(self):
+        f = Filter().eq('LapCount', 10)
+        dataset = self._datastore.query(sessions=[1],
+                         channels=['Speed'], data_filter=f)
+        
+        records = dataset.fetch_records()
+
+        self.ids.mainchart.add_channel_data(records, 0, 255)
+
         
     def import_datalog(self):
         content = LogImportWidget(datastore=self._datastore, dismiss_cb=self.dismiss_popup, settings=self._settings)
@@ -201,9 +213,33 @@ class AnalysisView(Screen):
                     sessions_view.append_lap(session_node, lapcount, laptime)
         except:
             print("unable to fetch laps - possibly empty database")
+        self.do_query()
+            
         
     def init_view(self):
         self.init_datastore()
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()
+
+class ChannelChart(Graph):
+    def __init__(self, **kwargs):
+        super(ChannelChart, self).__init__(**kwargs)
+        
+        
+    def add_channel_data(self, samples, min, max):
+        
+        plot = SmoothLinePlot(color=rgb('00FF00'))
+        self.add_plot(plot)
+        self.plot = plot
+        points = []
+        sample_index = 0
+        for sample in samples:
+            points.append((sample_index, sample[1]))
+            sample_index += 1 
+            
+        self.ymin = min
+        self.ymax = max
+        self.xmin = 0
+        self.xmax = sample_index
+        plot.points = points
