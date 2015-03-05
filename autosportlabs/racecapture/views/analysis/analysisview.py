@@ -1,13 +1,12 @@
 import kivy
 kivy.require('1.8.0')
 from kivy.app import Builder
-from kivy.utils import get_color_from_hex as rgb
 from kivy.uix.screenmanager import Screen
-from installfix_garden_graph import Graph, MeshLinePlot
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser, LapNode
+from autosportlabs.racecapture.views.analysis.linechart import LineChart
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
@@ -222,25 +221,3 @@ class AnalysisView(Screen):
     def dismiss_popup(self, *args):
         self._popup.dismiss()
 
-class ChannelChart(Graph):
-    def __init__(self, **kwargs):
-        super(ChannelChart, self).__init__(**kwargs)
-        
-        
-    def add_channel_data(self, samples, min, max):
-        
-        plot = MeshLinePlot(color=rgb('00FF00'))
-        self.add_plot(plot)
-        self.plot = plot
-        points = []
-        sample_index = 0
-        for sample in samples:
-            points.append((sample_index, sample[1]))
-            print(str(sample[1]))
-            sample_index += 1 
-            
-        self.ymin = min
-        self.ymax = max
-        self.xmin = 0
-        self.xmax = sample_index
-        plot.points = points
