@@ -217,6 +217,7 @@ class AnalysisView(Screen):
         
     def init_view(self):
         self.init_datastore()
+        self.ids.mainchart.settings = self._settings
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()
