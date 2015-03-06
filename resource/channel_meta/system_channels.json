@@ -217,6 +217,42 @@
             "max": 2000
         },
         {
+            "nm": "BrakeTmp_LF",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_RF",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_LR",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_RR",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
             "nm": "TireTmp_LF1",
             "ut": "F",
             "sys": 1,
