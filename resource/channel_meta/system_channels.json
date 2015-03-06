@@ -217,7 +217,187 @@
             "max": 2000
         },
         {
-            "nm": "LF_Height",
+            "nm": "BrakeTmp_LF",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_RF",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_LR",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_RR",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "TireTmp_LF1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LF2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LF3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LF4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "Height_LF",
             "ut": "mm",
             "sys": 1,
             "type": 1,
@@ -226,7 +406,7 @@
             "max": 255
         },
         {
-            "nm": "RF_Height",
+            "nm": "Height_RF",
             "ut": "mm",
             "sys": 1,
             "type": 1,
@@ -235,7 +415,7 @@
             "max": 255
         },
         {
-            "nm": "LR_Height",
+            "nm": "Height_LR",
             "ut": "mm",
             "sys": 1,
             "type": 1,
@@ -244,7 +424,7 @@
             "max": 255
         },
         {
-            "nm": "RR_Height",
+            "nm": "Height_RR",
             "ut": "mm",
             "sys": 1,
             "type": 1,
