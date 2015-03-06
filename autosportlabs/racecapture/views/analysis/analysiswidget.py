@@ -14,7 +14,11 @@ class AnalysisWidget(AnchorLayout):
     def __init__(self, **kwargs):
         super(AnalysisWidget, self).__init__(**kwargs)
         self.settings = kwargs.get('settings')
-        
+        self.register_event_type('on_channel_selected')
+    
+    def on_channel_selected(self, value):
+        pass
+    
     def on_options(self, *args):
         self.showChannelSelectDialog()
         
@@ -37,6 +41,7 @@ class AnalysisWidget(AnchorLayout):
     
     def channel_selected(self, instance, value):
         print("channel " + value)
+        self.dispatch('on_channel_selected', value)
         self._dismiss_popup()
 
     def popup_dismissed(self, *args):

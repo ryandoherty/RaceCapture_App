@@ -212,13 +212,15 @@ class AnalysisView(Screen):
                     sessions_view.append_lap(session_node, lapcount, laptime)
         except:
             print("unable to fetch laps - possibly empty database")
-        self.do_query()
-            
+        #self.do_query()
         
     def init_view(self):
         self.init_datastore()
-        self.ids.mainchart.settings = self._settings
+        mainchart = self.ids.mainchart
+        mainchart.settings = self._settings
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()
 
+    def on_channel_selected(self, instance, value):
+        print(str(instance) + ' ' + str(value))
