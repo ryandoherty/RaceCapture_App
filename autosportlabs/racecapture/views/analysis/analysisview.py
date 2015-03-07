@@ -159,16 +159,6 @@ class AnalysisView(Screen):
     def on_import_complete(self, *args):
         print('import complete')
         self.refresh_session_list()
-    
-    def do_query(self):
-        f = Filter().eq('LapCount', 10)
-        dataset = self._datastore.query(sessions=[1],
-                         channels=['Speed'], data_filter=f)
-        
-        records = dataset.fetch_records()
-
-        self.ids.mainchart.add_channel_data(records, 0, 255)
-
         
     def import_datalog(self):
         content = LogImportWidget(datastore=self._datastore, dismiss_cb=self.dismiss_popup, settings=self._settings)
@@ -210,9 +200,8 @@ class AnalysisView(Screen):
                     lapcount = r[1]
                     laptime = r[2]
                     sessions_view.append_lap(session_node, lapcount, laptime)
-        except:
-            print("unable to fetch laps - possibly empty database")
-        #self.do_query()
+        except Exception as e:
+            print("unable to fetch laps: " + str(e))
         
     def init_view(self):
         self.init_datastore()
@@ -223,4 +212,12 @@ class AnalysisView(Screen):
         self._popup.dismiss()
 
     def on_channel_selected(self, instance, value):
-        print(str(instance) + ' ' + str(value))
+        self._do_query(instance, value)
+
+    def _do_query(self, instance, channel):
+        f = Filter().eq('LapCount', 10)
+        dataset = self._datastore.query(sessions=[1],
+                         channels=[channel], data_filter=f)
+        
+        records = dataset.fetch_records()
+        instance.add_channel_data(records, 0, 255)
