@@ -1,4 +1,5 @@
 from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidget
+from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
 from installfix_garden_graph import Graph, MeshLinePlot, LinePlot
 from kivy.utils import get_color_from_hex as rgb
 from kivy.app import Builder
@@ -10,11 +11,32 @@ Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 #DEFAULT_CHART_COLORS = ['5DA5DA', 'FAA43A','60BD68', 'F17CB0', 'B2912F', 'B276B2','DECF3F', 'F15854', 'FFFFFF']
 DEFAULT_CHART_COLORS =  ['2b908f', '90ee7e', 'f45b5b', '7798BF', 'aaeeee', 'ff0066', 'eeaaee', '55BF3B', 'DF5353', '7798BF', 'aaeeee']
 
+class ChannelPlot(object):
+    plot = None
+    channel = None
+    min_value = 0
+    max_value = 0
+    lap = None
+    sourceref = None
+    distance_index = {}
+    samples = 0
+    def __init__(self, plot, channel, min_value, max_value, sourceref):
+        self.plot = plot
+        self.channel = channel
+        self.min_value = min_value
+        self.max_value = max_value
+        self.sourceref = sourceref
+    
 class LineChart(AnalysisWidget):
     color_index = 0
+    channel_plots = []
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
         Window.bind(mouse_pos=self.on_mouse_pos)
+        self.register_event_type('on_marker')
+    
+    def on_marker(self, marker_event):
+        pass
     
     def _get_next_line_color(self):
         index = self.color_index
@@ -23,28 +45,32 @@ class LineChart(AnalysisWidget):
         self.color_index = index
         return color
         
-    def add_channel_data(self, samples, min, max):
+    def add_channel_data(self, samples, channel, min_value, max_value, source):
         
         chart = self.ids.chart
-        
         plot = LinePlot(color=self._get_next_line_color(), line_width=1.25)
-        
+        channel_plot = ChannelPlot(plot, channel, min_value, max_value, source)
         chart.add_plot(plot)
         points = []
-        max_distance = 0
+        distance_index = {}
+        max_distance = chart.xmax
         sample_index = 0
         for sample in samples:
             distance = sample[1]
             if distance > max_distance:
                 max_distance = distance 
             points.append((distance, sample[2]))
-            sample_index += 1 
-            
-        chart.ymin = min
-        chart.ymax = max
+            distance_index[distance] = sample_index
+            sample_index += 1
+        
+        channel_plot.distance_index = distance_index
+        channel_plot.samples = sample_index            
+        chart.ymin = min_value
+        chart.ymax = max_value
         chart.xmin = 0
         chart.xmax = max_distance
         plot.points = points
+        self.channel_plots.append(channel_plot)
     
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
@@ -59,7 +85,6 @@ class LineChart(AnalysisWidget):
         super(LineChart, self).on_touch_down(touch)
         return False
         
-        
     def on_touch_move(self, touch):
         if not self.collide_point(touch.x, touch.y):
             return False
@@ -68,6 +93,12 @@ class LineChart(AnalysisWidget):
     def on_mouse_pos(self, x, pos):
         if not self.collide_point(pos[0], pos[1]):
             return False
+
+        mouse_x = pos[0] - self.pos[0]
+        width = self.size[0]
+        pct = mouse_x / width
         
-        print(str(pos))
-        
+        for channel_plot in self.channel_plots:
+            data_index = int(channel_plot.samples * pct)
+            marker = MarkerEvent(data_index, channel_plot.sourceref)
+            self.dispatch('on_marker', marker)

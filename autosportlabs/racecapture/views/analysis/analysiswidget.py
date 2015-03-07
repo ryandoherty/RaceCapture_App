@@ -22,11 +22,6 @@ class AnalysisWidget(AnchorLayout):
     def on_options(self, *args):
         self.showChannelSelectDialog()
         
-    def _init_view(self):
-        options_button=IconButton(text='|', id='options', on_press=self.on_options)
-        self.add_widget(options_button)
-        
-        
     def showChannelSelectDialog(self):
         content = ChannelSelectView(settings=self.settings, channel=self.channel)
         content.bind(on_channel_selected=self.channel_selected)

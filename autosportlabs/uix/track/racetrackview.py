@@ -8,6 +8,7 @@ from kivy.app import Builder
 from kivy.metrics import dp
 from kivy.graphics import Color, Line
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+from autosportlabs.uix.track.trackmap import TrackMap
 from utils import *
 
 Builder.load_file('autosportlabs/uix/track/racetrackview.kv')
@@ -21,6 +22,5 @@ class RaceTrackView(BoxLayout):
         self.initMap(track)
                 
     def initMap(self, track):
-        trackmap = kvFind(self, 'rcid', 'trackmap1')  
-        trackmap.setTrackPoints(track.mapPoints)
+        self.ids.trackmap.setTrackPoints(track.mapPoints)
 

@@ -97,7 +97,7 @@ class TrackInfoView(BoxLayout):
                 cc = cc.lower()
                 try:
                     flagImagePath = 'resource/flags/' + str(track.countryCode.lower()) + '.png'
-                    flagImage.source = flagImagePath
+                    flagImage.sourceref = flagImagePath
                 except Exception as detail:
                     print('Error loading flag for country code: ' + str(detail))  
             self.track = track

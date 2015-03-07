@@ -14,15 +14,22 @@ from utils import *
 
 Builder.load_file('autosportlabs/uix/track/trackmap.kv')
 
-class Point:
+class Point(object):
     x = 0.0
     y = 0.0
     def __init__(self, x, y):
         self.x = x
         self.y = y
     
+class MarkerPoint(Point):
+    color = "FFFFFF"
+    def __init__(self, x, y, color):
+        super.__init__(x, y)
+        self.color = color
+    
 class TrackMap(Widget):
-    trackWidthScale =0.01
+    trackWidthScale = 0.01
+    marker_width_scale = 0.05
     trackColor = (1.0, 1.0, 1.0, 0.5)
     MIN_PADDING = dp(1)
     offsetPoint = Point(0,0)
@@ -34,6 +41,7 @@ class TrackMap(Widget):
     minXY = Point(-1, -1)
     maxXY = Point(-1, -1)
     
+    marker_points = []
     
     def set_trackColor(self, color):
         self.trackColor = color
@@ -84,15 +92,20 @@ class TrackMap(Widget):
             linePoints.append(scaledPoint.x)
             linePoints.append(scaledPoint.y)
         self.linePoints = linePoints
-        
+        self._draw_current_map()
+         
+    def _draw_current_map(self):
         with self.canvas:
             Color(*self.trackColor)
             Line(points=self.linePoints, width=dp(self.trackWidthScale * self.height), closed=True)
-        
+            marker_size = self.marker_width_scale * self.height
+            for marker_point in self.marker_points:
+                Color(marker_point.color)
+                Line(circle=(marker_point.x, marker_point.y, marker_size), close=True)
+         
     def setTrackPoints(self, geoPoints):
         self.genMapPoints(geoPoints)
         self.update_map()
-        
         
     def projectPoint(self, geoPoint):
         latitude = geoPoint.latitude * float(math.pi / 180.0)

@@ -2,10 +2,10 @@ import kivy
 kivy.require('1.8.0')
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
-from autosportlabs.uix.track.racetrackview import RaceTrackView
-from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.racecapture.datastore import DataStore, Filter
+from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser, LapNode
+from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent, SourceRef
 from autosportlabs.racecapture.views.analysis.linechart import LineChart
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
@@ -145,13 +145,8 @@ class AnalysisView(Screen):
         self.init_view()
 
     def on_tracks_updated(self, track_manager):
-        tracks = track_manager.getAllTrackIds()
-
-        if len(tracks) > 0:
-            trackId = track_manager.getAllTrackIds()[0]
-            track = track_manager.getTrackById(trackId)
-            self.ids.trackview.initMap(track)
-            self._trackmanager = track_manager
+        
+        self.ids.analysismap.track_manager = track_manager
 
     def open_datastore(self):
         pass
@@ -214,10 +209,25 @@ class AnalysisView(Screen):
     def on_channel_selected(self, instance, value):
         self._do_query(instance, value)
 
+    def on_marker(self, instance, marker):
+        print(str(marker))
+        
     def _do_query(self, instance, channel):
-        f = Filter().eq('LapCount', 3)
-        dataset = self._datastore.query(sessions=[1],
+        lap = 3
+        session = 1
+        f = Filter().eq('LapCount', lap)
+        dataset = self._datastore.query(sessions=[session],
                          channels=['Distance', channel], data_filter=f)
         
         records = dataset.fetch_records()
-        instance.add_channel_data(records, 0, 255)
+        source = SourceRef(lap, session)
+        instance.add_channel_data(records, channel, 0, 255, source)
+        self._sync_analysis_map(dataset)
+        
+    def _find_average_latlong(self, dataset):
+        
+    def _sync_analysis_map(self, dataset):
+        pass
+        
+        
+        
