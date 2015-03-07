@@ -327,7 +327,7 @@ class DataStore(object):
         try:
             new_channels = []
             for i in range(1, len(raw_channels)+1):
-                name, units, samplerate = raw_channels[i -1].replace('"', '').split('|')
+                name, units, min, max, samplerate = raw_channels[i -1].replace('"', '').split('|')
                 #print name, units, samplerate
                 channel = DatalogChannel(name, units, int(samplerate), 0)
                 channels.append(channel)
