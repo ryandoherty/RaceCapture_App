@@ -1,6 +1,78 @@
 {
     "channels": [
         {
+            "nm": "AccelX",
+            "ut": "G",
+            "sys": 1,
+            "type": 5,
+            "prec": 2,
+            "min": -3,
+            "max": 3
+        },
+        {
+            "nm": "AccelY",
+            "ut": "G",
+            "sys": 1,
+            "type": 5,
+            "prec": 2,
+            "min": -3,
+            "max": 3
+        },
+        {
+            "nm": "AccelZ",
+            "ut": "G",
+            "sys": 1,
+            "type": 5,
+            "prec": 2,
+            "min": -3,
+            "max": 3
+        },
+        {
+            "nm": "Yaw",
+            "ut": "Deg/Sec",
+            "sys": 1,
+            "type": 5,
+            "prec": 0,
+            "min": -300,
+            "max": 300
+        },
+        {
+            "nm": "Pitch",
+            "ut": "Deg/Sec",
+            "sys": 1,
+            "type": 5,
+            "prec": 0,
+            "min": -300,
+            "max": 300
+        },
+        {
+            "nm": "Roll",
+            "ut": "Deg/Sec",
+            "sys": 1,
+            "type": 5,
+            "prec": 0,
+            "min": -300,
+            "max": 300
+        },
+        {
+            "nm": "Speed",
+            "ut": "MPH",
+            "sys": 1,
+            "type": 6,
+            "prec": 2,
+            "min": 0,
+            "max": 150
+        },
+        {
+            "nm": "Distance",
+            "ut": "Miles",
+            "sys": 1,
+            "type": 6,
+            "prec": 3,
+            "min": 0,
+            "max": 0
+        },            
+        {
             "nm": "Coolant",
             "ut": "F",
             "sys": 1,
@@ -433,60 +505,6 @@
             "max": 255
         },
         {
-            "nm": "AccelX",
-            "ut": "G",
-            "sys": 1,
-            "type": 5,
-            "prec": 2,
-            "min": -3,
-            "max": 3
-        },
-        {
-            "nm": "AccelY",
-            "ut": "G",
-            "sys": 1,
-            "type": 5,
-            "prec": 2,
-            "min": -3,
-            "max": 3
-        },
-        {
-            "nm": "AccelZ",
-            "ut": "G",
-            "sys": 1,
-            "type": 5,
-            "prec": 2,
-            "min": -3,
-            "max": 3
-        },
-        {
-            "nm": "Yaw",
-            "ut": "Deg/Sec",
-            "sys": 1,
-            "type": 5,
-            "prec": 0,
-            "min": -300,
-            "max": 300
-        },
-        {
-            "nm": "Pitch",
-            "ut": "Deg/Sec",
-            "sys": 1,
-            "type": 5,
-            "prec": 0,
-            "min": -300,
-            "max": 300
-        },
-        {
-            "nm": "Roll",
-            "ut": "Deg/Sec",
-            "sys": 1,
-            "type": 5,
-            "prec": 0,
-            "min": -300,
-            "max": 300
-        },
-        {
             "nm": "Heading",
             "ut": "Degrees",
             "sys": 1,
@@ -530,24 +548,6 @@
             "prec": 6,
             "min": -180,
             "max": 180
-        },
-        {
-            "nm": "Speed",
-            "ut": "MPH",
-            "sys": 1,
-            "type": 6,
-            "prec": 2,
-            "min": 0,
-            "max": 150
-        },
-        {
-            "nm": "Distance",
-            "ut": "Miles",
-            "sys": 1,
-            "type": 6,
-            "prec": 3,
-            "min": 0,
-            "max": 0
         },
         {
             "nm": "Sector",
@@ -611,15 +611,6 @@
             "prec": 0,
             "min": 0,
             "max": 1000
-        },
-        {
-            "nm": "Unknown",
-            "ut": "",
-            "sys": 1,
-            "type": 0,
-            "prec": 0,
-            "min": 0,
-            "max": 1024
         },
         {
             "nm": "Analog1",
@@ -782,6 +773,15 @@
             "prec": 0,
             "min": 0,
             "max": 100
-        }        
+        },
+        {
+            "nm": "Unknown",
+            "ut": "",
+            "sys": 1,
+            "type": 0,
+            "prec": 0,
+            "min": 0,
+            "max": 1024
+        }
     ]
 }
