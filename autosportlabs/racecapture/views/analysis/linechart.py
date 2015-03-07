@@ -2,7 +2,7 @@ from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidg
 from installfix_garden_graph import Graph, MeshLinePlot, LinePlot
 from kivy.utils import get_color_from_hex as rgb
 from kivy.app import Builder
-
+from kivy.core.window import Window
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 
 #DEFAULT_CHART_COLORS = ['FFFFFF', '003AC1','FF5D00','FFC700','607DC1','FFAE7F','FFE37F','919FC1','FFD6BF','FFF1BF']
@@ -13,8 +13,9 @@ DEFAULT_CHART_COLORS =  ['2b908f', '90ee7e', 'f45b5b', '7798BF', 'aaeeee', 'ff00
 class LineChart(AnalysisWidget):
     color_index = 0
     def __init__(self, **kwargs):
-        super(LineChart, self).__init__(**kwargs)        
-        
+        super(LineChart, self).__init__(**kwargs)
+        Window.bind(mouse_pos=self.on_mouse_pos)
+    
     def _get_next_line_color(self):
         index = self.color_index
         color = rgb(DEFAULT_CHART_COLORS[index])
@@ -30,15 +31,43 @@ class LineChart(AnalysisWidget):
         
         chart.add_plot(plot)
         points = []
+        max_distance = 0
         sample_index = 0
         for sample in samples:
-            points.append((sample_index, sample[1]))
+            distance = sample[1]
+            if distance > max_distance:
+                max_distance = distance 
+            points.append((distance, sample[2]))
             sample_index += 1 
             
         chart.ymin = min
         chart.ymax = max
         chart.xmin = 0
-        chart.xmax = sample_index
+        chart.xmax = max_distance
         plot.points = points
+    
+    def on_touch_down(self, touch):
+        if self.collide_point(touch.x, touch.y):
+            button = touch.button
+            scroll_dir = 0
+            if touch.is_mouse_scrolling:
+                if 'down' in button or 'left' in button:
+                    scroll_dir = 1
+                if 'up' in button or 'right' in button:
+                    scroll_dir = -1
+                print(str(touch) + ' ' + str(scroll_dir))
+        super(LineChart, self).on_touch_down(touch)
+        return False
         
+        
+    def on_touch_move(self, touch):
+        if not self.collide_point(touch.x, touch.y):
+            return False
+        print(str(touch))
+        
+    def on_mouse_pos(self, x, pos):
+        if not self.collide_point(pos[0], pos[1]):
+            return False
+        
+        print(str(pos))
         

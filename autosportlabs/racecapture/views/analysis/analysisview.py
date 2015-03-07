@@ -215,9 +215,9 @@ class AnalysisView(Screen):
         self._do_query(instance, value)
 
     def _do_query(self, instance, channel):
-        f = Filter().eq('LapCount', 10)
+        f = Filter().eq('LapCount', 3)
         dataset = self._datastore.query(sessions=[1],
-                         channels=[channel], data_filter=f)
+                         channels=['Distance', channel], data_filter=f)
         
         records = dataset.fetch_records()
         instance.add_channel_data(records, 0, 255)
