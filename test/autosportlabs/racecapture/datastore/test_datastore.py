@@ -103,6 +103,31 @@ class DataStoreTest(unittest.TestCase):
 
         self.assertEqual(len(records), 100)
 
+    def test_channel_average(self):
+        lat_avg = self.ds.get_channel_average("Latitude")
+        lon_avg = self.ds.get_channel_average("Longitude")
+        self.assertEqual(round(lat_avg, 6), 47.256164)
+        self.assertEqual(round(lon_avg, 6), -123.191297)
+         
+    def test_channel_average_by_session(self):
+        #session exists
+        lat_avg = self.ds.get_channel_average("Latitude", [1])
+        lon_avg = self.ds.get_channel_average("Longitude", [1])
+        self.assertEqual(47.256164, round(lat_avg, 6))
+        self.assertEqual(-123.191297, round(lon_avg, 6))
+        
+        #session does not exist
+        lat_avg = self.ds.get_channel_average("Latitude", [2])
+        lon_avg = self.ds.get_channel_average("Longitude", [2])
+        self.assertEqual(None, lat_avg)
+        self.assertEqual(None, lon_avg)
+
+        #include an existing and not existing session
+        lat_avg = self.ds.get_channel_average("Latitude", [1,2])
+        lon_avg = self.ds.get_channel_average("Longitude", [1,2])
+        self.assertEqual(47.256164, round(lat_avg, 6))
+        self.assertEqual(-123.191297, round(lon_avg, 6))
+        
     def test_channel_min_max(self):
         rpm_min = self.ds.get_channel_min('RPM')
         rpm_max = self.ds.get_channel_max('RPM')
@@ -200,15 +225,48 @@ class DataStoreTest(unittest.TestCase):
                                 data_filter=f,
                                 distinct_records=True)
 
-        
-#        samples = dataset.fetch_columns()
+        laptimes = {}
         records = dataset.fetch_records()
-        
-        print("records " + str(len(records)))
         for r in records:
-            for c in r:
-                print str(c),
-            print("")
+            laptimes[int(r[1])] = r[2]
+
+        self.assertEqual(laptimes[1],3.437)
+        self.assertEqual(laptimes[2],2.257)
+        self.assertEqual(laptimes[3],2.227)
+        self.assertEqual(laptimes[4],2.313)
+        self.assertEqual(laptimes[5],2.227)
+        self.assertEqual(laptimes[6],2.227)
+        self.assertEqual(laptimes[7],2.423)
+        self.assertEqual(laptimes[8],2.31)
+        self.assertEqual(laptimes[9],2.223)
+        self.assertEqual(laptimes[10],2.233)
+        self.assertEqual(laptimes[11],2.247)
+        self.assertEqual(laptimes[12],2.24)
+        self.assertEqual(laptimes[13],2.25)
+        self.assertEqual(laptimes[14],2.237)
+        self.assertEqual(laptimes[15],2.243)
+        self.assertEqual(laptimes[16],2.29)
+        self.assertEqual(laptimes[17],2.387)
+        self.assertEqual(laptimes[18],2.297)
+        self.assertEqual(laptimes[19],2.383)
+        self.assertEqual(laptimes[20],2.177)
+        self.assertEqual(laptimes[21],2.207)
+        self.assertEqual(laptimes[22],2.18)
+        self.assertEqual(laptimes[23],2.17)
+        self.assertEqual(laptimes[24],2.22)
+        self.assertEqual(laptimes[25],2.217)
+        self.assertEqual(laptimes[26],2.223)
+        self.assertEqual(laptimes[27],2.173)
+        self.assertEqual(laptimes[28],2.19)
+        self.assertEqual(laptimes[29],2.33)
+        self.assertEqual(laptimes[30],2.227)
+        self.assertEqual(laptimes[31],2.257)
+        self.assertEqual(laptimes[32],2.183)
+        self.assertEqual(laptimes[33],2.163)
+        self.assertEqual(laptimes[34],2.23)
+        self.assertEqual(laptimes[35],2.23)
+        self.assertEqual(laptimes[36],2.54)
+        self.assertEqual(laptimes[37],3.383)
 
     def test_get_sessions(self):
         sessions = self.ds.get_sessions()

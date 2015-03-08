@@ -601,6 +601,25 @@ class DataStore(object):
 
         self._conn.commit()
 
+    def get_channel_average(self, channel, sessions=None):
+        c = self._conn.cursor()
+
+        base_sql = "SELECT AVG({}) from datapoint".format(channel)
+        
+        if type(sessions) == list and len(sessions) > 0:
+            base_sql += " JOIN sample ON datapoint.sample_id=sample.id WHERE "            
+            ses_filters = []
+            for s in sessions:
+                ses_filters.append('sample.session_id = {}'.format(s))
+            base_sql += '     OR '.join(ses_filters)
+        base_sql += ';'
+
+        c.execute(base_sql)
+        res = c.fetchone()
+
+        average = None if res == None else res[0]
+        return average
+        
     def get_channel_max(self, channel):
         c = self._conn.cursor()
 
