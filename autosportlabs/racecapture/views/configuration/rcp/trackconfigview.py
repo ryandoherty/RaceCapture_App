@@ -108,8 +108,6 @@ class AutomaticTrackConfigScreen(Screen):
     tracksGrid = None
     trackManager = None
     TRACK_ITEM_MIN_HEIGHT = 200
-    searchRadiusMeters = 2000
-    searchBearing = 360
     trackSelectionPopup = None
     def __init__(self, **kwargs):
         super(AutomaticTrackConfigScreen, self).__init__(**kwargs)
@@ -160,8 +158,7 @@ class AutomaticTrackConfigScreen(Screen):
             matchedTracks = []
             for track in self.trackDb.tracks:
                 startPoint = track.startLine
-                radius = startPoint.metersToDegrees(self.searchRadiusMeters, self.searchBearing)
-                matchedTrack = self.trackManager.findNearbyTrack(track.startLine, radius)
+                matchedTrack = self.trackManager.findNearbyTrack(track.startLine)
                 if matchedTrack:
                     matchedTracks.append(matchedTrack)
                     

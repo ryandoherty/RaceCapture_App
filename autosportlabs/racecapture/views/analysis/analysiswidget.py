@@ -8,12 +8,19 @@ from kivy.uix.popup import Popup
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 
 class AnalysisWidget(AnchorLayout):
-    _popup = None
-    channel = None
     settings = None
+
     def __init__(self, **kwargs):
         super(AnalysisWidget, self).__init__(**kwargs)
         self.settings = kwargs.get('settings')
+    
+    def on_options(self, *args):
+        pass    
+
+class ChannelAnalysisWidget(AnalysisWidget):
+    _popup = None
+    def __init__(self, **kwargs):
+        super(ChannelAnalysisWidget, self).__init__(**kwargs)
         self.register_event_type('on_channel_selected')
     
     def on_channel_selected(self, value):
@@ -23,7 +30,7 @@ class AnalysisWidget(AnchorLayout):
         self.showChannelSelectDialog()
         
     def showChannelSelectDialog(self):
-        content = ChannelSelectView(settings=self.settings, channel=self.channel)
+        content = ChannelSelectView(settings=self.settings)
         content.bind(on_channel_selected=self.channel_selected)
         content.bind(on_channel_cancel=self._dismiss_popup)
 
@@ -31,11 +38,8 @@ class AnalysisWidget(AnchorLayout):
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
-        #self._dismiss_customization_popup_trigger()
-        
     
     def channel_selected(self, instance, value):
-        print("channel " + value)
         self.dispatch('on_channel_selected', value)
         self._dismiss_popup()
 

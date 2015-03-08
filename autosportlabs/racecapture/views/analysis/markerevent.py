@@ -13,7 +13,7 @@ class SourceRef(object):
 class MarkerEvent(object):
     data_index = 0
     sourceref = None
-    def __init__(self, data_index,sourceref):
+    def __init__(self, data_index, sourceref):
         self.data_index = data_index
         self.sourceref = sourceref
         

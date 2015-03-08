@@ -11,6 +11,8 @@ import urllib2
 import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
         
+TRACK_DEFAULT_SEARCH_RADIUS_METERS = 2000
+TRACK_DEFAULT_SEARCH_BEARING_DEGREES = 360
 class Venue:
     venueId = None
     uri = None
@@ -148,11 +150,13 @@ class TrackManager:
     def getTrackIdsInRegion(self):
         return self.trackIdsInRegion
         
-    def findNearbyTrack(self, point, searchRadius):
+    def findNearbyTrack(self, point, searchRadius = TRACK_DEFAULT_SEARCH_RADIUS_METERS, searchBearing = TRACK_DEFAULT_SEARCH_BEARING_DEGREES):
+        radius = point.metersToDegrees(searchRadius, searchBearing)
+        
         for trackId in self.tracks.keys():
             track = self.tracks[trackId]
             trackCenter = track.getCenterPoint()
-            if trackCenter and trackCenter.withinCircle(point, searchRadius):
+            if trackCenter and trackCenter.withinCircle(point, radius):
                 return track
         return None
         

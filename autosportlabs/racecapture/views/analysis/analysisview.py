@@ -10,6 +10,7 @@ from autosportlabs.racecapture.views.analysis.linechart import LineChart
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
+from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
@@ -135,6 +136,7 @@ class AnalysisView(Screen):
     _databus = None
     _trackmanager = None
     _datastore = DataStore()
+    _session_location_cache = {}
 
     def __init__(self, **kwargs):
         super(AnalysisView, self).__init__(**kwargs)
@@ -210,7 +212,12 @@ class AnalysisView(Screen):
         self._do_query(instance, value)
 
     def on_marker(self, instance, marker):
-        print(str(marker))
+        source = marker.sourceref
+        cache = self._session_location_cache.get(source.session)
+        if cache != None:
+            point = cache[marker.data_index]
+            self.ids.analysismap.update_reference_mark(source, point)
+        
         
     def _do_query(self, instance, channel):
         lap = 3
@@ -222,12 +229,28 @@ class AnalysisView(Screen):
         records = dataset.fetch_records()
         source = SourceRef(lap, session)
         instance.add_channel_data(records, channel, 0, 255, source)
-        self._sync_analysis_map(dataset)
+        self._sync_analysis_map(session)
+        self._update_location_cache(session)
         
-    def _find_average_latlong(self, dataset):
-        
-    def _sync_analysis_map(self, dataset):
-        pass
+    def _update_location_cache(self, session):
+        cache = self._session_location_cache.get(session)
+        if cache == None:
+            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0)
+            dataset = self._datastore.query(sessions=[session], 
+                                            channels = ["Latitude", "Longitude"], 
+                                            data_filter=f)
+            records = dataset.fetch_records()
+            cache = []
+            for r in records:
+                lat = r[1]
+                lon = r[2]
+                cache.append(GeoPoint.fromPoint(lat, lon))
+            self._session_location_cache[session]=cache
+    
+    def _sync_analysis_map(self, session):
+        lat_avg = self._datastore.get_channel_average("Latitude", [session])
+        lon_avg = self._datastore.get_channel_average("Longitude", [session])
+        self.ids.analysismap.select_map(lat_avg, lon_avg)
         
         
         

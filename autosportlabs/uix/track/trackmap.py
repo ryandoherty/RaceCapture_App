@@ -22,14 +22,13 @@ class Point(object):
         self.y = y
     
 class MarkerPoint(Point):
-    color = "FFFFFF"
-    def __init__(self, x, y, color):
-        super.__init__(x, y)
+    def __init__(self, color):
+        super(MarkerPoint, self).__init__(0, 0)
         self.color = color
     
 class TrackMap(Widget):
     trackWidthScale = 0.01
-    marker_width_scale = 0.05
+    marker_width_scale = 0.02
     trackColor = (1.0, 1.0, 1.0, 0.5)
     MIN_PADDING = dp(1)
     offsetPoint = Point(0,0)
@@ -41,7 +40,7 @@ class TrackMap(Widget):
     minXY = Point(-1, -1)
     maxXY = Point(-1, -1)
     
-    marker_points = []
+    marker_points = {}
     
     def set_trackColor(self, color):
         self.trackColor = color
@@ -57,8 +56,21 @@ class TrackMap(Widget):
         self.bind(pos=self.update_map)
         self.bind(size=self.update_map)
 
+    def add_marker(self, key, color):
+        self.marker_points[key] = MarkerPoint(color)
+    
+    def get_marker(self, key):
+        return self.marker_points.get(key)
+    
+    def update_marker(self, key, geoPoint):
+        marker_point = self.marker_points.get(key)
+        if marker_point is not None:
+            point = self._offset_point(self._project_point(geoPoint))
+            marker_point.x = point.x
+            marker_point.y = point.y
+            self._draw_current_map()
+        
     def update_map(self, *args):
-        self.canvas.clear()
         
         paddingBothSides = self.MIN_PADDING * 2
         
@@ -95,19 +107,28 @@ class TrackMap(Widget):
         self._draw_current_map()
          
     def _draw_current_map(self):
+        left = self.pos[0]
+        bottom = self.pos[1]        
+        self.canvas.clear()
         with self.canvas:
             Color(*self.trackColor)
             Line(points=self.linePoints, width=dp(self.trackWidthScale * self.height), closed=True)
             marker_size = self.marker_width_scale * self.height
-            for marker_point in self.marker_points:
-                Color(marker_point.color)
-                Line(circle=(marker_point.x, marker_point.y, marker_size), close=True)
+            for marker_point in self.marker_points.itervalues():
+                scaledPoint = self.scalePoint(marker_point, self.height, left, bottom)                
+                Color(*marker_point.color)
+                Line(circle=(scaledPoint.x, scaledPoint.y, marker_size), width=marker_size, closed=True)
          
     def setTrackPoints(self, geoPoints):
         self.genMapPoints(geoPoints)
         self.update_map()
         
-    def projectPoint(self, geoPoint):
+    def _offset_point(self, point):
+        point.x = point.x - self.minXY.x
+        point.y = point.y - self.minXY.y
+        return point
+        
+    def _project_point(self, geoPoint):
         latitude = geoPoint.latitude * float(math.pi / 180.0)
         longitude = geoPoint.longitude * float(math.pi / 180.0)
         point = Point(longitude, float(math.log(math.tan((math.pi / 4.0) + 0.5 * latitude))))
@@ -127,7 +148,7 @@ class TrackMap(Widget):
         maxXY = Point(-1, -1)
         
         for geoPoint in geoPoints:
-            point = self.projectPoint(geoPoint)
+            point = self._project_point(geoPoint)
             minXY.x = point.x if minXY.x == -1 else min(minXY.x, point.x)
             minXY.y = point.y if minXY.y == -1 else min(minXY.y, point.y)
             points.append(point);

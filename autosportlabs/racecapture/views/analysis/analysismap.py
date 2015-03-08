@@ -2,15 +2,18 @@ from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidg
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from kivy.properties import ObjectProperty
 from kivy.app import Builder
+from autosportlabs.racecapture.geo.geopoint import GeoPoint
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 class AnalysisMap(AnalysisWidget):
     track_manager = ObjectProperty(None)
         
-        
-    def on_track_manager(self, instance, value):
-        tracks = self.track_manager.getAllTrackIds()
-        if len(tracks) > 0:
-            trackId = self.track_manager.getAllTrackIds()[0]
-            track = self.track_manager.getTrackById(trackId)
-            self.ids.track.initMap(track)
+    def select_map(self, latitude, longitude):
+        if self.track_manager:
+            point = GeoPoint.fromPoint(latitude, longitude)
+            track = self.track_manager.findNearbyTrack(point)
+            if track != None:
+                self.ids.track.initMap(track)
+                
+    def update_reference_mark(self, source, point):
+        self.ids.track.update_reference_mark(source, point)
