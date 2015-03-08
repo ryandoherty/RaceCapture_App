@@ -165,6 +165,12 @@ class Filter(object):
 
     @add_combop
     @chan_adj
+    def neq(self, chan, val):
+        self._cmd_seq += '{} != {} '.format(chan, val)
+        return self
+
+    @add_combop
+    @chan_adj
     def eq(self, chan, val):
         self._cmd_seq += '{} = {} '.format(chan, val)
         return self

@@ -51,6 +51,14 @@ class DataStoreTest(unittest.TestCase):
 
         self.assertSequenceEqual(filter_text, expected_output)
 
+    def test_not_equal_filter(self):
+        f = Filter().neq('LapCount', 1)
+        
+        expected_output = 'datapoint.LapCount != 1'
+        filter_text = str(f).strip()
+        
+        self.assertSequenceEqual(filter_text, expected_output)
+        
     def test_chained_filter(self):
         f = Filter().lt('LapCount', 1).gt('Coolant', 212).or_().eq('RPM', 9001)
 
