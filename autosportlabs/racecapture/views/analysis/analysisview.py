@@ -1,9 +1,15 @@
 import kivy
 kivy.require('1.8.0')
+from kivy.clock import Clock
 from kivy.app import Builder
+from kivy.uix.widget import Widget
+from kivy.uix.popup import Popup
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
+from autosportlabs.racecapture.views.analysis.addstreamview import AddStreamView
 from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser, LapNode
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent, SourceRef
 from autosportlabs.racecapture.views.analysis.linechart import LineChart
@@ -11,11 +17,6 @@ from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
-from kivy.uix.widget import Widget
-from kivy.uix.popup import Popup
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.label import Label
-from kivy.clock import Clock
 
 import os.path
 
@@ -137,6 +138,7 @@ class AnalysisView(Screen):
     _trackmanager = None
     _datastore = DataStore()
     _session_location_cache = {}
+    _popup = None
 
     def __init__(self, **kwargs):
         super(AnalysisView, self).__init__(**kwargs)
@@ -153,10 +155,26 @@ class AnalysisView(Screen):
     def open_datastore(self):
         pass
 
+    def on_add_stream(self, *args):
+        self.show_add_stream_dialog()
+        
     def on_import_complete(self, *args):
-        print('import complete')
         self.refresh_session_list()
         
+    def on_stream_selected(self, instance, value):
+        print("stream selected")
+        
+    def show_add_stream_dialog(self):
+        print('add stream')
+        content = AddStreamView(settings=self._settings)
+        content.bind(on_stream_selected=self.on_stream_selected)
+
+        #content = Label(text='hello')
+        popup = Popup(title="Add Telemetry Stream", content=content, size_hint=(0.7, 0.7))
+        popup.bind(on_dismiss=self.popup_dismissed)
+        popup.open()
+        self._popup = popup
+
     def import_datalog(self):
         content = LogImportWidget(datastore=self._datastore, dismiss_cb=self.dismiss_popup, settings=self._settings)
         content.bind(on_import_complete=self.on_import_complete)
@@ -253,5 +271,13 @@ class AnalysisView(Screen):
         lon_avg = self._datastore.get_channel_average("Longitude", [session])
         self.ids.analysismap.select_map(lat_avg, lon_avg)
         
+
+    def popup_dismissed(self, *args):
+        self._popup = None
         
+    def _dismiss_popup(self, *args):
+        if self._popup:
+            self._popup.dismiss()
+            self._popup = None
+
         

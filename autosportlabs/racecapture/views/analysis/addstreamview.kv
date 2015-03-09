@@ -1,0 +1,20 @@
+#:kivy 1.8
+<AddStreamView>:
+	orientation: 'vertical'
+	GridLayout:
+		padding: [self.height * 0.25, self.height * 0.25]
+		spacing: self.height * 0.25
+		rows: 1
+		cols: 3
+		FeatureButton:
+			icon: u'\uf0ed'
+			title: 'Cloud'
+#			on_press: root.show_view('dash')
+		FeatureButton:
+			icon: u'\uf1eb'
+			title: 'Wireless'
+#			on_press: root.show_view('analysis')				
+		FeatureButton:
+			icon: u'\uf07c'
+			title: 'Import'
+#			on_press: root.show_view('config')			

@@ -72,7 +72,7 @@
 	                    id: 'read'
 	                    text: '\357\202\223'
 	                    rcid: 'readlog'
-	                    on_release: root.import_datalog()
+	                    on_release: root.on_add_stream()
 	            LineChart:
 	            	id: mainchart
 	            	on_channel_selected: root.on_channel_selected(*args)
