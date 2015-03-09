@@ -237,9 +237,9 @@ class AnalysisView(Screen):
         cache = self._session_location_cache.get(session)
         if cache == None:
             f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0)
-            dataset = self._datastore.query(sessions=[session], 
+            dataset = self._datastore.query(sessions = [session], 
                                             channels = ["Latitude", "Longitude"], 
-                                            data_filter=f)
+                                            data_filter = f)
             records = dataset.fetch_records()
             cache = []
             for r in records:
