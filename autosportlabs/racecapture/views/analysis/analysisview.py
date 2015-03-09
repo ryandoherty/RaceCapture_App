@@ -209,7 +209,8 @@ class AnalysisView(Screen):
         self._popup.dismiss()
 
     def on_channel_selected(self, instance, value):
-        self._do_query(instance, value)
+        if value is not None:
+            self._do_query(instance, value)
 
     def on_marker(self, instance, marker):
         source = marker.sourceref
