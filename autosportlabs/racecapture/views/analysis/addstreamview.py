@@ -36,3 +36,11 @@ class AddStreamView(BoxLayout):
 class AddStreamSelectView(Screen):
     pass
     
+class CloudConnectView(Screen):
+    pass
+
+class WirelessConnectView(Screen):
+    pass
+
+class FileConnectView(Screen):
+    pass
