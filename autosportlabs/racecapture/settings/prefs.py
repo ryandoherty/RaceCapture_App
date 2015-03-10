@@ -143,6 +143,4 @@ class UserPrefs(EventDispatcher):
         for id, channel in self._prefs_dict["gauge_settings"].iteritems():
             data["gauge_settings"][id] = channel
 
-        data['datastore_path'] = self._prefs_dict['datastore_path']
-
         return json.dumps(data)
