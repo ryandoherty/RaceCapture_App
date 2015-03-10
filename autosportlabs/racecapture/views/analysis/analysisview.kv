@@ -48,11 +48,20 @@
 <AnalysisView>:
 	BoxLayout:
 		orientation: 'horizontal'
-		SessionBrowser:
-			size_hint_x: 0.1
-			id: sessions
+		BoxLayout:
+			size_hint_x: 0.2
+			orientation: 'vertical'
+			SessionBrowser:
+				size_hint_y: 0.9
+				id: sessions
+	        IconButton:
+	        	size_hint_y: 0.1
+	            id: 'read'
+	            font_size: root.height * 0.1
+	            text: u'\uf0fe'
+	            on_release: root.on_add_stream()
 	    BoxLayout:
-	        size_hint_x: 0.9
+	        size_hint_x: 0.8
 	        orientation: 'vertical'
 	        BoxLayout:
 	            orientation: 'horizontal'
@@ -62,18 +71,7 @@
 	            Label:
 	                size_hint_x: 0.25
 	                text: 'secondary chart'
-	        BoxLayout:
-	            orientation: 'horizontal'
-	            BoxLayout:
-	                orientation: 'horizontal'
-	                size_hint_y: 0.1
-	                size_hint_x: 0.1
-	                IconButton:
-	                    id: 'read'
-	                    text: '\357\202\223'
-	                    rcid: 'readlog'
-	                    on_release: root.on_add_stream()
-	            LineChart:
-	            	id: mainchart
-	            	on_channel_selected: root.on_channel_selected(*args)
-	            	on_marker: root.on_marker(*args)
+            LineChart:
+            	id: mainchart
+            	on_channel_selected: root.on_channel_selected(*args)
+            	on_marker: root.on_marker(*args)
