@@ -1,6 +1,12 @@
 #:kivy 1.8
 <AddStreamView>:
 	orientation: 'vertical'
+	ScreenManager:
+		id: screens
+		AddStreamSelectView:
+			id: streamSelectScreen
+		
+<AddStreamSelectView>:
 	GridLayout:
 		size_hint_y: 0.9
 		padding: [self.height * 0.25, self.height * 0.25]
@@ -10,15 +16,15 @@
 		FeatureButton:
 			icon: u'\uf0ed'
 			title: 'Cloud'
-#			on_press: root.show_view('dash')
+			on_press: root.connect_cloud_stream()
 		FeatureButton:
 			icon: u'\uf1eb'
 			title: 'Wireless'
-#			on_press: root.show_view('analysis')				
+			on_press: root.connect_wireless_stream()				
 		FeatureButton:
 			icon: u'\uf07c'
 			title: 'Import'
-#			on_press: root.show_view('config')	
+			on_press: root.connect_file_stream()	
 	Label:
 		size_hint_y: 0.1
 		font_size: root.height * 0.1

@@ -5,6 +5,7 @@ from kivy.app import Builder
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.listview import ListView, ListItemButton
+from kivy.uix.screenmanager import Screen
 from utils import kvFind
 from kivy.adapters.listadapter import ListAdapter
 from autosportlabs.uix.button.featurebutton import FeatureButton
@@ -15,10 +16,23 @@ class AddStreamView(BoxLayout):
     settings = None
     def __init__(self, **kwargs):
         super(AddStreamView, self).__init__(**kwargs)
-        self.register_event_type('on_stream_selected')
         
         self.settings = kwargs.get('settings')
 
-    def on_stream_selected(self, selected_channel):
+    def connect_cloud_stream(self):
+        pass
+    
+        screenMgr = kvFind(self, 'rcid', 'screenmgr')
+        screenMgr.add_widget(self.manualTrackConfigView)
+        self.screenManager = screenMgr
+    
+    def connect_wireless_stream(self):
+        pass
+    
+    def connect_file_stream(self):
         pass
         
+        
+class AddStreamSelectView(Screen):
+    pass
+    
