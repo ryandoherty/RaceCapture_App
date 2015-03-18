@@ -17,12 +17,13 @@ class OBD2Channel(BoxLayout):
     channels = None
     obd2Settings = None
     pidIndex = 0
+
     def __init__(self, **kwargs):
         super(OBD2Channel, self).__init__(**kwargs)
         self.obd2Settings = kwargs.get('obd2Settings')
         self.register_event_type('on_delete_pid')
         self.register_event_type('on_modified')
-    
+
     def on_modified(self):
         pass
 
@@ -60,6 +61,7 @@ class OBD2ChannelsView(BaseConfigView):
     obd2Cfg = None
     obd2Grid = None
     obd2Settings = None
+    base_dir = None
     def __init__(self, **kwargs):
         super(OBD2ChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
@@ -67,8 +69,9 @@ class OBD2ChannelsView(BaseConfigView):
         obd2Enable = kvFind(self, 'rcid', 'obd2enable')
         obd2Enable.bind(on_setting=self.on_obd2_enabled)
         obd2Enable.setControl(SettingsSwitch())
+        self.base_dir = kwargs.get('base_dir')
         
-        self.obd2Settings = OBD2Settings()
+        self.obd2Settings = OBD2Settings(base_dir=self.base_dir)
         
         self.update_view_enabled()
 
