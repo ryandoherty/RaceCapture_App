@@ -235,6 +235,24 @@
             "max": 10000
         },
         {
+            "nm": "RPM2",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 10000
+        },
+        {
+            "nm": "RPM3",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 10000
+        },
+        {
             "nm": "Wheel",
             "ut": "RPM",
             "sys": 1,
