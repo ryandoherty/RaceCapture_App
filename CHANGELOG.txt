@@ -1,3 +1,7 @@
+==1.2.5===
+* OS X support (offically)
+* Additional UI layout improvements for mobile devices
+
 ==1.2.4===
 * Usability improvements to Track browser interface for searching and loading
 * Auto-prompt first-time users to download tracks (beginnings of first time setup wizard)
