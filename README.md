@@ -37,6 +37,7 @@ Dependencies:
 1. Install [PYInstaller] (http://www.pyinstaller.org) `pip install pyinstaller`
 1. Try `pyinstaller --version` - should return "2.1" or similar
 1. Open `/Applications/Kivy.app/Contents/Resources/lib/sitepackages/pygments/lexers/__init__.py` and add a line "from pygments.lexers.agile import PythonLexer" near the top. Yes, I know this is bad form. It's to fix an error ("AttributeError: 'module' object has no attribute 'PythonLexer'") where PyInstaller failed to find an import and I couldn't work out how to force it. -CLR 2014-05-29
+1. Open `/Applications/Kivy.app/Contents/Resources/kivy/kivy/uix/codeinput.py`, add "from pygments.lexers import PythonLexer" and change "self.lexer = lexers.PythonLexer()" to "self.lexer = PythonLexer()". Yes this is bad form, Kivy, Pyinstaller or Pygments is broken and this fixes it.
 
 ## Creating installer for current version (OSX)
 

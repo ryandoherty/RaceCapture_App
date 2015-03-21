@@ -21,10 +21,12 @@ class WirelessConfigView(BaseConfigView):
     apnHostField = None
     apnUserField = None
     apnPassField = None
+    base_dir = None
     
     def __init__(self, **kwargs):
         super(WirelessConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
+        self.base_dir = kwargs.get('base_dir')
 
         btEnable = kvFind(self, 'rcid', 'btEnable') 
         btEnable.bind(on_setting=self.on_bt_enable)
@@ -109,7 +111,7 @@ class WirelessConfigView(BaseConfigView):
     
     def loadApnSettingsSpinner(self, spinner):
         try:
-            json_data = open(os.path.join('resource', 'settings', 'cell_providers.json'))
+            json_data = open(os.path.join(self.base_dir, 'resource', 'settings', 'cell_providers.json'))
             cellProviderInfo = json.load(json_data)
             apnMap = {}
             apnMap['custom'] = self.customApnLabel

@@ -2,6 +2,7 @@ import json
 from collections import OrderedDict
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
+import os
 
 CHANNEL_TYPE_UNKNOWN    = 0
 CHANNEL_TYPE_ANALOG     = 1
@@ -133,10 +134,12 @@ class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
     channel_names = []
     unknownChannel = ChannelMeta(name='Unknown')
+    base_dir = None
         
     def __init__(self, **kwargs):
         try:
-            systemChannelsJson = json.load(open('resource/channel_meta/system_channels.json'))
+            self.base_dir = kwargs.get('base_dir')
+            systemChannelsJson = json.load(open(os.path.join(self.base_dir, 'resource', 'channel_meta', 'system_channels.json')))
             channelsJson = systemChannelsJson.get('channels')
             channels = OrderedDict()
             channel_names = []
