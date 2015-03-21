@@ -53,14 +53,15 @@ class ConfigView(Screen):
     text_input = ObjectProperty(None)
     writeStale = BooleanProperty(False)
     track_manager = ObjectProperty(None)
-    
+
     #List of config views
     configViews = []
     content = None
     menu = None
     rc_config = None
     scriptView = None
-    _settings = None    
+    _settings = None
+    base_dir = None
 
     def __init__(self, **kwargs):
         super(ConfigView, self).__init__(**kwargs)
@@ -68,7 +69,8 @@ class ConfigView(Screen):
         self.rc_config = kwargs.get('rcpConfig', None)
         self.rc_api = kwargs.get('rc_api', None)
         self.dataBusPump = kwargs.get('dataBusPump', None)
-        self._settings = kwargs.get('settings')        
+        self._settings = kwargs.get('settings')
+        self.base_dir = kwargs.get('base_dir')
 
         self.register_event_type('on_config_updated')
         self.register_event_type('on_channels_updated')
@@ -168,8 +170,8 @@ class ConfigView(Screen):
         attach_node('Accelerometer/Gyro', None, ImuChannelsView(rc_api=self.rc_api))
         attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView(channels=system_channels))
         attach_node('CAN Bus', None, CANConfigView())
-        attach_node('OBDII', None, OBD2ChannelsView(channels=system_channels))
-        attach_node('Wireless', None, WirelessConfigView())
+        attach_node('OBDII', None, OBD2ChannelsView(channels=system_channels, base_dir=self.base_dir))
+        attach_node('Wireless', None, WirelessConfigView(base_dir=self.base_dir))
         attach_node('Telemetry', None, TelemetryConfigView())
         scriptView = LuaScriptingView()
         scriptView.bind(on_run_script=self.runScript)

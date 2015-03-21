@@ -1,3 +1,10 @@
+==1.2.4===
+* Usability improvements to Track browser interface for searching and loading
+* Auto-prompt first-time users to download tracks (beginnings of first time setup wizard)
+* Fixes for parsing data streams when number of telemetry channels > 32
+* Some screen scaling improvements to dashboard
+* Analog map scaling: allow previous cell to equal next cell's value
+
 ===1.2.3===
 * Updates to android background service (extend timeout)
 * Remember last config file load/save dir. it's the little things...

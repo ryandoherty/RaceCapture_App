@@ -5,9 +5,9 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.stacklayout import StackLayout
 from pygments.formatters.bbcode import BBCodeFormatter #explicit import to make pyinstaller work. do not remove
 from kivy.uix.codeinput import CodeInput
+from pygments.lexers import PythonLexer
 from kivy.app import Builder
 from kivy.extras.highlight import KivyLexer
-#from pygments.lexers.agile import PythonLexer 
 from pygments import lexers
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
