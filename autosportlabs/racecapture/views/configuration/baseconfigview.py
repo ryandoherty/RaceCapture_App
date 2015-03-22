@@ -23,9 +23,8 @@ class BaseChannelView(BoxLayout):
     def on_modified(self, channelConfig):
         pass
     
-    def on_channel(self, instance, value):
+    def on_channel(self, *args):
         if self.channelConfig:
-            self.channelConfig.name = value
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
 

@@ -81,7 +81,10 @@ class ChannelEditor(BoxLayout):
         if self.channel:
             channel = self.channel
             nameField.text = channel.name
-            nameField.disabled = channel.systemChannel
+            try:
+                nameField.disabled = channel.systemChannel
+            except AttributeError:
+                nameField.disabled = False
             unitsField.text = channel.units
             precisionField.text = str(channel.precision)
             minField.text = str(channel.min)
