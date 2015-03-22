@@ -51,7 +51,7 @@ class GPIOChannel(BaseChannelView):
         sampleRateSpinner.setValue(channelConfig.sampleRate)
     
         channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channelConfig.name)
+        channelSpinner.setValue(channelConfig)
         
         modeSpinner = kvFind(self, 'rcid', 'mode')
         modeSpinner.setFromValue(channelConfig.mode)
