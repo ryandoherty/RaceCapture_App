@@ -1,6 +1,7 @@
 ==1.2.5===
 * OS X support (offically)
 * Additional UI layout improvements for mobile devices
+* allow ctrl-v pasting of negative values into float/integer constrained input fields
 
 ==1.2.4===
 * Usability improvements to Track browser interface for searching and loading

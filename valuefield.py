@@ -30,7 +30,7 @@ class TextValueField(ValueField):
 class IntegerValueField(ValueField):
     pat = re.compile('[^0-9]')
     def insert_text(self, substring, from_undo=False):
-        if '-' == substring and not '-' in self.text:
+        if '-'  in substring and not '-' in self.text:
             return super(IntegerValueField, self).insert_text(substring, from_undo=from_undo)
         pat = self.pat
         s = re.sub(pat, '', substring)
@@ -39,7 +39,7 @@ class IntegerValueField(ValueField):
 class FloatValueField(ValueField):
     pat = re.compile('[^0-9]')
     def insert_text(self, substring, from_undo=False):
-        if '-' == substring and not '-' in self.text:
+        if '-' in substring and not '-' in self.text:
             return super(FloatValueField, self).insert_text(substring, from_undo=from_undo)
         pat = self.pat
         if '.' in self.text:
