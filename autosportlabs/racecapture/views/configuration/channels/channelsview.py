@@ -14,6 +14,7 @@ from autosportlabs.racecapture.views.configuration.baseconfigview import BaseCon
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
 from channels import Channels, Channel
+from valuefield import FloatValueField, IntegerValueField, TextValueField
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/channels/channelsview.kv')
 
@@ -80,12 +81,12 @@ class ChannelEditor(BoxLayout):
         
         if self.channel:
             channel = self.channel
-            nameField.text = channel.name
+            nameField.text = str(channel.name)
             try:
                 nameField.disabled = channel.systemChannel
             except AttributeError:
                 nameField.disabled = False
-            unitsField.text = channel.units
+            unitsField.text = str(channel.units)
             precisionField.text = str(channel.precision)
             minField.text = str(channel.min)
             maxField.text = str(channel.max)

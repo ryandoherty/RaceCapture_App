@@ -39,9 +39,9 @@ class ChannelNameSelectorView(BoxLayout):
         spinner.text = str(name)
         
     def on_channel_selected(self, instance, value):
-        channel_meta = self.system_channels.findChannelMeta(value)
+        channel_meta = self.system_channels.findChannelMeta(value, None)
         if channel_meta is not None:
-            self.channel_config.name= channel_meta.name
+            self.channel_config.name = channel_meta.name
             self.channel_config.units = channel_meta.units
             self.channel_config.min = channel_meta.min
             self.channel_config.max = channel_meta.max

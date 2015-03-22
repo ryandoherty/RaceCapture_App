@@ -16,12 +16,14 @@
 				spacing: dp(10)
 				FieldLabel:
 					text: 'Name'
-				ValueField:
+				TextValueField:
+				    max_len: 11
 					rcid: 'name'
 					on_text: root.on_name(*args)
 				FieldLabel:
 					text: 'Units'
-				ValueField:
+				TextValueField:
+				    max_len: 7
 					rcid: 'units'
 					on_text: root.on_units(*args)
 		BoxLayout:

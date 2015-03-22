@@ -1,8 +1,8 @@
 import re
 from kivy.uix.textinput import TextInput
-
+from kivy.properties import NumericProperty
 class ValueField(TextInput):
-
+    
     def __init__(self, *args, **kwargs):
         self.next = kwargs.pop('next', None)
         self.multiline = False
@@ -18,7 +18,15 @@ class ValueField(TextInput):
             self.next.select_all()
         else:
             super(ValueField, self)._keyboard_on_key_down(window, keycode, text, modifiers)
+            
 
+class TextValueField(ValueField):
+    max_len = NumericProperty(100)
+    
+    def insert_text(self, substring, from_undo=False):
+        if len(self.text) < self.max_len:
+            super(TextValueField, self).insert_text(substring, from_undo=from_undo)    
+    
 class IntegerValueField(ValueField):
     pat = re.compile('[^0-9]')
     def insert_text(self, substring, from_undo=False):
@@ -27,7 +35,6 @@ class IntegerValueField(ValueField):
         pat = self.pat
         s = re.sub(pat, '', substring)
         super(IntegerValueField, self).insert_text(s, from_undo=from_undo)
-    
     
 class FloatValueField(ValueField):
     pat = re.compile('[^0-9]')

@@ -130,10 +130,11 @@ class Sample(object):
 
         
 
+UNKNOWN_CHANNEL = ChannelMeta(name='Unknown')
+
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
     channel_names = []
-    unknownChannel = ChannelMeta(name='Unknown')
     base_dir = None
         
     def __init__(self, **kwargs):
@@ -153,7 +154,7 @@ class SystemChannels(EventDispatcher):
         except Exception as detail:
             print('Error loading system channels: {}'.format(str(detail)))
 
-    def findChannelMeta(self, channel):
+    def findChannelMeta(self, channel, default=UNKNOWN_CHANNEL):
         channelMeta = self.channels.get(channel)
-        if not channelMeta: channelMeta = self.unknownChannel
+        if not channelMeta: channelMeta = default
         return channelMeta
