@@ -49,7 +49,7 @@ class ChannelNameSelectorView(BoxLayout):
             self.dispatch('on_channel')
     
     def on_customize(self, *args):
-        popup = Popup(title = 'Edit Channel',
+        popup = Popup(title = 'Customize Channel',
                       content = ChannelEditor(channel = self.channel_config), 
                       size_hint=(None, None), size = (dp(500), dp(180)))
         popup.open()
