@@ -3,6 +3,7 @@ from collections import OrderedDict
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
 import os
+import copy
 
 CHANNEL_TYPE_UNKNOWN    = 0
 CHANNEL_TYPE_ANALOG     = 1
@@ -127,8 +128,49 @@ class Sample(object):
             channelConfigIndex += 1
             mask_index += 1
 
-
+class RuntimeChannels(EventDispatcher):
+    data_bus = ObjectProperty(None, allownone=True)
+    system_channels = ObjectProperty(None, allownone=True)
+    channels = OrderedDict()
+    channel_names = []
         
+    def __init__(self, **kwargs):
+        super(RuntimeChannels, self).__init__(**kwargs)
+        self.system_channels = kwargs['system_channels']
+        self.reload_system_channels()
+    
+    def on_data_bus(self, instance, value):
+        value.addMetaListener(self.on_runtime_channel_meta)
+    
+    def reload_system_channels(self):
+        channels = self.channels
+        channels.clear()
+        #first, pull in the system channel defaults
+        self.channel_names = list(self.system_channels.channel_names)
+        for channel_name, system_meta in self.system_channels.channels.iteritems():
+            channels[channel_name] = system_meta
+        
+    def on_runtime_channel_meta(self, runtime_channel_meta):
+        #first, reload the default set of channels
+        self.reload_system_channels()
+        
+        channels = self.channels
+        #now override defaults with current runtime values
+        for channel_name, runtime_meta in runtime_channel_meta.iteritems():
+            existing_meta = channels.get(channel_name)
+            
+            if existing_meta is not None:
+                #override existing cahnnel meta with channel meta from runtime
+                existing_meta.name = runtime_meta.name
+                existing_meta.units = runtime_meta.units
+                existing_meta.min = runtime_meta.min
+                existing_meta.max = runtime_meta.max
+                existing_meta.precision = runtime_meta.precision
+            else:
+                #this is a channel (possibly a custom channel) that isn't in the system defaults.
+                #put it at the top of the list
+                self.channel_names.insert(0,channel_name)
+                channels[channel_name] = copy.copy(existing_meta)
 
 UNKNOWN_CHANNEL = ChannelMeta(name='Unknown')
 
@@ -138,6 +180,7 @@ class SystemChannels(EventDispatcher):
     base_dir = None
         
     def __init__(self, **kwargs):
+        super(SystemChannels, self).__init__(**kwargs)        
         try:
             self.base_dir = kwargs.get('base_dir')
             systemChannelsJson = json.load(open(os.path.join(self.base_dir, 'resource', 'channel_meta', 'system_channels.json')))
