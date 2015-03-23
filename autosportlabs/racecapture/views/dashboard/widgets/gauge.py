@@ -41,8 +41,6 @@ Builder.load_string('''
 class CustomizeGaugeBubble(CenteredBubble):
     pass
 
-
-
 class Gauge(ButtonBehavior, AnchorLayout):
     _customizeGaugeBubble = None
     _valueView = None
@@ -164,6 +162,13 @@ class Gauge(ButtonBehavior, AnchorLayout):
         view = self.titleView
         if view:
             view.font_size = value
+    
+    def on_channel_meta(self, channel_metas):
+        channel = self.channel
+        channel_meta = channel_metas.get(channel)
+        if channel_meta is not None:
+            self._update_display(channel_meta)            
+            self._update_title(channel, channel_meta)
             
     def setValue(self, value):
         self.value = value
@@ -216,8 +221,9 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 
     def on_channel(self, instance, value):
         try:
-            self._update_display()
-            self.update_title()
+            channel_meta = self.settings.runtimeChannels.channels.get(value)
+            self._update_display(channel_meta)
+            self._update_title(value, channel_meta)                
             self._update_channel_binding()
             self._update_channel_ranges()
         except Exception as e:
@@ -233,27 +239,25 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def on_data_bus(self, instance, value):
         self._update_channel_binding()
 
-    def update_title(self):
+    def _update_title(self, channel_name, channel_meta):
         try:
-            channel = self.channel
-            if channel:
-                channelMeta = self.settings.runtimeChannels.channels.get(channel)
-                title = channelMeta.name
-                if channelMeta.units and len(channelMeta.units):
-                    title += '\n({})'.format(channelMeta.units)
+            channel_name
+            if channel_name is not None and channel_meta is not None:
+                title = channel_meta.name
+                if channel_meta.units and len(channel_meta.units):
+                    title += '\n({})'.format(channel_meta.units)
                 self.title = title
             else:
                 self.title = ''
         except Exception as e:
             print('Failed to update gauge title & units ' + str(e))
         
-    def _update_display(self):
+    def _update_display(self, channel_meta):
         try:
-            channelMeta = self.settings.runtimeChannels.channels.get(self.channel)
-            if channelMeta:
-                self.min = channelMeta.min
-                self.max = channelMeta.max
-                self.precision = channelMeta.precision
+            if channel_meta:
+                self.min = channel_meta.min
+                self.max = channel_meta.max
+                self.precision = channel_meta.precision
             else:
                 self.min = DEFAULT_MIN
                 self.max = DEFAULT_MAX
@@ -267,6 +271,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         channel = self.channel
         if dataBus and channel:
             dataBus.addChannelListener(str(channel), self.setValue)
+            dataBus.addMetaListener(self.on_channel_meta)
                  
     def on_release(self):
         if not self.channel:
