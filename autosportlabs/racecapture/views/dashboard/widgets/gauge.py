@@ -237,7 +237,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         try:
             channel = self.channel
             if channel:
-                channelMeta = self.settings.systemChannels.channels.get(channel)
+                channelMeta = self.settings.runtimeChannels.channels.get(channel)
                 title = channelMeta.name
                 if channelMeta.units and len(channelMeta.units):
                     title += '\n({})'.format(channelMeta.units)
@@ -249,7 +249,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         
     def _update_display(self):
         try:
-            channelMeta = self.settings.systemChannels.channels.get(self.channel)
+            channelMeta = self.settings.runtimeChannels.channels.get(self.channel)
             if channelMeta:
                 self.min = channelMeta.min
                 self.max = channelMeta.max

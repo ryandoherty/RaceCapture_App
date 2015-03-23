@@ -128,6 +128,8 @@ class Sample(object):
             channelConfigIndex += 1
             mask_index += 1
 
+UNKNOWN_CHANNEL = ChannelMeta(name='Unknown')
+
 class RuntimeChannels(EventDispatcher):
     data_bus = ObjectProperty(None, allownone=True)
     system_channels = ObjectProperty(None, allownone=True)
@@ -138,6 +140,11 @@ class RuntimeChannels(EventDispatcher):
         super(RuntimeChannels, self).__init__(**kwargs)
         self.system_channels = kwargs['system_channels']
         self.reload_system_channels()
+    
+    def findChannelMeta(self, channel, default=UNKNOWN_CHANNEL):
+        channelMeta = self.channels.get(channel)
+        if not channelMeta: channelMeta = default
+        return channelMeta
     
     def on_data_bus(self, instance, value):
         value.addMetaListener(self.on_runtime_channel_meta)
@@ -170,9 +177,8 @@ class RuntimeChannels(EventDispatcher):
                 #this is a channel (possibly a custom channel) that isn't in the system defaults.
                 #put it at the top of the list
                 self.channel_names.insert(0,channel_name)
-                channels[channel_name] = copy.copy(existing_meta)
+                channels[channel_name] = copy.copy(runtime_meta)
 
-UNKNOWN_CHANNEL = ChannelMeta(name='Unknown')
 
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
@@ -201,3 +207,4 @@ class SystemChannels(EventDispatcher):
         channelMeta = self.channels.get(channel)
         if not channelMeta: channelMeta = default
         return channelMeta
+
