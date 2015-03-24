@@ -190,8 +190,10 @@ class RaceCaptureApp(App):
     def on_write_config_complete(self, result):
         self.showActivity("Writing completed")
         self.rc_config.stale = False
+        self.dataBusPump.meta_is_stale()
         Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_written'))
         Clock.schedule_once(lambda dt: self.showActivity(''), 5)
+        
 
     def on_write_config_error(self, detail):
         alertPopup('Error Writing', 'Could not write configuration:\n\n' + str(detail))
