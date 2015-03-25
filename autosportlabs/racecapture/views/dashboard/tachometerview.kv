@@ -26,7 +26,6 @@
 						rcid: 'curLap'
 						channel: 'LapTime'
 						halign: 'left'
-						value_size: dp(120)
 					BoxLayout:
 						orientation: 'horizontal'
 						TimeDelta:
@@ -34,15 +33,20 @@
 							rcid: 'delta'
 							channel: 'LapDelta'
 							halign: 'left'
-							value_size: dp(120)
 							value: None
-						Laptime:
+						BoxLayout:
 							size_hint_x: 0.50
-							rcid: 'bestLap'
-							channel: 'BestLap'
-							value_size: dp(60)
-							halign: 'center'
-							normal_color: [1.0, 0.0 , 1.0, 1.0]
+							orientation: 'vertical'
+							Widget:
+								size_hint_y: 0.25
+							Laptime:
+								size_hint_y: 0.50
+								rcid: 'bestLap'
+								channel: 'BestLap'
+								halign: 'center'
+								normal_color: [1.0, 0.0 , 1.0, 1.0]
+							Widget:
+								size_hint_y: 0.25
 		AnchorLayout:
 			anchor_x: 'left'
 			anchor_y: 'center'

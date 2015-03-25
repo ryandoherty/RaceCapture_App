@@ -4,7 +4,6 @@
 		Laptime:
 			size_hint_y: 0.25
 			rcid: 'curLap'
-			value_size: dp(180)
 			halign: 'center'
 		BoxLayout:
 			size_hint_y: 0.6
@@ -20,17 +19,16 @@
 				size_hint_x: 0.65
 				rcid: 'delta'
 				channel: 'LapDelta'
-				value_size: dp(200)
 				halign: 'right'
 			BoxLayout:
 				size_hint_x: 0.1
 		BoxLayout:
 			orientation: 'horizontal'
 			size_hint_y: 0.15
-			spacing: dp(10)
+			spacing: self.height * 0.1
 			FieldLabel:
 				size_hint_x: 0.15
-				font_size: dp(40)
+				font_size: self.height * 0.5
 				halign: 'right'
 				text: 'Best'
 			Laptime:
@@ -39,17 +37,15 @@
 				size_hint_x: 0.35
 				halign: 'left'
 				normal_color: [1.0, 0.0 , 1.0, 1.0]
-				value_size: dp(80)
 			Laptime:
 				rcid: 'sector'
 				channel: 'SectorTime'
 				size_hint_x: 0.35
 				halign: 'right'
-				value_size: dp(80)
 				normal_color: [1.0, 1.0 , 0.0, 1.0]
 			FieldLabel:
 				size_hint_x: 0.15
-				font_size: dp(40)
+				font_size: self.height * 0.5
 				halign: 'left'
 				rcid: 'sector'
 				text: 'Sector'
