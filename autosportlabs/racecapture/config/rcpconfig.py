@@ -307,7 +307,6 @@ class GpsConfig(object):
         self.positionEnabled = False
         self.speedEnabled = False
         self.distanceEnabled = False
-        self.timeEnabled = False
         self.satellitesEnabled = False
 
     def fromJson(self, json):
@@ -315,8 +314,7 @@ class GpsConfig(object):
             self.sampleRate = int(json.get('sr', self.sampleRate))
             self.positionEnabled = int(json.get('pos', self.positionEnabled))
             self.speedEnabled = int(json.get('speed', self.speedEnabled))
-            self.timeEnabled = int(json.get('time', self.timeEnabled))
-            self.distanceEnabled = int(json.get('dist', self.timeEnabled))
+            self.distanceEnabled = int(json.get('dist', self.distanceEnabled))
             self.satellitesEnabled = int(json.get('sats', self.satellitesEnabled))
             self.stale = False
             
@@ -325,7 +323,6 @@ class GpsConfig(object):
                               'sr' : self.sampleRate,
                               'pos' : self.positionEnabled,
                               'speed' : self.speedEnabled,
-                              'time' : self.timeEnabled,
                               'dist' : self.distanceEnabled,
                               'sats' : self.satellitesEnabled
                               }
