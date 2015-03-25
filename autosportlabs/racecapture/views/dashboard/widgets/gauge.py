@@ -168,7 +168,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         channel_meta = channel_metas.get(channel)
         if channel_meta is not None:
             self._update_display(channel_meta)            
-            self._update_title(channel, channel_meta)
+            self.update_title(channel, channel_meta)
             
     def setValue(self, value):
         self.value = value
@@ -223,7 +223,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         try:
             channel_meta = self.settings.runtimeChannels.channels.get(value)
             self._update_display(channel_meta)
-            self._update_title(value, channel_meta)                
+            self.update_title(value, channel_meta)                
             self._update_channel_binding()
             self._update_channel_ranges()
         except Exception as e:
@@ -239,7 +239,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def on_data_bus(self, instance, value):
         self._update_channel_binding()
 
-    def _update_title(self, channel_name, channel_meta):
+    def update_title(self, channel_name, channel_meta):
         try:
             channel_name
             if channel_name is not None and channel_meta is not None:
