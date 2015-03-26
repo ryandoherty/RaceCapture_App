@@ -168,7 +168,7 @@ class RuntimeChannels(EventDispatcher):
             existing_meta = channels.get(channel_name)
             
             if existing_meta is not None:
-                #override existing cahnnel meta with channel meta from runtime
+                #override existing channel meta with channel meta from runtime
                 existing_meta.name = runtime_meta.name
                 existing_meta.units = runtime_meta.units
                 existing_meta.min = runtime_meta.min
