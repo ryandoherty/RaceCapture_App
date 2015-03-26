@@ -586,6 +586,15 @@
             "max": 0
         },
         {
+            "nm": "CurLapTime",
+            "ut": "Min",
+            "sys": 1,
+            "type": 7,
+            "prec": 4,
+            "min": 0,
+            "max": 0
+        },
+        {
             "nm": "LapTime",
             "ut": "Min",
             "sys": 1,

@@ -4,6 +4,7 @@
 <ChannelEditor>:
 	orientation: 'vertical'
 	GridLayout:
+        size_hint_y: 0.75
 		spacing: dp(20)
 		cols: 2
 		BoxLayout:
@@ -51,6 +52,11 @@
 					FloatValueField:
 						rcid: 'max'
 						on_text: root.on_max(*args)
+    IconButton:
+        size_hint_y: 0.25
+        text: "\357\200\214"
+        on_press: root.on_close()
+						
 
 <ChannelLabel>:
 	size_hint_y: None

@@ -5,6 +5,7 @@ from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, Sampl
     ChannelMetaCollection
 from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
+from autosportlabs.racecapture.databus.filter.currentlaptimefilter import CurrentLapTimeFilter
 
 DEFAULT_DATABUS_UPDATE_INTERVAL = 0.1 #10Hz UI update rate
 
@@ -13,6 +14,7 @@ class DataBusFactory(object):
         databus = DataBus()
         databus.add_data_filter(BestLapFilter(system_channels))
         databus.add_data_filter(LaptimeDeltaFilter(system_channels))
+        databus.add_data_filter(CurrentLapTimeFilter(system_channels))
         return databus
     
 class DataBus(object):

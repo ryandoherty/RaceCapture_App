@@ -48,12 +48,18 @@ class ChannelNameSelectorView(BoxLayout):
             self.channel_config.precision = channel_meta.precision
             self.dispatch('on_channel')
     
+    def _dismiss_editor(self):
+        self._popup.dismiss()
+        
     def on_customize(self, *args):
+        
+        content = ChannelEditor(channel = self.channel_config)
         popup = Popup(title = 'Customize Channel',
-                      content = ChannelEditor(channel = self.channel_config), 
-                      size_hint=(None, None), size = (dp(500), dp(180)))
-        popup.open()
+                      content = content, 
+                      size_hint=(None, None), size = (dp(500), dp(220)))
         popup.bind(on_dismiss=self.on_edited)
+        content.bind(on_channel_edited=lambda *args:popup.dismiss())                     
+        popup.open()
     
     def on_edited(self, *args):
         self.set_channel_name(self.channel_config.name)
