@@ -71,7 +71,7 @@ class AnalogChannel(BaseChannelView):
                     
     def on_config_updated(self, channelConfig):
         channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channelConfig.name)
+        channelSpinner.setValue(channelConfig)
 
         sampleRateSpinner = kvFind(self, 'rcid', 'sr')
         sampleRateSpinner.setValue(channelConfig.sampleRate)

@@ -14,6 +14,7 @@ from autosportlabs.racecapture.views.configuration.baseconfigview import BaseCon
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
 from channels import Channels, Channel
+from valuefield import FloatValueField, IntegerValueField, TextValueField
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/channels/channelsview.kv')
 
@@ -63,6 +64,7 @@ class ChannelEditor(BoxLayout):
     def __init__(self, **kwargs):
         super(ChannelEditor, self).__init__(**kwargs)
         self.channel = kwargs.get('channel', None)
+        self.register_event_type('on_channel_edited')        
         self.init_view()
         
     def init_view(self):
@@ -80,9 +82,12 @@ class ChannelEditor(BoxLayout):
         
         if self.channel:
             channel = self.channel
-            nameField.text = channel.name
-            nameField.disabled = channel.systemChannel
-            unitsField.text = channel.units
+            nameField.text = str(channel.name)
+            try:
+                nameField.disabled = channel.systemChannel
+            except AttributeError:
+                nameField.disabled = False
+            unitsField.text = str(channel.units)
             precisionField.text = str(channel.precision)
             minField.text = str(channel.min)
             maxField.text = str(channel.max)
@@ -97,10 +102,27 @@ class ChannelEditor(BoxLayout):
         self.channel.precision = int(value)
     
     def on_min(self, instance, value):
-        self.channel.min = float(value)
+        max_range = self.channel.max
+        min_range = float(value)
+        if min_range > max_range:
+            min_range = max_range
+            instance.text = str(min_range)
+        self.channel.min = float(min_range)
     
     def on_max(self, instance, value):
-        self.channel.max = float(value)
+        min_range = self.channel.min
+        max_range = float(value)
+        if max_range < min_range:
+            max_range = min_range
+            instance.text = str(max_range)
+        self.channel.max = float(max_range)
+        
+        
+    def on_channel_edited(self, *args):
+        pass
+    
+    def on_close(self):
+        self.dispatch('on_channel_edited')        
         
 class ChannelsView(BaseConfigView):
     channelsContainer = None

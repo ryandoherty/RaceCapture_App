@@ -4,6 +4,7 @@
 <ChannelEditor>:
 	orientation: 'vertical'
 	GridLayout:
+        size_hint_y: 0.75
 		spacing: dp(20)
 		cols: 2
 		BoxLayout:
@@ -16,12 +17,14 @@
 				spacing: dp(10)
 				FieldLabel:
 					text: 'Name'
-				ValueField:
+				TextValueField:
+				    max_len: 11
 					rcid: 'name'
 					on_text: root.on_name(*args)
 				FieldLabel:
 					text: 'Units'
-				ValueField:
+				TextValueField:
+				    max_len: 7
 					rcid: 'units'
 					on_text: root.on_units(*args)
 		BoxLayout:
@@ -36,6 +39,8 @@
 					text: 'Precision'
 				IntegerValueField:
 					rcid: 'prec'
+					min_value: 0
+					max_value: 6
 					on_text: root.on_precision(*args)
 				FieldLabel:
 					text: 'Min / max'
@@ -47,6 +52,11 @@
 					FloatValueField:
 						rcid: 'max'
 						on_text: root.on_max(*args)
+    IconButton:
+        size_hint_y: 0.25
+        text: "\357\200\214"
+        on_press: root.on_close()
+						
 
 <ChannelLabel>:
 	size_hint_y: None

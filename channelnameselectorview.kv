@@ -5,9 +5,17 @@
         spacing: dp(5)
         orientation: 'horizontal'
         FieldLabel:
+            size_hint_x: 0.5
             text: 'Channel Name'
             halign: 'right'
         ChannelNameSpinner:
+            size_hint_x: 0.4
         	rcid: 'id'
-            on_text: root.onSelect(*args)
+            on_text: root.on_channel_selected(*args)
+        IconButton:
+            size_hint_x: 0.1
+            text: u'\uf013'
+            font_size: self.height * 0.6
+            size_hint_x: 0.1
+            on_release: root.on_customize(*args)
         

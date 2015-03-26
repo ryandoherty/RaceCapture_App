@@ -131,6 +131,8 @@ class Sample(object):
 
         
 
+UNKNOWN_CHANNEL = ChannelMeta(name='Unknown')
+
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
     channel_names = []
@@ -156,7 +158,7 @@ class SystemChannels(EventDispatcher):
             print('Error loading system channels: {}'.format(str(detail)))
             traceback.print_exc()
 
-    def findChannelMeta(self, channel):
+    def findChannelMeta(self, channel, default=UNKNOWN_CHANNEL):
         channelMeta = self.channels.get(channel)
-        if not channelMeta: channelMeta = self.unknownChannel
+        if not channelMeta: channelMeta = default
         return channelMeta
