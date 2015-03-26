@@ -27,7 +27,7 @@ class ChannelSelectView(FloatLayout):
         
         data = []
         channel_list = self.ids.channelList
-        for available_channel,channelMeta in settings.systemChannels.channels.iteritems():
+        for available_channel,channelMeta in settings.runtimeChannels.channels.iteritems():
             channel_type = channelMeta.type
             data.append({'text': available_channel, 'is_selected': False})
             

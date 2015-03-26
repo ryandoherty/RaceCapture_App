@@ -101,7 +101,8 @@ class RaceCaptureApp(App):
         #self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
-        self._data_bus = DataBusFactory().create_standard_databus(self.settings.systemChannels)        
+        self._data_bus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
+        self.settings.runtimeChannels.data_bus = self._data_bus        
 
         Window.bind(on_key_down=self._on_keyboard_down)
         self.register_event_type('on_tracks_updated')
@@ -189,8 +190,10 @@ class RaceCaptureApp(App):
     def on_write_config_complete(self, result):
         self.showActivity("Writing completed")
         self.rc_config.stale = False
+        self.dataBusPump.meta_is_stale()
         Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_written'))
         Clock.schedule_once(lambda dt: self.showActivity(''), 5)
+        
 
     def on_write_config_error(self, detail):
         alertPopup('Error Writing', 'Could not write configuration:\n\n' + str(detail))

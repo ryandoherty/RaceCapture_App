@@ -14,7 +14,7 @@ Builder.load_file('channelnameselectorview.kv')
 class ChannelNameSelectorView(BoxLayout):
     channel_type = NumericProperty(CHANNEL_TYPE_UNKNOWN)
     channel_config = None
-    system_channels = None
+    runtime_channels = None
     
     def __init__(self, **kwargs):
         super(ChannelNameSelectorView, self).__init__(**kwargs)
@@ -22,9 +22,9 @@ class ChannelNameSelectorView(BoxLayout):
         self.register_event_type('on_channel')
         self.bind(channel_type = self.on_channel_type)
 
-    def on_channels_updated(self, system_channels):
-        self.system_channels = system_channels
-        kvFind(self, 'rcid', 'id').dispatch('on_channels_updated', system_channels)        
+    def on_channels_updated(self, runtime_channels):
+        self.runtime_channels = runtime_channels
+        kvFind(self, 'rcid', 'id').dispatch('on_channels_updated', runtime_channels)        
     
     def on_channel_type(self, instance, value):
         spinner = kvFind(self, 'rcid', 'id')
@@ -39,7 +39,7 @@ class ChannelNameSelectorView(BoxLayout):
         spinner.text = str(name)
         
     def on_channel_selected(self, instance, value):
-        channel_meta = self.system_channels.findChannelMeta(value, None)
+        channel_meta = self.runtime_channels.findChannelMeta(value, None)
         if channel_meta is not None:
             self.channel_config.name = channel_meta.name
             self.channel_config.units = channel_meta.units

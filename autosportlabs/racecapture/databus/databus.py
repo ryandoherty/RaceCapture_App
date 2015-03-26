@@ -187,6 +187,9 @@ class DataBusPump(object):
         self._running.clear()
         self._sample_thread.join()
 
+    def meta_is_stale(self):
+        self.request_meta()
+        
     def request_meta(self):
         self._rc_api.get_meta()
     

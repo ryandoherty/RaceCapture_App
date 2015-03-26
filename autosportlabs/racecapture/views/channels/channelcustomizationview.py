@@ -34,7 +34,7 @@ class ChannelCustomizationView(FloatLayout):
         
         self.settings = kwargs.get('settings')
         self.channel = kwargs.get('channel')
-        self.channelMeta = self.settings.systemChannels.findChannelMeta(self.channel)
+        self.channelMeta = self.settings.runtimeChannels.findChannelMeta(self.channel)
         self.init_view()
         
     
