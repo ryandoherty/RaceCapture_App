@@ -1,4 +1,5 @@
 import json
+import traceback
 from collections import OrderedDict
 from kivy.event import EventDispatcher
 from kivy.properties import ObjectProperty
@@ -135,12 +136,14 @@ UNKNOWN_CHANNEL = ChannelMeta(name='Unknown')
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
     channel_names = []
-    base_dir = None
+    unknownChannel = ChannelMeta(name='Unknown')
         
     def __init__(self, **kwargs):
         try:
-            self.base_dir = kwargs.get('base_dir')
-            systemChannelsJson = json.load(open(os.path.join(self.base_dir, 'resource', 'channel_meta', 'system_channels.json')))
+            base_dir = kwargs.get('base_dir')
+            base_dir = '.' if base_dir is None else base_dir
+            system_channels_path = open(os.path.join(base_dir, 'resource', 'channel_meta', 'system_channels.json'))
+            systemChannelsJson = json.load(system_channels_path)
             channelsJson = systemChannelsJson.get('channels')
             channels = OrderedDict()
             channel_names = []
@@ -153,6 +156,7 @@ class SystemChannels(EventDispatcher):
             self.channel_names = channel_names
         except Exception as detail:
             print('Error loading system channels: {}'.format(str(detail)))
+            traceback.print_exc()
 
     def findChannelMeta(self, channel, default=UNKNOWN_CHANNEL):
         channelMeta = self.channels.get(channel)

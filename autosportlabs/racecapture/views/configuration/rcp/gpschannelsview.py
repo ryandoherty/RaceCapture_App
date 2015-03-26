@@ -39,13 +39,7 @@ class GPSChannelsView(BaseConfigView):
             self.gpsConfig.distanceEnabled = 1 if value else 0
             self.gpsConfig.stale = True
             self.dispatch('on_modified')
-                        
-    def onTimeActive(self, instance, value):
-        if self.gpsConfig:        
-            self.gpsConfig.timeEnabled = 1 if value else 0
-            self.gpsConfig.stale = True
-            self.dispatch('on_modified')
-                        
+                                                
     def onSatsActive(self, instance, value):
         if self.gpsConfig:        
             self.gpsConfig.satellitesEnabled = 1 if value else 0
@@ -67,7 +61,6 @@ class GPSChannelsView(BaseConfigView):
         self.setCheckBox(gpsConfig, 'pos', gpsConfig.positionEnabled)
         self.setCheckBox(gpsConfig, 'speed', gpsConfig.speedEnabled)
         self.setCheckBox(gpsConfig, 'dist', gpsConfig.distanceEnabled)
-        self.setCheckBox(gpsConfig, 'time', gpsConfig.timeEnabled)
         self.setCheckBox(gpsConfig, 'sats', gpsConfig.satellitesEnabled)
         
         self.gpsConfig = gpsConfig

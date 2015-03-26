@@ -1,4 +1,5 @@
 ==1.2.5===
+* Removed obsolete GPS Time of Day channel (timestamp channels are now built in)
 * OS X support (offically)
 * Additional UI layout improvements for mobile devices
 * Allow ctrl-v pasting of negative values into float/integer constrained input fields
