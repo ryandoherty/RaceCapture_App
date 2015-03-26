@@ -4,6 +4,7 @@
 * Additional UI layout improvements for mobile devices
 * Allow ctrl-v pasting of negative values into float/integer constrained input fields
 * Add ability to customize channel details beyond system defaults (label units, min, max, logging precision)
+
 ==1.2.4===
 * Usability improvements to Track browser interface for searching and loading
 * Auto-prompt first-time users to download tracks (beginnings of first time setup wizard)
