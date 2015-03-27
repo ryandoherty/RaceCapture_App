@@ -43,10 +43,17 @@ class TracksUpdateStatusView(BoxLayout):
         self.progressView = self.ids.progress
         self.messageView = self.ids.updatemsg
         
+    def _update_progress(self, percent):
+        self.progressView.value = percent
+    
+    def _update_message(self, message):
+        self.messageView.text = message
+        
     def on_progress(self, count, total, message = None):
-        self.progressView.value = (float(count) / float(total) * 100)
+        progress_percent = (float(count) / float(total) * 100)
+        Clock.schedule_once(lambda dt: self._update_progress(progress_percent))
         if message:
-            self.messageView.text = message
+            Clock.schedule_once(lambda dt: self._update_message(message))
     
     def on_message(self, message):
         self.messageView.text = message
@@ -148,6 +155,8 @@ class TracksBrowser(BoxLayout):
         self.ids.regions.disabled = disabled
         self.ids.namefilter.disabled = disabled
         self.ids.search.disabled = disabled
+        if disabled == False and is_mobile_platform() == False:
+            self.ids.namefilter.focus = True
     
     def dismissPopups(self):
         if self.tracksUpdatePopup:
@@ -200,8 +209,6 @@ class TracksBrowser(BoxLayout):
         else:
             self.dismissPopups()
             self.setViewDisabled(False)
-            self.ids.namefilter.focus = True
-            
         
     def refreshTrackList(self):
         region = self.ids.regions.text
@@ -225,7 +232,7 @@ class TracksBrowser(BoxLayout):
         self.dismissPopups()
         if trackCount == 0:
             self.tracksGrid.add_widget(Label(text="No Tracks Found"))
-            self.setViewDisabled(False)
+            self.setViewDisabled(False)            
             self.ids.namefilter.focus = True                        
         else:
             self.showProgressPopup("", "Loading")        
