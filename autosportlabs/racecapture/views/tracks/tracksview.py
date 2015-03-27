@@ -148,6 +148,8 @@ class TracksBrowser(BoxLayout):
         self.ids.regions.disabled = disabled
         self.ids.namefilter.disabled = disabled
         self.ids.search.disabled = disabled
+        if disabled == False and is_mobile_platform() == False:
+            self.ids.namefilter.focus = True
     
     def dismissPopups(self):
         if self.tracksUpdatePopup:
@@ -200,8 +202,6 @@ class TracksBrowser(BoxLayout):
         else:
             self.dismissPopups()
             self.setViewDisabled(False)
-            self.ids.namefilter.focus = True
-            
         
     def refreshTrackList(self):
         region = self.ids.regions.text
@@ -225,7 +225,7 @@ class TracksBrowser(BoxLayout):
         self.dismissPopups()
         if trackCount == 0:
             self.tracksGrid.add_widget(Label(text="No Tracks Found"))
-            self.setViewDisabled(False)
+            self.setViewDisabled(False)            
             self.ids.namefilter.focus = True                        
         else:
             self.showProgressPopup("", "Loading")        
