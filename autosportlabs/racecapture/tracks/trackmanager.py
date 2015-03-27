@@ -5,9 +5,9 @@ import errno
 import string
 import logging
 from threading import Thread, Lock
-from os import listdir, makedirs
 from urlparse import urljoin, urlparse
 import urllib2
+import os
 import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
         
@@ -109,6 +109,7 @@ class TrackManager:
     tracks = None
     regions = None
     trackIdsInRegion = None
+    base_dir = None
     def __init__(self, **kwargs):
         self.setTracksUserDir(kwargs.get('user_dir', self.tracks_user_dir) + self.track_user_subdir)
         self.updateLock = Lock()
@@ -116,10 +117,11 @@ class TrackManager:
         self.trackList = {}
         self.tracks = {}
         self.trackIdsInRegion = []
+        self.base_dir = kwargs.get('base_dir')
         
     def setTracksUserDir(self, path):
         try:
-            makedirs(path)
+            os.makedirs(path)
         except OSError as exception:
             if exception.errno != errno.EEXIST:
                 raise
@@ -132,7 +134,7 @@ class TrackManager:
     def loadRegions(self):
         del(self.regions[:])
         try:
-            regionsJson = json.load(open('resource/settings/geo_regions.json'))
+            regionsJson = json.load(open(os.path.join(self.base_dir, 'resource', 'settings', 'geo_regions.json')))
             regionsNode = regionsJson.get('regions')
             if regionsNode:
                 for regionNode in regionsNode: 
@@ -267,7 +269,7 @@ class TrackManager:
             t.daemon=True
             t.start()
         else:
-            existingTracksFilenames = listdir(self.tracks_user_dir)
+            existingTracksFilenames = os.listdir(self.tracks_user_dir)
             self.tracks.clear()
             self.trackList.clear()
             trackCount = len(existingTracksFilenames)

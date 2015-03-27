@@ -1,6 +1,78 @@
 {
     "channels": [
         {
+            "nm": "AccelX",
+            "ut": "G",
+            "sys": 1,
+            "type": 5,
+            "prec": 2,
+            "min": -3,
+            "max": 3
+        },
+        {
+            "nm": "AccelY",
+            "ut": "G",
+            "sys": 1,
+            "type": 5,
+            "prec": 2,
+            "min": -3,
+            "max": 3
+        },
+        {
+            "nm": "AccelZ",
+            "ut": "G",
+            "sys": 1,
+            "type": 5,
+            "prec": 2,
+            "min": -3,
+            "max": 3
+        },
+        {
+            "nm": "Yaw",
+            "ut": "Deg/Sec",
+            "sys": 1,
+            "type": 5,
+            "prec": 0,
+            "min": -300,
+            "max": 300
+        },
+        {
+            "nm": "Pitch",
+            "ut": "Deg/Sec",
+            "sys": 1,
+            "type": 5,
+            "prec": 0,
+            "min": -300,
+            "max": 300
+        },
+        {
+            "nm": "Roll",
+            "ut": "Deg/Sec",
+            "sys": 1,
+            "type": 5,
+            "prec": 0,
+            "min": -300,
+            "max": 300
+        },
+        {
+            "nm": "Speed",
+            "ut": "MPH",
+            "sys": 1,
+            "type": 6,
+            "prec": 2,
+            "min": 0,
+            "max": 150
+        },
+        {
+            "nm": "Distance",
+            "ut": "Miles",
+            "sys": 1,
+            "type": 6,
+            "prec": 3,
+            "min": 0,
+            "max": 0
+        },            
+        {
             "nm": "Coolant",
             "ut": "F",
             "sys": 1,
@@ -163,6 +235,24 @@
             "max": 10000
         },
         {
+            "nm": "RPM2",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 10000
+        },
+        {
+            "nm": "RPM3",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 10000
+        },
+        {
             "nm": "Wheel",
             "ut": "RPM",
             "sys": 1,
@@ -217,7 +307,187 @@
             "max": 2000
         },
         {
-            "nm": "LF_Height",
+            "nm": "BrakeTmp_LF",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_RF",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_LR",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "BrakeTmp_RR",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
+            "nm": "TireTmp_LF1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LF2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LF3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LF4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RF4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_LR4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR1",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR2",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR3",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "TireTmp_RR4",
+            "ut": "F",
+            "sys": 1,
+            "type": 1,
+            "prec": 0,
+            "min": 0,
+            "max": 250
+        },
+        {
+            "nm": "Height_LF",
             "ut": "mm",
             "sys": 1,
             "type": 1,
@@ -226,7 +496,7 @@
             "max": 255
         },
         {
-            "nm": "RF_Height",
+            "nm": "Height_RF",
             "ut": "mm",
             "sys": 1,
             "type": 1,
@@ -235,7 +505,7 @@
             "max": 255
         },
         {
-            "nm": "LR_Height",
+            "nm": "Height_LR",
             "ut": "mm",
             "sys": 1,
             "type": 1,
@@ -244,67 +514,13 @@
             "max": 255
         },
         {
-            "nm": "RR_Height",
+            "nm": "Height_RR",
             "ut": "mm",
             "sys": 1,
             "type": 1,
             "prec": 0,
             "min": 0,
             "max": 255
-        },
-        {
-            "nm": "AccelX",
-            "ut": "G",
-            "sys": 1,
-            "type": 5,
-            "prec": 2,
-            "min": -3,
-            "max": 3
-        },
-        {
-            "nm": "AccelY",
-            "ut": "G",
-            "sys": 1,
-            "type": 5,
-            "prec": 2,
-            "min": -3,
-            "max": 3
-        },
-        {
-            "nm": "AccelZ",
-            "ut": "G",
-            "sys": 1,
-            "type": 5,
-            "prec": 2,
-            "min": -3,
-            "max": 3
-        },
-        {
-            "nm": "Yaw",
-            "ut": "Deg/Sec",
-            "sys": 1,
-            "type": 5,
-            "prec": 0,
-            "min": -300,
-            "max": 300
-        },
-        {
-            "nm": "Pitch",
-            "ut": "Deg/Sec",
-            "sys": 1,
-            "type": 5,
-            "prec": 0,
-            "min": -300,
-            "max": 300
-        },
-        {
-            "nm": "Roll",
-            "ut": "Deg/Sec",
-            "sys": 1,
-            "type": 5,
-            "prec": 0,
-            "min": -300,
-            "max": 300
         },
         {
             "nm": "Heading",
@@ -352,24 +568,6 @@
             "max": 180
         },
         {
-            "nm": "Speed",
-            "ut": "MPH",
-            "sys": 1,
-            "type": 6,
-            "prec": 2,
-            "min": 0,
-            "max": 150
-        },
-        {
-            "nm": "Distance",
-            "ut": "Miles",
-            "sys": 1,
-            "type": 6,
-            "prec": 3,
-            "min": 0,
-            "max": 0
-        },
-        {
             "nm": "Sector",
             "ut": "Count",
             "sys": 1,
@@ -380,6 +578,15 @@
         },
         {
             "nm": "SectorTime",
+            "ut": "Min",
+            "sys": 1,
+            "type": 7,
+            "prec": 4,
+            "min": 0,
+            "max": 0
+        },
+        {
+            "nm": "CurLapTime",
             "ut": "Min",
             "sys": 1,
             "type": 7,
@@ -431,15 +638,6 @@
             "prec": 0,
             "min": 0,
             "max": 1000
-        },
-        {
-            "nm": "Unknown",
-            "ut": "",
-            "sys": 1,
-            "type": 0,
-            "prec": 0,
-            "min": 0,
-            "max": 1024
         },
         {
             "nm": "Analog1",
@@ -602,6 +800,15 @@
             "prec": 0,
             "min": 0,
             "max": 100
-        }        
+        },
+        {
+            "nm": "Unknown",
+            "ut": "",
+            "sys": 1,
+            "type": 0,
+            "prec": 0,
+            "min": 0,
+            "max": 1024
+        }
     ]
 }

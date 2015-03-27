@@ -97,6 +97,7 @@ class UserPrefs(EventDispatcher):
         default_user_dir = self.get_default_user_dir()
         self.config.setdefault('preferences', 'config_file_dir', default_user_dir )
         self.config.setdefault('preferences', 'firmware_dir', default_user_dir )
+        self.config.setdefault('preferences', 'first_time_setup', True)
 
     def load(self):
         self.config = ConfigParser()

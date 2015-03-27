@@ -11,6 +11,7 @@
             size_hint_x: 0.2
             spacing: 0
             orientation: 'vertical'
+            spacing: dp(30)            
             TreeView:
                 size_hint_y: 0.9
                 rcid: 'menu'
@@ -21,26 +22,36 @@
             BoxLayout:
                 size_hint_y: 0.1
                 orientation: 'horizontal'
+                spacing: dp(30)
                 IconButton:
                     id: 'open'
+                    size_hint: (0.75, 0.75)
+                    pos_hint: {'center_x': .5, 'center_y': .5}                                  
                     text: '\357\204\225'
                     rcid: 'openconfig'
                     on_release: root.openConfig()
                 IconButton:
                     id: 'save'
+                    size_hint: (0.75, 0.75)
+                    pos_hint: {'center_x': .5, 'center_y': .5}
                     text: '\357\203\207'
                     rcid: 'saveconfig'
                     on_release: root.saveConfig()
             BoxLayout:
                 size_hint_y: 0.1
                 orientation: 'horizontal'
+                spacing: dp(30)                
                 IconButton:
                     id: 'read'
+                    size_hint: (0.75, 0.75)
+                    pos_hint: {'center_x': .5, 'center_y': .5}
                     text: '\357\202\223'
                     rcid: 'readconfig'
                     on_release: root.readConfig()
                 IconButton:
                     id: 'write'
+                    size_hint: (0.75, 0.75)                
+                    pos_hint: {'center_x': .5, 'center_y': .5}
                     text: '\357\200\231'
                     rcid: 'writeconfig'
                     on_release: root.writeConfig()

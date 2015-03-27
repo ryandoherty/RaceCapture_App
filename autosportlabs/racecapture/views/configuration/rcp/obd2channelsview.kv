@@ -31,11 +31,10 @@
 		rcid: 'obd2enable'
 		label_text: 'OBDII channels'
 		help_text: 'Specify one or more OBDII Channels to query and the logged sample rate'
-		size_hint_y: 0.25
-	Label:
-		size_hint_y: 0.02
+		size_hint_y: 0.20
 	BoxLayout:
-		spacing: 5
+        size_hint_y: 0.70
+		spacing: dp(10)
 		orientation: 'vertical'		
 	    HSeparator:
 	        text: 'OBDII Channels'
@@ -63,7 +62,7 @@
 	            cols: 1
 	
     BoxLayout:
-    	size_hint_y: 0.2
+    	size_hint_y: 0.10
     	spacing: dp(5)
     	orientation: 'vertical'
     	IconButton:

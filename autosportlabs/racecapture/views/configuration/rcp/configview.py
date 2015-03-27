@@ -53,14 +53,15 @@ class ConfigView(Screen):
     text_input = ObjectProperty(None)
     writeStale = BooleanProperty(False)
     track_manager = ObjectProperty(None)
-    
+
     #List of config views
     configViews = []
     content = None
     menu = None
     rc_config = None
     scriptView = None
-    _settings = None    
+    _settings = None
+    base_dir = None
 
     def __init__(self, **kwargs):
         super(ConfigView, self).__init__(**kwargs)
@@ -68,7 +69,8 @@ class ConfigView(Screen):
         self.rc_config = kwargs.get('rcpConfig', None)
         self.rc_api = kwargs.get('rc_api', None)
         self.dataBusPump = kwargs.get('dataBusPump', None)
-        self._settings = kwargs.get('settings')        
+        self._settings = kwargs.get('settings')
+        self.base_dir = kwargs.get('base_dir')
 
         self.register_event_type('on_config_updated')
         self.register_event_type('on_channels_updated')
@@ -89,14 +91,14 @@ class ConfigView(Screen):
     def on_config_modified(self, *args):
         self.writeStale = True
 
-    def update_system_channels(self, system_channels):
+    def update_runtime_channels(self, system_channels):
         for view in self.configViews:
             channelWidgets = list(kvquery(view, __class__=ChannelNameSpinner))
             for channelWidget in channelWidgets:
                 channelWidget.dispatch('on_channels_updated', system_channels)
         
-    def on_channels_updated(self, system_channels):
-        self.update_system_channels(system_channels)
+    def on_channels_updated(self, runtime_channels):
+        self.update_runtime_channels(runtime_channels)
         
     def on_config_updated(self, config):
         self.config = config
@@ -157,19 +159,19 @@ class ConfigView(Screen):
             view.bind(on_config_modified=self.on_config_modified)
             return tree.add_node(label, n)
 
-        system_channels = self._settings.systemChannels
+        runtime_channels = self._settings.runtimeChannels
 
         defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView())
         attach_node('GPS', None, GPSChannelsView())
         attach_node('Lap Statistics', None, LapStatsView())        
-        attach_node('Analog Sensors', None, AnalogChannelsView(channels=system_channels))
-        attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channels=system_channels))
-        attach_node('Digital In/Out', None, GPIOChannelsView(channels=system_channels))
+        attach_node('Analog Sensors', None, AnalogChannelsView(channels=runtime_channels))
+        attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channels=runtime_channels))
+        attach_node('Digital In/Out', None, GPIOChannelsView(channels=runtime_channels))
         attach_node('Accelerometer/Gyro', None, ImuChannelsView(rc_api=self.rc_api))
-        attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView(channels=system_channels))
+        attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView(channels=runtime_channels))
         attach_node('CAN Bus', None, CANConfigView())
-        attach_node('OBDII', None, OBD2ChannelsView(channels=system_channels))
-        attach_node('Wireless', None, WirelessConfigView())
+        attach_node('OBDII', None, OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
+        attach_node('Wireless', None, WirelessConfigView(base_dir=self.base_dir))
         attach_node('Telemetry', None, TelemetryConfigView())
         scriptView = LuaScriptingView()
         scriptView.bind(on_run_script=self.runScript)
@@ -183,7 +185,7 @@ class ConfigView(Screen):
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
         
-        self.update_system_channels(system_channels)
+        self.update_runtime_channels(runtime_channels)
         self.update_tracks()
         self.loaded = True
         

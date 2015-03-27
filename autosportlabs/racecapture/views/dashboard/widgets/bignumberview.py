@@ -60,9 +60,9 @@ class BigNumberView(Gauge):
         self.valueView.font_size = DEFAULT_VALUE_FONT_SIZE
         return super(BigNumberView, self).on_channel(instance, value)
    
-    def update_title(self):
+    def update_title(self, channel, channel_meta):
         try:
-            self.title = self.channel if self.channel else ''
+            self.title = channel if channel else ''
         except Exception as e:
             print('Failed to update digital gauge title ' + str(e))
 

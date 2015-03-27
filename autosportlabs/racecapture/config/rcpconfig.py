@@ -82,12 +82,12 @@ class ScalingMap(object):
     def setVolts(self, map_bin, value):
         if map_bin < SCALING_MAP_POINTS - 1:
             next_value = self.raw[map_bin+1]
-            if value >= next_value:
-                raise ScalingMapException("Must be less than {}".format(next_value))
+            if value > next_value:
+                raise ScalingMapException("Must be less or equal to {}".format(next_value))
         if map_bin > 0:
             prev_value = self.raw[map_bin - 1]
-            if value <= prev_value:
-                raise ScalingMapException("Must be greater than {}".format(prev_value))
+            if value < prev_value:
+                raise ScalingMapException("Must be greater or equal to {}".format(prev_value))
         if value < SCALING_MAP_MIN_VOLTS:
             raise ScalingMapException('Must be greater than {}'.format(SCALING_MAP_MIN_VOLTS))
         
@@ -307,7 +307,6 @@ class GpsConfig(object):
         self.positionEnabled = False
         self.speedEnabled = False
         self.distanceEnabled = False
-        self.timeEnabled = False
         self.satellitesEnabled = False
 
     def fromJson(self, json):
@@ -315,8 +314,7 @@ class GpsConfig(object):
             self.sampleRate = int(json.get('sr', self.sampleRate))
             self.positionEnabled = int(json.get('pos', self.positionEnabled))
             self.speedEnabled = int(json.get('speed', self.speedEnabled))
-            self.timeEnabled = int(json.get('time', self.timeEnabled))
-            self.distanceEnabled = int(json.get('dist', self.timeEnabled))
+            self.distanceEnabled = int(json.get('dist', self.distanceEnabled))
             self.satellitesEnabled = int(json.get('sats', self.satellitesEnabled))
             self.stale = False
             
@@ -325,7 +323,6 @@ class GpsConfig(object):
                               'sr' : self.sampleRate,
                               'pos' : self.positionEnabled,
                               'speed' : self.speedEnabled,
-                              'time' : self.timeEnabled,
                               'dist' : self.distanceEnabled,
                               'sats' : self.satellitesEnabled
                               }
