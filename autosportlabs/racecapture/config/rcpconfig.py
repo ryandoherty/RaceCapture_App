@@ -519,6 +519,7 @@ CONFIG_SECTOR_COUNT_STAGE = 18
 class Track(object):
     def __init__(self, **kwargs):
         self.stale = False
+        self.trackId = None
         self.trackType = TRACK_TYPE_CIRCUIT
         self.sectorCount = CONFIG_SECTOR_COUNT
         self.startLine = GeoPoint()
@@ -527,6 +528,7 @@ class Track(object):
     
     def fromJson(self, trackJson):
         if trackJson:
+            self.trackId = trackJson.get('id', self.trackId)
             self.trackType = trackJson.get('type', self.trackType)
             sectorsJson = trackJson.get('sec', None)
             del self.sectors[:]
@@ -553,6 +555,7 @@ class Track(object):
     @classmethod
     def fromTrackMap(cls, trackMap):
         t = Track()
+        t.trackId = trackMap.shortId
         t.trackType = TRACK_TYPE_STAGE if trackMap.finishPoint else TRACK_TYPE_CIRCUIT
         t.startLine = copy(trackMap.startFinishPoint)
         t.finishLine = copy(trackMap.finishPoint)
@@ -570,8 +573,9 @@ class Track(object):
         for sector in self.sectors:
             sectors.append(sector.toJson())
         trackJson = {}
-        trackJson['sec']  = sectors
+        trackJson['id'] = self.trackId
         trackJson['type'] = self.trackType
+        trackJson['sec']  = sectors
         
         if self.trackType == TRACK_TYPE_STAGE:
             trackJson['st'] = self.startLine.toJson()

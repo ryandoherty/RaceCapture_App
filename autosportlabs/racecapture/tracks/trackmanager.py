@@ -4,6 +4,7 @@ import copy
 import errno
 import string
 import logging
+from dateutil.parser import *
 from threading import Thread, Lock
 from urlparse import urljoin, urlparse
 import urllib2
@@ -29,9 +30,11 @@ class TrackMap:
     mapPoints = None
     sectorPoints = None
     name = ''
+    createdAt = None
     updatedAt = None
     length = 0
     trackId = None
+    shortId = None
     startFinishPoint = None
     finishPoint = None
     countryCode = None
@@ -45,18 +48,29 @@ class TrackMap:
         if len(self.mapPoints) > 0:
             return self.mapPoints[0]
         return None
-    
+
+    def _createShortId(self):
+        short_id = 0
+        if self.createdAt is not None:
+            try:
+                short_id = int(time.mktime(parse(self.createdAt).timetuple()))
+            except:
+                pass
+        return short_id
+            
     def fromJson(self, trackJson):
         venueNode = trackJson.get('venue')
         if (venueNode):
             self.startFinishPoint = GeoPoint.fromPointJson(venueNode.get('start_finish'))
             self.finishPoint = GeoPoint.fromPointJson(venueNode.get('finish'))
             self.countryCode = venueNode.get('country_code', self.countryCode)
+            self.createdAt = venueNode.get('created', self.createdAt)
             self.updatedAt = venueNode.get('updated', self.updatedAt)
             self.name = venueNode.get('name', self.name)
             self.configuration = venueNode.get('configuration', self.configuration)
             self.length = venueNode.get('length', self.length)
             self.trackId = venueNode.get('id', self.trackId)
+            self.shortId = self._createShortId()
             
             mapPointsNode = venueNode.get('track_map_array')
             mapPoints = []
@@ -79,6 +93,7 @@ class TrackMap:
         if self.finishPoint:
             venueJson['finish'] = self.finishPoint.toJson()
         venueJson['country_code'] = self.countryCode
+        venueJson['created'] = self.createdAt
         venueJson['updated'] = self.updatedAt
         venueJson['name'] = self.name
         venueJson['configuration'] = self.configuration
@@ -149,6 +164,12 @@ class TrackManager:
     
     def getTrackIdsInRegion(self):
         return self.trackIdsInRegion
+        
+    def findTrackByShortId(self, id):
+        for track in self.tracks.itervalues():
+            if id == track.shortId:
+                return track
+        return None
         
     def findNearbyTrack(self, point, searchRadius):
         for trackId in self.tracks.keys():
