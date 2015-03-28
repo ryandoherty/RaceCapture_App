@@ -86,7 +86,7 @@ class TrackMap:
                     sectorPoints.append(GeoPoint.fromPoint(point[0], point[1]))
             self.sectorPoints = sectorPoints
             if not self.shortId > 0:
-                raise Exception("Could not parse trackMap: shortId is invalid") 
+                raise Warning("Could not parse trackMap: shortId is invalid") 
     
     def toJson(self):
         venueJson = {}
@@ -265,9 +265,11 @@ class TrackManager:
         trackUrl = self.rcp_venue_url + '/' + venueId
         trackJson = self.loadJson(trackUrl)
         trackMap = TrackMap()
-        trackMap.fromJson(trackJson)
-        
-        return copy.deepcopy(trackMap)
+        try:
+            trackMap.fromJson(trackJson)
+            return copy.deepcopy(trackMap)
+        except Warning:
+            return None
         
     def saveTrack(self, trackMap, trackId):
         path = self.tracks_user_dir + '/' + trackId + '.json'
@@ -312,7 +314,7 @@ class TrackManager:
                     if progressCallback:
                         progressCallback(count, trackCount, trackMap.name)
                 except Exception as detail:
-                    print('failed to read track file\n' + trackPath + ';\n' + str(detail))
+                    print('failed to read track file ' + trackPath + ';\n' + str(detail))
             del self.trackIdsInRegion[:]
             self.trackIdsInRegion.extend(self.tracks.keys())
                         
@@ -350,9 +352,10 @@ class TrackManager:
                     updateTrack = True
                 if updateTrack:
                     updatedTrackMap = self.downloadTrack(trackId)
-                    self.saveTrack(updatedTrackMap, trackId)
-                    if progressCallback:
-                        progressCallback(count, updatedCount, updatedTrackMap.name)
+                    if updatedTrackMap is not None:
+                        self.saveTrack(updatedTrackMap, trackId)
+                        if progressCallback:
+                            progressCallback(count, updatedCount, updatedTrackMap.name)
                 else:
                     progressCallback(count, updatedCount)
             self.loadCurrentTracks(None)
