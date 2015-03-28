@@ -85,6 +85,8 @@ class TrackMap:
                 for point in sectorNode:
                     sectorPoints.append(GeoPoint.fromPoint(point[0], point[1]))
             self.sectorPoints = sectorPoints
+            if not self.shortId > 0:
+                raise Exception("Could not parse trackMap: shortId is invalid") 
     
     def toJson(self):
         venueJson = {}
@@ -301,7 +303,6 @@ class TrackManager:
                     trackJson = json.load(json_data)
                     trackMap = TrackMap()
                     trackMap.fromJson(trackJson)
-                    
                     venueNode = trackJson['venue']
                     if venueNode:
                         venue = Venue()
