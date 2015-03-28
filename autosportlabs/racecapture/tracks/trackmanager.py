@@ -11,6 +11,7 @@ import urllib2
 import os
 import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
+from kivy.logger import Logger
         
 class Venue:
     venueId = None
@@ -159,7 +160,7 @@ class TrackManager:
                     region.fromJson(regionNode)
                     self.regions.append(region)
         except Exception as detail:
-            print('Error loading regions data ' + traceback.format_exc())
+            Logger.warning('TrackManager: Error loading regions data ' + traceback.format_exc())
     
     def getAllTrackIds(self):
         return self.tracks.keys()
@@ -224,9 +225,9 @@ class TrackManager:
                 j = json.loads(jsonStr)
                 return j
             except Exception as detail:
-                print('Failed to read: from {} : {}'.format(uri, traceback.format_exc()))
+                Logger.warning('TrackManager: Failed to read: from {} : {}'.format(uri, traceback.format_exc()))
                 if retries < self.readRetries:
-                    print('retrying in ' + str(self.retryDelay) + ' seconds...')
+                    Logger.warning('TrackManager: retrying in ' + str(self.retryDelay) + ' seconds...')
                     retries += 1
                     time.sleep(self.retryDelay)
         raise Exception('Error reading json doc from: ' + uri)    
@@ -253,12 +254,12 @@ class TrackManager:
                                 
                 nextUri = venuesDocJson.get('nextURI')
             except Exception as detail:
-                print('Malformed venue JSON from url ' + nextUri + '; json =  ' + str(venueJson) + ' ' + str(detail))
+                Logger.error('TrackManager: Malformed venue JSON from url ' + nextUri + '; json =  ' + str(venueJson) + ' ' + str(detail))
                 
         retrievedVenueCount = len(trackList)
-        print('fetched list of ' + str(retrievedVenueCount) + ' tracks')                 
+        Logger.info('TrackManager: fetched list of ' + str(retrievedVenueCount) + ' tracks')                 
         if (not totalVenues == retrievedVenueCount):
-            print('Warning - track list count does not reflect downloaded track list size ' + str(totalVenues) + '/' + str(retrievedVenueCount))
+            Logger.warning('TrackManager: track list count does not reflect downloaded track list size ' + str(totalVenues) + '/' + str(retrievedVenueCount))
         return trackList
         
     def downloadTrack(self, venueId):
@@ -314,7 +315,7 @@ class TrackManager:
                     if progressCallback:
                         progressCallback(count, trackCount, trackMap.name)
                 except Exception as detail:
-                    print('failed to read track file ' + trackPath + ';\n' + str(detail))
+                    Logger.warning('TrackManager: failed to read track file ' + trackPath + ';\n' + str(detail))
             del self.trackIdsInRegion[:]
             self.trackIdsInRegion.extend(self.tracks.keys())
                         
@@ -345,10 +346,10 @@ class TrackManager:
                 updateTrack = False
                 count += 1
                 if currentTracks.get(trackId) == None:
-                    print('new track detected ' + trackId)
+                    Logger.info('TrackManager: new track detected ' + trackId)
                     updateTrack = True
                 elif not currentTracks[trackId].updatedAt == updatedTrackList[trackId].updatedAt:
-                    print('existing map changed ' + trackId)
+                    Logger.info('TrackManager: existing map changed ' + trackId)
                     updateTrack = True
                 if updateTrack:
                     updatedTrackMap = self.downloadTrack(trackId)
