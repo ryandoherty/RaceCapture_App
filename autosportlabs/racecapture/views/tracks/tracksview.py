@@ -231,7 +231,7 @@ class TracksBrowser(BoxLayout):
 
         self.dismissPopups()
         if trackCount == 0:
-            self.tracksGrid.add_widget(Label(text="No Tracks Found"))
+            self.tracksGrid.add_widget(Label(text="No tracks found - try checking for updates"))
             self.setViewDisabled(False)            
             self.ids.namefilter.focus = True                        
         else:
