@@ -12,9 +12,8 @@
         HSeparator:
             text: 'Channels'    		
     GridLayout:
-    	spacing: [30,30]
-    	padding: [30,30]
-        size_hint: (1.0,0.6)
+    	spacing: [dp(30),dp(30)]
+    	padding: [dp(30),dp(30)]
         cols: 2
         FieldLabel:
             text: 'Position'
@@ -36,10 +35,20 @@
         	rcid: 'dist'
         	on_active: root.onDistActive(*args)
         FieldLabel:
+            text: 'Altitude'
+            halign: 'right'
+        Switch:
+            rcid: 'alt'
+            on_active: root.onAltitudeActive(*args)
+        FieldLabel:
             text: 'Satellites'
             halign: 'right'
         Switch:
         	rcid: 'sats'
         	on_active: root.onSatsActive(*args)
-    Label:
-        size_hint: (1.0, 0.4)
+        FieldLabel:
+            text: 'GPS Quality'
+            halign: 'right'
+        Switch:
+            rcid: 'qual'
+            on_active: root.onGpsQualityActive(*args)

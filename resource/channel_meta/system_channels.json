@@ -67,11 +67,20 @@
             "nm": "Distance",
             "ut": "Miles",
             "sys": 1,
-            "type": 6,
+            "type": 9,
             "prec": 3,
             "min": 0,
             "max": 0
-        },            
+        },
+        {
+            "nm": "Altitude",
+            "ut": "M",
+            "sys": 1,
+            "type": 1,
+            "prec": 3,
+            "min": 0,
+            "max": 0
+        },                                
         {
             "nm": "Coolant",
             "ut": "F",
@@ -535,10 +544,19 @@
             "nm": "GPSSats",
             "ut": "",
             "sys": 1,
-            "type": 6,
+            "type": 8,
             "prec": 0,
             "min": 0,
-            "max": 100
+            "max": 20
+        },
+        {
+            "nm": "GPSQual",
+            "ut": "",
+            "sys": 1,
+            "type": 8,
+            "prec": 0,
+            "min": 0,
+            "max": 5
         },
         {
             "nm": "Time",

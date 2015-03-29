@@ -40,12 +40,24 @@ class GPSChannelsView(BaseConfigView):
             self.gpsConfig.stale = True
             self.dispatch('on_modified')
                                                 
+    def onAltitudeActive(self, instance, value):
+        if self.gpsConfig:        
+            self.gpsConfig.altitudeEnabled = 1 if value else 0
+            self.gpsConfig.stale = True
+            self.dispatch('on_modified')
+
     def onSatsActive(self, instance, value):
         if self.gpsConfig:        
             self.gpsConfig.satellitesEnabled = 1 if value else 0
             self.gpsConfig.stale = True
             self.dispatch('on_modified')
                 
+    def onGpsQualityActive(self, instance, value):
+        if self.gpsConfig:        
+            self.gpsConfig.qualityEnabled = 1 if value else 0
+            self.gpsConfig.stale = True
+            self.dispatch('on_modified')
+
     def on_sample_rate(self, instance, value):
         if self.gpsConfig:
             self.gpsConfig.sampleRate = value
@@ -61,7 +73,9 @@ class GPSChannelsView(BaseConfigView):
         self.setCheckBox(gpsConfig, 'pos', gpsConfig.positionEnabled)
         self.setCheckBox(gpsConfig, 'speed', gpsConfig.speedEnabled)
         self.setCheckBox(gpsConfig, 'dist', gpsConfig.distanceEnabled)
+        self.setCheckBox(gpsConfig, 'alt', gpsConfig.altitudeEnabled)
         self.setCheckBox(gpsConfig, 'sats', gpsConfig.satellitesEnabled)
+        self.setCheckBox(gpsConfig, 'qual', gpsConfig.qualityEnabled)
         
         self.gpsConfig = gpsConfig
         

@@ -307,7 +307,9 @@ class GpsConfig(object):
         self.positionEnabled = False
         self.speedEnabled = False
         self.distanceEnabled = False
+        self.altitudeEnabled = False
         self.satellitesEnabled = False
+        self.qualityEnabled = False
 
     def fromJson(self, json):
         if json:
@@ -315,7 +317,9 @@ class GpsConfig(object):
             self.positionEnabled = int(json.get('pos', self.positionEnabled))
             self.speedEnabled = int(json.get('speed', self.speedEnabled))
             self.distanceEnabled = int(json.get('dist', self.distanceEnabled))
+            self.altitudeEnabled = int(json.get('alt', self.altitudeEnabled))
             self.satellitesEnabled = int(json.get('sats', self.satellitesEnabled))
+            self.qualityEnabled = int(json.get('qual', self.qualityEnabled))
             self.stale = False
             
     def toJson(self):
@@ -324,7 +328,9 @@ class GpsConfig(object):
                               'pos' : self.positionEnabled,
                               'speed' : self.speedEnabled,
                               'dist' : self.distanceEnabled,
-                              'sats' : self.satellitesEnabled
+                              'alt' : self.altitudeEnabled,
+                              'sats' : self.satellitesEnabled,
+                              'qual' : self.qualityEnabled
                               }
                     }
                    
