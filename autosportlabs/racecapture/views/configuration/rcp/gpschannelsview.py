@@ -54,6 +54,12 @@ class GPSChannelsView(BaseConfigView):
             self.gpsConfig.stale = True
             self.dispatch('on_modified')
 
+    def onGpsDOPActive(self, instance, value):
+        if self.gpsConfig:        
+            self.gpsConfig.DOPEnabled = 1 if value else 0
+            self.gpsConfig.stale = True
+            self.dispatch('on_modified')
+
     def on_sample_rate(self, instance, value):
         if self.gpsConfig:
             self.gpsConfig.sampleRate = value
@@ -72,6 +78,7 @@ class GPSChannelsView(BaseConfigView):
         self.ids.altitude.active = gpsConfig.altitudeEnabled
         self.ids.satellites.active = gpsConfig.satellitesEnabled
         self.ids.quality.active = gpsConfig.qualityEnabled
+        self.ids.dop.active = gpsConfig.DOPEnabled
 
         self.gpsConfig = gpsConfig
         

@@ -47,8 +47,15 @@
             id: satellites
         	on_active: root.onSatsActive(*args)
         FieldLabel:
-            text: 'GPS Quality'
+            text: 'GPS Fix Quality'
             halign: 'right'
         Switch:
             id: quality
             on_active: root.onGpsQualityActive(*args)
+        FieldLabel:
+            text: 'Dilution of Precision (DOP)'
+            halign: 'right'
+        Switch:
+            id: dop
+            on_active: root.onGpsDOPActive(*args)
+            
