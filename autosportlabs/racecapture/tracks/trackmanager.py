@@ -4,12 +4,14 @@ import copy
 import errno
 import string
 import logging
+from dateutil.parser import *
 from threading import Thread, Lock
 from urlparse import urljoin, urlparse
 import urllib2
 import os
 import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
+from kivy.logger import Logger
         
 class Venue:
     venueId = None
@@ -29,9 +31,11 @@ class TrackMap:
     mapPoints = None
     sectorPoints = None
     name = ''
+    createdAt = None
     updatedAt = None
     length = 0
     trackId = None
+    shortId = None
     startFinishPoint = None
     finishPoint = None
     countryCode = None
@@ -45,18 +49,29 @@ class TrackMap:
         if len(self.mapPoints) > 0:
             return self.mapPoints[0]
         return None
-    
+
+    def _createShortId(self):
+        short_id = 0
+        if self.createdAt is not None:
+            try:
+                short_id = int(time.mktime(parse(self.createdAt).timetuple()))
+            except:
+                pass
+        return short_id
+            
     def fromJson(self, trackJson):
         venueNode = trackJson.get('venue')
         if (venueNode):
             self.startFinishPoint = GeoPoint.fromPointJson(venueNode.get('start_finish'))
             self.finishPoint = GeoPoint.fromPointJson(venueNode.get('finish'))
             self.countryCode = venueNode.get('country_code', self.countryCode)
+            self.createdAt = venueNode.get('created', self.createdAt)
             self.updatedAt = venueNode.get('updated', self.updatedAt)
             self.name = venueNode.get('name', self.name)
             self.configuration = venueNode.get('configuration', self.configuration)
             self.length = venueNode.get('length', self.length)
             self.trackId = venueNode.get('id', self.trackId)
+            self.shortId = self._createShortId()
             
             mapPointsNode = venueNode.get('track_map_array')
             mapPoints = []
@@ -71,6 +86,8 @@ class TrackMap:
                 for point in sectorNode:
                     sectorPoints.append(GeoPoint.fromPoint(point[0], point[1]))
             self.sectorPoints = sectorPoints
+            if not self.shortId > 0:
+                raise Warning("Could not parse trackMap: shortId is invalid") 
     
     def toJson(self):
         venueJson = {}
@@ -79,6 +96,7 @@ class TrackMap:
         if self.finishPoint:
             venueJson['finish'] = self.finishPoint.toJson()
         venueJson['country_code'] = self.countryCode
+        venueJson['created'] = self.createdAt
         venueJson['updated'] = self.updatedAt
         venueJson['name'] = self.name
         venueJson['configuration'] = self.configuration
@@ -142,13 +160,19 @@ class TrackManager:
                     region.fromJson(regionNode)
                     self.regions.append(region)
         except Exception as detail:
-            print('Error loading regions data ' + traceback.format_exc())
+            Logger.warning('TrackManager: Error loading regions data ' + traceback.format_exc())
     
     def getAllTrackIds(self):
         return self.tracks.keys()
     
     def getTrackIdsInRegion(self):
         return self.trackIdsInRegion
+        
+    def findTrackByShortId(self, id):
+        for track in self.tracks.itervalues():
+            if id == track.shortId:
+                return track
+        return None
         
     def findNearbyTrack(self, point, searchRadius):
         for trackId in self.tracks.keys():
@@ -201,9 +225,9 @@ class TrackManager:
                 j = json.loads(jsonStr)
                 return j
             except Exception as detail:
-                print('Failed to read: from {} : {}'.format(uri, traceback.format_exc()))
+                Logger.warning('TrackManager: Failed to read: from {} : {}'.format(uri, traceback.format_exc()))
                 if retries < self.readRetries:
-                    print('retrying in ' + str(self.retryDelay) + ' seconds...')
+                    Logger.warning('TrackManager: retrying in ' + str(self.retryDelay) + ' seconds...')
                     retries += 1
                     time.sleep(self.retryDelay)
         raise Exception('Error reading json doc from: ' + uri)    
@@ -230,21 +254,23 @@ class TrackManager:
                                 
                 nextUri = venuesDocJson.get('nextURI')
             except Exception as detail:
-                print('Malformed venue JSON from url ' + nextUri + '; json =  ' + str(venueJson) + ' ' + str(detail))
+                Logger.error('TrackManager: Malformed venue JSON from url ' + nextUri + '; json =  ' + str(venueJson) + ' ' + str(detail))
                 
         retrievedVenueCount = len(trackList)
-        print('fetched list of ' + str(retrievedVenueCount) + ' tracks')                 
+        Logger.info('TrackManager: fetched list of ' + str(retrievedVenueCount) + ' tracks')                 
         if (not totalVenues == retrievedVenueCount):
-            print('Warning - track list count does not reflect downloaded track list size ' + str(totalVenues) + '/' + str(retrievedVenueCount))
+            Logger.warning('TrackManager: track list count does not reflect downloaded track list size ' + str(totalVenues) + '/' + str(retrievedVenueCount))
         return trackList
         
     def downloadTrack(self, venueId):
         trackUrl = self.rcp_venue_url + '/' + venueId
         trackJson = self.loadJson(trackUrl)
         trackMap = TrackMap()
-        trackMap.fromJson(trackJson)
-        
-        return copy.deepcopy(trackMap)
+        try:
+            trackMap.fromJson(trackJson)
+            return copy.deepcopy(trackMap)
+        except Warning:
+            return None
         
     def saveTrack(self, trackMap, trackId):
         path = self.tracks_user_dir + '/' + trackId + '.json'
@@ -280,7 +306,6 @@ class TrackManager:
                     trackJson = json.load(json_data)
                     trackMap = TrackMap()
                     trackMap.fromJson(trackJson)
-                    
                     venueNode = trackJson['venue']
                     if venueNode:
                         venue = Venue()
@@ -290,7 +315,7 @@ class TrackManager:
                     if progressCallback:
                         progressCallback(count, trackCount, trackMap.name)
                 except Exception as detail:
-                    print('failed to read track file\n' + trackPath + ';\n' + str(detail))
+                    Logger.warning('TrackManager: failed to read track file ' + trackPath + ';\n' + str(detail))
             del self.trackIdsInRegion[:]
             self.trackIdsInRegion.extend(self.tracks.keys())
                         
@@ -321,16 +346,17 @@ class TrackManager:
                 updateTrack = False
                 count += 1
                 if currentTracks.get(trackId) == None:
-                    print('new track detected ' + trackId)
+                    Logger.info('TrackManager: new track detected ' + trackId)
                     updateTrack = True
                 elif not currentTracks[trackId].updatedAt == updatedTrackList[trackId].updatedAt:
-                    print('existing map changed ' + trackId)
+                    Logger.info('TrackManager: existing map changed ' + trackId)
                     updateTrack = True
                 if updateTrack:
                     updatedTrackMap = self.downloadTrack(trackId)
-                    self.saveTrack(updatedTrackMap, trackId)
-                    if progressCallback:
-                        progressCallback(count, updatedCount, updatedTrackMap.name)
+                    if updatedTrackMap is not None:
+                        self.saveTrack(updatedTrackMap, trackId)
+                        if progressCallback:
+                            progressCallback(count, updatedCount, updatedTrackMap.name)
                 else:
                     progressCallback(count, updatedCount)
             self.loadCurrentTracks(None)
