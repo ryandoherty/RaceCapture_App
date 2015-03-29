@@ -14,6 +14,8 @@ CHANNEL_TYPE_PWM        = 4
 CHANNEL_TYPE_IMU        = 5
 CHANNEL_TYPE_GPS        = 6
 CHANNEL_TYPE_STATISTICS = 7
+CHANNEL_TYPE_COUNT      = 8
+CHANNEL_TYPE_LENGTH     = 9
 
 class SampleMetaException(Exception):
     pass
