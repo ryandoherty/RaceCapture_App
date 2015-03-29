@@ -19,36 +19,36 @@
             text: 'Position'
             halign: 'right'
         Switch:
-        	rcid: 'pos'
+            id: position
         	on_active: root.onPosActive(*args)
         FieldLabel:
             text: 'Speed'
             halign: 'right'
         Switch:
-        	rcid: 'speed'
+            id: speed
         	halign: 'right'
         	on_active: root.onSpeedActive(*args)
         FieldLabel:
             text: 'Distance'
             halign: 'right'
         Switch:
-        	rcid: 'dist'
+            id: distance
         	on_active: root.onDistActive(*args)
         FieldLabel:
             text: 'Altitude'
             halign: 'right'
         Switch:
-            rcid: 'alt'
+            id: altitude
             on_active: root.onAltitudeActive(*args)
         FieldLabel:
             text: 'Satellites'
             halign: 'right'
         Switch:
-        	rcid: 'sats'
+            id: satellites
         	on_active: root.onSatsActive(*args)
         FieldLabel:
             text: 'GPS Quality'
             halign: 'right'
         Switch:
-            rcid: 'qual'
+            id: quality
             on_active: root.onGpsQualityActive(*args)

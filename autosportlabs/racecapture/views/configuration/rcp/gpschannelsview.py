@@ -17,10 +17,6 @@ class GPSChannelsView(BaseConfigView):
         super(GPSChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
-
-    def setCheckBox(self, gpsCfg, key, active):
-        checkbox = kvFind(self, 'rcid', key)
-        checkbox.active = active
                 
     def onPosActive(self, instance, value):
         if self.gpsConfig:
@@ -70,12 +66,12 @@ class GPSChannelsView(BaseConfigView):
         sampleRate = kvFind(self, 'rcid', 'sr')
         sampleRate.setValue(gpsConfig.sampleRate)
         
-        self.setCheckBox(gpsConfig, 'pos', gpsConfig.positionEnabled)
-        self.setCheckBox(gpsConfig, 'speed', gpsConfig.speedEnabled)
-        self.setCheckBox(gpsConfig, 'dist', gpsConfig.distanceEnabled)
-        self.setCheckBox(gpsConfig, 'alt', gpsConfig.altitudeEnabled)
-        self.setCheckBox(gpsConfig, 'sats', gpsConfig.satellitesEnabled)
-        self.setCheckBox(gpsConfig, 'qual', gpsConfig.qualityEnabled)
-        
+        self.ids.position.active = gpsConfig.positionEnabled
+        self.ids.speed.active = gpsConfig.speedEnabled
+        self.ids.distance.active = gpsConfig.distanceEnabled
+        self.ids.altitude.active = gpsConfig.altitudeEnabled
+        self.ids.satellites.active = gpsConfig.satellitesEnabled
+        self.ids.quality.active = gpsConfig.qualityEnabled
+
         self.gpsConfig = gpsConfig
         
