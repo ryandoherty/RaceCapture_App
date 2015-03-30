@@ -93,8 +93,8 @@ class Sample(object):
     
     def processData(self, dataJson):
         metas = self.metas.channel_metas
-        channelConfigCount = len(metas)        
-        bitmaskFieldCount = channelConfigCount / 32 + 1 if channelConfigCount % 32 > 0 else 0
+        channelConfigCount = len(metas) 
+        bitmaskFieldCount = max(0, (channelConfigCount - 1) / 32) + 1       
         
         maxFieldCount = channelConfigCount + bitmaskFieldCount
                 
