@@ -119,7 +119,7 @@ class Sample(object):
             if mask_index >= 32:            
                 mask_index = 0;
                 bitmapIndex += 1
-                if bitmapIndex > bitmaskFields.length:
+                if bitmapIndex > len(bitmaskFields):
                     raise Exception("channel count overflowed number of bitmap fields available")
             
             mask = 1 << mask_index
