@@ -93,8 +93,8 @@ class Sample(object):
     
     def processData(self, dataJson):
         metas = self.metas.channel_metas
-        channelConfigCount = len(metas)        
-        bitmaskFieldCount = channelConfigCount / 32 + 1 if channelConfigCount % 32 > 0 else 0
+        channelConfigCount = len(metas) 
+        bitmaskFieldCount = max(0, (channelConfigCount - 1) / 32) + 1       
         
         maxFieldCount = channelConfigCount + bitmaskFieldCount
                 
@@ -119,7 +119,7 @@ class Sample(object):
             if mask_index >= 32:            
                 mask_index = 0;
                 bitmapIndex += 1
-                if bitmapIndex > bitmaskFields.length:
+                if bitmapIndex > len(bitmaskFields):
                     raise Exception("channel count overflowed number of bitmap fields available")
             
             mask = 1 << mask_index
