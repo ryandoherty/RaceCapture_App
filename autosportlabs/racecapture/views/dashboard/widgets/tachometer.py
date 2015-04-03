@@ -10,8 +10,6 @@ from autosportlabs.racecapture.views.dashboard.widgets.fontgraphicalgauge import
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/tachometer.kv')
 
-TACH_RANGES = OrderedDict([(7000, 'resource/fonts/tach_7000.ttf'), (10000, 'resource/fonts/tach_10000.ttf'), (15000, 'resource/fonts/tach_15000.ttf')])
-
 class Tachometer(FontGraphicalGauge):
     def __init__(self, **kwargs):
         super(Tachometer, self).__init__(**kwargs)
@@ -19,25 +17,6 @@ class Tachometer(FontGraphicalGauge):
             
     def initWidgets(self):
         pass
-        
-        
-    def configureRangeFont(self, max):
-        graphView = self.graphView
-        lastRangeFont = None
-        lastRange = 0
-        for testRange,font in TACH_RANGES.items():
-            lastRangeFont = font
-            lastRange = testRange
-            if max <= testRange:
-                graphView.font_name = font
-                return testRange
-        
-        graphView.font_name = lastRangeFont
-        return lastRange
-            
-
-    def on_max(self, instance, value):
-        self.configureRangeFont(value)
         
     def on_touch_down(self, touch, *args):
         pass

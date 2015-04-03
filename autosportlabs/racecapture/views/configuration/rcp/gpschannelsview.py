@@ -17,10 +17,6 @@ class GPSChannelsView(BaseConfigView):
         super(GPSChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
-
-    def setCheckBox(self, gpsCfg, key, active):
-        checkbox = kvFind(self, 'rcid', key)
-        checkbox.active = active
                 
     def onPosActive(self, instance, value):
         if self.gpsConfig:
@@ -39,19 +35,31 @@ class GPSChannelsView(BaseConfigView):
             self.gpsConfig.distanceEnabled = 1 if value else 0
             self.gpsConfig.stale = True
             self.dispatch('on_modified')
-                        
-    def onTimeActive(self, instance, value):
+                                                
+    def onAltitudeActive(self, instance, value):
         if self.gpsConfig:        
-            self.gpsConfig.timeEnabled = 1 if value else 0
+            self.gpsConfig.altitudeEnabled = 1 if value else 0
             self.gpsConfig.stale = True
             self.dispatch('on_modified')
-                        
+
     def onSatsActive(self, instance, value):
         if self.gpsConfig:        
             self.gpsConfig.satellitesEnabled = 1 if value else 0
             self.gpsConfig.stale = True
             self.dispatch('on_modified')
                 
+    def onGpsQualityActive(self, instance, value):
+        if self.gpsConfig:        
+            self.gpsConfig.qualityEnabled = 1 if value else 0
+            self.gpsConfig.stale = True
+            self.dispatch('on_modified')
+
+    def onGpsDOPActive(self, instance, value):
+        if self.gpsConfig:        
+            self.gpsConfig.DOPEnabled = 1 if value else 0
+            self.gpsConfig.stale = True
+            self.dispatch('on_modified')
+
     def on_sample_rate(self, instance, value):
         if self.gpsConfig:
             self.gpsConfig.sampleRate = value
@@ -64,11 +72,13 @@ class GPSChannelsView(BaseConfigView):
         sampleRate = kvFind(self, 'rcid', 'sr')
         sampleRate.setValue(gpsConfig.sampleRate)
         
-        self.setCheckBox(gpsConfig, 'pos', gpsConfig.positionEnabled)
-        self.setCheckBox(gpsConfig, 'speed', gpsConfig.speedEnabled)
-        self.setCheckBox(gpsConfig, 'dist', gpsConfig.distanceEnabled)
-        self.setCheckBox(gpsConfig, 'time', gpsConfig.timeEnabled)
-        self.setCheckBox(gpsConfig, 'sats', gpsConfig.satellitesEnabled)
-        
+        self.ids.position.active = gpsConfig.positionEnabled
+        self.ids.speed.active = gpsConfig.speedEnabled
+        self.ids.distance.active = gpsConfig.distanceEnabled
+        self.ids.altitude.active = gpsConfig.altitudeEnabled
+        self.ids.satellites.active = gpsConfig.satellitesEnabled
+        self.ids.quality.active = gpsConfig.qualityEnabled
+        self.ids.dop.active = gpsConfig.DOPEnabled
+
         self.gpsConfig = gpsConfig
         

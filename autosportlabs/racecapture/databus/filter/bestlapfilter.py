@@ -3,6 +3,7 @@
 class BestLapFilter(object):
     """Update BestLap if laptime is present and is faster than the current best"""
     BEST_LAPTIME_KEY = 'BestLap'
+    LAST_LAPTIME_KEY = 'LapTime'
     best_laptime = 0
     best_laptime_meta = None
     def __init__(self, system_channels):
@@ -15,7 +16,7 @@ class BestLapFilter(object):
         self.best_laptime = 0
          
     def filter(self, channel_data):
-        laptime = channel_data.get('LapTime')
+        laptime = channel_data.get(self.LAST_LAPTIME_KEY)
         if laptime != None and laptime > 0:
             current_best_laptime = self.best_laptime
             if current_best_laptime == 0 or laptime < current_best_laptime: 

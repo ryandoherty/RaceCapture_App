@@ -10,13 +10,12 @@
 	    	color: root.title_color
 	    	size_hint_y: 0.85
 	    	on_texture: root.change_font_size()
-	    	font_size: root.value_font_size
+	    	font_size: self.height
 	    	font_name: "resource/fonts/ASL_light.ttf"
 	    Label:
 	    	rcid: 'title'
 			font_name: "resource/fonts/ASL_light.ttf"
-	    	font_size: root.title_font_size
 	    	color: root.title_color
 	    	size_hint_y: 0.15
-	    	font_size: dp(30)	    	
+	    	font_size: self.height
 	    	text: root.title

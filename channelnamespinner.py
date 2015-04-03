@@ -10,8 +10,8 @@ class ChannelNameSpinner(Spinner):
         self.register_event_type('on_channels_updated')
         self.values = []
      
-    def on_channels_updated(self, system_channels):
-        channel_names = system_channels.channel_names
+    def on_channels_updated(self, runtime_channels):
+        channel_names = runtime_channels.channel_names
         filtered_channel_names = channel_names
         if self.filterList != None:
             filtered_channel_names = []

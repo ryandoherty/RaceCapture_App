@@ -307,17 +307,21 @@ class GpsConfig(object):
         self.positionEnabled = False
         self.speedEnabled = False
         self.distanceEnabled = False
-        self.timeEnabled = False
+        self.altitudeEnabled = False
         self.satellitesEnabled = False
+        self.qualityEnabled = False
+        self.DOPEnabled = False
 
     def fromJson(self, json):
         if json:
             self.sampleRate = int(json.get('sr', self.sampleRate))
             self.positionEnabled = int(json.get('pos', self.positionEnabled))
             self.speedEnabled = int(json.get('speed', self.speedEnabled))
-            self.timeEnabled = int(json.get('time', self.timeEnabled))
-            self.distanceEnabled = int(json.get('dist', self.timeEnabled))
+            self.distanceEnabled = int(json.get('dist', self.distanceEnabled))
+            self.altitudeEnabled = int(json.get('alt', self.altitudeEnabled))
             self.satellitesEnabled = int(json.get('sats', self.satellitesEnabled))
+            self.qualityEnabled = int(json.get('qual', self.qualityEnabled))
+            self.DOPEnabled = int(json.get('dop', self.DOPEnabled))
             self.stale = False
             
     def toJson(self):
@@ -325,9 +329,11 @@ class GpsConfig(object):
                               'sr' : self.sampleRate,
                               'pos' : self.positionEnabled,
                               'speed' : self.speedEnabled,
-                              'time' : self.timeEnabled,
                               'dist' : self.distanceEnabled,
-                              'sats' : self.satellitesEnabled
+                              'alt' : self.altitudeEnabled,
+                              'sats' : self.satellitesEnabled,
+                              'qual' : self.qualityEnabled,
+                              'dop' : self.DOPEnabled
                               }
                     }
                    
@@ -522,6 +528,7 @@ CONFIG_SECTOR_COUNT_STAGE = 18
 class Track(object):
     def __init__(self, **kwargs):
         self.stale = False
+        self.trackId = None
         self.trackType = TRACK_TYPE_CIRCUIT
         self.sectorCount = CONFIG_SECTOR_COUNT
         self.startLine = GeoPoint()
@@ -530,6 +537,7 @@ class Track(object):
     
     def fromJson(self, trackJson):
         if trackJson:
+            self.trackId = trackJson.get('id', self.trackId)
             self.trackType = trackJson.get('type', self.trackType)
             sectorsJson = trackJson.get('sec', None)
             del self.sectors[:]
@@ -556,6 +564,7 @@ class Track(object):
     @classmethod
     def fromTrackMap(cls, trackMap):
         t = Track()
+        t.trackId = trackMap.shortId
         t.trackType = TRACK_TYPE_STAGE if trackMap.finishPoint else TRACK_TYPE_CIRCUIT
         t.startLine = copy(trackMap.startFinishPoint)
         t.finishLine = copy(trackMap.finishPoint)
@@ -573,8 +582,9 @@ class Track(object):
         for sector in self.sectors:
             sectors.append(sector.toJson())
         trackJson = {}
-        trackJson['sec']  = sectors
+        trackJson['id'] = self.trackId
         trackJson['type'] = self.trackType
+        trackJson['sec']  = sectors
         
         if self.trackType == TRACK_TYPE_STAGE:
             trackJson['st'] = self.startLine.toJson()

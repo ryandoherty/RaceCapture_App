@@ -3,8 +3,10 @@ import json
 
 class OBD2Settings(object):
     obd2channelInfo = {}
-    def __init__(self, **kwargs):
+    base_dir = None
+    def __init__(self, base_dir=None, **kwargs):
         super(OBD2Settings, self).__init__(**kwargs)
+        self.base_dir = base_dir
         self.loadOBD2Channels()
         
         
@@ -20,7 +22,7 @@ class OBD2Settings(object):
     
     def loadOBD2Channels(self):
         try:
-            obd2_json = open(os.path.join('resource', 'settings', 'obd2_channels.json'))
+            obd2_json = open(os.path.join(self.base_dir, 'resource', 'settings', 'obd2_channels.json'))
             obd2channels = json.load(obd2_json)
             obd2channels = obd2channels['obd2Channels']
             

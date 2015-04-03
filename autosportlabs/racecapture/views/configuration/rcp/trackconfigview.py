@@ -151,14 +151,12 @@ class AutomaticTrackConfigScreen(Screen):
         trackSelectionPopup.bind(on_tracks_selected=self.on_tracks_selected)
         popup.open()
         self.trackSelectionPopup = popup
-        
     
     def init_tracks_list(self):
         if self.trackManager and self.trackDb:
             matchedTracks = []
             for track in self.trackDb.tracks:
-                startPoint = track.startLine
-                matchedTrack = self.trackManager.findNearbyTrack(track.startLine)
+                matchedTrack = self.trackManager.findTrackByShortId(track.trackId)
                 if matchedTrack:
                     matchedTracks.append(matchedTrack)
                     

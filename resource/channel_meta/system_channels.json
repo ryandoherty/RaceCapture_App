@@ -67,11 +67,20 @@
             "nm": "Distance",
             "ut": "Miles",
             "sys": 1,
-            "type": 6,
+            "type": 9,
             "prec": 3,
             "min": 0,
             "max": 0
-        },            
+        },
+        {
+            "nm": "Altitude",
+            "ut": "M",
+            "sys": 1,
+            "type": 1,
+            "prec": 3,
+            "min": 0,
+            "max": 0
+        },                                
         {
             "nm": "Coolant",
             "ut": "F",
@@ -227,6 +236,24 @@
         },
         {
             "nm": "RPM",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 10000
+        },
+        {
+            "nm": "RPM2",
+            "ut": "",
+            "sys": 1,
+            "type": 2,
+            "prec": 0,
+            "min": 0,
+            "max": 10000
+        },
+        {
+            "nm": "RPM3",
             "ut": "",
             "sys": 1,
             "type": 2,
@@ -517,10 +544,19 @@
             "nm": "GPSSats",
             "ut": "",
             "sys": 1,
-            "type": 6,
+            "type": 8,
             "prec": 0,
             "min": 0,
-            "max": 100
+            "max": 20
+        },
+        {
+            "nm": "GPSQual",
+            "ut": "",
+            "sys": 1,
+            "type": 8,
+            "prec": 0,
+            "min": 0,
+            "max": 5
         },
         {
             "nm": "Time",
@@ -560,6 +596,15 @@
         },
         {
             "nm": "SectorTime",
+            "ut": "Min",
+            "sys": 1,
+            "type": 7,
+            "prec": 4,
+            "min": 0,
+            "max": 0
+        },
+        {
+            "nm": "CurLapTime",
             "ut": "Min",
             "sys": 1,
             "type": 7,

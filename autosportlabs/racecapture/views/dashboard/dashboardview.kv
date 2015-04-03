@@ -9,20 +9,20 @@
 			orientation: 'horizontal'
 			IconButton:
 				color: [0.2, 0.2, 0.2, 1.0]
-				font_size: dp(100)	
+				font_size: self.height
 				rcid: 'teleRxStatus'
 				text: ' \357\203\231'
 				size_hint_x: 0.2
 				on_release: root.on_nav_left()   				
 			DigitalGauge:
-				rcid: 'left'
+				rcid: 'left_bottom'
 			DigitalGauge:
-				rcid: 'center'
+				rcid: 'center_bottom'
 			DigitalGauge:
-				rcid: 'right'
+				rcid: 'right_bottom'
 			IconButton:
 				color: [0.2, 0.2, 0.2, 1.0]
-				font_size: dp(100)
+				font_size: self.height
 				rcid: 'teleRxStatus'
 				text: '\357\203\232 '
 				size_hint_x: 0.2

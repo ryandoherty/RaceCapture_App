@@ -1,6 +1,8 @@
 #!/usr/bin/python
-__version__ = "1.2.4"
+__version__ = "1.3.0"
 import sys
+import os
+
 if __name__ == '__main__' and sys.platform == 'win32':
     from multiprocessing import freeze_support
     freeze_support()
@@ -83,18 +85,31 @@ class RaceCaptureApp(App):
 
     use_kivy_settings = False
 
+    base_dir = None
+
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
+
+        # We do this because when this app is bundled into a standalone app
+        # by pyinstaller we must reference all files by their absolute paths
+        # sys._MEIPASS is provided by pyinstaller
+        if getattr(sys, 'frozen', False):
+            self.base_dir = sys._MEIPASS
+        else:
+            self.base_dir = os.path.dirname(os.path.abspath(__file__))
+
         #self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)
-        self.settings = SystemSettings(self.user_data_dir)
-        self._data_bus = DataBusFactory().create_standard_databus(self.settings.systemChannels)        
+        self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
+        self._data_bus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
+        self.settings.runtimeChannels.data_bus = self._data_bus        
 
         Window.bind(on_key_down=self._on_keyboard_down)
         self.register_event_type('on_tracks_updated')
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
-        self.trackManager = TrackManager(user_dir=self.user_data_dir)
+        self.trackManager = TrackManager(user_dir=self.user_data_dir, base_dir=self.base_dir)
+
 
     def _on_keyboard_down(self, keyboard, keycode, *args):
         if keycode == 27:
@@ -122,7 +137,7 @@ class RaceCaptureApp(App):
         self.settings.userPrefs.set_pref('preferences', 'first_time_setup', False)
         
     def loadCurrentTracksSuccess(self):
-        print('Curent Tracks Loaded')
+        print('Current Tracks Loaded')
         Clock.schedule_once(lambda dt: self.notifyTracksUpdated())            
 
     def loadCurrentTracksError(self, details):
@@ -173,8 +188,12 @@ class RaceCaptureApp(App):
             self._serial_warning()
 
     def on_write_config_complete(self, result):
+        self.showActivity("Writing completed")
         self.rc_config.stale = False
+        self.dataBusPump.meta_is_stale()
         Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_written'))
+        Clock.schedule_once(lambda dt: self.showActivity(''), 5)
+        
 
     def on_write_config_error(self, detail):
         alertPopup('Error Writing', 'Could not write configuration:\n\n' + str(detail))
@@ -261,7 +280,8 @@ class RaceCaptureApp(App):
                                 rcpConfig=self.rc_config,
                                 rc_api=self._rc_api,
                                 dataBusPump=self.dataBusPump,
-                                settings=self.settings)
+                                settings=self.settings,
+                                base_dir=self.base_dir)
         configView.bind(on_read_config=self.on_read_config)
         configView.bind(on_write_config=self.on_write_config)
         configView.bind(on_run_script=self.on_run_script)
@@ -282,7 +302,7 @@ class RaceCaptureApp(App):
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
 
         analysisView = AnalysisView(name='analysis', data_bus=self._data_bus, settings=self.settings)
-        preferences_view = PreferencesView(self.settings, name='preferences')
+        preferences_view = PreferencesView(self.settings, name='preferences', base_dir=self.base_dir)
 
         screenMgr = kvFind(self.root, 'rcid', 'main')
 
