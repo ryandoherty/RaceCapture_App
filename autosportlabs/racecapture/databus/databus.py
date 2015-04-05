@@ -155,6 +155,9 @@ class DataBusPump(object):
             self._sample_thread = Thread(target=self.sample_worker)
             self._sample_thread.daemon = True
             self._sample_thread.start()
+        else:
+            #we're already running, refresh channel meta data
+            self.meta_is_stale()
 
     def on_meta(self, meta_json):
         metas = self.sample.metas
