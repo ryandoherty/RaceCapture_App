@@ -9,12 +9,15 @@ __all__ = ('is_mobile_platform', 'intersection', 'difference', 'curry', 'strtotu
            'is_color_transparent', 'boundary', 'dist',
            'deprecated', 'SafeList',
            'interpolate', 'OrderedDict', 'kvFind', 'kvFindClass', 'kvPrintAttr',
-           'breadth_first', 'walk_tree', 'filter_tree', 'kvquery', 'pct_h', 'pct_w')
+           'breadth_first', 'walk_tree', 'filter_tree', 'kvquery', 'pct_h', 'pct_w', 'time_to_epoch')
 
+import time
+import calendar
 from re import match, split
 from UserDict import DictMixin
 from kivy.core.window import Window
 from kivy import platform
+from datetime import datetime
 
 def is_mobile_platform():
     return True if platform == 'android' or platform == 'ios' else False
@@ -32,7 +35,10 @@ def boundary(value, minvalue, maxvalue):
     '''Limit a value between a minvalue and maxvalue'''
     return min(max(value, minvalue), maxvalue)
 
-
+def time_to_epoch(timestamp):
+    epoch = int(calendar.timegm(datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").timetuple()))
+    return epoch
+    
 def intersection(set1, set2):
     '''Return intersection between 2 list'''
     return filter(lambda s: s in set2, set1)
@@ -42,7 +48,6 @@ def difference(set1, set2):
     '''Return difference between 2 list'''
     return filter(lambda s: s not in set2, set1)
 
-
 def curry(fn, *cargs, **ckwargs):
     '''Change the function signature to pass new variable.'''
 
@@ -51,7 +56,6 @@ def curry(fn, *cargs, **ckwargs):
         d.update(fkwargs)
         return fn(*(cargs + fargs), **d)
     return call_fn
-
 
 def interpolate(value_from, value_to, step=10):
     '''Interpolate a value to another. Can be useful to smooth some transition.
