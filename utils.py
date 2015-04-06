@@ -36,8 +36,7 @@ def boundary(value, minvalue, maxvalue):
     return min(max(value, minvalue), maxvalue)
 
 def time_to_epoch(timestamp):
-    epoch = int(calendar.timegm(datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").timetuple()))
-    return epoch
+    return int(calendar.timegm(datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").timetuple()))
     
 def intersection(set1, set2):
     '''Return intersection between 2 list'''
