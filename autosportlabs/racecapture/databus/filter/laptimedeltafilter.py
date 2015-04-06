@@ -1,6 +1,7 @@
 
 class LaptimeDeltaFilter(object):
-    """Update the DeltaTime if BestLap and a reference lap time is available. 
+    """Update the DeltaTime if BestLap and a reference lap time is available.
+    DeltaTime is in seconds: positive value means you are slower than fast lap 
     The Reference Lap is based on the current predicted lap time, or if not available, the 
     last lap time.
     
@@ -30,5 +31,5 @@ class LaptimeDeltaFilter(object):
         reference_laptime = laptime if predtime == None else predtime
         delta_time = 0.0
         if reference_laptime and best_laptime:
-            delta_time = reference_laptime - best_laptime
+            delta_time = (reference_laptime - best_laptime) * 60.0
         channel_data[LaptimeDeltaFilter.LAP_DELTA_KEY] = delta_time
