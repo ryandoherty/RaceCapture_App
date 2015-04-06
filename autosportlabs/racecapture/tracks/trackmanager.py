@@ -4,7 +4,6 @@ import copy
 import errno
 import string
 import logging
-from dateutil.parser import *
 from threading import Thread, Lock
 from urlparse import urljoin, urlparse
 import urllib2
@@ -12,7 +11,7 @@ import os
 import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
 from kivy.logger import Logger
-        
+from utils import time_to_epoch
 class Venue:
     venueId = None
     uri = None
@@ -54,7 +53,7 @@ class TrackMap:
         short_id = 0
         if self.createdAt is not None:
             try:
-                short_id = int(time.mktime(parse(self.createdAt).timetuple()))
+                short_id = time_to_epoch(self.createdAt)
             except:
                 pass
         return short_id
