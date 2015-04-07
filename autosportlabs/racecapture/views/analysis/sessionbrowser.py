@@ -44,5 +44,13 @@ class SessionBrowser(BoxLayout):
         self.ids.sessions.add_node(node, session_node)
         return node
 
-    
+    def clear_sessions(self):
+        tree_view = self.ids.sessions
+        nodes = []
+        for node in tree_view.iterate_all_nodes(tree_view.get_root()):
+            nodes.append(node)
+            
+        for node in nodes:
+            tree_view.remove_node(node)
+            
 

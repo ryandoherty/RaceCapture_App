@@ -5,7 +5,17 @@
 		id: screens
 		AddStreamSelectView:
 			id: streamSelectScreen
-		
+			name: 'stream_select'
+        CloudConnectView:
+            id: cloudConnectScreen
+            name: 'cloud_connect'
+        WirelessConnectView:
+            id: wirelessConnectScreen
+            name: 'wireless_connect'
+		FileConnectView:
+		    id: fileConnectScreen
+		    name: 'file_connect'
+        
 <AddStreamSelectView>:
 	GridLayout:
 		size_hint_y: 0.9
@@ -30,4 +40,65 @@
 		font_size: root.height * 0.1
 		font_name: 'resource/fonts/ASL_regular.ttf'
 		text: 'choose a stream to connect'
+		
+<FileConnectView>:
+    BoxLayout:
+        orientation: 'vertical'
+        LogImportWidget:
+            id: log_import
+        
+<CloudConnectView>:
+    Label:
+        text: 'Cloud connect view'
+        
+<WirelessConnectView>:
+    Label:
+        text: 'Wireless connect view'
+		
+<LogImportWidget>:
+    size: root.size
+    BoxLayout:
+        spacing: dp(5)
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: 0.25
+            orientation: 'horizontal'
+            BoxLayout:
+                orientation: 'vertical'
+                Label:
+                    text: 'Datalog Location'
+                Label:
+                    text: 'Session Name'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    TextInput:
+                        id: log_path
+                        multiline: False
+                    IconButton:
+                        id: log_open
+                        text: '\357\204\225'
+                        rcid: 'opendatalog'
+                        on_release: root.select_log()
+                TextInput:
+                    id: session_name
+        Label:
+            size_hint_y: .1
+            size_hint_x: .1
+            text: 'Notes'
+        TextInput:
+            id: session_notes
+            size_hint_y: 0.35
+        Button:
+            size_hint_x: 0.3
+            size_hint_y: 0.1
+            text: 'Begin Import'
+            on_release: root.load_log()
+        Label:
+            size_hint_y: .1
+            id: current_status
+        ProgressBar:
+            id: log_load_progress
+            size_hint_y: .1
 		
