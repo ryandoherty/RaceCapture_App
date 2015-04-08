@@ -1,0 +1,20 @@
+#:kivy 1.8
+<CustomizeChannelsView>:
+    orientation: 'vertical'
+    ScreenManager:
+        id: screens
+        CurrentChannelsView:
+            id: currentChannelsView
+            name: 'current_channels'
+        AddChannelView:
+            id: addChannelView
+            name: 'add_channel'
+
+            
+<CurrentChannelsView>:
+    Label:
+        text: 'Current Channels'
+
+<AddChannelView>:
+    Label:
+        text: 'Add Channel'

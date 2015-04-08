@@ -4,15 +4,17 @@ from kivy.app import Builder
 from kivy.uix.anchorlayout import AnchorLayout
 from iconbutton import IconButton
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
+from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 from kivy.uix.popup import Popup
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 
 class AnalysisWidget(AnchorLayout):
     settings = None
-
+    datastore = None
     def __init__(self, **kwargs):
         super(AnalysisWidget, self).__init__(**kwargs)
         self.settings = kwargs.get('settings')
+        self.datastore = kwargs.get('datastore')
     
     def on_options(self, *args):
         pass    
@@ -27,20 +29,20 @@ class ChannelAnalysisWidget(AnalysisWidget):
         pass
     
     def on_options(self, *args):
-        self.showChannelSelectDialog()
+        self.showCustomizeDialog()
         
-    def showChannelSelectDialog(self):
-        content = ChannelSelectView(settings=self.settings)
-        content.bind(on_channel_selected=self.channel_selected)
-        content.bind(on_channel_cancel=self._dismiss_popup)
+    def showCustomizeDialog(self):
+        content = CustomizeChannelsView(settings=self.settings, datastore=self.datastore)
+        content.bind(on_channels_customized=self.channels_customized)
 
-        popup = Popup(title="Select Channel", content=content, size_hint=(0.5, 0.7))
+        popup = Popup(title="Customize Channels", content=content, size_hint=(0.7, 0.7))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
     
-    def channel_selected(self, instance, value):
-        self.dispatch('on_channel_selected', value)
+    def channels_customized(self, instance, value):
+        print("channels customized")
+#        self.dispatch('on_channel_selected', value)
         self._dismiss_popup()
 
     def popup_dismissed(self, *args):

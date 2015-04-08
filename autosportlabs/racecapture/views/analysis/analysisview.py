@@ -105,6 +105,7 @@ class AnalysisView(Screen):
         self.init_datastore()
         mainchart = self.ids.mainchart
         mainchart.settings = self._settings
+        mainchart.datastore = self._datastore
 
     def on_channel_selected(self, instance, value):
         if value is not None:
@@ -116,7 +117,6 @@ class AnalysisView(Screen):
         if cache != None:
             point = cache[marker.data_index]
             self.ids.analysismap.update_reference_mark(source, point)
-        
         
     def _do_query(self, instance, channel):
         lap = 3
