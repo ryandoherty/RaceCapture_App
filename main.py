@@ -29,6 +29,7 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
     from autosportlabs.racecapture.views.tracks.tracksview import TracksView
     from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
+    from autosportlabs.racecapture.views.status.statusview import StatusView
     from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
     from autosportlabs.racecapture.views.analysis.analysisview import AnalysisView
     from autosportlabs.racecapture.views.preferences.preferences import PreferencesView
@@ -39,6 +40,7 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
     from toolbarview import ToolbarView
+    from kivy.modules import inspector
 
 from kivy.app import App, Builder
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig
@@ -294,6 +296,10 @@ class RaceCaptureApp(App):
         rcComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
         rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
 
+        status_view = StatusView(name='status',
+                                rcp_api=self._rc_api
+                                )
+
         tracksView = TracksView(name='tracks')
 
         dashView = DashboardView(name='dash', dataBus=self._data_bus, settings=self.settings)
@@ -321,17 +327,21 @@ class RaceCaptureApp(App):
         screenMgr.add_widget(dashView)
         screenMgr.add_widget(analysisView)
         screenMgr.add_widget(preferences_view)
+        screenMgr.add_widget(status_view)
 
         self.mainViews = {'config' : configView,
                           'tracks': tracksView,
                           'dash': dashView,
                           'analysis': analysisView,
-                          'preferences': preferences_view}
+                          'preferences': preferences_view,
+                          'status': status_view
+                          }
 
         self.screenMgr = screenMgr
         self.configView = configView
         self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')
         self.check_first_time_setup()
+        inspector.create_inspector(Window, self.screenMgr)
 
     def check_first_time_setup(self):
         if self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'True':

@@ -68,16 +68,16 @@ class RcpApi:
         self._enable_autodetect.set()
 
     def enable_autorecover(self):
-        print("Enabling auto recover")
+        #print("Enabling auto recover")
         self._enable_autodetect.set()
 
     def disable_autorecover(self):
-        print("Disabling auto recover")
+        #print("Disabling auto recover")
         self._enable_autodetect.clear()
         
     def recover_connection(self):
         if self._enable_autodetect.is_set():
-            print("attempting to recover connection")
+            #print("attempting to recover connection")
             self.run_auto_detect()
 
     def _start_message_rx_worker(self):
@@ -87,7 +87,7 @@ class RcpApi:
         self._msg_rx_thread.start()
 
     def stop_message_rx_worker(self):
-        print('Stopping msg rx worker')
+        #print('Stopping msg rx worker')
         self._running.clear()
         self._msg_rx_thread.join()
     
@@ -138,7 +138,7 @@ class RcpApi:
             listeners.discard(callback)
             
     def msg_rx_worker(self):
-        print('msg_rx_worker started')
+        #print('msg_rx_worker started')
         comms = self.comms
         error_count = 0
         while self._running.is_set():
@@ -159,33 +159,34 @@ class RcpApi:
                                 try:
                                     listener(msgJson)
                                 except Exception as e:
-                                    print('Message Listener Exception for')
-                                    traceback.print_exc()
+                                    #print('Message Listener Exception for')
+                                    #traceback.print_exc()
+                                    pass
                             break
                     msg = ''
             except PortNotOpenException:
-                print("Port not open...")
+                #print("Port not open...")
                 msg=''
                 sleep(1.0)
             except Exception:
-                print('Message rx worker exception: {} | {}'.format(msg, str(Exception)))
-                traceback.print_exc()
+                #print('Message rx worker exception: {} | {}'.format(msg, str(Exception)))
+                #traceback.print_exc()
                 msg = ''
                 error_count += 1
                 if error_count > 5:
-                    print("Too many Rx exceptions; re-opening connection")
+                    #print("Too many Rx exceptions; re-opening connection")
                     self.recover_connection()
                     sleep(5)
                 else:
                     sleep(0.25)
                     
-        print("RxWorker exiting")
+        #print("RxWorker exiting")
                     
     def rcpCmdComplete(self, msgReply):
         self.cmdSequenceQueue.put(msgReply)
                 
     def recoverTimeout(self):
-        print('POKE')
+        #print('POKE')
         self.comms.write_message(' ')
 
     def notifyProgress(self, count, total):
@@ -219,7 +220,7 @@ class RcpApi:
                 failCallback = command.failCallback
                 comms = self.comms
                 
-                print('Execute Sequence begin')
+                #print('Execute Sequence begin')
                 
                 if not comms.isOpen(): self.run_auto_detect()
                         
@@ -256,14 +257,14 @@ class RcpApi:
                                     result = q.get(True, self.msg_rx_timeout)
                                     msgName = result.keys()[0]
                                     if not msgName == name:
-                                        print('rx message did not match expected name ' + str(name) + '; ' + str(msgName))
+                                        #print('rx message did not match expected name ' + str(name) + '; ' + str(msgName))
                                         result = None
                                 except Exception as e:
-                                    print('Read message timeout ' + str(e))
+                                    #print('Read message timeout ' + str(e))
                                     self.recoverTimeout()
                                     retry += 1
                             if not result:
-                                print('Level 2 retry for (' + str(level2Retry) + ') ' + name)
+                                #print('Level 2 retry for (' + str(level2Retry) + ') ' + name)
                                 level2Retry += 1
         
         
@@ -284,15 +285,16 @@ class RcpApi:
                 except CommsErrorException:
                     self.recover_connection()
                 except Exception as detail:
-                    print('Command sequence exception: ' + str(detail))
-                    traceback.print_exc()
+                    #print('Command sequence exception: ' + str(detail))
+                    #traceback.print_exc()
                     failCallback(detail)
                     self.recover_connection()
 
-                print('Execute Sequence complete')
+                #print('Execute Sequence complete')
                 
             except Exception as e:
-                print('Execute command exception ' + str(e))
+                #print('Execute command exception ' + str(e))
+                pass
                 
     def sendCommand(self, cmd):
         try:
@@ -497,10 +499,13 @@ class RcpApi:
 
     def setScriptPage(self, scriptPage, page, mode):
         self.sendCommand({'setScriptCfg': {'data':scriptPage,'page':page, 'mode':mode}})
+
+    def getStatus(self):
+        self.sendGet('getStatus', None)
         
     def sequenceWriteScript(self, scriptCfg, cmdSequence):
         page = 0
-        print(str(scriptCfg))
+        #print(str(scriptCfg))
         script = scriptCfg['scriptCfg']['data']
         while True:
             if len(script) >= 256:
@@ -582,7 +587,7 @@ class RcpApi:
         self._queue_multiple(cmd_sequence, 'calImu', winCallback, failCallback) 
         
     def get_meta(self):
-        print("sending meta")
+        #print("sending meta")
         self.sendCommand({'getMeta':None})
         
     def sample(self, include_meta=False):
@@ -607,7 +612,7 @@ class RcpApi:
             version_result_event.set()
             
         def on_ver_fail(value):
-            print('on_ver_fail')
+            #print('on_ver_fail')
             version_result_event.set()
         
         while True:
@@ -615,7 +620,7 @@ class RcpApi:
                 self._auto_detect_event.wait()
                 self._auto_detect_event.clear()
                 self._enable_autodetect.wait()
-                print("Starting auto-detect")
+                #print("Starting auto-detect")
                 
                 comms = self.comms
                 if comms and comms.isOpen():
@@ -630,11 +635,11 @@ class RcpApi:
                 else:
                     ports = comms.get_available_ports()
         
-                print "Searching for device on all ports"
+                #print "Searching for device on all ports"
                 testVer = VersionConfig()
                 for p in ports:
                     try:
-                        print('Trying' + str(p))
+                        #print('Trying' + str(p))
                         if self.detect_activity_callback: self.detect_activity_callback(str(p))
                         comms.port = p
                         comms.open()
@@ -647,29 +652,31 @@ class RcpApi:
                                 break #we found something!
                         else:
                             try:
-                                print ('Giving up on ' + str(p))
+                                #print ('Giving up on ' + str(p))
                                 comms.close()
                             finally:
                                 pass
         
                     except Exception as detail:
-                        print('Not found on ' + str(p) + " " + str(detail))
+                        #print('Not found on ' + str(p) + " " + str(detail))
                         try:
                             comms.close()
                         finally:
                             pass
         
                 if version_result.version_json != None:
-                    print "Found device version " + testVer.toString() + " on port:", comms.port
+                    #print "Found device version " + testVer.toString() + " on port:", comms.port
                     self.detect_win(testVer)
                 else:
-                    print('Did not find device')
+                    #print('Did not find device')
                     comms.close()
                     comms.port = None
                     if self.detect_fail_callback: self.detect_fail_callback()
             except Exception as e:
-                print ('Error running auto detect: ' + str(e))
-                traceback.print_exc()
+                #print ('Error running auto detect: ' + str(e))
+                #traceback.print_exc()
+                pass
             finally: 
-                print("auto detect finished. port=" + str(comms.port))
+                #print("auto detect finished. port=" + str(comms.port))
+                pass
             
