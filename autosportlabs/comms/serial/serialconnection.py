@@ -18,7 +18,7 @@ class SerialConnection():
         print("getting available ports")
         ports = [x[0] for x in list_ports.comports()]
         ports.sort()
-        filtered_ports = filter(lambda port: not port.startswith('/dev/ttyS'), ports)
+        filtered_ports = filter(lambda port: not port.startswith('/dev/ttyS') and not port.startswith('/dev/cu.Bluetooth-Incoming-Port'), ports)
         return filtered_ports
             
     def isOpen(self):
