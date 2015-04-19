@@ -217,6 +217,15 @@ class RaceCaptureApp(App):
     def on_read_config_error(self, detail):
         alertPopup('Error Reading', 'Could not read configuration:\n\n' + str(detail))
 
+    def on_get_status(self):
+        try:
+            self._rc_api.get_rcp_status(self.on_read_status_complete, self.on_read_status_error)
+        except:
+            logging.exception('')
+            self._serial_warning()
+
+    def on_read_status_complete(self, status):
+        self.status_view.dispatch('on_status_updated', )
 
     def on_tracks_updated(self, track_manager):
         for view in self.mainViews.itervalues():
@@ -299,6 +308,7 @@ class RaceCaptureApp(App):
         status_view = StatusView(name='status',
                                 rcp_api=self._rc_api
                                 )
+        status_view.bind(on_status_requested)
 
         tracksView = TracksView(name='tracks')
 
@@ -339,6 +349,7 @@ class RaceCaptureApp(App):
 
         self.screenMgr = screenMgr
         self.configView = configView
+        self.status_view = status_view
         self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')
         self.check_first_time_setup()
         inspector.create_inspector(Window, self.screenMgr)

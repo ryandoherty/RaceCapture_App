@@ -16,10 +16,19 @@ from autosportlabs.racecapture.views.status.components.track import *
 
 Builder.load_file('autosportlabs/racecapture/views/status/statusview.kv')
 
+# Simple extension of Kivy's TreeViewLabel so we can add on our own properties
+# to it for easier view tracking
 class LinkedTreeViewLabel(TreeViewLabel):
     view = None
 
+
+# Shows RCP's entire status, getting the values by firing an 'on_status_requested' event
+# that is heard by other code that talks to RCP. Data is then returned back to this
+# class asynchronously.
 class StatusView(Screen):
+
+    #JSON object that contains the status of RCP
+    status = None
 
     menu_items = {
         'GPS': {'view': GPSStatusView, 'instance': None},
@@ -36,10 +45,11 @@ class StatusView(Screen):
     def __init__(self, **kwargs):
         super(StatusView, self).__init__(**kwargs)
         self._content_container = self.ids.content
-        self.rc_api = kwargs.get('rc_api')
         self.register_event_type('on_tracks_updated')
+        self.register_event_type('on_status_requested')
 
         self._build_menu()
+        self.dispatch('on_status_requested')
 
     def _build_menu(self):
         menu_node = self.ids.menu
@@ -56,13 +66,24 @@ class StatusView(Screen):
         view_info = self.menu_items[value.text]
 
         if not view_info['instance']:
-            view = view_info['view'](title=value.text)
-            view_info['instance'] = view
-        else:
-            view = view_info['instance']
+            view_info['instance'] = view_info['view'](self.status)
 
-        self._content_container.add_widget(view)
+        self._content_container.add_widget(view_info['instance'])
+
+    def update(self):
+        #loop through views, update with new status
+        for item, config in self.menu_items.iteritems():
+            if config['instance']:
+                config['instance'].update_status(self.status)
+
+    def on_status_updated(self, status):
+        self.status = status
+        self.update()
+        pass
 
     def on_tracks_updated(self, track_manager):
+        pass
+
+    def on_status_requested(self):
         pass
 

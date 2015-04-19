@@ -349,8 +349,11 @@ class RcpApi:
                               RcpCmd('trackDb',     self.getTrackDb)
                            ]
                 
-        self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)            
-        
+        self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)
+
+    def get_rcp_status(self, success_cb, error_cb):
+        self.executeSingle(RcpCmd('getStatus', self.getStatus), success_cb, error_cb)
+
     def writeRcpCfg(self, cfg, winCallback = None, failCallback = None):
         cmdSequence = []
         
