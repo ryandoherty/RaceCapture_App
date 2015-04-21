@@ -48,6 +48,48 @@ class StatusView(Screen):
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_status_requested')
 
+        self.status ={
+            "system":{
+                "model":'RCP',
+                "ver_major":2,
+                "ver_minor":8,
+                "ver_bugfix":0,
+                "serial":'45FGEJ',
+                "uptime":1429478284000
+            },
+            "GPS":{
+                "init":1,
+                "qual": 1,
+                "lat": 39.536569,
+                "lon": -122.336868,
+                "sats": 4,
+                "dop": 1.2
+            },
+            "cell":{
+                "init": 3,
+                "IMEI": '23r5jkdsfj34f',
+                "sig_str": 3,
+                "number":'4085631823'
+            },
+            "bt":{
+                "init": 2,
+            },
+            "logging":{
+                "status": 2,
+                "started": 1429478284000
+            },
+            "track":{
+                "status": 2,
+                "trackId": 1429478284000,
+                "inLap": 0,
+                "armed": 1
+            },
+            "telemetry" :{
+                "status": 2,
+                "started": 1429478284000
+            }
+        }
+
         self._build_menu()
         self.dispatch('on_status_requested')
 

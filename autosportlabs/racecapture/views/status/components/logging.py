@@ -11,5 +11,6 @@ class LoggingStatusView(BaseComponentStatusView):
         super(LoggingStatusView, self).__init__(self.title, status)
 
     def render(self):
+
         pass
 
