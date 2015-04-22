@@ -5,22 +5,15 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.uix.treeview import TreeView, TreeViewLabel
+from kivy.uix.label import Label
 from utils import *
-from autosportlabs.racecapture.views.status.components.gps import *
-from autosportlabs.racecapture.views.status.components.bluetooth import *
-from autosportlabs.racecapture.views.status.components.cellular import *
-from autosportlabs.racecapture.views.status.components.logging import *
-from autosportlabs.racecapture.views.status.components.system import *
-from autosportlabs.racecapture.views.status.components.telemetry import *
-from autosportlabs.racecapture.views.status.components.track import *
 
 Builder.load_file('autosportlabs/racecapture/views/status/statusview.kv')
 
 # Simple extension of Kivy's TreeViewLabel so we can add on our own properties
 # to it for easier view tracking
 class LinkedTreeViewLabel(TreeViewLabel):
-    view = None
-
+    id = None
 
 # Shows RCP's entire status, getting the values by firing an 'on_status_requested' event
 # that is heard by other code that talks to RCP. Data is then returned back to this
@@ -29,15 +22,40 @@ class StatusView(Screen):
 
     #JSON object that contains the status of RCP
     status = None
+    selected_item = None
 
-    menu_items = {
-        'GPS': {'view': GPSStatusView, 'instance': None},
-        'Telemetry': {'view': TelemetryStatusView, 'instance': None},
-        'Track': {'view': TrackStatusView, 'instance': None},
-        'Logging': {'view': LoggingStatusView, 'instance': None},
-        'Bluetooth': {'view': BluetoothStatusView, 'instance': None},
-        'Cellular': {'view': CellularStatusView, 'instance': None},
-        'System': {'view': SystemStatusView, 'instance': None},
+    menu_keys = {
+        "system": "System Status",
+        "GPS": "GPS",
+        "cell": "Cellular",
+        "bt": "Bluetooth",
+        "logging": "Logging",
+        "track": "Track",
+        "telemetry": "Telemetry"
+    }
+
+    enum_keys = {
+        'system': {
+
+        },
+        'GPS': {
+
+        },
+        'cell': {
+
+        },
+        'bt': {
+
+        },
+        'logging': {
+
+        },
+        'track': {
+
+        },
+        'telemetry': {
+
+        }
     }
 
     menu_select_color = [1.0,0,0,0.6]
@@ -87,6 +105,9 @@ class StatusView(Screen):
             "telemetry" :{
                 "status": 2,
                 "started": 1429478284000
+            },
+            "unknown": {
+                'foo':'bar'
             }
         }
 
@@ -96,31 +117,57 @@ class StatusView(Screen):
     def _build_menu(self):
         menu_node = self.ids.menu
 
-        for item, config in self.menu_items.iteritems():
-            label = LinkedTreeViewLabel(text=item)
+        for item, config in self.status.iteritems():
+            text = self.menu_keys[item] if item in self.menu_keys else item
+
+            label = LinkedTreeViewLabel(text=text)
+
+            label.id = item
             label.color_selected = self.menu_select_color
             menu_node.add_node(label)
 
         menu_node.bind(selected_node=self._on_menu_select)
 
     def _on_menu_select(self, instance, value):
-        self._content_container.clear_widgets()
-        view_info = self.menu_items[value.text]
-
-        if not view_info['instance']:
-            view_info['instance'] = view_info['view'](self.status)
-
-        self._content_container.add_widget(view_info['instance'])
+        self.selected_item = value.id
+        self.update()
 
     def update(self):
-        #loop through views, update with new status
-        for item, config in self.menu_items.iteritems():
-            if config['instance']:
-                config['instance'].update_status(self.status)
+        if self.selected_item in self.menu_keys:
+            text = self.menu_keys[self.selected_item]
+        else:
+            text = self.selected_item
+
+        self.ids.name.text = text
+
+        function_name = 'render_' + self.selected_item
+
+        #Generic way of not having to create a long switch or if/else block
+        #to call each render function
+        if function_name in dir(self):
+            getattr(self, function_name)()
+
+    def render_system(self):
+        version = '.'.join(
+            [
+                str(self.status['system']['ver_major']),
+                str(self.status['system']['ver_minor']),
+                str(self.status['system']['ver_bugfix'])
+            ]
+            )
+
+
+        version_label = Label(text='Version')
+        version_number = Label(text=version)
+        self.ids.grid.add_widget(version_label)
+        self.ids.grid.add_widget(version_number)
 
     def on_status_updated(self, status):
         self.status = status
         self.update()
+        pass
+
+    def on_status_requested(self):
         pass
 
     def on_tracks_updated(self, track_manager):

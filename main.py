@@ -308,7 +308,7 @@ class RaceCaptureApp(App):
         status_view = StatusView(name='status',
                                 rcp_api=self._rc_api
                                 )
-        status_view.bind(on_status_requested)
+        status_view.bind(on_status_requested = self.on_get_status)
 
         tracksView = TracksView(name='tracks')
 
