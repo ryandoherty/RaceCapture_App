@@ -152,7 +152,7 @@ class RcpApi:
                     self.on_rx(True)
                     error_count = 0
                     for messageName in msgJson.keys():
-                        #print('processing message ' + messageName)
+                    #    print('processing message ' + messageName)
                         listeners = self.msgListeners.get(messageName, None)
                         if listeners:
                             for listener in listeners:
@@ -352,7 +352,7 @@ class RcpApi:
         self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)
 
     def get_rcp_status(self, success_cb, error_cb):
-        self.executeSingle(RcpCmd('getStatus', self.getStatus), success_cb, error_cb)
+        self.executeSingle(RcpCmd('status', self.get_status), success_cb, error_cb)
 
     def writeRcpCfg(self, cfg, winCallback = None, failCallback = None):
         cmdSequence = []
@@ -503,7 +503,7 @@ class RcpApi:
     def setScriptPage(self, scriptPage, page, mode):
         self.sendCommand({'setScriptCfg': {'data':scriptPage,'page':page, 'mode':mode}})
 
-    def getStatus(self):
+    def get_status(self):
         self.sendGet('getStatus', None)
         
     def sequenceWriteScript(self, scriptCfg, cmdSequence):

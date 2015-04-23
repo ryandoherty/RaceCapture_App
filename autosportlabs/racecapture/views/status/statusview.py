@@ -6,6 +6,8 @@ from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.uix.label import Label
+from kivy.properties import ObjectProperty
+from datetime import timedelta
 from utils import *
 
 Builder.load_file('autosportlabs/racecapture/views/status/statusview.kv')
@@ -20,10 +22,16 @@ class LinkedTreeViewLabel(TreeViewLabel):
 # class asynchronously.
 class StatusView(Screen):
 
-    #JSON object that contains the status of RCP
-    status = None
+    #Dict object that contains the status of RCP
+    status = ObjectProperty(None)
+
+    #Currently selected menu item
     selected_item = None
 
+    #Track manager for getting track name
+    track_manager = None
+
+    #Used for building the left side menu
     menu_keys = {
         "system": "System Status",
         "GPS": "GPS",
@@ -34,88 +42,74 @@ class StatusView(Screen):
         "telemetry": "Telemetry"
     }
 
+    #Dict for getting English text for status enums
     enum_keys = {
-        'system': {
-
-        },
         'GPS': {
-
+            'init': [
+                'Not initialized',
+                'Initialized',
+                'Error initializing'
+            ],
+            'qual': [
+                'No fix',
+                'Weak',
+                'Acceptable',
+                'Strong'
+            ]
         },
         'cell': {
-
+            'init': [
+                'Not initialized',
+                'Initialized',
+                'Error initializing'
+            ]
         },
         'bt': {
-
+            'init': [
+                'Not initialized',
+                'Initialized',
+                'Error initializing'
+            ]
         },
         'logging': {
-
+            'status': [
+                'Not logging',
+                'Logging',
+                'Error logging'
+            ]
         },
         'track': {
-
+            'status': [
+                'Attempting to auto-detect',
+                'User defined start/finish point',
+                'Detected'
+            ]
         },
         'telemetry': {
-
+            'status': [
+                'Idle',
+                'Connected',
+                'Connection terminated',
+                'Device ID rejected',
+                'Data connection failed. SIM card is valid, either no data plan is associated or the plan has expired.',
+                'Failed to connect to server',
+                'Data connection failed. APN settings possibly wrong.',
+                'Unable to join cellular network. Bad or missing SIM card.'
+            ]
         }
     }
 
     menu_select_color = [1.0,0,0,0.6]
 
-    def __init__(self, **kwargs):
+    def __init__(self, track_manager, **kwargs):
         super(StatusView, self).__init__(**kwargs)
-        self._content_container = self.ids.content
+        self.track_manager = track_manager
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_status_requested')
 
-        self.status ={
-            "system":{
-                "model":'RCP',
-                "ver_major":2,
-                "ver_minor":8,
-                "ver_bugfix":0,
-                "serial":'45FGEJ',
-                "uptime":1429478284000
-            },
-            "GPS":{
-                "init":1,
-                "qual": 1,
-                "lat": 39.536569,
-                "lon": -122.336868,
-                "sats": 4,
-                "dop": 1.2
-            },
-            "cell":{
-                "init": 3,
-                "IMEI": '23r5jkdsfj34f',
-                "sig_str": 3,
-                "number":'4085631823'
-            },
-            "bt":{
-                "init": 2,
-            },
-            "logging":{
-                "status": 2,
-                "started": 1429478284000
-            },
-            "track":{
-                "status": 2,
-                "trackId": 1429478284000,
-                "inLap": 0,
-                "armed": 1
-            },
-            "telemetry" :{
-                "status": 2,
-                "started": 1429478284000
-            },
-            "unknown": {
-                'foo':'bar'
-            }
-        }
-
-        self._build_menu()
-        self.dispatch('on_status_requested')
-
     def _build_menu(self):
         menu_node = self.ids.menu
+        menu_node.clear_widgets()
 
         for item, config in self.status.iteritems():
             text = self.menu_keys[item] if item in self.menu_keys else item
@@ -139,13 +133,22 @@ class StatusView(Screen):
             text = self.selected_item
 
         self.ids.name.text = text
+        self.ids.grid.clear_widgets()
 
-        function_name = 'render_' + self.selected_item
+        function_name = ('render_' + self.selected_item).lower()
 
         #Generic way of not having to create a long switch or if/else block
         #to call each render function
         if function_name in dir(self):
             getattr(self, function_name)()
+        else:
+            self.render_generic(self.selected_item)
+
+    def render_generic(self, section):
+        status = self.status[section]
+
+        for item, value in status.iteritems():
+            self._add_item(item, value)
 
     def render_system(self):
         version = '.'.join(
@@ -154,25 +157,120 @@ class StatusView(Screen):
                 str(self.status['system']['ver_minor']),
                 str(self.status['system']['ver_bugfix'])
             ]
-            )
+        )
 
+        self._add_item('Version', version)
+        self._add_item('Serial Number', self.status['system']['serial'])
 
-        version_label = Label(text='Version')
-        version_number = Label(text=version)
-        self.ids.grid.add_widget(version_label)
-        self.ids.grid.add_widget(version_number)
+        uptime = timedelta(milliseconds=self.status['system']['uptime'])
+        self._add_item('Uptime', uptime)
 
-    def on_status_updated(self, status):
-        self.status = status
+    def render_gps(self):
+        status = self.status['GPS']
+
+        init_status = self._get_enum_definition('GPS', 'init', status['init'])
+        quality = self._get_enum_definition('GPS', 'qual', status['qual'])
+        location = str(status['lat']) + ', ' + str(status['lon'])
+        satellites = status['sats']
+        dop = status['dop']
+
+        self._add_item('Status', init_status)
+        self._add_item('GPS Quality', quality)
+        self._add_item('Location', location)
+        self._add_item('Satellites', satellites)
+        self._add_item('Dissolution of precision', dop)
+
+    def render_cell(self):
+        status = self.status['cell']
+
+        init_status = self._get_enum_definition('cell', 'init', status['init'])
+        imei = status['IMEI']
+        signal_strength = status['sig_str']
+        number = status['number']
+
+        self._add_item('Status', init_status)
+        self._add_item('IMEI', imei)
+        self._add_item('Signal strength', signal_strength)
+        self._add_item('Phone Number', number)
+
+    def render_bt(self):
+        status = self.status['bt']
+
+        init_status = self._get_enum_definition('bt', 'init', status['init'])
+        self._add_item('Status', init_status)
+
+    def render_logging(self):
+        status = self.status['logging']
+
+        init_status = self._get_enum_definition('logging', 'status', status['status'])
+        duration = timedelta(milliseconds=status['dur'])
+
+        self._add_item('Status', init_status)
+        self._add_item('Logging for', duration)
+
+    def render_telemetry(self):
+        status = self.status['telemetry']
+
+        init_status = self._get_enum_definition('telemetry', 'status', status['status'])
+        duration = timedelta(milliseconds=status['dur'])
+
+        self._add_item('Status', init_status)
+        self._add_item('Logging for', duration)
+
+    def render_track(self):
+        status = self.status['track']
+
+        init_status = self._get_enum_definition('track', 'status', status['status'])
+
+        if status['status'] == 1:
+            track_name = 'User defined'
+        else:
+            if status['trackId'] != 0:
+                track = self.track_manager.findTrackByShortId(status['trackId'])
+
+                if track is None:
+                    track_name = 'Track not found'
+                else:
+                    track_name = track.name
+            else:
+                track_name = 'No track detected'
+
+        in_lap = 'Yes' if status['inLap'] == 1 else 'No'
+        armed = 'Yes' if status['armed'] == 1 else 'No'
+
+        self._add_item('Status', init_status)
+        self._add_item('Track', track_name)
+        self._add_item('In lap', in_lap)
+        self._add_item('Armed', armed)
+
+    def _add_item(self, label, data):
+        label_widget = Label(text=label)
+        data_widget = Label(text=str(data))
+        self.ids.grid.add_widget(label_widget)
+        self.ids.grid.add_widget(data_widget)
+
+    def on_status(self, instance, value):
+        self._build_menu()
+
+        if self.selected_item is None:
+            self.selected_item = 'system'
+
         self.update()
-        pass
+
+    # Generalized function for getting an enum's English
+    # equivalent. If the value is not found, the enum is returned
+    def _get_enum_definition(self, section, subsection, value):
+        val = value
+
+        if section in self.enum_keys and subsection in self.enum_keys[section]:
+            if len(self.enum_keys[section][subsection]) > value:
+                val = self.enum_keys[section][subsection][value]
+
+        return val
 
     def on_status_requested(self):
         pass
 
     def on_tracks_updated(self, track_manager):
-        pass
-
-    def on_status_requested(self):
         pass
 
