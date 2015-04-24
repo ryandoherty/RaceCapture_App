@@ -351,9 +351,6 @@ class RcpApi:
                 
         self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)
 
-    def get_rcp_status(self, success_cb, error_cb):
-        self.executeSingle(RcpCmd('status', self.get_status), success_cb, error_cb)
-
     def writeRcpCfg(self, cfg, winCallback = None, failCallback = None):
         cmdSequence = []
         
@@ -588,6 +585,9 @@ class RcpApi:
         cmd_sequence.append(RcpCmd('calImu', self.sendCalibrateImu))
         cmd_sequence.append(RcpCmd('flashCfg', self.sendFlashConfig))
         self._queue_multiple(cmd_sequence, 'calImu', winCallback, failCallback) 
+        
+    def get_status(self):
+        self.sendCommand({'getStatus':None})
         
     def get_meta(self):
         #print("sending meta")

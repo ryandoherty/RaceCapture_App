@@ -217,20 +217,6 @@ class RaceCaptureApp(App):
     def on_read_config_error(self, detail):
         alertPopup('Error Reading', 'Could not read configuration:\n\n' + str(detail))
 
-    def on_get_status(self, instance, *args):
-        try:
-            self._rc_api.get_rcp_status(self.on_read_status_complete, self.on_read_status_error)
-        except:
-            logging.exception('')
-            self._serial_warning()
-
-    def on_read_status_complete(self, status):
-        print "GOT STATUS"
-        self.status_view.status = status
-
-    def on_read_status_error(self, detail):
-        alertPopup('Error Reading', 'Could not get RaceCapture status\n\n'+ str(detail))
-
     def on_tracks_updated(self, track_manager):
         for view in self.mainViews.itervalues():
             view.dispatch('on_tracks_updated', track_manager)
@@ -310,10 +296,9 @@ class RaceCaptureApp(App):
         rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
 
         status_view = StatusView(name='status',
-                                 track_manager = self.trackManager
+                                 track_manager = self.trackManager,
+                                 rc_api = rcComms
                                 )
-
-        status_view.bind(on_status_requested = self.on_get_status)
 
         tracksView = TracksView(name='tracks')
 
@@ -376,10 +361,10 @@ class RaceCaptureApp(App):
     def rc_detect_win(self, rcpVersion):
         self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
         self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
+        self.status_view.start_status()
 
         if self.rc_config.loaded == False:
             Clock.schedule_once(lambda dt: self.on_read_config(self))
-            Clock.schedule_once(lambda dt: self.on_get_status(self))
         else:
             self.showActivity('Connected')
 

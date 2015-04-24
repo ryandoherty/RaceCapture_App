@@ -1,6 +1,6 @@
 import kivy
 kivy.require('1.8.0')
-
+from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
@@ -22,6 +22,7 @@ class LinkedTreeViewLabel(TreeViewLabel):
 # class asynchronously.
 class StatusView(Screen):
 
+    STATUS_QUERY_INTERVAL = 2.0
     #Dict object that contains the status of RCP
     status = ObjectProperty(None)
 
@@ -104,9 +105,13 @@ class StatusView(Screen):
     def __init__(self, track_manager, **kwargs):
         super(StatusView, self).__init__(**kwargs)
         self.track_manager = track_manager
+        self.rc_api = kwargs.get('rc_api', None)        
         self.register_event_type('on_tracks_updated')
-        self.register_event_type('on_status_requested')
-
+        self.rc_api.addListener('s', self.on_status_updated)
+        
+    def start_status(self):
+        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)        
+        
     def _build_menu(self):
         menu_node = self.ids.menu
         menu_node.clear_widgets()
@@ -126,6 +131,9 @@ class StatusView(Screen):
         self.selected_item = value.id
         self.update()
 
+    def on_status_updated(self, status):
+        self.status = status
+        
     def update(self):
         if self.selected_item in self.menu_keys:
             text = self.menu_keys[self.selected_item]
@@ -267,9 +275,6 @@ class StatusView(Screen):
                 val = self.enum_keys[section][subsection][value]
 
         return val
-
-    def on_status_requested(self):
-        pass
 
     def on_tracks_updated(self, track_manager):
         pass
