@@ -107,9 +107,10 @@ class StatusView(Screen):
         self.track_manager = track_manager
         self.rc_api = kwargs.get('rc_api', None)        
         self.register_event_type('on_tracks_updated')
-        self.rc_api.addListener('s', self.on_status_updated)
+        self.rc_api.addListener('status', self.on_status_updated)
         
     def start_status(self):
+        print("start status")
         Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)        
         
     def _build_menu(self):
