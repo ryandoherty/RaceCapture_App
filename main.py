@@ -295,9 +295,10 @@ class RaceCaptureApp(App):
         rcComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
         rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
 
-        status_view = StatusView(name='status',
-                                 track_manager = self.trackManager,
-                                 rc_api = rcComms
+        status_view = StatusView(
+                                 self.trackManager,
+                                 rcComms,
+                                 name='status',
                                 )
 
         tracksView = TracksView(name='tracks')

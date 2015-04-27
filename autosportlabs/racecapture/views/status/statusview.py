@@ -17,17 +17,18 @@ Builder.load_file('autosportlabs/racecapture/views/status/statusview.kv')
 class LinkedTreeViewLabel(TreeViewLabel):
     id = None
 
-# Shows RCP's entire status, getting the values by firing an 'on_status_requested' event
-# that is heard by other code that talks to RCP. Data is then returned back to this
-# class asynchronously.
+# Shows RCP's entire status, getting the values by polling RCP for its status
 class StatusView(Screen):
 
     STATUS_QUERY_INTERVAL = 2.0
+
     #Dict object that contains the status of RCP
     status = ObjectProperty(None)
 
     #Currently selected menu item
     selected_item = None
+
+    menu_built = False
 
     #Track manager for getting track name
     track_manager = None
@@ -100,22 +101,24 @@ class StatusView(Screen):
         }
     }
 
+    menu_node = None
     menu_select_color = [1.0,0,0,0.6]
 
-    def __init__(self, track_manager, **kwargs):
+    def __init__(self, track_manager, rc_api, **kwargs):
         super(StatusView, self).__init__(**kwargs)
         self.track_manager = track_manager
-        self.rc_api = kwargs.get('rc_api', None)        
+        self.rc_api = rc_api
         self.register_event_type('on_tracks_updated')
         self.rc_api.addListener('status', self.on_status_updated)
-        
+        self.menu_node = self.ids.menu
+        self.menu_node.bind(selected_node=self._on_menu_select)
+
     def start_status(self):
-        print("start status")
-        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)        
+        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)
         
     def _build_menu(self):
-        menu_node = self.ids.menu
-        menu_node.clear_widgets()
+        if self.menu_built:
+            return
 
         for item, config in self.status.iteritems():
             text = self.menu_keys[item] if item in self.menu_keys else item
@@ -124,18 +127,24 @@ class StatusView(Screen):
 
             label.id = item
             label.color_selected = self.menu_select_color
-            menu_node.add_node(label)
+            node = self.menu_node.add_node(label)
 
-        menu_node.bind(selected_node=self._on_menu_select)
+            if item == 'system':
+                default_node = node
+
+        self.menu_built = True
+
+        self.menu_node.select_node(default_node)
 
     def _on_menu_select(self, instance, value):
         self.selected_item = value.id
         self.update()
 
     def on_status_updated(self, status):
-        self.status = status
+        self.status = status['status']
         
     def update(self):
+
         if self.selected_item in self.menu_keys:
             text = self.menu_keys[self.selected_item]
         else:
@@ -181,7 +190,7 @@ class StatusView(Screen):
         quality = self._get_enum_definition('GPS', 'qual', status['qual'])
         location = str(status['lat']) + ', ' + str(status['lon'])
         satellites = status['sats']
-        dop = status['dop']
+        dop = status['DOP']
 
         self._add_item('Status', init_status)
         self._add_item('GPS Quality', quality)
@@ -260,9 +269,6 @@ class StatusView(Screen):
 
     def on_status(self, instance, value):
         self._build_menu()
-
-        if self.selected_item is None:
-            self.selected_item = 'system'
 
         self.update()
 
