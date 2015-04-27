@@ -147,12 +147,12 @@ class RcpApi:
                 msg = comms.read_message()
                 if msg:
                     
-                    print('msg_rx_worker Rx: ' + str(msg))
+                    #print('msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
                     error_count = 0
                     for messageName in msgJson.keys():
-                    #    print('processing message ' + messageName)
+                        #print('processing message ' + messageName)
                         listeners = self.msgListeners.get(messageName, None)
                         if listeners:
                             for listener in listeners:
@@ -161,7 +161,6 @@ class RcpApi:
                                 except Exception as e:
                                     print('Message Listener Exception for')
                                     traceback.print_exc()
-                                    pass
                             break
                     msg = ''
             except PortNotOpenException:
@@ -294,8 +293,7 @@ class RcpApi:
                 
             except Exception as e:
                 print('Execute command exception ' + str(e))
-                pass
-                
+
     def sendCommand(self, cmd):
         try:
             self.sendCommandLock.acquire()
@@ -304,7 +302,7 @@ class RcpApi:
             comms = self.comms
 
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
-            print('send cmd: ' + cmdStr)
+            #print('send cmd: ' + cmdStr)
             comms.write_message(cmdStr)
         except Exception:
             self.recover_connection()
@@ -678,8 +676,6 @@ class RcpApi:
             except Exception as e:
                 print ('Error running auto detect: ' + str(e))
                 traceback.print_exc()
-                pass
-            finally: 
+            finally:
                 print("auto detect finished. port=" + str(comms.port))
-                pass
-            
+
