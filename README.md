@@ -27,6 +27,14 @@ Dependencies:
 1. install asl_f4_loader in dependencies folder: pip install asl_f4_loader-X.X.X.tar.gz
 1. install pygame (http://www.pygame.org/download.shtml - use correct package for your OSX+Python version)
 
+## Simplified dev install (OS X)
+1. download [Kivy DMG](http://kivy.org/#download) (current is 1.9.0) 
+1. install Kivy into Applications and run symlink script
+1. install [virtualenv](http://www.virtualenv.org)
+1. re-enable setup tools for Kivy virtualenv: `sudo virtualenv /Applications/Kivy.app/Contents/Resources/venv/`
+1. install pip requirements: `/Applications/Kivy.app/Contents/Resources/venv/bin/pip install -r requirements.txt`
+1. run app: `kivy main.py`
+
 ## running (OS X)
 
     /Applications/Kivy.app/Contents/Resources/script main.py
