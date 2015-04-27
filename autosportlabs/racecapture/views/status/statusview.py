@@ -26,15 +26,18 @@ class StatusView(Screen):
     status = ObjectProperty(None)
 
     #Currently selected menu item
-    selected_item = None
+    _selected_item = None
 
-    menu_built = False
+    _menu_built = False
 
     #Track manager for getting track name
     track_manager = None
 
+    #Comms object for communicating with RCP
+    rc_api = None
+
     #Used for building the left side menu
-    menu_keys = {
+    _menu_keys = {
         "system": "System Status",
         "GPS": "GPS",
         "cell": "Cellular",
@@ -45,7 +48,7 @@ class StatusView(Screen):
     }
 
     #Dict for getting English text for status enums
-    enum_keys = {
+    _enum_keys = {
         'GPS': {
             'init': [
                 'Not initialized',
@@ -101,7 +104,7 @@ class StatusView(Screen):
         }
     }
 
-    menu_node = None
+    _menu_node = None
     menu_select_color = [1.0,0,0,0.6]
 
     def __init__(self, track_manager, rc_api, **kwargs):
@@ -109,58 +112,61 @@ class StatusView(Screen):
         self.track_manager = track_manager
         self.rc_api = rc_api
         self.register_event_type('on_tracks_updated')
-        self.rc_api.addListener('status', self.on_status_updated)
-        self.menu_node = self.ids.menu
-        self.menu_node.bind(selected_node=self._on_menu_select)
+        self.rc_api.addListener('status', self._on_status_updated)
+        self._menu_node = self.ids.menu
+        self._menu_node.bind(selected_node=self._on_menu_select)
 
     def start_status(self):
-        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)        
+        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)
         
     def _build_menu(self):
-        if self.menu_built:
+        if self._menu_built:
             return
 
+        default_node = None
+
         for item, config in self.status.iteritems():
-            text = self.menu_keys[item] if item in self.menu_keys else item
+            text = self._menu_keys[item] if item in self._menu_keys else item
 
             label = LinkedTreeViewLabel(text=text)
 
             label.id = item
             label.color_selected = self.menu_select_color
-            node = self.menu_node.add_node(label)
+            node = self._menu_node.add_node(label)
 
             if item == 'system':
                 default_node = node
 
-        self.menu_built = True
+        self._menu_built = True
 
-        self.menu_node.select_node(default_node)
+        if default_node:
+            self._menu_node.select_node(default_node)
 
     def _on_menu_select(self, instance, value):
-        self.selected_item = value.id
+        self._selected_item = value.id
         self.update()
 
-    def on_status_updated(self, status):
+    def _on_status_updated(self, status):
         self.status = status['status']
         
     def update(self):
 
-        if self.selected_item in self.menu_keys:
-            text = self.menu_keys[self.selected_item]
+        if self._selected_item in self._menu_keys:
+            text = self._menu_keys[self._selected_item]
         else:
-            text = self.selected_item
+            text = self._selected_item
 
         self.ids.name.text = text
         self.ids.grid.clear_widgets()
 
-        function_name = ('render_' + self.selected_item).lower()
+        function_name = ('render_' + self._selected_item).lower()
 
         #Generic way of not having to create a long switch or if/else block
         #to call each render function
         if function_name in dir(self):
             getattr(self, function_name)()
         else:
-            self.render_generic(self.selected_item)
+            self.render_generic(self._selected_item)
 
     def render_generic(self, section):
         status = self.status[section]
@@ -269,7 +275,6 @@ class StatusView(Screen):
 
     def on_status(self, instance, value):
         self._build_menu()
-
         self.update()
 
     # Generalized function for getting an enum's English
@@ -277,9 +282,9 @@ class StatusView(Screen):
     def _get_enum_definition(self, section, subsection, value):
         val = value
 
-        if section in self.enum_keys and subsection in self.enum_keys[section]:
-            if len(self.enum_keys[section][subsection]) > value:
-                val = self.enum_keys[section][subsection][value]
+        if section in self._enum_keys and subsection in self._enum_keys[section]:
+            if len(self._enum_keys[section][subsection]) > value:
+                val = self._enum_keys[section][subsection][value]
 
         return val
 
