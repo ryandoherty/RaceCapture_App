@@ -114,7 +114,7 @@ class StatusView(Screen):
         self.menu_node.bind(selected_node=self._on_menu_select)
 
     def start_status(self):
-        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)
+        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)        
         
     def _build_menu(self):
         if self.menu_built:
