@@ -40,7 +40,6 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
     from toolbarview import ToolbarView
-    from kivy.modules import inspector
 
 from kivy.app import App, Builder
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig
@@ -343,7 +342,6 @@ class RaceCaptureApp(App):
         self.status_view = status_view
         self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')
         self.check_first_time_setup()
-        inspector.create_inspector(Window, self.screenMgr)
 
     def check_first_time_setup(self):
         if self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'True':
