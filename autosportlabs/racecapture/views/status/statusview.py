@@ -202,7 +202,7 @@ class StatusView(Screen):
         self._add_item('GPS Quality', quality)
         self._add_item('Location', location)
         self._add_item('Satellites', satellites)
-        self._add_item('Dissolution of precision', dop)
+        self._add_item('Dilution of precision', dop)
 
     def render_cell(self):
         status = self.status['cell']
