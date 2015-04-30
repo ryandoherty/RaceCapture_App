@@ -15,7 +15,7 @@ from fieldlabel import FieldLabel
 Builder.load_file('autosportlabs/racecapture/views/status/statusview.kv')
 
 RAW_STATUS_BGCOLOR_1 = [0  , 0  , 0  , 1.0]
-RAW_STATUS_BGCOLOR_2 = [0.05, 0.05, 0.05, 1.0]
+RAW_STATUS_BGCOLOR_2 = [0.10, 0.10, 0.10, 1.0]
 
 class StatusLabel(FieldLabel):
     backgroundColor = ObjectProperty(RAW_STATUS_BGCOLOR_1)
@@ -203,7 +203,7 @@ class StatusView(Screen):
         self._add_item('Version', version)
         self._add_item('Serial Number', self.status['system']['serial'])
 
-        uptime = timedelta(milliseconds=self.status['system']['uptime'])
+        uptime = timedelta(seconds=(self.status['system']['uptime']/1000))
         self._add_item('Uptime', uptime)
 
     def render_gps(self):
@@ -244,7 +244,7 @@ class StatusView(Screen):
         status = self.status['logging']
 
         init_status = self._get_enum_definition('logging', 'status', status['status'])
-        duration = timedelta(milliseconds=status['dur'])
+        duration = timedelta(seconds=(status['dur']/1000))
 
         self._add_item('Status', init_status)
         self._add_item('Logging for', duration)
@@ -253,7 +253,7 @@ class StatusView(Screen):
         status = self.status['telemetry']
 
         init_status = self._get_enum_definition('telemetry', 'status', status['status'])
-        duration = timedelta(milliseconds=status['dur'])
+        duration = timedelta(seconds=(status['dur']/1000))
 
         self._add_item('Status', init_status)
         self._add_item('Logging for', duration)
