@@ -1,16 +1,30 @@
 import kivy
 kivy.require('1.8.0')
 from kivy.clock import Clock
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.uix.label import Label
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from datetime import timedelta
 from utils import *
+from fieldlabel import FieldLabel
 
 Builder.load_file('autosportlabs/racecapture/views/status/statusview.kv')
+
+RAW_STATUS_BGCOLOR_1 = [0  , 0  , 0  , 1.0]
+RAW_STATUS_BGCOLOR_2 = [0.05, 0.05, 0.05, 1.0]
+
+class StatusLabel(FieldLabel):
+    backgroundColor = ObjectProperty(RAW_STATUS_BGCOLOR_1)
+
+class StatusTitle(StatusLabel):
+    pass
+
+class StatusValue(StatusLabel):
+    pass
 
 # Simple extension of Kivy's TreeViewLabel so we can add on our own properties
 # to it for easier view tracking
@@ -20,6 +34,8 @@ class LinkedTreeViewLabel(TreeViewLabel):
 # Shows RCP's entire status, getting the values by polling RCP for its status
 class StatusView(Screen):
 
+    _bg_current = RAW_STATUS_BGCOLOR_1
+    
     STATUS_QUERY_INTERVAL = 2.0
 
     #Dict object that contains the status of RCP
@@ -85,8 +101,8 @@ class StatusView(Screen):
         },
         'track': {
             'status': [
-                'Attempting to auto-detect',
-                'User defined start/finish point',
+                'Searching',
+                'Fixed start/finish',
                 'Detected'
             ]
         },
@@ -150,14 +166,15 @@ class StatusView(Screen):
         self.status = status['status']
         
     def update(self):
-
+        _bg_current = RAW_STATUS_BGCOLOR_1
+        
         if self._selected_item in self._menu_keys:
             text = self._menu_keys[self._selected_item]
         else:
             text = self._selected_item
 
         self.ids.name.text = text
-        self.ids.grid.clear_widgets()
+        self.ids.statusGrid.clear_widgets()
 
         function_name = ('render_' + self._selected_item).lower()
 
@@ -268,11 +285,19 @@ class StatusView(Screen):
         self._add_item('Armed', armed)
 
     def _add_item(self, label, data):
-        label_widget = Label(text=label)
-        data_widget = Label(text=str(data))
-        self.ids.grid.add_widget(label_widget)
-        self.ids.grid.add_widget(data_widget)
+        label_widget = StatusTitle(text=label)
+        data_widget = StatusValue(text=str(data))
+        self.ids.statusGrid.add_widget(label_widget)
+        self.ids.statusGrid.add_widget(data_widget)
+        if len(self.ids.statusGrid.children) / 2 % 2 == 0:
+            bg_color = RAW_STATUS_BGCOLOR_2
+        else:
+            bg_color = RAW_STATUS_BGCOLOR_1
+            
+        label_widget.backgroundColor = bg_color
+        data_widget.backgroundColor = bg_color        
 
+    
     def on_status(self, instance, value):
         self._build_menu()
         self.update()
