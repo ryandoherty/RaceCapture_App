@@ -174,7 +174,7 @@ class StatusView(Screen):
             text = self._selected_item
 
         self.ids.name.text = text
-        self.ids.statusGrid.clear_widgets()
+        self.ids.status_grid.clear_widgets()
 
         function_name = ('render_' + self._selected_item).lower()
 
@@ -287,9 +287,9 @@ class StatusView(Screen):
     def _add_item(self, label, data):
         label_widget = StatusTitle(text=label)
         data_widget = StatusValue(text=str(data))
-        self.ids.statusGrid.add_widget(label_widget)
-        self.ids.statusGrid.add_widget(data_widget)
-        if len(self.ids.statusGrid.children) / 2 % 2 == 0:
+        self.ids.status_grid.add_widget(label_widget)
+        self.ids.status_grid.add_widget(data_widget)
+        if len(self.ids.status_grid.children) / 2 % 2 == 0:
             bg_color = RAW_STATUS_BGCOLOR_2
         else:
             bg_color = RAW_STATUS_BGCOLOR_1

@@ -42,15 +42,15 @@
                 size_hint_x: 1
                 size_hint_y: 0.1
             ScrollView:
-                id: scrlChan
+                id: scroller
                 size_hint_y: 0.9
                 do_scroll_x:False
                 do_scroll_y:True
                 GridLayout:
-                    id: statusGrid
+                    id: status_grid
                     padding: [self.height * 0.02, self.height * 0.02]
                     row_default_height: root.height * 0.1
                     row_force_default: True
                     size_hint_y: None
-                    height: max(self.minimum_height, scrlChan.height)                                      
+                    height: max(self.minimum_height, scroller.height)                                      
                     cols: 2
