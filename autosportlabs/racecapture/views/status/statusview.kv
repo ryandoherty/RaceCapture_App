@@ -1,0 +1,56 @@
+#:kivy 1.8.0
+
+<StatusLabel>:
+    canvas.before:
+        Color:
+            rgba: self.backgroundColor
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    padding_x: -10
+
+<StatusTitle>:
+    font_size: self.height * 0.5
+    size_hint_x: 0.8
+
+<StatusValue>:
+    font_size: self.height * 0.40
+
+<StatusView>:
+    BoxLayout:
+        orientation: 'horizontal'
+        size_hint_x: 1
+        size_hint_y: 1
+        BoxLayout:
+            size_hint_x: 0.2
+            spacing: 0
+            orientation: 'vertical'
+            spacing: dp(30)
+            TreeView:
+                size_hint_y: 0.9
+                id: menu
+                size_hint: (None, 1)
+                width: dp(200)
+                hide_root: True
+                indent_level: 0
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.8
+            size_hint_y: 1
+            HSeparator:
+                text: 'Loading...'
+                id: name
+                size_hint_x: 1
+                size_hint_y: 0.1
+            ScrollView:
+                id: scroller
+                size_hint_y: 0.9
+                do_scroll_x:False
+                do_scroll_y:True
+                GridLayout:
+                    id: status_grid
+                    row_default_height: root.height * 0.12
+                    row_force_default: True
+                    size_hint_y: None
+                    height: max(self.minimum_height, scroller.height)                                      
+                    cols: 2

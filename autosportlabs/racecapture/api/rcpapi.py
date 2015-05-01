@@ -293,7 +293,7 @@ class RcpApi:
                 
             except Exception as e:
                 print('Execute command exception ' + str(e))
-                
+
     def sendCommand(self, cmd):
         try:
             self.sendCommandLock.acquire()
@@ -347,8 +347,8 @@ class RcpApi:
                               RcpCmd('trackDb',     self.getTrackDb)
                            ]
                 
-        self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)            
-        
+        self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)
+
     def writeRcpCfg(self, cfg, winCallback = None, failCallback = None):
         cmdSequence = []
         
@@ -497,10 +497,13 @@ class RcpApi:
 
     def setScriptPage(self, scriptPage, page, mode):
         self.sendCommand({'setScriptCfg': {'data':scriptPage,'page':page, 'mode':mode}})
+
+    def get_status(self):
+        self.sendGet('getStatus', None)
         
     def sequenceWriteScript(self, scriptCfg, cmdSequence):
         page = 0
-        print(str(scriptCfg))
+        #print(str(scriptCfg))
         script = scriptCfg['scriptCfg']['data']
         while True:
             if len(script) >= 256:
@@ -580,6 +583,9 @@ class RcpApi:
         cmd_sequence.append(RcpCmd('calImu', self.sendCalibrateImu))
         cmd_sequence.append(RcpCmd('flashCfg', self.sendFlashConfig))
         self._queue_multiple(cmd_sequence, 'calImu', winCallback, failCallback) 
+        
+    def get_status(self):
+        self.sendCommand({'getStatus':None})
         
     def get_meta(self):
         print("sending meta")
@@ -670,6 +676,6 @@ class RcpApi:
             except Exception as e:
                 print ('Error running auto detect: ' + str(e))
                 traceback.print_exc()
-            finally: 
+            finally:
                 print("auto detect finished. port=" + str(comms.port))
-            
+
