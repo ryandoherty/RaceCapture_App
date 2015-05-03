@@ -130,7 +130,7 @@ class ConfigView(Screen):
         if not self.loaded:
             Builder.load_file(CONFIG_VIEW_KV)
             Builder.apply(self)
-            Clock.schedule_once(lambda dt: self.createConfigViews(),1.0)
+            self.createConfigViews()
         
     def createConfigViews(self):
         tree = kvFind(self, 'rcid', 'menu')
@@ -146,7 +146,8 @@ class ConfigView(Screen):
                 pass
     
             try:
-                if not value.view:
+                view = value.view
+                if not view:
                     view = value.view_builder()
                     self.configViews.append(view)
                     view.bind(on_config_modified=self.on_config_modified)
@@ -188,10 +189,9 @@ class ConfigView(Screen):
         attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
         attach_node('Wireless', None, lambda: WirelessConfigView(base_dir=self.base_dir))
         attach_node('Telemetry', None, lambda: TelemetryConfigView())
-        attach_node('Scripting', None, create_scripting_view()
-)
+        attach_node('Scripting', None, lambda: create_scripting_view())
         if FIRMWARE_UPDATABLE:
-            attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
+            attach_node('Firmware', None, lambda: FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)

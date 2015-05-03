@@ -8,12 +8,13 @@ from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/gpschannelsview.kv')            
+GPS_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/gpschannelsview.kv'
             
 class GPSChannelsView(BaseConfigView):
     gpsConfig = None
     
     def __init__(self, **kwargs):
+        Builder.load_file(GPS_CHANNELS_VIEW_KV)            
         super(GPSChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)

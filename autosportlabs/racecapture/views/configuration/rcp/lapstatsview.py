@@ -8,12 +8,13 @@ from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/lapstatsview.kv')            
+LAPSTATS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/lapstatsview.kv'
             
 class LapStatsView(BaseConfigView):
     lapConfig = None
     
     def __init__(self, **kwargs):
+        Builder.load_file(LAPSTATS_VIEW_KV)            
         super(LapStatsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
