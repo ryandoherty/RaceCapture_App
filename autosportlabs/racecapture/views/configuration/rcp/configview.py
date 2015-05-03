@@ -138,28 +138,35 @@ class ConfigView(Screen):
         def create_tree(text):
             return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))
     
+        def show_node(node):
+            try:
+                view = node.view
+                if not view:
+                    view = node.view_builder()
+                    self.configViews.append(view)
+                    view.bind(on_config_modified=self.on_config_modified)
+                    node.view = view
+                
+                self.ids.content.clear_widgets()
+                Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
+
+                if self.loaded:
+                    if self.config:
+                        view.dispatch('on_config_updated', self.config)
+                    if self.track_manager:
+                        view.dispatch('on_tracks_updated', self.track_manager)                                    
+                
+            except Exception, e:
+                print e
+            
         def on_select_node(instance, value):
             # ensure that any keyboard is released
             try:
                 self.ids.content.get_parent_window().release_keyboard()
             except:
                 pass
-    
-            try:
-                view = value.view
-                if not view:
-                    view = value.view_builder()
-                    self.configViews.append(view)
-                    view.bind(on_config_modified=self.on_config_modified)
-                    value.view = view
-                
-                self.ids.content.clear_widgets()
-                if self.config and self.loaded:        
-                    view.dispatch('on_config_updated', self.config)                
-                Clock.schedule_once(lambda dt: self.ids.content.add_widget(value.view))
-                
-            except Exception, e:
-                print e
+            #show_node(value)
+            Clock.schedule_once(lambda dt: show_node(value))
             
         def attach_node(text, n, view_builder):
             label = LinkedTreeViewLabel(text=text)
