@@ -97,6 +97,7 @@ class BluetoothConnection(object):
             self.send_stream.write(data)
         except Exception as e:
             print('write error; stream not active ' + str(e))
+            raise
     
     def flushInput(self):
         pass

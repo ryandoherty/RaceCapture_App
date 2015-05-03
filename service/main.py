@@ -28,7 +28,10 @@ last_keep_alive_time = time()
 
 def tx_api_callback(message, *args):
     message = message[2]
-    bt_connection.write(message)
+    try:
+        bt_connection.write(message)
+    except:
+        osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)        
 
 def cmd_api_callback(message, *args):
     message = message[2]
