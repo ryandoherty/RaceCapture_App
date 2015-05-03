@@ -39,7 +39,7 @@ from channels import *
 
 RCP_CONFIG_FILE_EXTENSION = '.rcp'
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/configview.kv')
+CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/configview.kv'
 
 class LinkedTreeViewLabel(TreeViewLabel):
     view = None
@@ -129,7 +129,9 @@ class ConfigView(Screen):
                 
     def on_enter(self):
         if not self.loaded:
-            Clock.schedule_once(lambda dt: self.createConfigViews(),0.1)
+            Builder.load_file(CONFIG_VIEW_KV)
+            Builder.apply(self)
+            Clock.schedule_once(lambda dt: self.createConfigViews(),1.0)
         
     def createConfigViews(self):
         tree = kvFind(self, 'rcid', 'menu')
