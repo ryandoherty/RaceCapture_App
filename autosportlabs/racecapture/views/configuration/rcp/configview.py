@@ -14,6 +14,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
+from kivy.factory import Factory
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
@@ -43,6 +44,7 @@ CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/configview.k
 
 class LinkedTreeViewLabel(TreeViewLabel):
     view = None
+    view_builder = None
 
 class ConfigView(Screen):
     #file save/load
@@ -56,10 +58,9 @@ class ConfigView(Screen):
 
     #List of config views
     configViews = []
-    content = None
     menu = None
     rc_config = None
-    scriptView = None
+    script_view = None
     _settings = None
     base_dir = None
 
@@ -83,8 +84,6 @@ class ConfigView(Screen):
         self.register_event_type('on_poll_logfile')
         self.register_event_type('on_set_logfile_level')
         
-        self.content = kvFind(self, 'rcid', 'content')
-
     def on_config_written(self, *args):
         self.writeStale = False
         
@@ -142,45 +141,55 @@ class ConfigView(Screen):
         def on_select_node(instance, value):
             # ensure that any keyboard is released
             try:
-                self.content.get_parent_window().release_keyboard()
+                self.ids.content.get_parent_window().release_keyboard()
             except:
                 pass
     
             try:
-                self.content.clear_widgets()
-                Clock.schedule_once(lambda dt: self.content.add_widget(value.view))
+                if not value.view:
+                    view = value.view_builder()
+                    self.configViews.append(view)
+                    view.bind(on_config_modified=self.on_config_modified)
+                    value.view = view
+                
+                self.ids.content.clear_widgets()
+                if self.config and self.loaded:        
+                    view.dispatch('on_config_updated', self.config)                
+                Clock.schedule_once(lambda dt: self.ids.content.add_widget(value.view))
+                
             except Exception, e:
                 print e
             
-        def attach_node(text, n, view):
+        def attach_node(text, n, view_builder):
             label = LinkedTreeViewLabel(text=text)
-            
-            label.view = view
+            label.view_builder = view_builder
             label.color_selected =   [1.0,0,0,0.6]
-            self.configViews.append(view)
-            view.bind(on_config_modified=self.on_config_modified)
             return tree.add_node(label, n)
 
+        def create_scripting_view():
+            script_view = LuaScriptingView()
+            script_view.bind(on_run_script=self.runScript)
+            script_view.bind(on_poll_logfile=self.pollLogfile)
+            script_view.bind(on_set_logfile_level=self.setLogFileLevel)
+            self.script_view = script_view
+            return script_view            
+            
         runtime_channels = self._settings.runtimeChannels
 
-        defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView())
-        attach_node('GPS', None, GPSChannelsView())
-        attach_node('Lap Statistics', None, LapStatsView())        
-        attach_node('Analog Sensors', None, AnalogChannelsView(channels=runtime_channels))
-        attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channels=runtime_channels))
-        attach_node('Digital In/Out', None, GPIOChannelsView(channels=runtime_channels))
-        attach_node('Accelerometer/Gyro', None, ImuChannelsView(rc_api=self.rc_api))
-        attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView(channels=runtime_channels))
-        attach_node('CAN Bus', None, CANConfigView())
-        attach_node('OBDII', None, OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
-        attach_node('Wireless', None, WirelessConfigView(base_dir=self.base_dir))
-        attach_node('Telemetry', None, TelemetryConfigView())
-        scriptView = LuaScriptingView()
-        scriptView.bind(on_run_script=self.runScript)
-        scriptView.bind(on_poll_logfile=self.pollLogfile)
-        scriptView.bind(on_set_logfile_level=self.setLogFileLevel)
-        attach_node('Scripting', None, scriptView)
-        self.scriptView = scriptView
+        defaultNode = attach_node('Race Track/Sectors', None, lambda: TrackConfigView())
+        attach_node('GPS', None, lambda: GPSChannelsView())
+        attach_node('Lap Statistics', None, lambda: LapStatsView())        
+        attach_node('Analog Sensors', None, lambda: AnalogChannelsView(channels=runtime_channels))
+        attach_node('Pulse/RPM Sensors', None, lambda: PulseChannelsView(channels=runtime_channels))
+        attach_node('Digital In/Out', None, lambda: GPIOChannelsView(channels=runtime_channels))
+        attach_node('Accelerometer/Gyro', None, lambda: ImuChannelsView(rc_api=self.rc_api))
+        attach_node('Pulse/Analog Out', None, lambda: AnalogPulseOutputChannelsView(channels=runtime_channels))
+        attach_node('CAN Bus', None, lambda: CANConfigView())
+        attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
+        attach_node('Wireless', None, lambda: WirelessConfigView(base_dir=self.base_dir))
+        attach_node('Telemetry', None, lambda: TelemetryConfigView())
+        attach_node('Scripting', None, create_scripting_view()
+)
         if FIRMWARE_UPDATABLE:
             attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
         
@@ -214,9 +223,9 @@ class ConfigView(Screen):
         pass
         
     def on_logfile(self, logfileJson):
-        if self.scriptView:
+        if self.script_view:
             logfileText = logfileJson.get('logfile').replace('\r','').replace('\0','')
-            self.scriptView.dispatch('on_logfile', logfileText)
+            self.script_view.dispatch('on_logfile', logfileText)
         
     def runScript(self, instance):
         self.dispatch('on_run_script')
