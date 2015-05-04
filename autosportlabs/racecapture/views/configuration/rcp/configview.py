@@ -141,7 +141,6 @@ class ConfigView(Screen):
             return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))
     
         def show_node(node):
-            self.ids.content.clear_widgets()
             try:
                 view = node.view
                 if not view:
@@ -166,7 +165,7 @@ class ConfigView(Screen):
                 self.ids.content.get_parent_window().release_keyboard()
             except:
                 pass
-            #show_node(value)
+            self.ids.content.clear_widgets()
             Clock.schedule_once(lambda dt: show_node(value))
             
         def attach_node(text, n, view_builder):
