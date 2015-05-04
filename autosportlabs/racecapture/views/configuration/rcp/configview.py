@@ -125,11 +125,14 @@ class ConfigView(Screen):
                 view.dispatch('on_config_updated', config)
         Clock.schedule_once(lambda dt: self._reset_stale())
                 
+    def init_screen(self):                
+        Builder.load_file(CONFIG_VIEW_KV)
+        Builder.apply(self)
+        self.createConfigViews()
+        
     def on_enter(self):
         if not self.loaded:
-            Builder.load_file(CONFIG_VIEW_KV)
-            Builder.apply(self)
-            self.createConfigViews()
+            Clock.schedule_once(lambda dt: self.init_screen())
         
     def createConfigViews(self):
         tree = kvFind(self, 'rcid', 'menu')
@@ -138,6 +141,7 @@ class ConfigView(Screen):
             return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))
     
         def show_node(node):
+            self.ids.content.clear_widgets()
             try:
                 view = node.view
                 if not view:
@@ -145,15 +149,13 @@ class ConfigView(Screen):
                     self.configViews.append(view)
                     view.bind(on_config_modified=self.on_config_modified)
                     node.view = view
-                
-                self.ids.content.clear_widgets()
+                    if self.loaded:
+                        if self.config:
+                            view.dispatch('on_config_updated', self.config)
+                        if self.track_manager:
+                            view.dispatch('on_tracks_updated', self.track_manager)                                    
                 Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
 
-                if self.loaded:
-                    if self.config:
-                        view.dispatch('on_config_updated', self.config)
-                    if self.track_manager:
-                        view.dispatch('on_tracks_updated', self.track_manager)                                    
                 
             except Exception, e:
                 print e
