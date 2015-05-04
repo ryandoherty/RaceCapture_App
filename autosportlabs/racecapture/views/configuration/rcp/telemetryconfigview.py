@@ -10,11 +10,12 @@ from valuefield import ValueField
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/telemetryconfigview.kv')
+TELEMETRY_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/telemetryconfigview.kv'
 
 class TelemetryConfigView(BaseConfigView):
     connectivityConfig = None
     def __init__(self, **kwargs):    
+        Builder.load_file(TELEMETRY_CONFIG_VIEW_KV)
         super(TelemetryConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
     

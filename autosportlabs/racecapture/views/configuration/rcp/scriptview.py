@@ -14,7 +14,7 @@ from autosportlabs.racecapture.views.configuration.baseconfigview import BaseCon
 from iconbutton import IconButton
 from settingsview import SettingsMappedSpinner
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/scriptview.kv')
+SCRIPT_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/scriptview.kv'
 
 LOGFILE_POLL_INTERVAL = 1
 LOGWINDOW_MAX_LENGTH = 20000
@@ -29,8 +29,9 @@ class LuaScriptingView(BaseConfigView):
     scriptCfg = None
     logfileView = None
     logfileScrollView = None
-    scriptView = None
+    script_view = None
     def __init__(self, **kwargs):
+        Builder.load_file(SCRIPT_VIEW_KV)
         super(LuaScriptingView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         self.register_event_type('on_run_script')
@@ -38,7 +39,7 @@ class LuaScriptingView(BaseConfigView):
         self.register_event_type('on_logfile')
         self.register_event_type('on_set_logfile_level')
         self.logfileView = kvFind(self, 'rcid', 'logfile')
-        self.scriptView = kvFind(self, 'rcid', 'script')
+        self.script_view = kvFind(self, 'rcid', 'script')
         self.logfileScrollView = kvFind(self, 'rcid', 'logfileSv') 
 
     def on_loglevel_selected(self, instance, value):
@@ -46,7 +47,7 @@ class LuaScriptingView(BaseConfigView):
         
     def on_config_updated(self, rcpCfg):
         scriptCfg = rcpCfg.scriptConfig
-        self.scriptView.text = scriptCfg.script
+        self.script_view.text = scriptCfg.script
         self.scriptCfg = scriptCfg
    
     def on_script_changed(self, instance, value):
