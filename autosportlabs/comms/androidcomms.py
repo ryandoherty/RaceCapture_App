@@ -122,6 +122,8 @@ class AndroidComms(object):
             return None
     
     def write_message(self, message):
+        if not self.isOpen():
+            raise Exception("AndroidComms: Connection closed")
         self.send_service_tx_message(message)
 
     def send_service_command(self, cmd):
