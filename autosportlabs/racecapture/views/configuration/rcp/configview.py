@@ -14,7 +14,6 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
-from kivy.factory import Factory
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
