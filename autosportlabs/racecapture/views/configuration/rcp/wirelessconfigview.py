@@ -11,7 +11,7 @@ from valuefield import ValueField
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv')
+WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
 class WirelessConfigView(BaseConfigView):
     customApnLabel = 'Custom APN'
@@ -24,6 +24,7 @@ class WirelessConfigView(BaseConfigView):
     base_dir = None
     
     def __init__(self, **kwargs):
+        Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
         super(WirelessConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         self.base_dir = kwargs.get('base_dir')

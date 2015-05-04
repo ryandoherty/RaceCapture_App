@@ -11,7 +11,7 @@ from autosportlabs.racecapture.views.configuration.baseconfigview import BaseCon
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.config.rcpconfig import *
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/imuchannelsview.kv')
+IMU_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/imuchannelsview.kv'
 
 class OrientationSpinner(MappedSpinner):
     def __init__(self, **kwargs):
@@ -115,7 +115,9 @@ class ImuChannelsView(BaseConfigView):
     editors = []
     imuCfg = None
     channelLabels = {0:'X', 1:'Y', 2:'Z', 3:'Yaw',4:'Pitch',5:'Roll',6:'Compass'}
+
     def __init__(self, **kwargs):
+        Builder.load_file(IMU_CHANNELS_VIEW_KV)
         super(ImuChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 

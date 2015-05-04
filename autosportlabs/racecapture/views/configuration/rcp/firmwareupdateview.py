@@ -19,7 +19,7 @@ from asl_f4_loader import fw_update
 from time import sleep
 from threading import Thread
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/firmwareupdateview.kv')
+FIRMWARE_UPDATE_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/firmwareupdateview.kv'
 
 if platform == 'win':
     RESET_DELAY = 5000
@@ -31,6 +31,7 @@ class FirmwareUpdateView(BaseConfigView):
     _settings = None
     
     def __init__(self, **kwargs):
+        Builder.load_file(FIRMWARE_UPDATE_VIEW_KV)
         super(FirmwareUpdateView, self).__init__(**kwargs)
         self._settings = kwargs.get('settings', None)
         self.register_event_type('on_config_updated')

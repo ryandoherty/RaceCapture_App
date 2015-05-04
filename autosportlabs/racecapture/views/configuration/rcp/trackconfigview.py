@@ -18,7 +18,7 @@ from autosportlabs.racecapture.views.tracks.tracksview import TrackInfoView, Tra
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/trackconfigview.kv')
+TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackconfigview.kv'
 
 class SectorPointView(BoxLayout):
     geoPoint = None
@@ -294,6 +294,7 @@ class TrackConfigView(BaseConfigView):
     autoConfigView = None
     
     def __init__(self, **kwargs):
+        Builder.load_file(TRACK_CONFIG_VIEW_KV)
         super(TrackConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         
