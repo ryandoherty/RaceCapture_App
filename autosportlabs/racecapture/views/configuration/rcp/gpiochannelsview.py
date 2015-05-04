@@ -12,7 +12,7 @@ from autosportlabs.racecapture.config.rcpconfig import *
 from mappedspinner import MappedSpinner
 from kivy.metrics import dp
 
-GPIO_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/gpiochannelsview.kv' 
+GPIO_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/gpiochannelsview.kv'
 
 class GPIOChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):

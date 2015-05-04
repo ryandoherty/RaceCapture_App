@@ -19,7 +19,7 @@ from asl_f4_loader import fw_update
 from time import sleep
 from threading import Thread
 
-FIRMWARE_UPDATE_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/firmwareupdateview.kv' 
+FIRMWARE_UPDATE_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/firmwareupdateview.kv'
 
 if platform == 'win':
     RESET_DELAY = 5000
