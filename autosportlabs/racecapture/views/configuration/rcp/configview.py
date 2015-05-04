@@ -14,6 +14,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
+from kivy.logger import Logger
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
@@ -156,8 +157,9 @@ class ConfigView(Screen):
                 Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
 
                 
-            except Exception, e:
-                print e
+            except Exception as detail:
+                alertPopup('Error', 'Error loading screen ' + str(node.text) + ':\n\n' + str(detail))
+                Logger.error("ConfigView: Error selecting configuration view " + str(node.text))
             
         def on_select_node(instance, value):
             # ensure that any keyboard is released
@@ -208,7 +210,7 @@ class ConfigView(Screen):
         self.loaded = True
         
     def updateControls(self):
-        print('writestale ' + str(self.writeStale))
+        Logger.debug("ConfigView: data is stale: " + str(self.writeStale))
         kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
         
     def update_tracks(self):
@@ -314,7 +316,7 @@ class ConfigView(Screen):
                 alertPopup('Error Loading', 'No config file selected')
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Configuration:\n\n' + str(detail))
-            traceback.print_exc()
+            Logger.exception('ConfigView: Error loading config: ' + str(detail))
                         
     def save(self, instance):
         def _do_save_config(filename):
@@ -339,7 +341,7 @@ class ConfigView(Screen):
                     _do_save_config(config_filename)
             except Exception as detail:
                 alertPopup('Error Saving', 'Failed to save:\n\n' + str(detail))
-                traceback.print_exc()
+                Logger.exception('ConfigView: Error Saving config: ' + str(detail))
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()
