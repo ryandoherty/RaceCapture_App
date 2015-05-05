@@ -270,7 +270,10 @@ class StatusView(Screen):
                 track = self.track_manager.findTrackByShortId(status['trackId'])
 
                 if track is None:
-                    track_name = 'Track not found'
+                    if status['status'] == 1:
+                        track_name = 'Fixed'
+                    else:
+                        track_name = 'Track not found'
                 else:
                     track_name = track.name
             else:
