@@ -42,7 +42,7 @@ if __name__ == '__main__':
     from toolbarview import ToolbarView
 
 from kivy.app import App, Builder
-from autosportlabs.racecapture.config.rcpconfig import RcpConfig
+from autosportlabs.racecapture.config.rcpconfig import RcpConfig, VersionConfig
 from autosportlabs.racecapture.databus.databus import DataBusFactory, DataBusPump
 from autosportlabs.racecapture.api.rcpapi import RcpApi
 
@@ -357,15 +357,22 @@ class RaceCaptureApp(App):
         rc_api.init_comms(comms)
         rc_api.run_auto_detect()
 
-    def rc_detect_win(self, rcpVersion):
-        self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
-        self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
-        self.status_view.start_status()
-
-        if self.rc_config.loaded == False:
-            Clock.schedule_once(lambda dt: self.on_read_config(self))
+    def rc_detect_win(self, version):
+        if version.is_compatible_version():
+            self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
+            self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
+            self.status_view.start_status()
+    
+            if self.rc_config.loaded == False:
+                Clock.schedule_once(lambda dt: self.on_read_config(self))
+            else:
+                self.showActivity('Connected')
         else:
-            self.showActivity('Connected')
+            alertPopup('Incompatible Firmware', 'Detected {} v{}\n\nPlease upgrade firmware to {} or higher'.format(
+                               version.friendlyName, 
+                               version.version_string(), 
+                               VersionConfig.get_minimum_version().version_string()
+                               ))
 
     def rc_detect_fail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)
