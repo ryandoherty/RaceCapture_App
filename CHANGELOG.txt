@@ -2,6 +2,8 @@
 * Support for 2.8.0 firmware
 * Configuration screen performance improvements
 * Dashboard channel synchronization improvements
+* System Status page
+* Ensure correct track and configuration is selected in auto-detect list of tracks
 
 ==1.2.5===
 * Removed obsolete GPS Time of Day channel (timestamp channels are now built in)
