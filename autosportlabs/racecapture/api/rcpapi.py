@@ -666,7 +666,7 @@ class RcpApi:
                             pass
         
                 if version_result.version_json != None:
-                    print "Found device version " + testVer.toString() + " on port:", comms.port
+                    print "Found device version " + str(testVer) + " on port:", comms.port
                     self.detect_win(testVer)
                 else:
                     print('Did not find device')
