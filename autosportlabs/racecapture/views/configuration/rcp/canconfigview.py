@@ -9,8 +9,7 @@ from utils import *
 from settingsview import SettingsView
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/canconfigview.kv')
-
+CAN_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/canconfigview.kv'
 
 class CANBaudRateSettings(SettingsView):
     channel_id = 0
@@ -25,9 +24,10 @@ class CANConfigView(BaseConfigView):
     can_settings = []
     
     def __init__(self, **kwargs):    
+        Builder.load_file(CAN_CONFIG_VIEW_KV)
         super(CANConfigView, self).__init__(**kwargs)
-        self.register_event_type('on_config_updated')
-    
+        
+        self.register_event_type('on_config_updated')    
         btEnable = kvFind(self, 'rcid', 'canEnabled') 
         btEnable.bind(on_setting=self.on_can_enabled)
         btEnable.setControl(SettingsSwitch())

@@ -14,6 +14,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
+from kivy.logger import Logger
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
@@ -39,10 +40,11 @@ from channels import *
 
 RCP_CONFIG_FILE_EXTENSION = '.rcp'
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/configview.kv')
+CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/configview.kv'
 
 class LinkedTreeViewLabel(TreeViewLabel):
     view = None
+    view_builder = None
 
 class ConfigView(Screen):
     #file save/load
@@ -56,10 +58,9 @@ class ConfigView(Screen):
 
     #List of config views
     configViews = []
-    content = None
     menu = None
     rc_config = None
-    scriptView = None
+    script_view = None
     _settings = None
     base_dir = None
 
@@ -83,8 +84,6 @@ class ConfigView(Screen):
         self.register_event_type('on_poll_logfile')
         self.register_event_type('on_set_logfile_level')
         
-        self.content = kvFind(self, 'rcid', 'content')
-
     def on_config_written(self, *args):
         self.writeStale = False
         
@@ -127,9 +126,14 @@ class ConfigView(Screen):
                 view.dispatch('on_config_updated', config)
         Clock.schedule_once(lambda dt: self._reset_stale())
                 
+    def init_screen(self):                
+        Builder.load_file(CONFIG_VIEW_KV)
+        Builder.apply(self)
+        self.createConfigViews()
+        
     def on_enter(self):
         if not self.loaded:
-            Clock.schedule_once(lambda dt: self.createConfigViews(),0.1)
+            Clock.schedule_once(lambda dt: self.init_screen())
         
     def createConfigViews(self):
         tree = kvFind(self, 'rcid', 'menu')
@@ -137,50 +141,66 @@ class ConfigView(Screen):
         def create_tree(text):
             return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))
     
+        def show_node(node):
+            try:
+                view = node.view
+                if not view:
+                    view = node.view_builder()
+                    self.configViews.append(view)
+                    view.bind(on_config_modified=self.on_config_modified)
+                    node.view = view
+                    if self.loaded:
+                        if self.config:
+                            view.dispatch('on_config_updated', self.config)
+                        if self.track_manager:
+                            view.dispatch('on_tracks_updated', self.track_manager)                                    
+                Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
+
+                
+            except Exception as detail:
+                alertPopup('Error', 'Error loading screen ' + str(node.text) + ':\n\n' + str(detail))
+                Logger.error("ConfigView: Error selecting configuration view " + str(node.text))
+            
         def on_select_node(instance, value):
             # ensure that any keyboard is released
             try:
-                self.content.get_parent_window().release_keyboard()
+                self.ids.content.get_parent_window().release_keyboard()
             except:
                 pass
-    
-            try:
-                self.content.clear_widgets()
-                Clock.schedule_once(lambda dt: self.content.add_widget(value.view))
-            except Exception, e:
-                print e
+            self.ids.content.clear_widgets()
+            Clock.schedule_once(lambda dt: show_node(value))
             
-        def attach_node(text, n, view):
+        def attach_node(text, n, view_builder):
             label = LinkedTreeViewLabel(text=text)
-            
-            label.view = view
+            label.view_builder = view_builder
             label.color_selected =   [1.0,0,0,0.6]
-            self.configViews.append(view)
-            view.bind(on_config_modified=self.on_config_modified)
             return tree.add_node(label, n)
 
+        def create_scripting_view():
+            script_view = LuaScriptingView()
+            script_view.bind(on_run_script=self.runScript)
+            script_view.bind(on_poll_logfile=self.pollLogfile)
+            script_view.bind(on_set_logfile_level=self.setLogFileLevel)
+            self.script_view = script_view
+            return script_view            
+            
         runtime_channels = self._settings.runtimeChannels
 
-        defaultNode = attach_node('Race Track/Sectors', None, TrackConfigView())
-        attach_node('GPS', None, GPSChannelsView())
-        attach_node('Lap Statistics', None, LapStatsView())        
-        attach_node('Analog Sensors', None, AnalogChannelsView(channels=runtime_channels))
-        attach_node('Pulse/RPM Sensors', None, PulseChannelsView(channels=runtime_channels))
-        attach_node('Digital In/Out', None, GPIOChannelsView(channels=runtime_channels))
-        attach_node('Accelerometer/Gyro', None, ImuChannelsView(rc_api=self.rc_api))
-        attach_node('Pulse/Analog Out', None, AnalogPulseOutputChannelsView(channels=runtime_channels))
-        attach_node('CAN Bus', None, CANConfigView())
-        attach_node('OBDII', None, OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
-        attach_node('Wireless', None, WirelessConfigView(base_dir=self.base_dir))
-        attach_node('Telemetry', None, TelemetryConfigView())
-        scriptView = LuaScriptingView()
-        scriptView.bind(on_run_script=self.runScript)
-        scriptView.bind(on_poll_logfile=self.pollLogfile)
-        scriptView.bind(on_set_logfile_level=self.setLogFileLevel)
-        attach_node('Scripting', None, scriptView)
-        self.scriptView = scriptView
+        defaultNode = attach_node('Race Track/Sectors', None, lambda: TrackConfigView())
+        attach_node('GPS', None, lambda: GPSChannelsView())
+        attach_node('Lap Statistics', None, lambda: LapStatsView())        
+        attach_node('Analog Sensors', None, lambda: AnalogChannelsView(channels=runtime_channels))
+        attach_node('Pulse/RPM Sensors', None, lambda: PulseChannelsView(channels=runtime_channels))
+        attach_node('Digital In/Out', None, lambda: GPIOChannelsView(channels=runtime_channels))
+        attach_node('Accelerometer/Gyro', None, lambda: ImuChannelsView(rc_api=self.rc_api))
+        attach_node('Pulse/Analog Out', None, lambda: AnalogPulseOutputChannelsView(channels=runtime_channels))
+        attach_node('CAN Bus', None, lambda: CANConfigView())
+        attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
+        attach_node('Wireless', None, lambda: WirelessConfigView(base_dir=self.base_dir))
+        attach_node('Telemetry', None, lambda: TelemetryConfigView())
+        attach_node('Scripting', None, lambda: create_scripting_view())
         if FIRMWARE_UPDATABLE:
-            attach_node('Firmware', None, FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
+            attach_node('Firmware', None, lambda: FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
         
         tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
@@ -190,7 +210,7 @@ class ConfigView(Screen):
         self.loaded = True
         
     def updateControls(self):
-        print('writestale ' + str(self.writeStale))
+        Logger.debug("ConfigView: data is stale: " + str(self.writeStale))
         kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
         
     def update_tracks(self):
@@ -212,9 +232,9 @@ class ConfigView(Screen):
         pass
         
     def on_logfile(self, logfileJson):
-        if self.scriptView:
+        if self.script_view:
             logfileText = logfileJson.get('logfile').replace('\r','').replace('\0','')
-            self.scriptView.dispatch('on_logfile', logfileText)
+            self.script_view.dispatch('on_logfile', logfileText)
         
     def runScript(self, instance):
         self.dispatch('on_run_script')
@@ -296,7 +316,7 @@ class ConfigView(Screen):
                 alertPopup('Error Loading', 'No config file selected')
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Configuration:\n\n' + str(detail))
-            traceback.print_exc()
+            Logger.exception('ConfigView: Error loading config: ' + str(detail))
                         
     def save(self, instance):
         def _do_save_config(filename):
@@ -321,7 +341,7 @@ class ConfigView(Screen):
                     _do_save_config(config_filename)
             except Exception as detail:
                 alertPopup('Error Saving', 'Failed to save:\n\n' + str(detail))
-                traceback.print_exc()
+                Logger.exception('ConfigView: Error Saving config: ' + str(detail))
 
     def dismiss_popup(self, *args):
         self._popup.dismiss()

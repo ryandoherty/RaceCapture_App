@@ -10,7 +10,7 @@ from autosportlabs.racecapture.OBD2.obd2settings import OBD2Settings
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/obd2channelsview.kv')
+OBD2_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/obd2channelsview.kv'
 
 class OBD2Channel(BoxLayout):
     obd2Channel = None
@@ -63,6 +63,7 @@ class OBD2ChannelsView(BaseConfigView):
     obd2Settings = None
     base_dir = None
     def __init__(self, **kwargs):
+        Builder.load_file(OBD2_CHANNELS_VIEW_KV)
         super(OBD2ChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         self.obd2Grid = kvFind(self, 'rcid', 'obd2grid')

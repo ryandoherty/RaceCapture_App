@@ -2,6 +2,9 @@ import json
 from copy import copy
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 
+RCP_COMPATIBLE_MAJOR_VERSION = 2
+RCP_MINIMUM_MINOR_VERSION = 8
+
 class BaseChannel(object):
     def __init__(self, **kwargs):
         self.name = 'Unknown'
@@ -817,10 +820,19 @@ class VersionConfig(object):
     bugfix = 0
     serial = 0
     def __init__(self, **kwargs):
-        pass
+        self.major = kwargs.get('major', 0)
+        self.minor = kwargs.get('minor', 0)
+        self.bugfix = kwargs.get('bugfix', 0)
     
-    def toString(self):
-        return str(self.name) + " " + str(self.major) + "." + str(self.minor) + "." + str(self.bugfix) + ' (s/n# ' + str(self.serial) + ')'
+    def __str__(self):
+        return '{} {}.{}.{} (s/n# {})'.format(self.name, self.major, self.minor, self.bugfix, self.serial)
+    
+    def version_string(self):
+        return '{}.{}.{}'.format(self.major, self.minor, self.bugfix)
+            
+    @staticmethod
+    def get_minimum_version():
+        return VersionConfig(major = RCP_COMPATIBLE_MAJOR_VERSION, minor = RCP_MINIMUM_MINOR_VERSION, bugfix = 0)
     
     def fromJson(self, versionJson):
         self.name = versionJson.get('name', self.name)
@@ -833,6 +845,9 @@ class VersionConfig(object):
     def toJson(self):
         versionJson = {'name': self.name, 'fname': self.friendlyName, 'major': self.major, 'minor': self.minor, 'bugfix': self.bugfix}
         return {'ver': versionJson}
+    
+    def is_compatible_version(self):
+        return self.major == RCP_COMPATIBLE_MAJOR_VERSION and self.minor >= RCP_MINIMUM_MINOR_VERSION
     
 class ChannelCapabilities(object):
     analog = 8

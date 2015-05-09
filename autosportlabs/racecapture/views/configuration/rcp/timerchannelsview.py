@@ -12,10 +12,11 @@ from kivy.metrics import dp
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
 
-Builder.load_file('autosportlabs/racecapture/views/configuration/rcp/timerchannelsview.kv')
+TIMER_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/timerchannelsview.kv'
 
 class PulseChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):
+        Builder.load_file(TIMER_CHANNELS_VIEW_KV)
         super(PulseChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Timer '
         self.accordion_item_height = dp(120)
