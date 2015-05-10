@@ -223,6 +223,8 @@ class DatalogChannel(object):
         self.units = units
         self.sample_rate = sample_rate
 
+    def __str__(self):
+        return self.name
 
 class DataStore(object):
     val_filters = ['lt', 'gt', 'eq', 'lt_eq', 'gt_eq']

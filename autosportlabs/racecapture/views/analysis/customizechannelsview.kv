@@ -3,18 +3,22 @@
     orientation: 'vertical'
     ScreenManager:
         id: screens
-        CurrentChannelsView:
-            id: currentChannelsView
-            name: 'current_channels'
-        AddChannelView:
-            id: addChannelView
-            name: 'add_channel'
 
             
 <CurrentChannelsView>:
-    Label:
-        text: 'Current Channels'
+    ScrollView:
+        id: scroller
+        size_hint_y: 0.9
+        do_scroll_x:False
+        do_scroll_y:True
+        GridLayout:
+            id: current_channels
+            row_default_height: root.height * 0.12
+            row_force_default: True
+            size_hint_y: None
+            height: max(self.minimum_height, scroller.height)                                      
+            cols: 2
 
-<AddChannelView>:
-    Label:
-        text: 'Add Channel'
+<AddChannelsView>:
+    ChannelSelectorView:
+        id: add_channels

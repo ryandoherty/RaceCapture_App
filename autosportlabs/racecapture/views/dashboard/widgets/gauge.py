@@ -173,7 +173,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def setValue(self, value):
         self.value = value
             
-    def showChannelSelectDialog(self):  
+    def showChannelSelectDialog(self):
         content = ChannelSelectView(settings=self.settings, channel=self.channel)
         content.bind(on_channel_selected=self.channel_selected)
         content.bind(on_channel_cancel=self._dismiss_popup)

@@ -4,7 +4,7 @@ import kivy
 kivy.require('1.8.0')
 from kivy.app import Builder
 from kivy.clock import Clock
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, ListProperty
 from kivy.uix.popup import Popup
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
@@ -16,52 +16,68 @@ from autosportlabs.uix.button.featurebutton import FeatureButton
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
+from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectorView
 from iconbutton import IconButton
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/customizechannelsview.kv')
 
+class CustomizeResult(object):
+    add_channels_view = []
+    remove_channels = []    
+    def __init__(self, **kwargs):
+        self.add_channels_view = kwargs.get("add_channels_view", [])
+        self.remove_channels  = kwargs.get("remove_channels", [])
+    
 class CustomizeChannelsView(BoxLayout):
+    customize_results = CustomizeResult()
+    
     def __init__(self, **kwargs):
         super(CustomizeChannelsView, self).__init__(**kwargs)
-        settings = kwargs.get('settings')
         datastore = kwargs.get('datastore')
+        channels = kwargs.get('current_channels')
         
-        current_channels_view = self.ids.currentChannelsView
-        current_channels_view.bind(on_channel_removed=self.channel_removed)
-        current_channels_view.settings = settings
-        current_channels_view.datastore = datastore
-        
-        add_channel_view = self.ids.addChannelView
-        add_channel_view.bind(on_channel_added=self.channel_added)
-        add_channel_view.settings = settings
-        add_channel_view.datastore = datastore
+        screen_manager = self.ids.screens
+        add_channels_view =  AddChannelsView(name='add')
+        current_channels_view = CurrentChannelsView(name='current')
+        screen_manager.add_widget(current_channels_view)
+        screen_manager.add_widget(add_channels_view)
+
+        current_channels_view.channels = channels
+        add_channels_view.available_channels = datastore.channel_list
         
         self.register_event_type('on_channels_customized')
+        self.current_channels_view = current_channels_view
+        self.add_channels_view = add_channels_view
+        screen_manager.current = 'add'
         
-    def on_channels_customized(self, *args):
+    def on_channels_customized(self, instance, value):
         pass
 
-    def channel_removed(self, *args):
-        pass
+    def channel_removed(self, instance, value):
+        self.customize_results.remove_channels.append(value)
     
-    def channel_added(self, *args):
-        pass        
-        
-class CurrentChannelsView(Screen):    
+    def channel_added(self, instance, value):
+        self.customize_results.add_channels_view.append(value)        
+    
+class CurrentChannelsView(Screen):
+    current_channels_view = ListProperty()
+    removed_channels = ListProperty()
+    
     def __init__(self, **kwargs):
         super(CurrentChannelsView, self).__init__(**kwargs)
-        self.register_event_type('on_channel_removed')
-            
-    def on_channel_removed(self, *args):
-        pass
-    
-class AddChannelView(Screen):
-    settings = None
-    datastore = None
-    def __init__(self, **kwargs):
-        super(AddChannelView, self).__init__(**kwargs)
-        self.register_event_type('on_channel_added')
         
-    def on_channel_added(self, *args):
+    def on_current_channels(self, instance, value):
+        pass
+        
+class AddChannelsView(Screen):
+    added_channels = ListProperty()
+    available_channels = ListProperty()
+    
+    def __init__(self, **kwargs):
+        super(AddChannelsView, self).__init__(**kwargs)
+
+    def on_added_channels(self, instance, value):
         pass
     
+    def on_available_channels(self, instance, value):
+        self.ids.add_channels.channels = self.available_channels
