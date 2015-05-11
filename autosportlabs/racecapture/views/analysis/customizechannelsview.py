@@ -53,8 +53,9 @@ class CustomizeChannelsView(BoxLayout):
         self.add_channels_view = add_channels_view
         screen_manager.current = 'add'
         
-    def hide_add_channels(self, *args):
+    def hide_add_channels(self, instance, value):
         self.ids.screens.current = 'current'
+        print(str(value))
         
     def on_channels_customized(self, instance, value):
         pass
@@ -90,12 +91,16 @@ class AddChannelsView(Screen):
         self.ids.add_channels.bind(on_channel_selected=self.channel_selected)
         self.ids.add_channels.channels = self.available_channels
         
-    def on_go_back(self, *args):
+    def on_go_back(self, channels):
         pass
     
     def go_back(self, *args):
-        self.dispatch('on_go_back')
+        self.dispatch('on_go_back', [])
         
-    def channel_selected(self, *args):
-        print('selected')
+    def channel_selected(self, instance, value):
+        self.added_channels=value[:]
         self.ids.confirm.disabled = False
+        
+    def confirm_add(self, *args):
+        self.dispatch('on_go_back', self.added_channels[:])
+        

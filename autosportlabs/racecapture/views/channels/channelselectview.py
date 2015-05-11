@@ -18,10 +18,11 @@ class ChannelItemButton(ListItemButton):
 
 class ChannelSelectorView(BoxLayout):
     channels = ListProperty()
-
+    multi_select = False
     def __init__(self, **kwargs):
         super(ChannelSelectorView, self).__init__(**kwargs)
         self.register_event_type('on_channel_selected')
+        self.multi_select = kwargs.get('multi_select', self.multi_select)
     
     def on_channels(self, instance, value):    
         data = []
@@ -34,7 +35,7 @@ class ChannelSelectorView(BoxLayout):
         list_adapter = ListAdapter(data=data,
                            args_converter=args_converter,
                            cls=ChannelItemButton,
-                           selection_mode='single',
+                           selection_mode= 'multiple' if self.multi_select else 'single',
                            allow_empty_selection=True)
 
         channel_list.adapter=list_adapter
@@ -45,8 +46,10 @@ class ChannelSelectorView(BoxLayout):
     
     def on_select(self, value):
         try:
-            channel = value.selection[0].text
-            self.dispatch('on_channel_selected', channel)
+            channels = []
+            for channel in value.selection:
+                channels.append(channel.text)
+            self.dispatch('on_channel_selected', channels)
         except Exception as e:
             print('Error Selecting channel: ' + str(e))
     
