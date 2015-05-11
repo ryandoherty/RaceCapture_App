@@ -9,9 +9,10 @@ from kivy.uix.popup import Popup
 from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.listview import ListView, ListItemButton
-from kivy.uix.screenmanager import Screen
+from kivy.uix.screenmanager import Screen, SwapTransition
 from utils import kvFind
 from kivy.adapters.listadapter import ListAdapter
+from iconbutton import IconButton
 from autosportlabs.uix.button.featurebutton import FeatureButton
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
@@ -37,6 +38,7 @@ class CustomizeChannelsView(BoxLayout):
         channels = kwargs.get('current_channels')
         
         screen_manager = self.ids.screens
+        screen_manager.transition = SwapTransition()
         add_channels_view =  AddChannelsView(name='add')
         current_channels_view = CurrentChannelsView(name='current')
         screen_manager.add_widget(current_channels_view)
@@ -44,11 +46,15 @@ class CustomizeChannelsView(BoxLayout):
 
         current_channels_view.channels = channels
         add_channels_view.available_channels = datastore.channel_list
+        add_channels_view.bind(on_go_back=self.hide_add_channels)
         
         self.register_event_type('on_channels_customized')
         self.current_channels_view = current_channels_view
         self.add_channels_view = add_channels_view
         screen_manager.current = 'add'
+        
+    def hide_add_channels(self, *args):
+        self.ids.screens.current = 'current'
         
     def on_channels_customized(self, instance, value):
         pass
@@ -75,9 +81,21 @@ class AddChannelsView(Screen):
     
     def __init__(self, **kwargs):
         super(AddChannelsView, self).__init__(**kwargs)
+        self.register_event_type('on_go_back')
 
     def on_added_channels(self, instance, value):
         pass
     
     def on_available_channels(self, instance, value):
+        self.ids.add_channels.bind(on_channel_selected=self.channel_selected)
         self.ids.add_channels.channels = self.available_channels
+        
+    def on_go_back(self, *args):
+        pass
+    
+    def go_back(self, *args):
+        self.dispatch('on_go_back')
+        
+    def channel_selected(self, *args):
+        print('selected')
+        self.ids.confirm.disabled = False

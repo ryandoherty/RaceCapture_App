@@ -18,6 +18,10 @@ class ChannelItemButton(ListItemButton):
 
 class ChannelSelectorView(BoxLayout):
     channels = ListProperty()
+
+    def __init__(self, **kwargs):
+        super(ChannelSelectorView, self).__init__(**kwargs)
+        self.register_event_type('on_channel_selected')
     
     def on_channels(self, instance, value):    
         data = []
@@ -36,8 +40,15 @@ class ChannelSelectorView(BoxLayout):
         channel_list.adapter=list_adapter
         list_adapter.bind(on_selection_change=self.on_select)
         
-    def on_select(self, value):
+    def on_channel_selected(self, channel):
         pass
+    
+    def on_select(self, value):
+        try:
+            channel = value.selection[0].text
+            self.dispatch('on_channel_selected', channel)
+        except Exception as e:
+            print('Error Selecting channel: ' + str(e))
     
 class ChannelSelectView(FloatLayout):
     channel = None

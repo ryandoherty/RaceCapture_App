@@ -20,5 +20,20 @@
             cols: 2
 
 <AddChannelsView>:
-    ChannelSelectorView:
-        id: add_channels
+    BoxLayout:
+        orientation: 'vertical'
+        ChannelSelectorView:
+            id: add_channels
+            size_hint_y: 0.9
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            IconButton:
+                id: go_back
+                text: u'\uf060'
+                on_release: root.go_back()
+            IconButton:
+                id: confirm
+                disabled: True
+                text: u'\uf00c'
+                on_release: root.confirm_add()
