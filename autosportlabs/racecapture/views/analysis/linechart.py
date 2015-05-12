@@ -43,7 +43,7 @@ class LineChart(ChannelAnalysisWidget):
     
     def add_channel(self, channel_data):
         chart = self.ids.chart
-        plot = LinePlot(color=self._color_sequence.get_next_color(), line_width=1.25)
+        plot = LinePlot(color=self._color_sequence.get_next_color(), line_width=1)
         channel_plot = ChannelPlot(plot, 
                                    channel_data.channel, 
                                    channel_data.min, 
