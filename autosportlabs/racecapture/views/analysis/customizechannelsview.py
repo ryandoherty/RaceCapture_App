@@ -52,17 +52,14 @@ class CustomizeChannelsView(BoxLayout):
         self.dispatch('on_channels_customized', self.current_channels_view.channels)
         
     def _get_available_channel_names(self):
-        channels = []
         available_channels = self.datastore.channel_list
-        for c in available_channels:
-            channels.append(str(c))
+        channels = [str(c) for c in available_channels]
         return channels
      
     def add_channels(self, *args):
         available_channels = self._get_available_channel_names()
         current_channels = self.current_channels_view.channels
         add_channels = [c for c in available_channels if c not in current_channels]
-        #del self.add_channels_view.available_channels[:]
         self.add_channels_view.available_channels = add_channels        
         self.ids.screens.current = 'add'
                 
