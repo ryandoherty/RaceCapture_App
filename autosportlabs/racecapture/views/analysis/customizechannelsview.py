@@ -56,7 +56,7 @@ class CustomizeChannelsView(BoxLayout):
                 
     def add_channels_complete(self, instance, added_channels):
         self.ids.screens.current = 'current'
-        self.current_channels_view.channels = added_channels
+        self.current_channels_view.channels.extend(added_channels)
         
     def on_channels_customized(self, *args):
         pass

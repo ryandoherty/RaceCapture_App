@@ -33,18 +33,24 @@ class LineChart(ChannelAnalysisWidget):
     
     def on_marker(self, marker_event):
         pass
-            
-    def add_channel_data(self, samples, channel, min_value, max_value, source):
-        
+                        
+    def remove_channel(self, channel):
+        pass
+    
+    def add_channel(self, channel_data):
         chart = self.ids.chart
         plot = LinePlot(color=self._color_sequence.get_next_color(), line_width=1.25)
-        channel_plot = ChannelPlot(plot, channel, min_value, max_value, source)
+        channel_plot = ChannelPlot(plot, 
+                                   channel_data.channel, 
+                                   channel_data.min, 
+                                   channel_data.max, 
+                                   channel_data.source)
         chart.add_plot(plot)
         points = []
         distance_index = {}
         max_distance = chart.xmax
         sample_index = 0
-        for sample in samples:
+        for sample in channel_data.records:
             distance = sample[1]
             if distance > max_distance:
                 max_distance = distance 
@@ -54,8 +60,8 @@ class LineChart(ChannelAnalysisWidget):
         
         channel_plot.distance_index = distance_index
         channel_plot.samples = sample_index            
-        chart.ymin = min_value
-        chart.ymax = max_value
+        chart.ymin = channel_data.min
+        chart.ymax = channel_data.max
         chart.xmin = 0
         chart.xmax = max_distance
         plot.points = points

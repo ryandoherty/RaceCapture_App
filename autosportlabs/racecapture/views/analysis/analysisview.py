@@ -127,7 +127,6 @@ class AnalysisView(Screen):
         
         records = dataset.fetch_records()
         source = SourceRef(lap, session)
-        instance.add_channel_data(records, channel, 0, 255, source)
         self._sync_analysis_map(session)
         self._update_location_cache(session)
         
