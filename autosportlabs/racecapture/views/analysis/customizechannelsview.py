@@ -19,6 +19,7 @@ from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectorView
 from iconbutton import IconButton
+from fieldlabel import FieldLabel
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/customizechannelsview.kv')
 
@@ -34,6 +35,7 @@ class CustomizeChannelsView(BoxLayout):
     
     def __init__(self, **kwargs):
         super(CustomizeChannelsView, self).__init__(**kwargs)
+        self.register_event_type('on_channels_customized')
         datastore = kwargs.get('datastore')
         channels = kwargs.get('current_channels')
         
@@ -41,23 +43,30 @@ class CustomizeChannelsView(BoxLayout):
         screen_manager.transition = SwapTransition()
         add_channels_view =  AddChannelsView(name='add')
         current_channels_view = CurrentChannelsView(name='current')
-        screen_manager.add_widget(current_channels_view)
-        screen_manager.add_widget(add_channels_view)
-
+        current_channels_view.bind(on_confirm_customize=self.confirm_customize)
+        current_channels_view.bind(on_add_channels=self.add_channels)
         current_channels_view.channels = channels
         add_channels_view.available_channels = datastore.channel_list
-        add_channels_view.bind(on_go_back=self.hide_add_channels)
+        add_channels_view.bind(on_go_back=self.add_channels_complete)
         
-        self.register_event_type('on_channels_customized')
         self.current_channels_view = current_channels_view
         self.add_channels_view = add_channels_view
-        screen_manager.current = 'add'
         
-    def hide_add_channels(self, instance, value):
+        screen_manager.add_widget(current_channels_view)
+        screen_manager.add_widget(add_channels_view)        
+        screen_manager.current = 'current'
+
+    def confirm_customize(self, *args):
+        self.dispatch('on_channels_customized')
+        
+    def add_channels(self, *args):
+        self.ids.screens.current = 'add'
+                
+    def add_channels_complete(self, instance, added_channels):
         self.ids.screens.current = 'current'
-        print(str(value))
+        self.current_channels_view.current_channels = added_channels
         
-    def on_channels_customized(self, instance, value):
+    def on_channels_customized(self, *args):
         pass
 
     def channel_removed(self, instance, value):
@@ -66,15 +75,62 @@ class CustomizeChannelsView(BoxLayout):
     def channel_added(self, instance, value):
         self.customize_results.add_channels_view.append(value)        
     
+class CurrentChannel(BoxLayout):
+    channel = None
+
+    def __init__(self, **kwargs):
+        super(CurrentChannel, self).__init__(**kwargs)
+        self.channel = kwargs.get('channel')
+        self.register_event_type('on_delete_channel')
+        self.register_event_type('on_modified')
+        self.ids.name.text = self.channel
+
+    def on_modified(self):
+        pass
+                
+    def on_delete_channel(self, channel):
+        pass
+    
+    def on_delete(self):
+        self.dispatch('on_delete_channel', self.channel)
+        
+    
 class CurrentChannelsView(Screen):
-    current_channels_view = ListProperty()
+    current_channels = ListProperty()
     removed_channels = ListProperty()
     
     def __init__(self, **kwargs):
         super(CurrentChannelsView, self).__init__(**kwargs)
+        self.register_event_type('on_confirm_customize')
+        self.register_event_type('on_add_channels')
         
     def on_current_channels(self, instance, value):
+        grid = self.ids.current_channels
+        grid.clear_widgets()
+        for channel in value:
+            current_channel = CurrentChannel(channel = channel)
+            current_channel.bind(on_delete_channel=self.on_delete_channel)
+            current_channel.bind(on_modified=self.on_modified)
+            grid.add_widget(current_channel)
+            
+    def on_delete_channel(self, instance, name):
+        print("delete " + name)
+    
+    def on_modified(self, instance, name):
+        print("modified " + name)   
+        
+    def on_confirm_customize(self, *args):
         pass
+    
+    def on_add_channels(self, *args):
+        pass
+    
+    def confirm_customize(self, *args):
+        self.dispatch('on_confirm_customize')
+    
+    def add_channels(self, *args):
+        self.dispatch('on_add_channels')
+        
         
 class AddChannelsView(Screen):
     added_channels = ListProperty()

@@ -4,20 +4,47 @@
     ScreenManager:
         id: screens
 
+<CurrentChannel>:
+    spacing: dp(10)
+    size_hint_y: None
+    height: dp(30)
+    orientation: 'horizontal'
+    FieldLabel:
+        id: name
+        size_hint_x: 0.9
+        font_size: root.height * 0.90   
+    IconButton:
+        size_hint_x: 0.1
+        text: '\357\200\224'
+        on_release: root.on_delete()
             
 <CurrentChannelsView>:
-    ScrollView:
-        id: scroller
-        size_hint_y: 0.9
-        do_scroll_x:False
-        do_scroll_y:True
-        GridLayout:
-            id: current_channels
-            row_default_height: root.height * 0.12
-            row_force_default: True
-            size_hint_y: None
-            height: max(self.minimum_height, scroller.height)                                      
-            cols: 2
+    BoxLayout:
+        orientation: 'vertical'
+        ScrollView:
+            id: scroller
+            size_hint_y: 0.9
+            do_scroll_x:False
+            do_scroll_y:True
+            GridLayout:
+                id: current_channels
+                row_default_height: root.height * 0.12
+                row_force_default: True
+                size_hint_y: None
+                height: max(self.minimum_height, scroller.height)                                      
+                cols: 1
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            IconButton:
+                id: go_back
+                text: u'\uf00c'
+                on_release: root.confirm_customize()
+            IconButton:
+                id: add
+                text: u'\uf0fe'
+                on_release: root.add_channels()
+            
 
 <AddChannelsView>:
     BoxLayout:
