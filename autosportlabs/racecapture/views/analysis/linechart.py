@@ -23,7 +23,7 @@ class ChannelPlot(object):
         self.sourceref = sourceref
     
 class LineChart(ChannelAnalysisWidget):
-    _channel_plots = []
+    _channel_plots = {}
     _color_sequence = ColorSequence()
     
     def __init__(self, **kwargs):
@@ -35,7 +35,11 @@ class LineChart(ChannelAnalysisWidget):
         pass
                         
     def remove_channel(self, channel):
-        pass
+        channel_plot = self._channel_plots.get(channel)
+        if channel_plot:
+            del(self._channel_plots[channel])
+            print('remove plot ' + channel)
+            self.ids.chart.remove_plot(channel_plot.plot)
     
     def add_channel(self, channel_data):
         chart = self.ids.chart
@@ -65,7 +69,7 @@ class LineChart(ChannelAnalysisWidget):
         chart.xmin = 0
         chart.xmax = max_distance
         plot.points = points
-        self._channel_plots.append(channel_plot)
+        self._channel_plots[channel_plot.channel] = channel_plot
     
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
@@ -93,7 +97,7 @@ class LineChart(ChannelAnalysisWidget):
         width = self.size[0]
         pct = mouse_x / width
         
-        for channel_plot in self._channel_plots:
+        for channel_plot in self._channel_plots.itervalues():
             data_index = int(channel_plot.samples * pct)
             marker = MarkerEvent(data_index, channel_plot.sourceref)
             self.dispatch('on_marker', marker)
