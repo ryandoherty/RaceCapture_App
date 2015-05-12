@@ -29,7 +29,7 @@ class CustomizeChannelsView(BoxLayout):
     def __init__(self, **kwargs):
         super(CustomizeChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_channels_customized')
-        datastore = kwargs.get('datastore')
+        self.datastore = kwargs.get('datastore')
         channels = kwargs.get('current_channels')
         
         screen_manager = self.ids.screens
@@ -39,7 +39,6 @@ class CustomizeChannelsView(BoxLayout):
         current_channels_view.bind(on_confirm_customize=self.confirm_customize)
         current_channels_view.bind(on_add_channels=self.add_channels)
         current_channels_view.channels = channels
-        add_channels_view.available_channels = datastore.channel_list
         add_channels_view.bind(on_go_back=self.add_channels_complete)
         
         self.current_channels_view = current_channels_view
@@ -52,7 +51,19 @@ class CustomizeChannelsView(BoxLayout):
     def confirm_customize(self, *args):
         self.dispatch('on_channels_customized', self.current_channels_view.channels)
         
+    def _get_available_channel_names(self):
+        channels = []
+        available_channels = self.datastore.channel_list
+        for c in available_channels:
+            channels.append(str(c))
+        return channels
+     
     def add_channels(self, *args):
+        available_channels = self._get_available_channel_names()
+        current_channels = self.current_channels_view.channels
+        add_channels = [c for c in available_channels if c not in current_channels]
+        #del self.add_channels_view.available_channels[:]
+        self.add_channels_view.available_channels = add_channels        
         self.ids.screens.current = 'add'
                 
     def add_channels_complete(self, instance, added_channels):
@@ -133,14 +144,16 @@ class AddChannelsView(Screen):
     def __init__(self, **kwargs):
         super(AddChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_go_back')
+        self.ids.add_channels.bind(on_channel_selected=self.channel_selected)
 
     def on_added_channels(self, instance, value):
         pass
-    
-    def on_available_channels(self, instance, value):
-        self.ids.add_channels.bind(on_channel_selected=self.channel_selected)
+
+    def on_pre_enter(self):
+        del self.added_channels[:]
+        del self.ids.add_channels.channels[:]
         self.ids.add_channels.channels = self.available_channels
-        
+                    
     def on_go_back(self, channels):
         pass
     
