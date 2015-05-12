@@ -45,8 +45,9 @@ class CustomizeChannelsView(BoxLayout):
         self.add_channels_view = add_channels_view
         
         screen_manager.add_widget(current_channels_view)
-        screen_manager.add_widget(add_channels_view)        
-        screen_manager.current = 'current'
+        screen_manager.add_widget(add_channels_view)
+        if not len(channels):
+            self.add_channels()
 
     def confirm_customize(self, *args):
         self.dispatch('on_channels_customized', self.current_channels_view.channels)
@@ -65,7 +66,11 @@ class CustomizeChannelsView(BoxLayout):
                 
     def add_channels_complete(self, instance, added_channels):
         self.ids.screens.current = 'current'
-        self.current_channels_view.channels.extend(added_channels)
+        current_channels = self.current_channels_view.channels
+        current_channels.extend(added_channels)
+        if len(current_channels) == len(added_channels):
+            self.confirm_customize()
+        
         
     def on_channels_customized(self, *args):
         pass
