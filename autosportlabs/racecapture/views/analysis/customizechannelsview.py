@@ -85,7 +85,6 @@ class CurrentChannel(BoxLayout):
     
     def on_delete(self):
         self.dispatch('on_delete_channel', self.channel)
-        
     
 class CurrentChannelsView(Screen):
     channels = ListProperty()

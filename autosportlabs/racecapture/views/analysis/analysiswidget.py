@@ -41,8 +41,10 @@ class ChannelAnalysisWidget(AnalysisWidget):
         self._popup = popup
     
     def channels_customized(self, instance,  updated_channels):
-        print("channels customized " + str(updated_channels))
         self._dismiss_popup()
+        print("channels customized " + str(updated_channels))
+        for channel in updated_channels:
+            self.dispatch('on_channel_selected', channel)
 
     def popup_dismissed(self, *args):
         self._popup = None
