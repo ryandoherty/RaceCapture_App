@@ -2,6 +2,7 @@ import os
 from threading import Thread
 import kivy
 kivy.require('1.8.0')
+from kivy.logger import Logger
 from kivy.app import Builder
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty, ListProperty
@@ -60,12 +61,6 @@ class CustomizeChannelsView(BoxLayout):
         
     def on_channels_customized(self, *args):
         pass
-
-    def channel_removed(self, instance, value):
-        self.customize_results.remove_channels.append(value)
-    
-    def channel_added(self, instance, value):
-        self.customize_results.add_channels_view.append(value)        
     
 class CurrentChannel(BoxLayout):
     channel = None
@@ -88,6 +83,7 @@ class CurrentChannel(BoxLayout):
     
 class CurrentChannelsView(Screen):
     channels = ListProperty()
+    _current_channel_widgets = {}
     
     def __init__(self, **kwargs):
         super(CurrentChannelsView, self).__init__(**kwargs)
@@ -97,14 +93,23 @@ class CurrentChannelsView(Screen):
     def on_channels(self, instance, value):
         grid = self.ids.current_channels
         grid.clear_widgets()
+        self._current_channel_widgets.clear()
         for channel in value:
             current_channel = CurrentChannel(channel = channel)
             current_channel.bind(on_delete_channel=self.on_delete_channel)
             current_channel.bind(on_modified=self.on_modified)
             grid.add_widget(current_channel)
+            self._current_channel_widgets[channel] = current_channel
             
     def on_delete_channel(self, instance, name):
-        print("delete " + name)
+        try:
+            grid = self.ids.current_channels
+            widget = self._current_channel_widgets.get(name)
+            grid.remove_widget(widget)
+            self.channels.remove(name)
+        except Exception as e:
+            Logger.error('Error deleting channel ' + name + ': ' + str(name))
+        
     
     def on_modified(self, instance, name):
         print("modified " + name)   
