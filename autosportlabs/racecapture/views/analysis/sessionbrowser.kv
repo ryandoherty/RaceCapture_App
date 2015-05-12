@@ -5,10 +5,16 @@
 		
 <LapNode>:
 	orientation: 'horizontal'
-	Label:
+	FieldLabel:
 		id: lap
-	Label:
+		size_hint_x: 0.2
+		halign: 'left'
+	FieldLabel:
 		id: laptime
+		size_hint_x: 0.6
+	CheckBox:
+        id: selected
+        size_hint_x: 0.2
 		
 <SessionBrowser>:
 	orientation: 'vertical'
@@ -17,6 +23,5 @@
         height: dp(300)
         id: sessions
         hide_root: True
-        indent_level: dp(0)
-        width: dp(200)
+        indent_level: -(root.width * 0.1)
 	

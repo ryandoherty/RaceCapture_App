@@ -5,15 +5,16 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.treeview import TreeView, TreeViewNode, TreeViewLabel
 from kivy.metrics import dp
+from autosportlabs.racecapture.views.util.viewutils import format_laptime
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessionbrowser.kv')
 
 class LapNode(BoxLayout):
     def __init__(self, **kwargs):
         super(LapNode, self).__init__(**kwargs)
         lap = kwargs.get('lap','')
-        laptime = kwargs.get('laptime', '---')
-        self.ids.lap.text = str(lap)
-        self.ids.laptime.text = str(laptime)
+        laptime = kwargs.get('laptime')
+        self.ids.lap.text = str(int(lap))
+        self.ids.laptime.text = format_laptime(laptime)
 
 class SessionNode(BoxLayout):
     def __init__(self, **kwargs):
