@@ -78,15 +78,8 @@ class ChannelAnalysisWidget(AnalysisWidget):
     
     def merge_selected_channels(self, updated_channels):
         current = self._selected_channels
-        removed = []
-        added = []
-        for c in current:
-            if c not in updated_channels:
-                removed.append(c)
-                
-        for c in updated_channels:
-            if c not in current:
-                added.append(c)
+        removed = [c for c in current if c not in updated_channels]
+        added = [c for c in updated_channels if c not in current]
                 
         for c in removed:
             current.remove(c)
