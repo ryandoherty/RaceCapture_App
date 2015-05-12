@@ -18,10 +18,17 @@
 		
 <SessionBrowser>:
 	orientation: 'vertical'
-    TreeView:
-        size_hint_y: 0.5
-        height: dp(300)
-        id: sessions
-        hide_root: True
-        indent_level: -(root.width * 0.1)
+    ScrollView:
+        id: scroller
+        do_scroll_x:False
+        do_scroll_y:True
+        TreeView:
+            size_hint_y: 0.5
+            height: dp(300)
+            id: sessions
+            hide_root: True
+            indent_level: -(root.width * 0.1)
+            height: max(self.minimum_height, scroller.height)                                      
+	
+	
 	
