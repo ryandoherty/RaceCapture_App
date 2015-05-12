@@ -32,7 +32,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
         self.showCustomizeDialog()
         
     def showCustomizeDialog(self):
-        content = CustomizeChannelsView(settings=self.settings, datastore=self.datastore)
+        content = CustomizeChannelsView(settings=self.settings, datastore=self.datastore, current_channels=[])
         content.bind(on_channels_customized=self.channels_customized)
 
         popup = Popup(title="Customize Channels", content=content, size_hint=(0.7, 0.7))
@@ -40,9 +40,8 @@ class ChannelAnalysisWidget(AnalysisWidget):
         popup.open()
         self._popup = popup
     
-    def channels_customized(self, *args):
-        print("channels customized")
-#        self.dispatch('on_channel_selected', value)
+    def channels_customized(self, instance,  updated_channels):
+        print("channels customized " + str(updated_channels))
         self._dismiss_popup()
 
     def popup_dismissed(self, *args):

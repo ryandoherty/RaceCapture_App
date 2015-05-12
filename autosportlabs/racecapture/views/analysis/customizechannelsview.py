@@ -23,16 +23,8 @@ from fieldlabel import FieldLabel
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/customizechannelsview.kv')
 
-class CustomizeResult(object):
-    add_channels_view = []
-    remove_channels = []    
-    def __init__(self, **kwargs):
-        self.add_channels_view = kwargs.get("add_channels_view", [])
-        self.remove_channels  = kwargs.get("remove_channels", [])
     
 class CustomizeChannelsView(BoxLayout):
-    customize_results = CustomizeResult()
-    
     def __init__(self, **kwargs):
         super(CustomizeChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_channels_customized')
@@ -57,14 +49,14 @@ class CustomizeChannelsView(BoxLayout):
         screen_manager.current = 'current'
 
     def confirm_customize(self, *args):
-        self.dispatch('on_channels_customized')
+        self.dispatch('on_channels_customized', self.current_channels_view.channels)
         
     def add_channels(self, *args):
         self.ids.screens.current = 'add'
                 
     def add_channels_complete(self, instance, added_channels):
         self.ids.screens.current = 'current'
-        self.current_channels_view.current_channels = added_channels
+        self.current_channels_view.channels = added_channels
         
     def on_channels_customized(self, *args):
         pass
@@ -96,15 +88,14 @@ class CurrentChannel(BoxLayout):
         
     
 class CurrentChannelsView(Screen):
-    current_channels = ListProperty()
-    removed_channels = ListProperty()
+    channels = ListProperty()
     
     def __init__(self, **kwargs):
         super(CurrentChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_confirm_customize')
         self.register_event_type('on_add_channels')
         
-    def on_current_channels(self, instance, value):
+    def on_channels(self, instance, value):
         grid = self.ids.current_channels
         grid.clear_widgets()
         for channel in value:
@@ -130,7 +121,6 @@ class CurrentChannelsView(Screen):
     
     def add_channels(self, *args):
         self.dispatch('on_add_channels')
-        
         
 class AddChannelsView(Screen):
     added_channels = ListProperty()
