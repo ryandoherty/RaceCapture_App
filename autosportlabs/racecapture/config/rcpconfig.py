@@ -260,6 +260,7 @@ class LapConfigChannel(BaseChannel):
         return json_dict                
         
 class LapConfig(object):
+    DEFAULT_PREDICTED_TIME_SAMPLE_RATE = 5
     def __init__(self, **kwargs):
         self.stale = False
         self.lapCount = LapConfigChannel()
@@ -267,6 +268,8 @@ class LapConfig(object):
         self.predTime = LapConfigChannel()
         self.sector = LapConfigChannel()
         self.sectorTime = LapConfigChannel()
+        self.elapsedTime = LapConfigChannel()
+        self.currentLap = LapConfigChannel()
 
     def fromJson(self, jsonCfg):
         if jsonCfg:
@@ -290,6 +293,14 @@ class LapConfig(object):
             if sectorTime: 
                 self.sectorTime.fromJson(sectorTime)
             
+            elapsedTime = jsonCfg.get('elapsedTime')
+            if elapsedTime: 
+                self.elapsedTime.fromJson(elapsedTime)
+
+            currentLap = jsonCfg.get('currentLap')
+            if currentLap: 
+                self.currentLap.fromJson(currentLap)
+
             self.stale = False
             
     def toJson(self):
@@ -298,7 +309,9 @@ class LapConfig(object):
                                   'lapTime': self.lapTime.toJson(),
                                   'predTime': self.predTime.toJson(),
                                   'sector': self.sector.toJson(),
-                                  'sectorTime': self.sectorTime.toJson()
+                                  'sectorTime': self.sectorTime.toJson(),
+                                  'elapsedTime': self.elapsedTime.toJson(),
+                                  'currentLap': self.currentLap.toJson()
                                   }
                         }
         return lapCfgJson
