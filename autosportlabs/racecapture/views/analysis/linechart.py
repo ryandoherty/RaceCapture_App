@@ -21,6 +21,9 @@ class ChannelPlot(object):
         self.min_value = min_value
         self.max_value = max_value
         self.sourceref = sourceref
+        
+    def __str__(self):
+        return "{}_{}".format(str(self.sourceref), self.channel) 
     
 class LineChart(ChannelAnalysisWidget):
     _channel_plots = {}
@@ -33,13 +36,18 @@ class LineChart(ChannelAnalysisWidget):
     
     def on_marker(self, marker_event):
         pass
-                        
+
     def remove_channel(self, channel):
-        channel_plot = self._channel_plots.get(channel)
-        if channel_plot:
-            del(self._channel_plots[channel])
-            print('remove plot ' + channel)
+        remove = []
+        for channel_plot in self._channel_plots.itervalues():
+            if channel_plot.channel == channel:
+                remove.append(channel_plot)
+        
+        for channel_plot in remove:
+            print("removing " + str(channel_plot))
             self.ids.chart.remove_plot(channel_plot.plot)
+            del(self._channel_plots[str(channel_plot)])
+
     
     def add_channel(self, channel_data):
         chart = self.ids.chart
@@ -69,7 +77,7 @@ class LineChart(ChannelAnalysisWidget):
         chart.xmin = 0
         chart.xmax = max_distance
         plot.points = points
-        self._channel_plots[channel_plot.channel] = channel_plot
+        self._channel_plots[str(channel_plot)] = channel_plot
     
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):

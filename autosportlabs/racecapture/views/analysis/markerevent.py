@@ -8,6 +8,9 @@ class SourceRef(object):
         self.lap = lap
         self.session = session
    
+    def __str__(self):
+        return "{}_{}".format(self.lap, self.session)
+    
 '''Describes an event to synchronize views
 '''     
 class MarkerEvent(object):

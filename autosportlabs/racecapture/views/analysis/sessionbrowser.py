@@ -6,16 +6,31 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.treeview import TreeView, TreeViewNode, TreeViewLabel
 from kivy.metrics import dp
 from autosportlabs.racecapture.views.util.viewutils import format_laptime
+from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
+
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessionbrowser.kv')
 
 class LapNode(BoxLayout):
+    lap = 0
+    session = 0
     def __init__(self, **kwargs):
         super(LapNode, self).__init__(**kwargs)
-        lap = kwargs.get('lap','')
+        self.register_event_type('on_lap_selected')
+        lap = int(kwargs.get('lap'))
+        session = int(kwargs.get('session'))
         laptime = kwargs.get('laptime')
-        self.ids.lap.text = str(int(lap))
+        self.ids.lap.text = str(lap)
         self.ids.laptime.text = format_laptime(laptime)
-
+        self.lap = lap
+        self.session = session
+        
+    def on_lap_selected(self, *args):
+        pass
+    
+    def lap_selected(self, instance, value):
+        self.dispatch('on_lap_selected', SourceRef(self.lap, self.session), value)
+        
+        
 class SessionNode(BoxLayout):
     def __init__(self, **kwargs):
         super(SessionNode, self).__init__(**kwargs)
@@ -34,17 +49,25 @@ class SessionBrowser(BoxLayout):
     
     def __init__(self, **kwargs):
         super(SessionBrowser, self).__init__(**kwargs)
+        self.register_event_type('on_lap_selected')
     
     def append_session(self, name, notes):
         node = TreeSessionNode(name=name, notes=notes, height=dp(20))
         self.ids.sessions.add_node(node, None)
         return node
         
-    def append_lap(self, session_node, lapnumber, laptime):
-        node = TreeLapNode(lap=lapnumber, laptime=laptime, height=dp(20))
+    def append_lap(self, session_node, session, lap, laptime):
+        node = TreeLapNode(session=session, lap=lap, laptime=laptime, height=dp(20))
+        node.bind(on_lap_selected=self.lap_selected)
         self.ids.sessions.add_node(node, session_node)
         return node
 
+    def on_lap_selected(self, *args):
+        pass
+    
+    def lap_selected(self, instance, source_ref, state):
+        self.dispatch('on_lap_selected', source_ref, state)
+        
     def clear_sessions(self):
         tree_view = self.ids.sessions
         nodes = []

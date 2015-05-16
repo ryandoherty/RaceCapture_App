@@ -38,10 +38,16 @@ class AnalysisView(Screen):
         self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings')
         self._trackmanager = kwargs.get('trackmanager')
+        self.ids.sessions.bind(on_lap_selected=self.lap_selected)
         self.init_view()
 
+    def lap_selected(self, instance, source_ref, selected):
+        if selected:
+            self.ids.mainchart.add_lap(source_ref)
+        else:
+            self.ids.mainchart.remove_lap(source_ref)
+    
     def on_tracks_updated(self, track_manager):
-        
         self.ids.analysismap.track_manager = track_manager
 
     def open_datastore(self):
@@ -97,7 +103,7 @@ class AnalysisView(Screen):
                 for r in records:
                     lapcount = r[1]
                     laptime = r[2]
-                    sessions_view.append_lap(session_node, lapcount, laptime)
+                    sessions_view.append_lap(session_node, session.ses_id, lapcount, laptime)
         except Exception as e:
             print("unable to fetch laps: " + str(e))
         
