@@ -271,6 +271,26 @@ class LapConfig(object):
         self.elapsedTime = LapConfigChannel()
         self.currentLap = LapConfigChannel()
 
+    def primary_stats_enabled(self):
+        return (self.lapCount.sampleRate > 0 or 
+            self.lapTime.sampleRate > 0 or 
+            self.sector.sampleRate > 0 or 
+            self.sectorTime.sampleRate > 0 or 
+            self.elapsedTime.sampleRate > 0 or 
+            self.currentLap.sampleRate > 0)
+        
+    def set_primary_stats(self, rate):
+        self.lapCount.sampleRate = rate
+        self.lapTime.sampleRate = rate
+        self.sector.sampleRate = rate
+        self.sectorTime.sampleRate = rate
+        self.elapsedTime.sampleRate = rate
+        self.currentLap.sampleRate = rate
+        self.stale = True
+
+    def predtime_stats_enabled(self):
+        return self.predTime.sampleRate > 0 
+    
     def fromJson(self, jsonCfg):
         if jsonCfg:
             lapCount = jsonCfg.get('lapCount')
