@@ -33,7 +33,7 @@ class Laptime(Gauge):
                 if value == MIN_LAP_TIME:
                     view.text = self.NULL_LAP_TIME
                 else:
-                    view.text = '{}:{}'.format(intMinuteValue,'{0:2.3f}'.format(fractionMinuteValue))
+                    view.text = '{}:{}'.format(intMinuteValue,'{0:6.3f}'.format(fractionMinuteValue))
         self.updateColors()
 
     def on_halign(self, instance, value):
