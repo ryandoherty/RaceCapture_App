@@ -21,5 +21,5 @@ def format_laptime(time):
     if time == MIN_LAP_TIME:
         return NULL_LAP_TIME
     else:
-        return '{}:{}'.format(intMinuteValue,'{0:2.3f}'.format(fractionMinuteValue))
+        return '{}:{}'.format(intMinuteValue,'{0:06.3f}'.format(fractionMinuteValue))
     
