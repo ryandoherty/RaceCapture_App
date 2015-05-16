@@ -218,9 +218,11 @@ class Filter(object):
 
 
 class DatalogChannel(object):
-    def __init__(self, channel_name='', units='', sample_rate=0, smoothing=0):
+    def __init__(self, channel_name='', units='', min=0, max=0, sample_rate=0, smoothing=0):
         self.name = channel_name
         self.units = units
+        self.min = min
+        self.max = max
         self.sample_rate = sample_rate
 
     def __str__(self):
@@ -263,13 +265,15 @@ class DataStore(object):
     def _populate_channel_list(self):
         c = self._conn.cursor()
 
-        c.execute("""SELECT name, units, smoothing
+        c.execute("""SELECT name, units, min_value, max_value, smoothing
         from channel""")
 
         for ch in c.fetchall():
             self._channels.append(DatalogChannel(channel_name=ch[0],
                                                  units=ch[1],
-                                                 smoothing=ch[2]))
+                                                 min=ch[2],
+                                                 max=ch[3],
+                                                 smoothing=ch[4]))
 
     @property
     def is_open(self):
@@ -279,6 +283,12 @@ class DataStore(object):
     def channel_list(self):
         return self._channels[:]
 
+    def get_channel(self, name): 
+        channel =  [c for c in self._channels if name in c.name]
+        if not len(channel):
+            raise Exception("Unknown channel: {}".format(name))
+        return channel[0]
+        
     def _create_tables(self):
 
         self._conn.execute("""CREATE TABLE session
@@ -304,7 +314,8 @@ class DataStore(object):
 
         self._conn.execute("""CREATE TABLE channel
         (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
-        units TEXT NOT NULL, smoothing INTEGER NOT NULL)""")
+        units TEXT NOT NULL, min_value REAL NOT NULL, max_value REAL NOT NULL,
+         smoothing INTEGER NOT NULL)""")
 
         self._conn.execute("""CREATE TABLE datalog_channel_map
         (datalog_id INTEGER NOT NULL, channel_id INTEGER NOT NULL)""")
@@ -323,8 +334,8 @@ class DataStore(object):
             ADD {} REAL""".format(channel.name))
 
             #Add the channel to the 'channel' table
-            self._conn.execute("""INSERT INTO channel (name, units, smoothing)
-            VALUES (?,?,?)""", (channel.name, channel.units, 1))
+            self._conn.execute("""INSERT INTO channel (name, units, min_value, max_value, smoothing)
+            VALUES (?,?,?,?,?)""", (channel.name, channel.units, channel.min, channel.max, 1))
 
         self._conn.commit()
 
@@ -336,8 +347,7 @@ class DataStore(object):
             new_channels = []
             for i in range(1, len(raw_channels)+1):
                 name, units, min, max, samplerate = raw_channels[i -1].replace('"', '').split('|')
-                #print name, units, samplerate
-                channel = DatalogChannel(name, units, int(samplerate), 0)
+                channel = DatalogChannel(name, units, float(min), float(max), int(samplerate), 0)
                 channels.append(channel)
                 if not name in [x.name for x in self._channels]:
                     new_channels.append(channel)

@@ -93,8 +93,9 @@ class ChannelAnalysisWidget(AnalysisWidget):
         dataset = self.datastore.query(sessions=[session],
                          channels=['Distance', channel], data_filter=f)
         
+        channel_meta = self.datastore.get_channel(channel)
         records = dataset.fetch_records()
-        channel_data = ChannelData(records=records, channel=channel, min=0, max=255, source=lap_ref)
+        channel_data = ChannelData(records=records, channel=channel, min=channel_meta.min, max=channel_meta.max, source=lap_ref)
         self.add_channel(channel_data)
         
     def merge_selected_channels(self, updated_channels):
