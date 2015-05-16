@@ -128,7 +128,7 @@ class StatusView(Screen):
         self.track_manager = track_manager
         self.rc_api = rc_api
         self.register_event_type('on_tracks_updated')
-        self.rc_api.addListener('status', Clock.schedule_once(lambda dt: self._on_status_updated))
+        self.rc_api.addListener('status', self._on_status_updated)
         self._menu_node = self.ids.menu
         self._menu_node.bind(selected_node=self._on_menu_select)
 
@@ -163,7 +163,10 @@ class StatusView(Screen):
         self.update()
 
     def _on_status_updated(self, status):
-        self.status = status['status']
+        def safe_update_status(status):
+            self.status = status['status']
+            
+        Clock.schedule_once(lambda dt: safe_update_status(status))
         
     def update(self):
         _bg_current = RAW_STATUS_BGCOLOR_1
