@@ -609,6 +609,29 @@ class DataStore(object):
 
         self._conn.commit()
 
+    def get_location_center(self, sessions=None):
+        c = self._conn.cursor()
+
+        base_sql = "SELECT AVG(Latitude), AVG(Longitude) from datapoint"
+        
+        if type(sessions) == list and len(sessions) > 0:
+            base_sql += " JOIN sample ON datapoint.sample_id=sample.id WHERE "            
+            ses_filters = []
+            for s in sessions:
+                ses_filters.append('(sample.session_id = {}'.format(s))
+            base_sql += '     OR '.join(ses_filters)
+        base_sql += ') AND datapoint.Latitude != 0 AND datapoint.Longitude != 0;'
+
+        c.execute(base_sql)
+        res = c.fetchone()
+        
+        lat_average = None
+        lon_average = None
+        if res:
+            lat_average =  res[0]
+            lon_average =  res[1]
+        return (lat_average, lon_average)
+        
     def get_channel_average(self, channel, sessions=None):
         c = self._conn.cursor()
 

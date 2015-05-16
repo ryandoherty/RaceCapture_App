@@ -2,6 +2,7 @@ import os.path
 from threading import Thread
 import kivy
 kivy.require('1.8.0')
+from kivy.logger import Logger
 from kivy.app import Builder
 from kivy.clock import Clock
 from kivy.uix.widget import Widget
@@ -44,6 +45,7 @@ class AnalysisView(Screen):
     def lap_selected(self, instance, source_ref, selected):
         if selected:
             self.ids.mainchart.add_lap(source_ref)
+            self._add_location_cache(source_ref)
         else:
             self.ids.mainchart.remove_lap(source_ref)
     
@@ -75,12 +77,12 @@ class AnalysisView(Screen):
             if os.path.isfile(dstore_path):
                 self._datastore.open_db(dstore_path)
             else:
-                print('creating datastore...')
+                Logger.info('AnalysisView: creating datastore...')
                 self._datastore.new(dstore_path)
             Clock.schedule_once(lambda dt: self.refresh_session_list())
 
         dstore_path = self._settings.userPrefs.get_datastore_location()
-        print "Datastore Path:", dstore_path
+        Logger.info("AnalysisView: Datastore Path:", dstore_path)
         t = Thread(target=_init_datastore, args=(dstore_path,))
         t.daemon = True
         t.start()
@@ -105,7 +107,7 @@ class AnalysisView(Screen):
                     laptime = r[2]
                     sessions_view.append_lap(session_node, session.ses_id, lapcount, laptime)
         except Exception as e:
-            print("unable to fetch laps: " + str(e))
+            Logger.error("AnalysisView: unable to fetch laps: " + str(e))
         
     def init_view(self):
         self.init_datastore()
@@ -114,32 +116,22 @@ class AnalysisView(Screen):
         mainchart.datastore = self._datastore
 
     def on_channel_selected(self, instance, value):
-        if value is not None:
-            self._do_query(instance, value)
+        pass
 
     def on_marker(self, instance, marker):
         source = marker.sourceref
-        cache = self._session_location_cache.get(source.session)
+        cache = self._session_location_cache.get(str(source))
         if cache != None:
             point = cache[marker.data_index]
             self.ids.analysismap.update_reference_mark(source, point)
-        
-    def _do_query(self, instance, channel):
-        lap = 3
-        session = 1
-        f = Filter().eq('LapCount', lap)
-        dataset = self._datastore.query(sessions=[session],
-                         channels=['Distance', channel], data_filter=f)
-        
-        records = dataset.fetch_records()
-        source = SourceRef(lap, session)
-        self._sync_analysis_map(session)
-        self._update_location_cache(session)
-        
-    def _update_location_cache(self, session):
-        cache = self._session_location_cache.get(session)
+                
+    def _add_location_cache(self, source_ref):
+        session = source_ref.session
+        lap = source_ref.lap
+        cache = self._session_location_cache.get(str(source_ref))
         if cache == None:
-            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0)
+            self._sync_analysis_map(session)
+            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("LapCount", lap)
             dataset = self._datastore.query(sessions = [session], 
                                             channels = ["Latitude", "Longitude"], 
                                             data_filter = f)
@@ -149,11 +141,10 @@ class AnalysisView(Screen):
                 lat = r[1]
                 lon = r[2]
                 cache.append(GeoPoint.fromPoint(lat, lon))
-            self._session_location_cache[session]=cache
+            self._session_location_cache[str(source_ref)]=cache
     
     def _sync_analysis_map(self, session):
-        lat_avg = self._datastore.get_channel_average("Latitude", [session])
-        lon_avg = self._datastore.get_channel_average("Longitude", [session])
+        lat_avg, lon_avg = self._datastore.get_location_center([session])
         self.ids.analysismap.select_map(lat_avg, lon_avg)
         
 

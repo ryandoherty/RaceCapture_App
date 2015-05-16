@@ -285,4 +285,8 @@ class DataStoreTest(unittest.TestCase):
         self.assertEqual(session.notes, 'the notes')
         self.assertIsNotNone(session.date)
         
+    def test_location_center(self):
+        lat, lon = self.ds.get_location_center([1])
+        self.assertIsNotNone(lat)
+        self.assertIsNotNone(lon)
         
