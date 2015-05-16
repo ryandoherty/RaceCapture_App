@@ -1,7 +1,7 @@
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
 from autosportlabs.uix.color.colorsequence import ColorSequence
-from installfix_garden_graph import Graph, MeshLinePlot, LinePlot
+from installfix_garden_graph import Graph, LinePlot
 from kivy.app import Builder
 from kivy.core.window import Window
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
@@ -44,14 +44,13 @@ class LineChart(ChannelAnalysisWidget):
                 remove.append(channel_plot)
         
         for channel_plot in remove:
-            print("removing " + str(channel_plot))
             self.ids.chart.remove_plot(channel_plot.plot)
             del(self._channel_plots[str(channel_plot)])
 
     
     def add_channel(self, channel_data):
         chart = self.ids.chart
-        plot = LinePlot(color=self._color_sequence.get_next_color(), line_width=1)
+        plot = LinePlot(color=self._color_sequence.get_next_color(), line_width=1.25)
         channel_plot = ChannelPlot(plot, 
                                    channel_data.channel, 
                                    channel_data.min, 
