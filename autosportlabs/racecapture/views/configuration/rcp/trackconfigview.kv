@@ -6,12 +6,23 @@
 		Label:
 			text: "Sector"
 			rcid: 'title'
-		FloatValueField:
-			rcid: 'lat'
-			on_text: root.on_lat(*args)
-		FloatValueField:
-			rcid: 'lon'
-			on_text: root.on_lon(*args)
+            size_hint_x: 0.25
+		FieldLabel:
+            size_hint_x: 0.25		
+            id: lat
+		FieldLabel:
+            size_hint_x: 0.25
+            id: lon
+        IconButton:
+            size_hint_x: 0.125
+            text: u'\uf05b'
+            font_size: self.height * 0.6
+            on_release: root.on_customize(*args)
+        IconButton:
+            size_hint_x: 0.125
+            text: u'\uf013'
+            font_size: self.height * 0.6
+            on_release: root.on_customize(*args)
 
 <TrackConfigView>:
 	padding: (dp(10),dp(20))
@@ -19,17 +30,14 @@
 	orientation: 'vertical'
 	BoxLayout:
 		orientation: 'vertical'
-		size_hint_y: 0.19
-		spacing: dp(20)
+		size_hint_y: 0.15
 		SettingsView:
 			rcid: 'autoDetect'
 			label_text: 'Automatic track detection'
-			help_text: 'Automatically detect and configure the race track upon GPS lock, after power-up. If you want a fixed configuration, leave off and configure your start/finish and sector targets below'
-	HLineSeparator:
-		size_hint_y: 0.01
+			help_text: 'Automatically detect and configure the race track upon power-up, upon GPS lock.'
 	ScreenManager:
 		rcid: 'screenmgr'
-		size_hint_y: 0.80
+		size_hint_y: 0.85
 
 <EmptyTrackDbView>:
 	BoxLayout:
@@ -115,39 +123,62 @@
 	BoxLayout:
 		orientation: 'vertical'
 		SettingsView:
-			size_hint_y: 0.30
+			size_hint_y: 0.25
 			rcid: 'sepStartFinish'
 			label_text: 'Separate start and finish lines'
-			help_text: 'Specify a separate start / finish line for Stage Rally, Hill Climb or Autocross type courses. Leave off for circuit type courses'
+			help_text: 'Specify a separate start / finish point for Stage, Hill Climb or AutoX type courses.'
 		BoxLayout:
 			orientation: 'vertical'
-			size_hint_y: 0.70
+			size_hint_y: 0.75
 		    	
-		    BoxLayout:
-		    	size_hint_y: 0.1
-		    	spacing: dp(5)
-				orientation: 'horizontal'
-		    	HSeparatorMinor: 
-		    		text: 'Type'
-		    	HSeparatorMinor:
-		    		text: 'Latitude'
-				HSeparatorMinor:
-					text: 'Longitude'
-		
 			SectorPointView:
 				rcid:'startLine'
-				size_hint_y: 0.1
+				size_hint_y: 0.15
 			SectorPointView:
 				rcid:'finishLine'
-				size_hint_y: 0.1
+				size_hint_y: 0.15
 		    	
-		    HSeparatorMinor:
-		        text: 'Sectors'
 		    ScrollView:
+                id: scroller
 		    	size_hint_y: 0.6
 				do_scroll_x: False
-		    	GridLayout:
-		    		spacing: dp(8)
-		    		rcid: 'sectorsGrid'
-		    		cols: 1
+                GridLayout:
+                    canvas.before:
+                        Color:
+                            rgba: 0.1, 0.1, 0.1, 1.0
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    id: sectors_grid
+                    row_default_height: root.height * 0.12
+                    row_force_default: True
+                    size_hint_y: None
+                    height: max(self.minimum_height, scroller.height)                                      
+                    cols: 1
+				
 	    
+	    
+<GeoPointEditor>:
+    orientation: 'vertical'
+    GridLayout:
+        size_hint_y: 0.75
+        spacing: dp(20)
+        cols: 2
+        BoxLayout:
+            spacing: dp(20)
+            orientation: 'horizontal'
+            FieldLabel:
+                text: 'Latitude'
+            FieldLabel:
+                text: 'Longitude'
+            FloatValueField:
+                id: lat
+                on_text: root.on_latitude(*args)                
+            FloatValueField:
+                id: lon
+                on_text: root.on_longitude(*args)
+    IconButton:
+        size_hint_y: 0.25
+        text: "\357\200\214"
+        on_press: root.on_close()
+

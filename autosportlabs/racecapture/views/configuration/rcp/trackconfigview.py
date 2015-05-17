@@ -22,8 +22,6 @@ TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackc
 
 class SectorPointView(BoxLayout):
     geoPoint = None
-    latView = None
-    lonView = None
     def __init__(self, **kwargs):
         super(SectorPointView, self).__init__(**kwargs)
         self.register_event_type('on_config_changed')
@@ -33,22 +31,13 @@ class SectorPointView(BoxLayout):
 
     def on_config_changed(self):
         pass
-    
-    def setNext(self, widget):
-        self.lonView.set_next(widget)
         
-    def getPrevious(self):
-        return self.latView
-    
     def setTitle(self, title):
         kvFind(self, 'rcid', 'title').text = title
         
     def setPoint(self, geoPoint):
-        self.latView = kvFind(self, 'rcid', 'lat')
-        self.lonView = kvFind(self, 'rcid', 'lon')
-        self.latView.text = str(geoPoint.latitude)
-        self.lonView.text = str(geoPoint.longitude)
-        self.latView.set_next(self.lonView)        
+        self.ids.lat.text = str(geoPoint.latitude)
+        self.ids.lon.text = str(geoPoint.longitude)
         self.geoPoint = geoPoint
         
     def on_lat(self, instance, value):
@@ -207,8 +196,8 @@ class ManualTrackConfigScreen(Screen):
         sepStartFinish.bind(on_setting=self.on_separate_start_finish)
         sepStartFinish.setControl(SettingsSwitch())
         
-        self.separateStartFinish = False        
-        sectorsContainer = kvFind(self, 'rcid', 'sectorsGrid')
+        self.separateStartFinish = False
+        sectorsContainer = self.ids.sectors_grid        
         self.sectorsContainer = sectorsContainer
         self.initSectorViews()
             
@@ -253,14 +242,7 @@ class ManualTrackConfigScreen(Screen):
             self.startLineView.setTitle('Start Line')
             self.finishLineView.setTitle('Finish Line')
             self.finishLineView.disabled = False
-    
-    def update_tabs(self):
-        prevSectorView = None
-        for sectorView in self.sectorViews:
-            if prevSectorView:
-                prevSectorView.setNext(sectorView.getPrevious())
-            prevSectorView = sectorView
-        
+            
     def on_config_updated(self, rcpCfg):
         trackCfg = rcpCfg.trackConfig
         
@@ -283,7 +265,6 @@ class ManualTrackConfigScreen(Screen):
         
         self.trackCfg = trackCfg
         self.updateTrackViewState()
-        self.update_tabs()
             
 class TrackConfigView(BaseConfigView):
     trackCfg = None
@@ -337,3 +318,27 @@ class TrackConfigView(BaseConfigView):
             self.trackCfg.autoDetect = value
             self.trackCfg.stale = True
             self.dispatch('on_modified')
+            
+            
+class GeoPointEditor(BoxLayout):
+    channel = None
+    rc_api = None
+    def __init__(self, **kwargs):
+        super(GeoPointEditor, self).__init__(**kwargs)
+        self.point = kwargs.get('point', None)
+        self.rc_api = kwargs.get('rc_api', None)
+        self.register_event_type('on_point_edited')        
+        self.init_view()
+        
+    def init_view(self):
+        pass
+            
+    def on_latitude(self, instance, value):
+        self.channel.name = value
+        
+    def on_longitude(self, instance, value):
+        self.channel.units = value
+    
+    def on_close(self):
+        self.dispatch('on_point_edited')        
+            
