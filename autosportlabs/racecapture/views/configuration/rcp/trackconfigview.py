@@ -35,20 +35,49 @@ class SectorPointView(BoxLayout):
     def setTitle(self, title):
         kvFind(self, 'rcid', 'title').text = title
         
+    def on_get_point(self, *args):
+        self.dispatch('on_config_changed')
+        
+    def _on_edited(self, *args):
+        self.setPoint(self.geoPoint)
+        self.dispatch('on_config_changed')
+    
+    def on_customize(self, *args):
+        content = GeoPointEditor(point=self.geoPoint)
+        popup = Popup(title = 'Edit Track Target',
+                      content = content, 
+                      size_hint=(None, None), size = (dp(500), dp(220)))
+        popup.bind(on_dismiss=self._on_edited)
+        content.bind(on_point_edited=lambda *args:popup.dismiss())                     
+        popup.open()
+        
     def setPoint(self, geoPoint):
         self.ids.lat.text = str(geoPoint.latitude)
         self.ids.lon.text = str(geoPoint.longitude)
         self.geoPoint = geoPoint
+            
+class GeoPointEditor(BoxLayout):
+    def __init__(self, **kwargs):
+        super(GeoPointEditor, self).__init__(**kwargs)
+        self.point = kwargs.get('point', None)
+        self.register_event_type('on_point_edited')
+        self.init_view()
         
-    def on_lat(self, instance, value):
-        if self.geoPoint:
-            self.geoPoint.latitude = float(value)
-            self.dispatch('on_config_changed')
+    def on_latitude(self, instance, value):
+        pass
+        
+    def on_longitude(self, instance, value):
+        pass
+        
+    def init_view(self):
+        pass
     
-    def on_lon(self, instance, value):
-        if self.geoPoint:
-            self.geoPoint.longitude = float(value)
-            self.dispatch('on_config_changed')
+    def on_point_edited(self, *args):
+        pass
+    
+    def on_close(self):
+        self.dispatch('on_point_edited')        
+
             
 class EmptyTrackDbView(BoxLayout):
     def __init__(self, **kwargs):
@@ -319,26 +348,4 @@ class TrackConfigView(BaseConfigView):
             self.trackCfg.stale = True
             self.dispatch('on_modified')
             
-            
-class GeoPointEditor(BoxLayout):
-    channel = None
-    rc_api = None
-    def __init__(self, **kwargs):
-        super(GeoPointEditor, self).__init__(**kwargs)
-        self.point = kwargs.get('point', None)
-        self.rc_api = kwargs.get('rc_api', None)
-        self.register_event_type('on_point_edited')        
-        self.init_view()
-        
-    def init_view(self):
-        pass
-            
-    def on_latitude(self, instance, value):
-        self.channel.name = value
-        
-    def on_longitude(self, instance, value):
-        self.channel.units = value
-    
-    def on_close(self):
-        self.dispatch('on_point_edited')        
             
