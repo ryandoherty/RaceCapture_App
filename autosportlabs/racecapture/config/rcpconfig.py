@@ -260,6 +260,7 @@ class LapConfigChannel(BaseChannel):
         return json_dict                
         
 class LapConfig(object):
+    DEFAULT_PREDICTED_TIME_SAMPLE_RATE = 5
     def __init__(self, **kwargs):
         self.stale = False
         self.lapCount = LapConfigChannel()
@@ -267,7 +268,29 @@ class LapConfig(object):
         self.predTime = LapConfigChannel()
         self.sector = LapConfigChannel()
         self.sectorTime = LapConfigChannel()
+        self.elapsedTime = LapConfigChannel()
+        self.currentLap = LapConfigChannel()
 
+    def primary_stats_enabled(self):
+        return (self.lapCount.sampleRate > 0 or 
+            self.lapTime.sampleRate > 0 or 
+            self.sector.sampleRate > 0 or 
+            self.sectorTime.sampleRate > 0 or 
+            self.elapsedTime.sampleRate > 0 or 
+            self.currentLap.sampleRate > 0)
+        
+    def set_primary_stats(self, rate):
+        self.lapCount.sampleRate = rate
+        self.lapTime.sampleRate = rate
+        self.sector.sampleRate = rate
+        self.sectorTime.sampleRate = rate
+        self.elapsedTime.sampleRate = rate
+        self.currentLap.sampleRate = rate
+        self.stale = True
+
+    def predtime_stats_enabled(self):
+        return self.predTime.sampleRate > 0 
+    
     def fromJson(self, jsonCfg):
         if jsonCfg:
             lapCount = jsonCfg.get('lapCount')
@@ -290,6 +313,14 @@ class LapConfig(object):
             if sectorTime: 
                 self.sectorTime.fromJson(sectorTime)
             
+            elapsedTime = jsonCfg.get('elapsedTime')
+            if elapsedTime: 
+                self.elapsedTime.fromJson(elapsedTime)
+
+            currentLap = jsonCfg.get('currentLap')
+            if currentLap: 
+                self.currentLap.fromJson(currentLap)
+
             self.stale = False
             
     def toJson(self):
@@ -298,7 +329,9 @@ class LapConfig(object):
                                   'lapTime': self.lapTime.toJson(),
                                   'predTime': self.predTime.toJson(),
                                   'sector': self.sector.toJson(),
-                                  'sectorTime': self.sectorTime.toJson()
+                                  'sectorTime': self.sectorTime.toJson(),
+                                  'elapsedTime': self.elapsedTime.toJson(),
+                                  'currentLap': self.currentLap.toJson()
                                   }
                         }
         return lapCfgJson

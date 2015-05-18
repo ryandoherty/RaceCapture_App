@@ -1,48 +1,24 @@
 #:kivy 1.8.0
 
 <LapStatsView>:
-    padding: [30,30]
+    padding: (dp(10), dp(10))
+    spacing: dp(20)
     orientation: 'vertical'
 	HSeparator:
-		text: 'Lap Statistics'    		
-    GridLayout:
-    	spacing: dp(30)
-    	padding: (dp(10), dp(10))
-        size_hint: (1.0,0.8)
-        cols: 2
-        HSeparatorMinor:
-        	text: 'Channel'
-        HSeparatorMinor:
-        	text: 'Sample Rate'
-        FieldLabel:
-        	halign: 'right'
-            text: 'Lap Count'
-        SampleRateSpinner:
-        	rcid: 'lapCount'
-        	on_text: root.on_lapCount_sample_rate(*args)
-        FieldLabel:
-        	halign: 'right'
-            text: 'Lap Time'
-        SampleRateSpinner:
-        	rcid: 'lapTime'
-        	on_text: root.on_lapTime_sample_rate(*args)
-        FieldLabel:
-        	halign: 'right'
-            text: 'Predicted Time'
-        SampleRateSpinner:
-        	rcid: 'predTime'
-        	on_text: root.on_predTime_sample_rate(*args)
-        FieldLabel:
-        	halign: 'right'
-            text: 'Sector'
-        SampleRateSpinner:
-        	rcid: 'sector'
-        	on_text: root.on_sector_sample_rate(*args)
-        FieldLabel:
-        	halign: 'right'
-            text: 'Sector Time'
-        SampleRateSpinner:
-        	rcid: 'sectorTime'
-        	on_text: root.on_sectorTime_sample_rate(*args)
-    Label:
-        size_hint: (1.0, 0.2)
+        text: 'Race Timing'
+        size_hint_y: 0.05
+		
+	SettingsView:
+        size_hint_y: 0.3
+        id: lapstats
+        label_text: 'Race Timing'
+        help_text: 'Enable lap/run timing for Circuit and Point to Point racing mode'
+        
+    SettingsView:
+        size_hint_y: 0.3
+        id: predtime
+        label_text: 'Predictive Timing'
+        help_text: 'Enable the predictive lap timer'
+
+    BoxLayout:
+        size_hint_y: 0.35
