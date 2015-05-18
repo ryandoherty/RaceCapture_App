@@ -554,7 +554,9 @@ class RcpApi:
                     mode = TRACK_ADD_MODE_IN_PROGRESS if index < trackCount - 1 else TRACK_ADD_MODE_COMPLETE
                     cmdSequence.append(RcpCmd('addTrackDb', self.addTrackDb, trackJson, index, mode))
                     index += 1
-    
+            else:
+                cmdSequence.append(RcpCmd('addTrackDb', self.addTrackDb, [], index, TRACK_ADD_MODE_COMPLETE))
+
     def addTrackDb(self, trackJson, index, mode):
         return self.sendCommand({'addTrackDb':
                                  {'index':index, 
