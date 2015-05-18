@@ -26,20 +26,45 @@
 
 <GeoPointEditor>:
     orientation: 'vertical'
-    GridLayout:
+    BoxLayout:
         size_hint_y: 0.75
-        spacing: dp(20)
-        cols: 2
-        FieldLabel:
-            text: 'Latitude'
-        FieldLabel:
-            text: 'Longitude'
-        FloatValueField:
-            id: lat
-            on_text: root.on_latitude(*args)                
-        FloatValueField:
-            id: lon
-            on_text: root.on_longitude(*args)
+        orientation: 'horizontal'
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_x: 0.8
+            BoxLayout:
+                size_hint_y: 0.3
+                orientation: 'horizontal'
+                FieldLabel:
+                    halign: 'center'
+                    text: 'Latitude'
+                FieldLabel:
+                    halign: 'center'
+                    text: 'Longitude'
+            BoxLayout:
+                size_hint_y: 0.3
+                orientation: 'horizontal'
+                FloatValueField:
+                    id: lat
+                    on_text: root.on_latitude(*args)                
+                FloatValueField:
+                    id: lon
+                    on_text: root.on_longitude(*args)
+            BoxLayout:
+                size_hint_y: 0.4
+                
+        BoxLayout:
+            #size_hint_x: 0.2
+            orientation: 'vertical'
+            spacing: dp(20)
+            padding: (dp(5), dp(5))
+            size_hint_x: 0.2
+            IconButton: 
+                text: u'\uf0ea'
+                id: paste
+            IconButton:
+                text: u'\uf05b'
+                id: get_current
     IconButton:
         size_hint_y: 0.25
         text: "\357\200\214"
