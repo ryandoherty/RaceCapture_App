@@ -188,7 +188,7 @@ class ConfigView(Screen):
 
         defaultNode = attach_node('Race Track/Sectors', None, lambda: TrackConfigView())
         attach_node('GPS', None, lambda: GPSChannelsView())
-        attach_node('Lap Statistics', None, lambda: LapStatsView())        
+        attach_node('Race Timing', None, lambda: LapStatsView())        
         attach_node('Analog Sensors', None, lambda: AnalogChannelsView(channels=runtime_channels))
         attach_node('Pulse/RPM Sensors', None, lambda: PulseChannelsView(channels=runtime_channels))
         attach_node('Digital In/Out', None, lambda: GPIOChannelsView(channels=runtime_channels))
