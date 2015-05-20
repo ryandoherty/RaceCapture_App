@@ -7,6 +7,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
+from kivy.clock import Clock
 from kivy.app import Builder
 from helplabel import HelpLabel
 from fieldlabel import FieldLabel
@@ -20,15 +21,27 @@ from autosportlabs.racecapture.config.rcpconfig import *
 
 TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackconfigview.kv'
 
+
 class SectorPointView(BoxLayout):
+    databus = None
     geoPoint = None
+    GPS_STATUS_POLL_INTERVAL = 1.0
+    GPS_NOT_LOCKED_COLOR = [0.7, 0.7, 0.0, 1.0]
+    GPS_LOCKED_COLOR = [0.0, 1.0, 0.0, 1.0]
     def __init__(self, **kwargs):
         super(SectorPointView, self).__init__(**kwargs)
+        self.databus = kwargs.get('databus')
         self.register_event_type('on_config_changed')
         title = kwargs.get('title', None)
         if title:
             self.setTitle(title)
+        Clock.schedule_interval(lambda dt: self.update_gps_status(), self.GPS_STATUS_POLL_INTERVAL)
 
+    def update_gps_status(self, *args):
+        gps_quality = self.databus.channel_data.get('GPSQual')
+        if gps_quality is not None:
+            self.ids.gps_target.color = self.GPS_NOT_LOCKED_COLOR if gps_quality < 2 else self.GPS_LOCKED_COLOR
+            
     def on_config_changed(self):
         pass
         
@@ -217,13 +230,19 @@ class ManualTrackConfigScreen(Screen):
     startLineView = None
     finishLineView = None
     separateStartFinish = False
+    _databus = None
 
     def __init__(self, **kwargs):
         super(ManualTrackConfigScreen, self).__init__(**kwargs)
-        
+        self._databus = kwargs.get('databus')
         sepStartFinish = kvFind(self, 'rcid', 'sepStartFinish') 
         sepStartFinish.bind(on_setting=self.on_separate_start_finish)
         sepStartFinish.setControl(SettingsSwitch())
+        
+        self.startLineView = self.ids.start_line
+        self.startLineView.databus = self._databus
+        self.finishLineView = self.ids.finish_line
+        self.finishLineView.databus = self._databus
         
         self.separateStartFinish = False
         sectorsContainer = self.ids.sectors_grid        
@@ -251,9 +270,7 @@ class ManualTrackConfigScreen(Screen):
         sectorsContainer = self.sectorsContainer
         sectorsContainer.clear_widgets()
         
-        self.startLineView = kvFind(self, 'rcid', 'startLine')
         self.startLineView.bind(on_config_changed=self.on_config_changed)
-        self.finishLineView = kvFind(self, 'rcid', 'finishLine')
         self.finishLineView.bind(on_config_changed=self.on_config_changed)
                                 
         self.updateTrackViewState()
@@ -283,7 +300,7 @@ class ManualTrackConfigScreen(Screen):
 
         sectorsContainer.clear_widgets()
         for i in range(0, trackCfg.track.sectorCount):
-            sectorView = SectorPointView(title = 'Sector ' + str(i))
+            sectorView = SectorPointView(title = 'Sector ' + str(i), databus=self._databus)
             sectorView.bind(on_config_changed=self.on_config_changed)
             sectorsContainer.add_widget(sectorView)
             sectorView.setPoint(trackCfg.track.sectors[i])
@@ -302,13 +319,15 @@ class TrackConfigView(BaseConfigView):
     screenManager = None
     manualTrackConfigView = None
     autoConfigView = None
+    _databus = None
     
     def __init__(self, **kwargs):
         Builder.load_file(TRACK_CONFIG_VIEW_KV)
         super(TrackConfigView, self).__init__(**kwargs)
+        self._databus = kwargs.get('databus')
         self.register_event_type('on_config_updated')
         
-        self.manualTrackConfigView = ManualTrackConfigScreen(name='manual')
+        self.manualTrackConfigView = ManualTrackConfigScreen(name='manual', databus=self._databus)
         self.manualTrackConfigView.bind(on_modified=self.on_modified)
         
         self.autoConfigView = AutomaticTrackConfigScreen(name='auto')
