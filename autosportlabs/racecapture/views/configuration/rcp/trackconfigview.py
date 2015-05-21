@@ -18,9 +18,9 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.tracks.tracksview import TrackInfoView, TracksView
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.uix.toast.kivytoast import toast
 
 TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackconfigview.kv'
-
 
 class SectorPointView(BoxLayout):
     databus = None
@@ -58,6 +58,9 @@ class SectorPointView(BoxLayout):
             self.ids.lat.text = str(latitude)
             self.ids.lon.text = str(longitude)
             self.dispatch('on_config_changed')
+            toast('Target updated')
+        else:
+            toast('No GPS Fix', True)
         
     def _on_edited(self, *args):
         self.setPoint(self.geoPoint)
