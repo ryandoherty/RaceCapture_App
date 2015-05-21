@@ -1,6 +1,7 @@
 import kivy
 kivy.require('1.8.0')
 
+from kivy.core.clipboard import Clipboard
 from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.gridlayout import GridLayout
@@ -114,8 +115,16 @@ class GeoPointEditor(BoxLayout):
         pass
     
     def on_paste_point(self, *args):
-        pass
-
+        try:
+            point_string = Clipboard.get('UTF8_STRING')
+            lat_lon = point_string.split(",")
+            lat = float(lat_lon[0])
+            lon = float(lat_lon[1])
+            self.ids.lat.text = str(lat)
+            self.ids.lon.text = str(lon)
+        except Exception:
+            toast('Paste expects (latitude),(longitude)', True)
+            
     def _get_gps_quality(self):
         gps_quality = self.databus.channel_data.get('GPSQual')
         return 0 if gps_quality is None else int(gps_quality)
@@ -127,7 +136,7 @@ class GeoPointEditor(BoxLayout):
                 self._refresh_view(channel_data.get('Latitude'), channel_data.get('Longitude'))
             else:
                 toast('No GPS Fix', True)
-        except Exception as e:
+        except Exception:
             toast('Error reading GPS target')
     
     def close(self):
