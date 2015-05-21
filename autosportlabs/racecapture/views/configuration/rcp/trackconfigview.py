@@ -52,15 +52,19 @@ class SectorPointView(BoxLayout):
         kvFind(self, 'rcid', 'title').text = title
         
     def on_update_target(self, *args):
-        if self._get_gps_quality() >= GpsConfig.GPS_QUALITY_2D:
-            latitude = self.databus.channel_data.get('Latitude')
-            longitude = self.databus.channel_data.get('Longitude')
-            self.ids.lat.text = str(latitude)
-            self.ids.lon.text = str(longitude)
-            self.dispatch('on_config_changed')
-            toast('Target updated')
-        else:
-            toast('No GPS Fix', True)
+        try:
+            if self._get_gps_quality() >= GpsConfig.GPS_QUALITY_2D:
+                channel_data = self.databus.channel_data
+                point = self.geoPoint
+                point.latitude = channel_data.get('Latitude')
+                point.longitude = channel_data.get('Longitude') 
+                self.setPoint(point)
+                self.dispatch('on_config_changed')
+                toast('Target updated')
+            else:
+                toast('No GPS Fix', True)
+        except Exception as e:
+            toast('Error getting GPS target')
         
     def _on_edited(self, *args):
         self.setPoint(self.geoPoint)
