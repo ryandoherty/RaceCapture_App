@@ -119,7 +119,7 @@ class TrackManager:
     tracks_user_dir = '.'
     track_user_subdir = '/venues'
     on_progress = lambda self, value: value
-    rcp_venue_url = 'http://race-capture.com/api/v1/venues'
+    rcp_venue_url = 'https://race-capture.com/api/v1/venues'
     readRetries = 3
     retryDelay = 1.0
     trackList = None
