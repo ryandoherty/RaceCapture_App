@@ -66,17 +66,18 @@ class SectorPointView(BoxLayout):
         except Exception as e:
             toast('Error reading GPS target')
         
-    def _on_edited(self, *args):
-        self.setPoint(self.point)
+    def _on_edited(self, instance, value):
+        print(str(value))
+        self.setPoint(value)
         self.dispatch('on_config_changed')
     
     def on_customize(self, *args):
-        content = GeoPointEditor(point=self.point)
+        content = GeoPointEditor(point=self.point, databus=self.databus)
         popup = Popup(title = 'Edit Track Target',
                       content = content, 
                       size_hint=(None, None), size = (dp(500), dp(220)))
-        popup.bind(on_dismiss=self._on_edited)
-        content.bind(on_point_edited=lambda *args:popup.dismiss())                     
+        content.bind(on_close=lambda *args:popup.dismiss())                     
+        content.bind(on_point_edited=self._on_edited)
         popup.open()
         
     def _refresh_point_view(self):
@@ -90,9 +91,11 @@ class SectorPointView(BoxLayout):
 class GeoPointEditor(BoxLayout):
     def __init__(self, **kwargs):
         super(GeoPointEditor, self).__init__(**kwargs)
-        self.point = kwargs.get('point', None)
+        self.point = kwargs.get('point')
+        self.databus = kwargs.get('databus')
         self.register_event_type('on_point_edited')
-        self.init_view()
+        self.register_event_type('on_close')
+        self._refresh_view(self.point.latitude, self.point.longitude)
         
     def on_latitude(self, instance, value):
         pass
@@ -100,14 +103,39 @@ class GeoPointEditor(BoxLayout):
     def on_longitude(self, instance, value):
         pass
         
-    def init_view(self):
-        pass
+    def _refresh_view(self, latitude, longitude):
+        self.ids.lat.text = str(latitude)
+        self.ids.lon.text = str(longitude)
     
     def on_point_edited(self, *args):
         pass
     
-    def on_close(self):
-        self.dispatch('on_point_edited')        
+    def on_close(self, *args):
+        pass
+    
+    def on_paste_point(self, *args):
+        pass
+
+    def _get_gps_quality(self):
+        gps_quality = self.databus.channel_data.get('GPSQual')
+        return 0 if gps_quality is None else int(gps_quality)
+
+    def on_update_target(self, *args):
+        try:
+            if self._get_gps_quality() >= GpsConfig.GPS_QUALITY_2D:
+                channel_data = self.databus.channel_data
+                self._refresh_view(channel_data.get('Latitude'), channel_data.get('Longitude'))
+            else:
+                toast('No GPS Fix', True)
+        except Exception as e:
+            toast('Error reading GPS target')
+    
+    def close(self):
+        point = self.point
+        point.latitude = float(self.ids.lat.text)
+        point.longitude = float(self.ids.lon.text)
+        self.dispatch('on_point_edited', self.point)        
+        self.dispatch('on_close')
 
             
 class EmptyTrackDbView(BoxLayout):

@@ -63,13 +63,15 @@
             IconButton: 
                 text: u'\uf0ea'
                 id: paste
+                on_press: root.on_paste_point()
             IconButton:
                 text: u'\uf05b'
                 id: get_current
+                on_press: root.on_update_target()
     IconButton:
         size_hint_y: 0.25
         text: "\357\200\214"
-        on_press: root.on_close()
+        on_press: root.close()
 
 <TrackConfigView>:
 	padding: (dp(10),dp(20))
