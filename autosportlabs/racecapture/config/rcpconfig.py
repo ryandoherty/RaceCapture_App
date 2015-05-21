@@ -337,6 +337,11 @@ class LapConfig(object):
         return lapCfgJson
           
 class GpsConfig(object):
+    GPS_QUALITY_NO_FIX = 0
+    GPS_QUALITY_2D = 1
+    GPS_QUALITY_3D = 2
+    GPS_QUALITY_3D_DGNSS = 3
+
     def __init__(self, **kwargs):
         self.stale = False
         self.sampleRate = 0

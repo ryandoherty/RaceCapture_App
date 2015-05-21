@@ -37,10 +37,13 @@ class SectorPointView(BoxLayout):
             self.setTitle(title)
         Clock.schedule_interval(lambda dt: self.update_gps_status(), self.GPS_STATUS_POLL_INTERVAL)
 
-    def update_gps_status(self, *args):
+    def _get_gps_quality(self):
         gps_quality = self.databus.channel_data.get('GPSQual')
-        if gps_quality is not None:
-            self.ids.gps_target.color = self.GPS_NOT_LOCKED_COLOR if gps_quality < 2 else self.GPS_LOCKED_COLOR
+        return 0 if gps_quality is None else int(gps_quality)
+    
+    def update_gps_status(self, *args):
+        gps_quality = self._get_gps_quality()
+        self.ids.gps_target.color = self.GPS_NOT_LOCKED_COLOR if gps_quality < GpsConfig.GPS_QUALITY_2D else self.GPS_LOCKED_COLOR
             
     def on_config_changed(self):
         pass
@@ -48,8 +51,13 @@ class SectorPointView(BoxLayout):
     def setTitle(self, title):
         kvFind(self, 'rcid', 'title').text = title
         
-    def on_get_point(self, *args):
-        self.dispatch('on_config_changed')
+    def on_update_target(self, *args):
+        if self._get_gps_quality() >= GpsConfig.GPS_QUALITY_2D:
+            latitude = self.databus.channel_data.get('Latitude')
+            longitude = self.databus.channel_data.get('Longitude')
+            self.ids.lat.text = str(latitude)
+            self.ids.lon.text = str(longitude)
+            self.dispatch('on_config_changed')
         
     def _on_edited(self, *args):
         self.setPoint(self.geoPoint)
