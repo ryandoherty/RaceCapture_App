@@ -2,6 +2,7 @@
 * Simplified lap stats page into 'Race Timing' with code that helps guarantee proper configuration
 * Fixed bug where no tracks are removed from RCP if all tracks are removed in configuration view
 * Improved visibility for checkboxes on OS X
+* Use SSL when fetching tracks from RaceCapture/Live
 
 ==1.3.1==
 * Fixed periodic crashing while connected to RCP (Windows version)
