@@ -23,12 +23,13 @@ from autosportlabs.uix.toast.kivytoast import toast
 
 TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackconfigview.kv'
 
+GPS_STATUS_POLL_INTERVAL = 1.0
+GPS_NOT_LOCKED_COLOR = [0.7, 0.7, 0.0, 1.0]
+GPS_LOCKED_COLOR = [0.0, 1.0, 0.0, 1.0]
+
 class SectorPointView(BoxLayout):
     databus = None
     point = None
-    GPS_STATUS_POLL_INTERVAL = 1.0
-    GPS_NOT_LOCKED_COLOR = [0.7, 0.7, 0.0, 1.0]
-    GPS_LOCKED_COLOR = [0.0, 1.0, 0.0, 1.0]
     def __init__(self, **kwargs):
         super(SectorPointView, self).__init__(**kwargs)
         self.databus = kwargs.get('databus')
@@ -36,7 +37,7 @@ class SectorPointView(BoxLayout):
         title = kwargs.get('title', None)
         if title:
             self.setTitle(title)
-        Clock.schedule_interval(lambda dt: self.update_gps_status(), self.GPS_STATUS_POLL_INTERVAL)
+        Clock.schedule_interval(lambda dt: self.update_gps_status(), GPS_STATUS_POLL_INTERVAL)
 
     def _get_gps_quality(self):
         gps_quality = self.databus.channel_data.get('GPSQual')
@@ -44,7 +45,7 @@ class SectorPointView(BoxLayout):
     
     def update_gps_status(self, *args):
         gps_quality = self._get_gps_quality()
-        self.ids.gps_target.color = self.GPS_NOT_LOCKED_COLOR if gps_quality < GpsConfig.GPS_QUALITY_2D else self.GPS_LOCKED_COLOR
+        self.ids.gps_target.color = GPS_NOT_LOCKED_COLOR if gps_quality < GpsConfig.GPS_QUALITY_2D else GPS_LOCKED_COLOR
             
     def on_config_changed(self):
         pass
@@ -68,7 +69,6 @@ class SectorPointView(BoxLayout):
             toast('Error reading GPS target')
         
     def _on_edited(self, instance, value):
-        print(str(value))
         self.setPoint(value)
         self.dispatch('on_config_changed')
     
@@ -99,6 +99,8 @@ class GeoPointEditor(BoxLayout):
         self._refresh_view(self.point.latitude, self.point.longitude)
         self.ids.lat.set_next(self.ids.lon)
         self.ids.lon.set_next(self.ids.lat)
+        Clock.schedule_interval(self.update_gps_status, GPS_STATUS_POLL_INTERVAL)
+        
         
     def on_latitude(self, instance, value):
         pass
@@ -126,6 +128,10 @@ class GeoPointEditor(BoxLayout):
             self.ids.lon.text = str(lon)
         except Exception:
             toast('Paste expects (latitude),(longitude)', True)
+
+    def update_gps_status(self, dt,  *args):
+        gps_quality = self._get_gps_quality()
+        self.ids.gps_target.color = GPS_NOT_LOCKED_COLOR if gps_quality < GpsConfig.GPS_QUALITY_2D else GPS_LOCKED_COLOR
             
     def _get_gps_quality(self):
         gps_quality = self.databus.channel_data.get('GPSQual')
@@ -145,7 +151,8 @@ class GeoPointEditor(BoxLayout):
         point = self.point
         point.latitude = float(self.ids.lat.text)
         point.longitude = float(self.ids.lon.text)
-        self.dispatch('on_point_edited', self.point)        
+        self.dispatch('on_point_edited', self.point)
+        Clock.unschedule(self.update_gps_status)              
         self.dispatch('on_close')
 
             
