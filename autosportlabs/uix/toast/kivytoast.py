@@ -14,7 +14,7 @@ TOAST_KV='''
     color: (1.0, 1.0, 1.0, self._transparency)
     canvas:
         Color:
-            rgba: (0.5, 0.5, 0.5, self._transparency)
+            rgba: (0.3, 0.3, 0.3, self._transparency)
         Rectangle:
             size: self.size
             pos: self.pos
