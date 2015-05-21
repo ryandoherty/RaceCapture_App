@@ -24,7 +24,7 @@ TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackc
 
 class SectorPointView(BoxLayout):
     databus = None
-    geoPoint = None
+    point = None
     GPS_STATUS_POLL_INTERVAL = 1.0
     GPS_NOT_LOCKED_COLOR = [0.7, 0.7, 0.0, 1.0]
     GPS_LOCKED_COLOR = [0.0, 1.0, 0.0, 1.0]
@@ -55,23 +55,23 @@ class SectorPointView(BoxLayout):
         try:
             if self._get_gps_quality() >= GpsConfig.GPS_QUALITY_2D:
                 channel_data = self.databus.channel_data
-                point = self.geoPoint
+                point = self.point
                 point.latitude = channel_data.get('Latitude')
                 point.longitude = channel_data.get('Longitude') 
-                self.setPoint(point)
+                self._refresh_point_view()
                 self.dispatch('on_config_changed')
                 toast('Target updated')
             else:
                 toast('No GPS Fix', True)
         except Exception as e:
-            toast('Error getting GPS target')
+            toast('Error reading GPS target')
         
     def _on_edited(self, *args):
-        self.setPoint(self.geoPoint)
+        self.setPoint(self.point)
         self.dispatch('on_config_changed')
     
     def on_customize(self, *args):
-        content = GeoPointEditor(point=self.geoPoint)
+        content = GeoPointEditor(point=self.point)
         popup = Popup(title = 'Edit Track Target',
                       content = content, 
                       size_hint=(None, None), size = (dp(500), dp(220)))
@@ -79,10 +79,13 @@ class SectorPointView(BoxLayout):
         content.bind(on_point_edited=lambda *args:popup.dismiss())                     
         popup.open()
         
-    def setPoint(self, geoPoint):
-        self.ids.lat.text = str(geoPoint.latitude)
-        self.ids.lon.text = str(geoPoint.longitude)
-        self.geoPoint = geoPoint
+    def _refresh_point_view(self):
+        self.ids.lat.text = str(self.point.latitude)
+        self.ids.lon.text = str(self.point.longitude)
+        
+    def setPoint(self, point):
+        self.point = point
+        self._refresh_point_view()
             
 class GeoPointEditor(BoxLayout):
     def __init__(self, **kwargs):
