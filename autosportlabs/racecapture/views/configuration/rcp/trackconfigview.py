@@ -73,13 +73,14 @@ class SectorPointView(BoxLayout):
         self.dispatch('on_config_changed')
     
     def on_customize(self, *args):
-        content = GeoPointEditor(point=self.point, databus=self.databus)
-        popup = Popup(title = 'Edit Track Target',
-                      content = content, 
-                      size_hint=(None, None), size = (dp(500), dp(220)))
-        content.bind(on_close=lambda *args:popup.dismiss())                     
-        content.bind(on_point_edited=self._on_edited)
-        popup.open()
+        if self.point:
+            content = GeoPointEditor(point=self.point, databus=self.databus)
+            popup = Popup(title = 'Edit Track Target',
+                          content = content, 
+                          size_hint=(None, None), size = (dp(500), dp(220)))
+            content.bind(on_close=lambda *args:popup.dismiss())                     
+            content.bind(on_point_edited=self._on_edited)
+            popup.open()
         
     def _refresh_point_view(self):
         self.ids.lat.text = str(self.point.latitude)
