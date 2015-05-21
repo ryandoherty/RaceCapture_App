@@ -97,6 +97,8 @@ class GeoPointEditor(BoxLayout):
         self.register_event_type('on_point_edited')
         self.register_event_type('on_close')
         self._refresh_view(self.point.latitude, self.point.longitude)
+        self.ids.lat.set_next(self.ids.lon)
+        self.ids.lon.set_next(self.ids.lat)
         
     def on_latitude(self, instance, value):
         pass
