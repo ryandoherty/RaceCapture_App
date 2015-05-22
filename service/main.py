@@ -14,11 +14,14 @@ RX_API                  = '/rc_rx'
 SERVICE_API_PORT        = 3000
 CLIENT_API_PORT         = 3001
 
+SERVICE_CMD_ERROR       = 'ERROR'
 SERVICE_CMD_EXIT        = 'EXIT'
 SERVICE_CMD_OPEN        = 'OPEN'
 SERVICE_CMD_CLOSE       = 'CLOSE'
 SERVICE_CMD_KEEP_ALIVE  = 'PING'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
+SERVICE_CMD_OPENED      = 'OPENED'
+SERVICE_CMD_CLOSED      = 'CLOSED'
 
 KEEP_ALIVE_TIMEOUT      = 30
 RX_THREAD_JOIN_DELAY    = 10
@@ -30,8 +33,10 @@ def tx_api_callback(message, *args):
     message = message[2]
     try:
         bt_connection.write(message)
-    except:
-        osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)        
+    except Exception as e:
+        traceback.print_exc()
+        Logger.error("RC_SVC: Failed to write BT message: " + str(e))
+        osc.sendMsg(CMD_API, [SERVICE_CMD_ERROR, ], port=CLIENT_API_PORT)        
 
 def cmd_api_callback(message, *args):
     message = message[2]
@@ -42,11 +47,14 @@ def cmd_api_callback(message, *args):
         try:
             Logger.info('RC_SVC: ############################## GOT OPEN CMD #####################################')
             bt_connection.open('RaceCapturePro')
+            osc.sendMsg(CMD_API, [SERVICE_CMD_OPENED, ], port=CLIENT_API_PORT)
         except Exception as e:
-            Logger.info("RC_SVC:Failed to open Bluetooth connection: " + str(e))
+            Logger.error("RC_SVC: Failed to open Bluetooth connection: " + str(e))
+            osc.sendMsg(CMD_API, [SERVICE_CMD_ERROR, ], port=CLIENT_API_PORT)            
     elif message == 'CLOSE':
         Logger.info('RC_SVC: ############################## GOT CLOSE CMD #####################################')
         bt_connection.close()
+        osc.sendMsg(CMD_API, [SERVICE_CMD_CLOSED, ], port=CLIENT_API_PORT)
     elif message == 'GET_PORTS':
         Logger.info('RC_SVC: ############################## GOT GET_PORTS CMD #####################################')
         ports = bt_connection.get_available_ports()
@@ -68,7 +76,7 @@ def bt_rx_thread():
         except Exception as e:
             Logger.info('RC_SVC: Exception in rx_message_thread')
             traceback.print_exc()
-            osc.sendMsg(CMD_API, ["ERROR", ], port=CLIENT_API_PORT)
+            osc.sendMsg(CMD_API, [SERVICE_CMD_ERROR, ], port=CLIENT_API_PORT)
             sleep(1.0)
     jnius.detach() #detach the current thread from pyjnius, else hard crash occurs 
     Logger.info('RC_SVC: ############################## bt_rx_thread exited ##############################')
