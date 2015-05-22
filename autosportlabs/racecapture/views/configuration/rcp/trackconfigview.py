@@ -128,7 +128,7 @@ class GeoPointEditor(BoxLayout):
             self.ids.lat.text = str(lat)
             self.ids.lon.text = str(lon)
         except Exception:
-            toast('Paste expects (latitude),(longitude)', True)
+            toast('Required format is: Latitude, Longitude\nin NN.NNNNN decimal format', True)
 
     def update_gps_status(self, dt,  *args):
         gps_quality = self._get_gps_quality()
@@ -149,11 +149,14 @@ class GeoPointEditor(BoxLayout):
             toast('Error reading GPS target')
     
     def close(self):
-        point = self.point
-        point.latitude = float(self.ids.lat.text)
-        point.longitude = float(self.ids.lon.text)
-        self.dispatch('on_point_edited', self.point)
         Clock.unschedule(self.update_gps_status)              
+        point = self.point
+        try:
+            point.latitude = float(self.ids.lat.text)
+            point.longitude = float(self.ids.lon.text)
+            self.dispatch('on_point_edited', self.point)
+        except Exception:
+            toast('NN.NNNNN decimal latitude/longitude format required', True)
         self.dispatch('on_close')
 
             
