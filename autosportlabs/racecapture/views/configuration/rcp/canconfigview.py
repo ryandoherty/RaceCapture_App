@@ -9,7 +9,7 @@ from utils import *
 from settingsview import SettingsView
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 
-CAN_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/canconfigview.kv' 
+CAN_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/canconfigview.kv'
 
 class CANBaudRateSettings(SettingsView):
     channel_id = 0

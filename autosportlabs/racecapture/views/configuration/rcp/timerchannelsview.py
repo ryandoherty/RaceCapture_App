@@ -12,7 +12,7 @@ from kivy.metrics import dp
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
 
-TIMER_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/timerchannelsview.kv' 
+TIMER_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/timerchannelsview.kv'
 
 class PulseChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):

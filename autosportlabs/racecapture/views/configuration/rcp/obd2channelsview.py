@@ -10,7 +10,7 @@ from autosportlabs.racecapture.OBD2.obd2settings import OBD2Settings
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
 
-OBD2_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/obd2channelsview.kv' 
+OBD2_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/obd2channelsview.kv'
 
 class OBD2Channel(BoxLayout):
     obd2Channel = None

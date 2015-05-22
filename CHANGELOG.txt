@@ -1,3 +1,22 @@
+==1.3.2==
+* Manual track configuration page allows setting of start/finish and sector points from current GPS location
+* Simplified lap stats page into 'Race Timing' with code that helps guarantee proper configuration
+* Fixed bug where no tracks are removed from RCP if all tracks are removed in configuration view
+* Improved visibility for checkboxes on OS X
+* Use SSL when fetching tracks from RaceCapture/Live
+* Expanded US and US East geo regions to include all of Michigan
+
+==1.3.1==
+* Fixed periodic crashing while connected to RCP (Windows version)
+* Laptimes properly show leading zeros for seconds portion
+
+==1.3.0==
+* Support for 2.8.0 firmware
+* Configuration screen performance improvements
+* Dashboard channel synchronization improvements
+* System Status page
+* Ensure correct track and configuration is selected in auto-detect list of tracks
+
 ==1.2.5===
 * Removed obsolete GPS Time of Day channel (timestamp channels are now built in)
 * OS X support (offically)

@@ -13,7 +13,7 @@ from utils import *
 from kivy.metrics import dp
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 
-ANALOG_PULSE_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/pwmchannelsview.kv' 
+ANALOG_PULSE_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/pwmchannelsview.kv'
 
 class AnalogPulseOutputChannelsView(BaseMultiChannelConfigView):
     def __init__(self, **kwargs):

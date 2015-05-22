@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.3.0"
+__version__ = "1.3.2"
 import sys
 import os
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     from toolbarview import ToolbarView
 
 from kivy.app import App, Builder
-from autosportlabs.racecapture.config.rcpconfig import RcpConfig
+from autosportlabs.racecapture.config.rcpconfig import RcpConfig, VersionConfig
 from autosportlabs.racecapture.databus.databus import DataBusFactory, DataBusPump
 from autosportlabs.racecapture.api.rcpapi import RcpApi
 
@@ -58,7 +58,7 @@ class RaceCaptureApp(App):
     _rc_api = RcpApi()
 
     #dataBus provides an eventing / polling mechanism to parts of the system that care
-    _data_bus = None
+    _databus = None
 
     #pumps data from rcApi to dataBus. kind of like a bridge
     dataBusPump = DataBusPump()
@@ -102,8 +102,8 @@ class RaceCaptureApp(App):
         #self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
-        self._data_bus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
-        self.settings.runtimeChannels.data_bus = self._data_bus        
+        self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
+        self.settings.runtimeChannels.data_bus = self._databus        
 
         Window.bind(on_key_down=self._on_keyboard_down)
         self.register_event_type('on_tracks_updated')
@@ -279,7 +279,7 @@ class RaceCaptureApp(App):
         configView = ConfigView(name='config',
                                 rcpConfig=self.rc_config,
                                 rc_api=self._rc_api,
-                                dataBusPump=self.dataBusPump,
+                                databus=self._databus,
                                 settings=self.settings,
                                 base_dir=self.base_dir)
         configView.bind(on_read_config=self.on_read_config)
@@ -302,12 +302,12 @@ class RaceCaptureApp(App):
 
         tracksView = TracksView(name='tracks')
 
-        dashView = DashboardView(name='dash', dataBus=self._data_bus, settings=self.settings)
+        dashView = DashboardView(name='dash', dataBus=self._databus, settings=self.settings)
 
         homepageView = HomePageView(name='home')
         homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
 
-        analysisView = AnalysisView(name='analysis', data_bus=self._data_bus, settings=self.settings)
+        analysisView = AnalysisView(name='analysis', data_bus=self._databus, settings=self.settings)
         preferences_view = PreferencesView(self.settings, name='preferences', base_dir=self.base_dir)
 
         screenMgr = kvFind(self.root, 'rcid', 'main')
@@ -357,15 +357,22 @@ class RaceCaptureApp(App):
         rc_api.init_comms(comms)
         rc_api.run_auto_detect()
 
-    def rc_detect_win(self, rcpVersion):
-        self.showStatus("{} v{}.{}.{}".format(rcpVersion.friendlyName, rcpVersion.major, rcpVersion.minor, rcpVersion.bugfix), False)
-        self.dataBusPump.startDataPump(self._data_bus, self._rc_api)
-        self.status_view.start_status()
-
-        if self.rc_config.loaded == False:
-            Clock.schedule_once(lambda dt: self.on_read_config(self))
+    def rc_detect_win(self, version):
+        if version.is_compatible_version():
+            self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
+            self.dataBusPump.startDataPump(self._databus, self._rc_api)
+            self.status_view.start_status()
+    
+            if self.rc_config.loaded == False:
+                Clock.schedule_once(lambda dt: self.on_read_config(self))
+            else:
+                self.showActivity('Connected')
         else:
-            self.showActivity('Connected')
+            alertPopup('Incompatible Firmware', 'Detected {} v{}\n\nPlease upgrade firmware to {} or higher'.format(
+                               version.friendlyName, 
+                               version.version_string(), 
+                               VersionConfig.get_minimum_version().version_string()
+                               ))
 
     def rc_detect_fail(self):
         self.showStatus("Could not detect RaceCapture/Pro", True)

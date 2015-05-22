@@ -11,7 +11,7 @@ from valuefield import ValueField
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 
-WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv' 
+WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
 class WirelessConfigView(BaseConfigView):
     customApnLabel = 'Custom APN'

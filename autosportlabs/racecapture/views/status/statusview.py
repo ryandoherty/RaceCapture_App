@@ -163,7 +163,10 @@ class StatusView(Screen):
         self.update()
 
     def _on_status_updated(self, status):
-        self.status = status['status']
+        def safe_update_status(status):
+            self.status = status['status']
+            
+        Clock.schedule_once(lambda dt: safe_update_status(status))
         
     def update(self):
         _bg_current = RAW_STATUS_BGCOLOR_1
@@ -270,7 +273,10 @@ class StatusView(Screen):
                 track = self.track_manager.findTrackByShortId(status['trackId'])
 
                 if track is None:
-                    track_name = 'Track not found'
+                    if status['status'] == 1:
+                        track_name = 'Fixed'
+                    else:
+                        track_name = 'Track not found'
                 else:
                     track_name = track.name
             else:
