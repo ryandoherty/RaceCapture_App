@@ -69,7 +69,7 @@ class SectorPointView(BoxLayout):
             toast('Error reading GPS target')
         
     def _on_edited(self, instance, value):
-        self.setPoint(value)
+        self.set_point(value)
         self.dispatch('on_config_changed')
     
     def on_customize(self, *args):
@@ -86,15 +86,15 @@ class SectorPointView(BoxLayout):
         self.ids.lat.text = str(self.point.latitude)
         self.ids.lon.text = str(self.point.longitude)
         
-    def setPoint(self, point):
+    def set_point(self, point):
         self.point = point
         self._refresh_point_view()
             
 class GeoPointEditor(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, point, databus, **kwargs):
         super(GeoPointEditor, self).__init__(**kwargs)
-        self.point = kwargs.get('point')
-        self.databus = kwargs.get('databus')
+        self.point = point
+        self.databus = databus
         self.register_event_type('on_point_edited')
         self.register_event_type('on_close')
         self._refresh_view(self.point.latitude, self.point.longitude)
@@ -371,11 +371,11 @@ class ManualTrackConfigScreen(Screen):
             sectorView = SectorPointView(title = 'Sector ' + str(i), databus=self._databus)
             sectorView.bind(on_config_changed=self.on_config_changed)
             sectorsContainer.add_widget(sectorView)
-            sectorView.setPoint(trackCfg.track.sectors[i])
+            sectorView.set_point(trackCfg.track.sectors[i])
             self.sectorViews.append(sectorView)
 
-        self.startLineView.setPoint(trackCfg.track.startLine)
-        self.finishLineView.setPoint(trackCfg.track.finishLine)
+        self.startLineView.set_point(trackCfg.track.startLine)
+        self.finishLineView.set_point(trackCfg.track.finishLine)
         
         self.trackCfg = trackCfg
         self.updateTrackViewState()
