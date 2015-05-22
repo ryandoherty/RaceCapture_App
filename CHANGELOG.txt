@@ -3,6 +3,7 @@
 * Fixed bug where no tracks are removed from RCP if all tracks are removed in configuration view
 * Improved visibility for checkboxes on OS X
 * Use SSL when fetching tracks from RaceCapture/Live
+* Expanded US and US East geo regions to include all of Michigan
 
 ==1.3.1==
 * Fixed periodic crashing while connected to RCP (Windows version)
