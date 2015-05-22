@@ -63,13 +63,14 @@ class ConfigView(Screen):
     script_view = None
     _settings = None
     base_dir = None
-
+    _databus = None
+    
     def __init__(self, **kwargs):
         super(ConfigView, self).__init__(**kwargs)
 
+        self._databus = kwargs.get('databus')
         self.rc_config = kwargs.get('rcpConfig', None)
         self.rc_api = kwargs.get('rc_api', None)
-        self.dataBusPump = kwargs.get('dataBusPump', None)
         self._settings = kwargs.get('settings')
         self.base_dir = kwargs.get('base_dir')
 
@@ -186,7 +187,7 @@ class ConfigView(Screen):
             
         runtime_channels = self._settings.runtimeChannels
 
-        defaultNode = attach_node('Race Track/Sectors', None, lambda: TrackConfigView())
+        defaultNode = attach_node('Race Track/Sectors', None, lambda: TrackConfigView(databus=self._databus))
         attach_node('GPS', None, lambda: GPSChannelsView())
         attach_node('Race Timing', None, lambda: LapStatsView())        
         attach_node('Analog Sensors', None, lambda: AnalogChannelsView(channels=runtime_channels))
