@@ -2,8 +2,9 @@ import traceback
 import threading
 import Queue
 from time import sleep
-from kivy.lib import osc
-from android import AndroidService
+from jnius import autoclass
+
+BTConn = autoclass('com.autosportlabs.racecapture.BluetoothConnection')
 
 CMD_API                 = '/rc_cmd'
 TX_API                  = '/rc_tx'
@@ -53,23 +54,14 @@ class AndroidComms(object):
     _rx_queue = None
     _oscid = None
     _reader_thread = None
-    _service = None
     _is_open = False
     
     def __init__(self, **kwargs):
         self.port = kwargs.get('port')
         _reader_should_run = None
         _reader_thread = None
+        self._bt_conn = BTConn.createInstance();
         self._rx_queue = Queue.Queue()
-        osc.init()
-        oscid = osc.listen(ipAddr='0.0.0.0', port=CLIENT_API_PORT)
-        osc.bind(oscid, self.on_rx, RX_API)
-        osc.bind(oscid, self.on_command, CMD_API)
-        self._oscid = oscid
-        
-        service = AndroidService('RC comms service', 'running')
-        service.start('service started')
-        self._service = service
         self.start_reader_thread()
 
     def on_command(self, message, *args):
