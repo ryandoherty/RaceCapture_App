@@ -12,13 +12,18 @@ RX_API                  = '/rc_rx'
 SERVICE_API_PORT        = 3000
 CLIENT_API_PORT         = 3001
 
+SERVICE_CMD_ERROR       = 'ERROR'
 SERVICE_CMD_EXIT        = 'EXIT'
 SERVICE_CMD_OPEN        = 'OPEN'
 SERVICE_CMD_CLOSE       = 'CLOSE'
 SERVICE_CMD_KEEP_ALIVE  = 'PING'
 SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
+SERVICE_CMD_OPENED      = 'OPENED'
+SERVICE_CMD_CLOSED      = 'CLOSED'
 
-SERVICE_STARTUP_DELAY   = 5
+PORT_OPEN_DELAY   = 5
+SERVICE_START_DELAY = 5
+
 class PortNotOpenException(Exception):
     pass
 
@@ -49,6 +54,7 @@ class AndroidComms(object):
     _oscid = None
     _reader_thread = None
     _service = None
+    _is_open = False
     
     def __init__(self, **kwargs):
         self.port = kwargs.get('port')
@@ -64,18 +70,23 @@ class AndroidComms(object):
         service = AndroidService('RC comms service', 'running')
         service.start('service started')
         self._service = service
+        self.start_reader_thread()
 
     def on_command(self, message, *args):
         message = message[2]
-        if message == 'ERROR':
+        if message == SERVICE_CMD_ERROR:
             print('Error on connection')
             self.close()
+        elif message == SERVICE_CMD_OPENED:
+            self._is_open = True
+        elif message == SERVICE_CMD_CLOSED:
+            self._is_open = False
         
     def on_rx(self, message, *args):
         message = message[2]
         self._rx_queue.put(message)
                 
-    def start_connection_process(self):
+    def start_reader_thread(self):
         reader_should_run = threading.Event()
         reader_should_run.set()
     
@@ -83,14 +94,17 @@ class AndroidComms(object):
         self._reader_should_run = reader_should_run
         self._reader_thread = reader_thread
         reader_thread.start()
-        sleep(SERVICE_STARTUP_DELAY)
+        sleep(SERVICE_START_DELAY)        
+                        
+    def start_connection_process(self):
         self.send_service_command(SERVICE_CMD_OPEN)
+        sleep(PORT_OPEN_DELAY)
                                 
     def get_available_ports(self):
         return ['RaceCapturePro'] #TODO get this from the service directly
     
     def isOpen(self):
-        return self._reader_thread != None and self._reader_thread.is_alive()
+        return self._is_open
     
     def open(self):
         print('Opening connection ' + str(self.port))
@@ -102,18 +116,18 @@ class AndroidComms(object):
     def cleanup(self):
         print('comms.cleanup()')
         self.send_service_command(SERVICE_CMD_EXIT)
+        try:
+            print('closing reader_thread')
+            self._reader_should_run.clear()
+            self._reader_thread.join(self._timeout)
+            print('reader_thread joined')
+        except:
+            print('Timeout joining reader_thread')
         
     def close(self):
         print('comms.close()')
         if self.isOpen():
             self.send_service_command(SERVICE_CMD_CLOSE)
-            try:
-                print('closing reader_thread')
-                self._reader_should_run.clear()
-                self._reader_thread.join(self._timeout)
-                print('reader_thread joined')
-            except:
-                print('Timeout joining reader_thread')
 
     def read_message(self):
         try:
@@ -122,6 +136,8 @@ class AndroidComms(object):
             return None
     
     def write_message(self, message):
+        if not self.isOpen():
+            raise Exception("AndroidComms: Connection closed")
         self.send_service_tx_message(message)
 
     def send_service_command(self, cmd):
