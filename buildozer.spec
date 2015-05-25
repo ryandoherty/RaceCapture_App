@@ -92,11 +92,13 @@ android.permissions = INTERNET, BLUETOOTH, BLUETOOTH_ADMIN , WRITE_EXTERNAL_STOR
 # their classes. Don't add jars that you do not need, since extra jars can slow
 # down the build process. Allows wildcards matching, for example:
 # OUYA-ODK/libs/*.jar
+#android.add_jars = jar/*.jar
 #android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
 #android.add_src =
+android.add_src = java/src/
 
 # (str) python-for-android branch to use, if not master, useful to try
 # not yet merged features.
@@ -144,7 +146,7 @@ android.wakelock = True
 [buildozer]
 
 # (int) Log level (0 = error only, 1 = info, 2 = debug (with command output))
-log_level = 1
+log_level = 2
 
 # (int) Display warning if buildozer is run as root (0 = False, 1 = True)
 warn_on_root = 1

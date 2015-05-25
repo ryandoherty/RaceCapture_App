@@ -2,24 +2,11 @@ import traceback
 import threading
 import Queue
 from time import sleep
-from kivy.lib import osc
-from android import AndroidService
+from jnius import autoclass
+import jnius
+from kivy.logger import Logger
 
-CMD_API                 = '/rc_cmd'
-TX_API                  = '/rc_tx'
-RX_API                  = '/rc_rx'
-
-SERVICE_API_PORT        = 3000
-CLIENT_API_PORT         = 3001
-
-SERVICE_CMD_ERROR       = 'ERROR'
-SERVICE_CMD_EXIT        = 'EXIT'
-SERVICE_CMD_OPEN        = 'OPEN'
-SERVICE_CMD_CLOSE       = 'CLOSE'
-SERVICE_CMD_KEEP_ALIVE  = 'PING'
-SERVICE_CMD_GET_PORTS   = 'GET_PORTS'
-SERVICE_CMD_OPENED      = 'OPENED'
-SERVICE_CMD_CLOSED      = 'CLOSED'
+BTConn = autoclass('com.autosportlabs.racecapture.BluetoothConnection')
 
 PORT_OPEN_DELAY   = 5
 SERVICE_START_DELAY = 5
@@ -29,120 +16,46 @@ class PortNotOpenException(Exception):
 
 class CommsErrorException(Exception):
     pass
-
-
-def message_reader(rx_queue, oscid, should_run):
-    print('connection process message reader started')
-    
-    while should_run.is_set():
-        try:
-            osc.readQueue(oscid)
-            sleep(0.1)
-        except:
-            print('Exception in message_reader')
-            traceback.print_exc()
-            #_rx_queue.put('##ERROR##')
-            sleep(0.5)
-    print('connection process message reader exited')            
     
 class AndroidComms(object):
     CONNECT_TIMEOUT = 10.0
     DEFAULT_TIMEOUT = 1.0
     port = None
     _timeout = DEFAULT_TIMEOUT
-    _rx_queue = None
     _oscid = None
     _reader_thread = None
-    _service = None
-    _is_open = False
     
     def __init__(self, **kwargs):
         self.port = kwargs.get('port')
         _reader_should_run = None
         _reader_thread = None
-        self._rx_queue = Queue.Queue()
-        osc.init()
-        oscid = osc.listen(ipAddr='0.0.0.0', port=CLIENT_API_PORT)
-        osc.bind(oscid, self.on_rx, RX_API)
-        osc.bind(oscid, self.on_command, CMD_API)
-        self._oscid = oscid
-        
-        service = AndroidService('RC comms service', 'running')
-        service.start('service started')
-        self._service = service
-        self.start_reader_thread()
-
-    def on_command(self, message, *args):
-        message = message[2]
-        if message == SERVICE_CMD_ERROR:
-            print('Error on connection')
-            self.close()
-        elif message == SERVICE_CMD_OPENED:
-            self._is_open = True
-        elif message == SERVICE_CMD_CLOSED:
-            self._is_open = False
-        
-    def on_rx(self, message, *args):
-        message = message[2]
-        self._rx_queue.put(message)
-                
-    def start_reader_thread(self):
-        reader_should_run = threading.Event()
-        reader_should_run.set()
-    
-        reader_thread = threading.Thread(target=message_reader, args=(self._rx_queue, self._oscid, reader_should_run))
-        self._reader_should_run = reader_should_run
-        self._reader_thread = reader_thread
-        reader_thread.start()
-        sleep(SERVICE_START_DELAY)        
-                        
-    def start_connection_process(self):
-        self.send_service_command(SERVICE_CMD_OPEN)
-        sleep(PORT_OPEN_DELAY)
-                                
+        self._bt_conn = BTConn.createInstance();
+                                                                
     def get_available_ports(self):
         return ['RaceCapturePro'] #TODO get this from the service directly
     
     def isOpen(self):
-        return self._is_open
+        return self._bt_conn.isOpen()
     
     def open(self):
-        print('Opening connection ' + str(self.port))
-        self.start_connection_process()
+        Logger.info('androidcomms: Opening connection ' + str(self.port))
+        self._bt_conn.open(self.port)
+        Logger.info('androidcomms: after open!!!!!!!!!!!!!!!!')
     
     def keep_alive(self):
-        self.send_service_command(SERVICE_CMD_KEEP_ALIVE)
+        pass
     
     def cleanup(self):
-        print('comms.cleanup()')
-        self.send_service_command(SERVICE_CMD_EXIT)
-        try:
-            print('closing reader_thread')
-            self._reader_should_run.clear()
-            self._reader_thread.join(self._timeout)
-            print('reader_thread joined')
-        except:
-            print('Timeout joining reader_thread')
+        Logger.info('androidcomms: cleanup')
         
     def close(self):
-        print('comms.close()')
-        if self.isOpen():
-            self.send_service_command(SERVICE_CMD_CLOSE)
+        Logger.info('androidcomms: close')
+        self._bt_conn.close()
 
     def read_message(self):
-        try:
-            return self._rx_queue.get(True, self._timeout)
-        except: #returns Empty object if timeout is hit
-            return None
+        return self._bt_conn.readLine()
     
     def write_message(self, message):
-        if not self.isOpen():
-            raise Exception("AndroidComms: Connection closed")
-        self.send_service_tx_message(message)
-
-    def send_service_command(self, cmd):
-        osc.sendMsg(CMD_API, [cmd,], port=SERVICE_API_PORT)
-        
-    def send_service_tx_message(self, message):
-        osc.sendMsg(TX_API, [message,], port=SERVICE_API_PORT)
+        if not self._bt_conn.write(message):
+            raise CommsErrorException()
                     

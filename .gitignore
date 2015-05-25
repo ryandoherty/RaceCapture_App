@@ -44,3 +44,5 @@ _ve/
 
 # Sublime Text
 *.sublime*
+*.class
+doeet.sh
