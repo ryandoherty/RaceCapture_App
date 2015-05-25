@@ -120,7 +120,7 @@ public class BluetoothConnection {
 	 */
 	public void close(){
 		synchronized(this.lock){		
-	        try{
+			try{
 	        	Log.i("BluetoothConnection", "Closing Socket");
 	        	if (this.socket != null){
 	                this.socket.close();        		
