@@ -12,7 +12,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 
-
+/**
+ * Bluetooth connection bridge for RaceCature app
+ * @author brent
+ *
+ */
 public class BluetoothConnection {
 	private static final UUID SerialPortServiceClass_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -69,6 +73,9 @@ public class BluetoothConnection {
         }
 	}
 	
+	/*
+	 * Opens the bluetooth connection with the specified port name
+	 */
 	public void open(String port){
 		synchronized(this.lock){
 			String error_message = null;
@@ -108,6 +115,9 @@ public class BluetoothConnection {
 		}
 	}
 	
+	/**
+	 * Closes the current Bluetooth connection
+	 */
 	public void close(){
 		synchronized(this.lock){		
 	        try{
@@ -127,10 +137,16 @@ public class BluetoothConnection {
 		}
 	}
 	
+	/**
+	 * Returns true if the connection is active
+	 */
 	public boolean isOpen(){
 		return this.socket != null;
 	}
 	
+	/**
+	 * reads a line from the socket. If the socket is closed or no data is available, returns null
+	 */
 	public String readLine(){
 		String line = null;
 		synchronized(this.lock){
@@ -144,6 +160,9 @@ public class BluetoothConnection {
 		return line;
 	}
 	
+	/**
+	 * Writes the specified data to the socket. Returns true if the write succeeded. 
+	 */
 	public boolean write(String data){
 		synchronized(this.lock){
 			try{
