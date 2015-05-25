@@ -141,7 +141,6 @@ public class BluetoothConnection {
 			}
 			catch(Throwable e){}
 		}
-		Log.i("BluetoothConnection", "readLine: " + String.valueOf(line));
 		return line;
 	}
 	
