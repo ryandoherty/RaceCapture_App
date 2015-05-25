@@ -132,18 +132,17 @@ public class BluetoothConnection {
 	}
 	
 	public String readLine(){
-		synchronized(this.lock){		
+		String line = null;
+		synchronized(this.lock){
 			try{
-				String line = null;
 				if (this.reader != null){
 					line =  this.reader.readLine();
 				}
-				return line;
 			}
-			catch(Throwable e){
-				return null;
-			}
+			catch(Throwable e){}
 		}
+		Log.i("BluetoothConnection", "readLine: " + String.valueOf(line));
+		return line;
 	}
 	
 	public boolean write(String data){

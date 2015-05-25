@@ -23,6 +23,7 @@ DEFAULT_READ_RETRIES            = 2
 
 COMMS_KEEP_ALIVE_TIMEOUT        = 2
 
+NO_DATA_AVAILABLE_DELAY         = 0.1
 class RcpCmd:
     name = None
     cmd = None
@@ -162,7 +163,10 @@ class RcpApi:
                                     print('Message Listener Exception for')
                                     traceback.print_exc()
                             break
-                    msg = ''
+                    msg = ''                        
+                else:
+                    sleep(NO_DATA_AVAILABLE_DELAY)
+                    
             except PortNotOpenException:
                 print("Port not open...")
                 msg=''
