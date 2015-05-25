@@ -4,6 +4,7 @@ import Queue
 from time import sleep
 from jnius import autoclass
 import jnius
+from kivy.logger import Logger
 
 BTConn = autoclass('com.autosportlabs.racecapture.BluetoothConnection')
 
@@ -28,9 +29,7 @@ class AndroidComms(object):
         self.port = kwargs.get('port')
         _reader_should_run = None
         _reader_thread = None
-        print("AndroidComms loading")
         self._bt_conn = BTConn.createInstance();
-        print("AndroidComms loading done")
                                                                 
     def get_available_ports(self):
         return ['RaceCapturePro'] #TODO get this from the service directly
@@ -39,18 +38,18 @@ class AndroidComms(object):
         return self._bt_conn.isOpen()
     
     def open(self):
-        print('Opening connection ' + str(self.port))
+        Logger.info('androidcomms: Opening connection ' + str(self.port))
         self._bt_conn.open(self.port)
-        print('after open!!!!!!!!!!!!!!!!')
+        Logger.info('androidcomms: after open!!!!!!!!!!!!!!!!')
     
     def keep_alive(self):
         pass
     
     def cleanup(self):
-        print('comms.cleanup()')
+        Logger.info('androidcomms: cleanup')
         
     def close(self):
-        print('comms.close()')
+        Logger.info('androidcomms: close')
         self._bt_conn.close()
 
     def read_message(self):
