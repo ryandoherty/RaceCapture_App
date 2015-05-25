@@ -6,6 +6,7 @@ from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, Sampl
 from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
 from autosportlabs.racecapture.databus.filter.currentlaptimefilter import CurrentLapTimeFilter
+import jnius
 
 DEFAULT_DATABUS_UPDATE_INTERVAL = 0.1 #10Hz UI update rate
 
@@ -222,4 +223,5 @@ class DataBusPump(object):
                     sample_event.clear()
                 
         print("DataBus Sampler Exiting")
+        jnius.detach() #detach the current thread from pyjnius, else hard crash occurs
 
