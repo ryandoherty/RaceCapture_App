@@ -28,7 +28,7 @@ class CANConfigView(BaseConfigView):
         super(CANConfigView, self).__init__(**kwargs)
         
         self.register_event_type('on_config_updated')    
-        btEnable = kvFind(self, 'rcid', 'canEnabled') 
+        btEnable = self.ids.canEnabled 
         btEnable.bind(on_setting=self.on_can_enabled)
         btEnable.setControl(SettingsSwitch())
                 
@@ -47,7 +47,7 @@ class CANConfigView(BaseConfigView):
     
     def on_config_updated(self, rcpCfg):
         can_config = rcpCfg.canConfig
-        kvFind(self, 'rcid', 'canEnabled').setValue(can_config.enabled)
+        self.ids.canEnabled.setValue(can_config.enabled)
         self.update_can_baud_rates(rcpCfg)
         self.can_config = can_config
         
