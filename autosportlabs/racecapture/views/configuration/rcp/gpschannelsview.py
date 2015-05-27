@@ -72,10 +72,7 @@ class GPSChannelsView(BaseConfigView):
                     
     def on_config_updated(self, rc_cfg):
         gpsConfig = rc_cfg.gpsConfig
-        
-        self.ids.sr.set_max_rate(rc_cfg.capabilities.sample_rates.gps)
-        self.ids.sr.setValue(gpsConfig.sampleRate)
-        
+        self.ids.sr.setValue(gpsConfig.sampleRate, rc_cfg.capabilities.sample_rates.gps)
         self.ids.position.active = gpsConfig.positionEnabled
         self.ids.speed.active = gpsConfig.speedEnabled
         self.ids.distance.active = gpsConfig.distanceEnabled
@@ -83,8 +80,6 @@ class GPSChannelsView(BaseConfigView):
         self.ids.satellites.active = gpsConfig.satellitesEnabled
         self.ids.quality.active = gpsConfig.qualityEnabled
         self.ids.dop.active = gpsConfig.DOPEnabled
-
         self.gpsConfig = gpsConfig
         self.lap_config = rc_cfg.lapConfig
-        
         

@@ -71,11 +71,9 @@ class AnalogChannel(BaseChannelView):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                     
-    def on_config_updated(self, channelConfig, max_rate):
+    def on_config_updated(self, channelConfig, max_sample_rate):
         self.ids.chanId.setValue(channelConfig)
-        spinner = self.ids.sr
-        spinner.set_max_rate(max_rate)
-        spinner.setValue(channelConfig.sampleRate)
+        self.ids.sr.setValue(channelConfig.sampleRate, max_sample_rate)
 
         scalingMode = channelConfig.scalingMode
 
