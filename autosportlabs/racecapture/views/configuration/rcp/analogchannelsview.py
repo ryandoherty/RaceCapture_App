@@ -77,9 +77,9 @@ class AnalogChannel(BaseChannelView):
 
         scalingMode = channelConfig.scalingMode
 
-        checkRaw = kvFind(self, 'rcid','smRaw')
-        checkLinear = kvFind(self, 'rcid', 'smLinear')
-        checkMapped = kvFind(self, 'rcid', 'smMapped')
+        checkRaw = self.ids.smRaw
+        checkLinear = self.ids.smLinear
+        checkMapped = self.ids.smMapped
         if scalingMode == 0:
             checkRaw.active = True
             checkLinear.active = False
@@ -93,8 +93,8 @@ class AnalogChannel(BaseChannelView):
             checkLinear.active = False
             checkMapped.active = True
         
-        kvFind(self, 'rcid', 'linearscaling').text = str(channelConfig.linearScaling)
-        mapEditor = kvFind(self, 'rcid', 'mapEditor')
+        self.ids.linearscaling.text = str(channelConfig.linearScaling)
+        mapEditor = self.ids.mapEditor
         mapEditor.on_config_changed(channelConfig.scalingMap)
         mapEditor.bind(on_map_updated=self.on_map_updated)
 
@@ -108,9 +108,6 @@ class AnalogChannel(BaseChannelView):
 class AnalogScaler(Graph):
     def __init__(self, **kwargs):
         super(AnalogScaler, self).__init__(**kwargs)
-    
-
-
 
 Builder.load_string('''
 <WarnLabel>
@@ -157,14 +154,13 @@ class AnalogScalingMapEditor(BoxLayout):
         scaled_field.text = '{:.3g}'.format(value)
         
     def on_config_changed(self, scalingMap):
-        editor = kvFind(self, 'rcid', 'mapEditor')
         mapSize = self.mapSize
         self.setTabStops(mapSize)
         for i in range(mapSize):
             volts = scalingMap.getVolts(i)
             scaled = scalingMap.getScaled(i)
-            voltsCell = kvFind(editor, 'rcid', 'v_' + str(i))
-            scaledCell = kvFind(editor, 'rcid', 's_' + str(i))
+            voltsCell = kvFind(self, 'rcid', 'v_' + str(i))
+            scaledCell = kvFind(self, 'rcid', 's_' + str(i))
             self.set_volts_cell(voltsCell, volts)
             self.set_scaled_cell(scaledCell, scaled)            
         self.scalingMap = scalingMap
@@ -174,7 +170,7 @@ class AnalogScalingMapEditor(BoxLayout):
     def regen_plot(self):
         scalingMap = self.scalingMap
         
-        graphContainer = kvFind(self, 'rcid', 'graphcontainer')
+        graphContainer = self.ids.graphcontainer
         graphContainer.clear_widgets()
         
         graph = AnalogScaler()
@@ -206,7 +202,7 @@ class AnalogScalingMapEditor(BoxLayout):
         
     def regen_plot2(self):
         scalingMap = self.scalingMap
-        graph = kvFind(self, 'rcid', 'scalingGraph')
+        graph = self.ids.scalingGraph
         
         plot = self.plot
         if not plot:
