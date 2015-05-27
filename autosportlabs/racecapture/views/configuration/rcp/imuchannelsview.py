@@ -156,14 +156,14 @@ class ImuChannelsView(BaseConfigView):
         imu_cfg = rc_cfg.imuConfig
         channelCount = imu_cfg.channelCount
 
-        commonSampleRate = 0
+        common_sample_rate = 0
         for i in range(channelCount):
             imuChannel = imu_cfg.channels[i]
             editor = self.editors[i]
             editor.on_config_updated(i, imuChannel, self.channelLabels)
-            commonSampleRate = imuChannel.sampleRate if commonSampleRate < imuChannel.sampleRate else commonSampleRate
+            common_sample_rate = imuChannel.sampleRate if common_sample_rate < imuChannel.sampleRate else common_sample_rate
         
         self.ids.sr.set_max_rate(rc_cfg.capabilities.sample_rates.sensor)
-        self.ids.sr.setValue(commonSampleRate)
+        self.ids.sr.setValue(common_sample_rate)
         self.imu_cfg = imu_cfg
 
