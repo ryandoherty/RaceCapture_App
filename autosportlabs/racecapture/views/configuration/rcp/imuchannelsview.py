@@ -127,7 +127,7 @@ class ImuChannelsView(BaseConfigView):
         gyroContainer = kvFind(self, 'rcid', 'gc')
         self.appendImuChannels(gyroContainer, self.editors, IMU_GYRO_CHANNEL_IDS)
         
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)                
+        self.ids.sr.bind(on_sample_rate = self.on_sample_rate)                
         
     def appendImuChannels(self, container, editors, ids):
         for i in ids:
@@ -152,8 +152,8 @@ class ImuChannelsView(BaseConfigView):
                 imuChannel.stale = True
                 self.dispatch('on_modified')
                 
-    def on_config_updated(self, rcpCfg):
-        imuCfg = rcpCfg.imuConfig
+    def on_config_updated(self, rc_cfg):
+        imuCfg = rc_cfg.imuConfig
         channelCount = imuCfg.channelCount
 
         commonSampleRate = 0
@@ -163,6 +163,7 @@ class ImuChannelsView(BaseConfigView):
             editor.on_config_updated(i, imuChannel, self.channelLabels)
             commonSampleRate = imuChannel.sampleRate if commonSampleRate < imuChannel.sampleRate else commonSampleRate
         
-        kvFind(self, 'rcid', 'sr').setValue(commonSampleRate)
+        self.ids.sr.set_max_rate(rc_cfg.capabilities.sample_rates.sensor)
+        self.ids.sr.setValue(commonSampleRate)
         self.imuCfg = imuCfg
 

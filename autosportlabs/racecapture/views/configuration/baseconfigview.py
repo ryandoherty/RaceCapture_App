@@ -13,8 +13,8 @@ class BaseChannelView(BoxLayout):
     channels = None
     def __init__(self, **kwargs):
         super(BaseChannelView, self).__init__(**kwargs)
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
-        channel_selector=kvFind(self, 'rcid', 'chanId')
+        self.ids.sr.bind(on_sample_rate = self.on_sample_rate)
+        channel_selector=self.ids.chanId
         self.channels = kwargs.get('channels')
         channel_selector.bind(on_channel = self.on_channel)
         channel_selector.dispatch('on_channels_updated', self.channels)
@@ -57,17 +57,18 @@ class BaseConfigView(BoxLayout):
         
 
 class LazyloadAccordionItem(AccordionItem):
-    def __init__(self, **kwargs):
+    def __init__(self, max_sample_rate, builder, channel_index, **kwargs):
         super(LazyloadAccordionItem, self).__init__(**kwargs)
-        self.lazy_builder = kwargs.get('builder')
-        self.channel_index = kwargs.get('channel_index')
+        self.max_sample_rate = max_sample_rate
+        self.lazy_builder = builder
+        self.channel_index = channel_index
         self.loaded = False
         self.editor = None
         
     def on_collapse(self, instance, value):
         super(LazyloadAccordionItem, self).on_collapse(instance, value)
         if value == False and self.loaded == False:
-                editor = self.lazy_builder(self.channel_index)
+                editor = self.lazy_builder(self.channel_index, self.max_sample_rate)
                 self.add_widget(editor)
                 self.loaded = True
                 self.editor = editor
@@ -90,14 +91,14 @@ class BaseMultiChannelConfigView(BaseConfigView):
         self._accordion = accordion
         self.add_widget(sv)
         
-    def update_channel_editors(self, channel_count):
+    def update_channel_editors(self, channel_count, max_sample_rate):
         accordion = self._accordion
         if self._channel_count != channel_count:
             self._channel_editors = []
             accordion.height = self.accordion_item_height * channel_count
             title = self.channel_title
             for i in range(channel_count):
-                channel = LazyloadAccordionItem(title=title + str(i + 1), builder=self.channel_builder, channel_index=i)
+                channel = LazyloadAccordionItem(title=title + str(i + 1), builder=self.channel_builder, channel_index=i, max_sample_rate=max_sample_rate)
                 accordion.add_widget(channel)
                 self._channel_editors.append(channel)
             self._channel_count = channel_count
@@ -105,14 +106,15 @@ class BaseMultiChannelConfigView(BaseConfigView):
 
     def on_config_updated(self, rc_cfg):
         config = self.get_specific_config(rc_cfg)
+        max_sample_rate = rc_cfg.capabilities.sample_rates.sensor
         channel_count = len(config.channels)
-        self.update_channel_editors(channel_count)
+        self.update_channel_editors(channel_count, max_sample_rate)
         accordion = self._accordion
         for i in range(channel_count):
             channel_config = config.channels[i]
             accordion_item = self._channel_editors[i]
-            if accordion_item.editor != None:
-                accordion_item.editor.on_config_updated(channel_config)
+            if accordion_item.editor is not None:
+                accordion_item.editor.on_config_updated(channel_config, max_sample_rate)
             
             self.setAccordionItemTitle(accordion, config.channels, channel_config)
 

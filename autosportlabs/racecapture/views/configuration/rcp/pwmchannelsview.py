@@ -22,11 +22,11 @@ class AnalogPulseOutputChannelsView(BaseMultiChannelConfigView):
         self.channel_title = 'Pulse / Analog Output '
         self.accordion_item_height = dp(120)
         
-    def channel_builder(self, index):
+    def channel_builder(self, index, max_sample_rate):
         editor = AnalogPulseOutputChannel(id='pwm' + str(index), channels=self.channels)
         editor.bind(on_modified=self.on_modified)
         if self.config:
-            editor.on_config_updated(self.config.channels[index])
+            editor.on_config_updated(self.config.channels[index], max_sample_rate)
         return editor
             
     def get_specific_config(self, rcp_cfg):
@@ -77,12 +77,12 @@ class AnalogPulseOutputChannel(BaseChannelView):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                         
-    def on_config_updated(self, channelConfig ):
-        channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channelConfig)
+    def on_config_updated(self, channelConfig, max_sample_rate):
+        self.ids.chanId.setValue(channelConfig)
 
-        sampleRateSpinner = kvFind(self, 'rcid', 'sr')
-        sampleRateSpinner.setValue(channelConfig.sampleRate)
+        sample_rate = self.ids.sr
+        sample_rate.set_max_rate(max_sample_rate)
+        sample_rate.setValue(channelConfig.sampleRate)
                 
         startupDutyCycle = kvFind(self, 'rcid', 'dutyCycle')
         startupDutyCycle.text = str(channelConfig.startupDutyCycle)

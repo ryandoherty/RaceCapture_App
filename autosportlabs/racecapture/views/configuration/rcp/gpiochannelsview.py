@@ -21,11 +21,11 @@ class GPIOChannelsView(BaseMultiChannelConfigView):
         self.channel_title = 'Digital Input/Output '
         self.accordion_item_height = dp(100)
 
-    def channel_builder(self, index):
+    def channel_builder(self, index, max_sample_rate):
         editor = GPIOChannel(id = 'gpio' + str(index), channels=self.channels)
         editor.bind(on_modified = self.on_modified)
         if self.config:
-            editor.on_config_updated(self.config.channels[index])
+            editor.on_config_updated(self.config.channels[index], max_sample_rate)
         return editor
     
     def get_specific_config(self, rcp_cfg):
@@ -46,13 +46,13 @@ class GPIOChannel(BaseChannelView):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
             
-    def on_config_updated(self, channelConfig):
+    def on_config_updated(self, channelConfig, max_sample_rate):
 
-        sampleRateSpinner = kvFind(self, 'rcid', 'sr')
-        sampleRateSpinner.setValue(channelConfig.sampleRate)
-    
-        channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channelConfig)
+        sample_rate = self.ids.sr
+        sample_rate.set_max_rate(max_sample_rate)
+        sample_rate.setValue(channelConfig.sampleRate)
+
+        self.ids.chanId.setValue(channelConfig)
         
         modeSpinner = kvFind(self, 'rcid', 'mode')
         modeSpinner.setFromValue(channelConfig.mode)

@@ -29,11 +29,11 @@ class AnalogChannelsView(BaseMultiChannelConfigView):
         self.accordion_item_height = dp(85)
         
             
-    def channel_builder(self, index):
+    def channel_builder(self, index, max_sample_rate):
         editor = AnalogChannel(id='analog' + str(index), channels=self.channels)
         editor.bind(on_modified=self.on_modified)
         if self.config:
-            editor.on_config_updated(self.config.channels[index])
+            editor.on_config_updated(self.config.channels[index], max_sample_rate)
         return editor
             
     def get_specific_config(self, rcp_cfg):
@@ -71,12 +71,11 @@ class AnalogChannel(BaseChannelView):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                     
-    def on_config_updated(self, channelConfig):
-        channelSpinner = kvFind(self, 'rcid', 'chanId')
-        channelSpinner.setValue(channelConfig)
-
-        sampleRateSpinner = kvFind(self, 'rcid', 'sr')
-        sampleRateSpinner.setValue(channelConfig.sampleRate)
+    def on_config_updated(self, channelConfig, max_rate):
+        self.ids.chanId.setValue(channelConfig)
+        spinner = self.ids.sr
+        spinner.set_max_rate(max_rate)
+        spinner.setValue(channelConfig.sampleRate)
 
         scalingMode = channelConfig.scalingMode
 

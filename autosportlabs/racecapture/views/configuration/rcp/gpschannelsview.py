@@ -18,7 +18,7 @@ class GPSChannelsView(BaseConfigView):
         Builder.load_file(GPS_CHANNELS_VIEW_KV)            
         super(GPSChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)
+        self.ids.sr.bind(on_sample_rate = self.on_sample_rate)
                 
     def onPosActive(self, instance, value):
         if self.gpsConfig:
@@ -70,11 +70,11 @@ class GPSChannelsView(BaseConfigView):
             if self.lap_config.primary_stats_enabled():
                 self.lap_config.set_primary_stats(value)
                     
-    def on_config_updated(self, rcpCfg):
-        gpsConfig = rcpCfg.gpsConfig
+    def on_config_updated(self, rc_cfg):
+        gpsConfig = rc_cfg.gpsConfig
         
-        sampleRate = kvFind(self, 'rcid', 'sr')
-        sampleRate.setValue(gpsConfig.sampleRate)
+        self.ids.sr.set_max_rate(rc_cfg.capabilities.sample_rates.gps)
+        self.ids.sr.setValue(gpsConfig.sampleRate)
         
         self.ids.position.active = gpsConfig.positionEnabled
         self.ids.speed.active = gpsConfig.speedEnabled
@@ -85,6 +85,6 @@ class GPSChannelsView(BaseConfigView):
         self.ids.dop.active = gpsConfig.DOPEnabled
 
         self.gpsConfig = gpsConfig
-        self.lap_config = rcpCfg.lapConfig
+        self.lap_config = rc_cfg.lapConfig
         
         
