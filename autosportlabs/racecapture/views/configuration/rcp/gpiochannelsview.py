@@ -49,6 +49,6 @@ class GPIOChannel(BaseChannelView):
     def on_config_updated(self, channelConfig, max_sample_rate):
         self.ids.sr.setValue(channelConfig.sampleRate, max_sample_rate)
 
-        self.ids.chanId.setValue(channelConfig)
+        self.ids.chan_id.setValue(channelConfig)
         self.ids.mode.setFromValue(channelConfig.mode)
         self.channelConfig = channelConfig

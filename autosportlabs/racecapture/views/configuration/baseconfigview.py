@@ -14,7 +14,7 @@ class BaseChannelView(BoxLayout):
     def __init__(self, **kwargs):
         super(BaseChannelView, self).__init__(**kwargs)
         self.ids.sr.bind(on_sample_rate = self.on_sample_rate)
-        channel_selector=self.ids.chanId
+        channel_selector=self.ids.chan_id
         self.channels = kwargs.get('channels')
         channel_selector.bind(on_channel = self.on_channel)
         channel_selector.dispatch('on_channels_updated', self.channels)

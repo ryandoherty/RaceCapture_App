@@ -55,7 +55,7 @@ class OBD2Channel(BoxLayout):
         sample_rate_spinner = self.ids.sr
         sample_rate_spinner.set_max_rate(self.max_sample_rate)        
         sample_rate_spinner.setFromValue(channel.sampleRate)
-        channel_spinner = self.ids.chanId
+        channel_spinner = self.ids.chan_id
         channel_spinner.filterList = self.obd2_settings.getChannelNames()
         channel_spinner.on_channels_updated(channels)
         channel_spinner.text = channel.name

@@ -75,7 +75,7 @@ class PulseChannel(BaseChannelView):
     def on_config_updated(self, channel_config, max_sample_rate):
         self.ids.sr.setValue(channel_config.sampleRate, max_sample_rate)
     
-        self.ids.chanId.setValue(channel_config)
+        self.ids.chan_id.setValue(channel_config)
         
         mode_spinner = kvFind(self, 'rcid', 'mode')
         mode_spinner.setFromValue(channel_config.mode)
