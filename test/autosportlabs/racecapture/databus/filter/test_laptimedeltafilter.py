@@ -1,6 +1,6 @@
 import unittest
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
-from autosportlabs.racecapture.data.sampledata import SystemChannels
+from autosportlabs.racecapture.data.channels import SystemChannels
 
 class LaptimeDeltaFilterTest(unittest.TestCase):
     system_channels = SystemChannels()
