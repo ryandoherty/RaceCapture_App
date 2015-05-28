@@ -75,28 +75,28 @@ class AnalogChannel(BaseChannelView):
         self.ids.chan_id.setValue(channelConfig)
         self.ids.sr.setValue(channelConfig.sampleRate, max_sample_rate)
 
-        scalingMode = channelConfig.scalingMode
+        scaling_mode = channelConfig.scalingMode
 
-        checkRaw = self.ids.smRaw
-        checkLinear = self.ids.smLinear
-        checkMapped = self.ids.smMapped
-        if scalingMode == 0:
-            checkRaw.active = True
-            checkLinear.active = False
-            checkMapped.active = False
-        elif scalingMode == 1:
-            checkRaw.active = False
-            checkLinear.active = True
-            checkMapped.active = False
-        elif scalingMode == 2:
-            checkRaw.active = False
-            checkLinear.active = False
-            checkMapped.active = True
+        check_raw = self.ids.smRaw
+        check_linear = self.ids.smLinear
+        check_mapped = self.ids.smMapped
+        if scaling_mode == 0:
+            check_raw.active = True
+            check_linear.active = False
+            check_mapped.active = False
+        elif scaling_mode == 1:
+            check_raw.active = False
+            check_linear.active = True
+            check_mapped.active = False
+        elif scaling_mode == 2:
+            check_raw.active = False
+            check_linear.active = False
+            check_mapped.active = True
         
         self.ids.linearscaling.text = str(channelConfig.linearScaling)
-        mapEditor = self.ids.mapEditor
-        mapEditor.on_config_changed(channelConfig.scalingMap)
-        mapEditor.bind(on_map_updated=self.on_map_updated)
+        map_editor = self.ids.map_editor
+        map_editor.on_config_changed(channelConfig.scalingMap)
+        map_editor.bind(on_map_updated=self.on_map_updated)
 
         self.channelConfig = channelConfig
         
@@ -127,8 +127,8 @@ class WarnLabel(Label):
 WARN_DISMISS_TIMEOUT = 3
 
 class AnalogScalingMapEditor(BoxLayout):
-    mapSize = SCALING_MAP_POINTS
-    scalingMap = None
+    map_size = SCALING_MAP_POINTS
+    scaling_map = None
     plot = None
     def __init__(self, **kwargs):
         super(AnalogScalingMapEditor, self).__init__(**kwargs)
@@ -153,22 +153,22 @@ class AnalogScalingMapEditor(BoxLayout):
     def set_scaled_cell(self, scaled_field, value):
         scaled_field.text = '{:.3g}'.format(value)
         
-    def on_config_changed(self, scalingMap):
-        mapSize = self.mapSize
-        self.setTabStops(mapSize)
-        for i in range(mapSize):
-            volts = scalingMap.getVolts(i)
-            scaled = scalingMap.getScaled(i)
-            voltsCell = kvFind(self, 'rcid', 'v_' + str(i))
-            scaledCell = kvFind(self, 'rcid', 's_' + str(i))
-            self.set_volts_cell(voltsCell, volts)
-            self.set_scaled_cell(scaledCell, scaled)            
-        self.scalingMap = scalingMap
+    def on_config_changed(self, scaling_map):
+        map_size = self.map_size
+        self.setTabStops(map_size)
+        for i in range(map_size):
+            volts = scaling_map.getVolts(i)
+            scaled = scaling_map.getScaled(i)
+            volts_cell = kvFind(self, 'rcid', 'v_' + str(i))
+            scaled_cell = kvFind(self, 'rcid', 's_' + str(i))
+            self.set_volts_cell(volts_cell, volts)
+            self.set_scaled_cell(scaled_cell, scaled)            
+        self.scaling_map = scaling_map
         self.regen_plot()
 
     #TODO make regen_plot2 the actual routine; we should'nt have to delete and re-add the plot to change the points
     def regen_plot(self):
-        scalingMap = self.scalingMap
+        scalingMap = self.scaling_map
         
         graphContainer = self.ids.graphcontainer
         graphContainer.clear_widgets()
@@ -181,27 +181,27 @@ class AnalogScalingMapEditor(BoxLayout):
         self.plot = plot
                 
         points = []
-        mapSize = self.mapSize
-        maxScaled = None
-        minScaled = None
-        for i in range(mapSize):
+        map_size = self.map_size
+        max_scaled = None
+        min_scaled = None
+        for i in range(map_size):
             volts = scalingMap.getVolts(i)
             scaled = scalingMap.getScaled(i)
             points.append((volts, scaled))
-            if maxScaled == None or scaled > maxScaled:
-                maxScaled = scaled
-            if minScaled == None or scaled < minScaled:
-                minScaled = scaled
+            if max_scaled == None or scaled > max_scaled:
+                max_scaled = scaled
+            if min_scaled == None or scaled < min_scaled:
+                min_scaled = scaled
             
-        graph.ymin = minScaled
-        graph.ymax = maxScaled
+        graph.ymin = min_scaled
+        graph.ymax = max_scaled
         graph.xmin = 0
         graph.xmax = 5
         plot.points = points
         
         
     def regen_plot2(self):
-        scalingMap = self.scalingMap
+        scaling_map = self.scaling_map
         graph = self.ids.scalingGraph
         
         plot = self.plot
@@ -211,20 +211,20 @@ class AnalogScalingMapEditor(BoxLayout):
             self.plot = plot
                 
         points = []
-        mapSize = self.mapSize
-        maxScaled = None
-        minScaled = None
+        mapSize = self.map_size
+        max_scaled = None
+        min_scaled = None
         for i in range(mapSize):
-            volts = scalingMap.getVolts(i)
-            scaled = scalingMap.getScaled(i)
+            volts = scaling_map.getVolts(i)
+            scaled = scaling_map.getScaled(i)
             points.append((volts, scaled))
-            if maxScaled == None or scaled > maxScaled:
-                maxScaled = scaled
-            if minScaled == None or scaled < minScaled:
-                minScaled = scaled
+            if max_scaled == None or scaled > max_scaled:
+                max_scaled = scaled
+            if min_scaled == None or scaled < min_scaled:
+                min_scaled = scaled
             
-        graph.ymin = minScaled
-        graph.ymax = maxScaled
+        graph.ymin = min_scaled
+        graph.ymax = max_scaled
         graph.xmin = 0
         graph.xmax = 5
         plot.points = points
@@ -241,8 +241,8 @@ class AnalogScalingMapEditor(BoxLayout):
             if value == '' or value == "." or value == "-": value = 0
             try:
                 value = float(value)
-                if self.scalingMap:
-                    self.scalingMap.setVolts(mapBin, value)
+                if self.scaling_map:
+                    self.scaling_map.setVolts(mapBin, value)
                     self.dispatch('on_map_updated')
                     self.regen_plot()
             except ScalingMapException as e:
@@ -254,20 +254,20 @@ class AnalogScalingMapEditor(BoxLayout):
                 warn.size_hint = (None,None)
                 self.get_root_window().add_widget(warn)
                 warn.center_on(instance)
-                original_value = self.scalingMap.getVolts(mapBin)
+                original_value = self.scaling_map.getVolts(mapBin)
                 self.set_volts_cell(instance, original_value)
                 Clock.schedule_once(lambda dt: self._refocus(instance))
             except Exception as e:
                 
                 alertPopup('Scaling Map', str(e))
-                original_value = self.scalingMap.getVolts(mapBin)
+                original_value = self.scaling_map.getVolts(mapBin)
                 self.set_volts_cell(instance, original_value)
                     
     def on_scaled(self, mapBin, instance, value):
         try:
             value = float(value)
-            if self.scalingMap:
-                self.scalingMap.setScaled(mapBin, value)
+            if self.scaling_map:
+                self.scaling_map.setScaled(mapBin, value)
                 self.dispatch('on_map_updated')
                 self.regen_plot()
         except Exception as e:
