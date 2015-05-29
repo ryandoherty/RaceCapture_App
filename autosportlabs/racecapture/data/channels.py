@@ -11,6 +11,7 @@ CHANNEL_TYPE_SENSOR     = 1
 CHANNEL_TYPE_IMU        = 2
 CHANNEL_TYPE_GPS        = 3
 CHANNEL_TYPE_TIME       = 4
+CHANNEL_TYPE_STATS      = 5
 
 class ChannelMeta(object):
     name = None
