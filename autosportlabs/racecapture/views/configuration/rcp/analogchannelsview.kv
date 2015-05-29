@@ -10,11 +10,11 @@
         HSeparator:
             text: 'Configuration'
         ChannelNameSelectorView:
-            rcid: 'chanId'
+            id: chan_id
             channel_type: 1
             size_hint: (1.0,0.3)
         SampleRateSelectorView:
-            rcid: 'sr'
+            id: sr
             size_hint: (1.0,0.3)
         HSeparator:
             text: 'Mode'
@@ -26,7 +26,7 @@
         		halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
-                rcid: 'smRaw'
+                id: smRaw
                 on_active: root.on_scaling_type_raw(*args)
             Label:
 	        FieldLabel:
@@ -34,17 +34,17 @@
 	        	halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
-                rcid: 'smLinear'
+                id: smLinear
                 on_active: root.on_scaling_type_linear(*args)
 			FloatValueField:
-				rcid: 'linearscaling'
+				id: linearscaling
 				on_text: root.on_linear_map_value(*args)	
 	        FieldLabel:
 	        	text: 'Mapped'
 	        	halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
-                rcid: 'smMapped'
+                id: smMapped
                 on_active: root.on_scaling_type_map(*args)
 			Label:               
     VSeparator:
@@ -54,7 +54,7 @@
         HSeparator:
             text: 'Calibration'
         AnalogScalingMapEditor:
-            rcid: 'mapEditor'
+            id: map_editor
  
 <AnalogScaler>:
     id: graph
@@ -74,7 +74,7 @@
     orientation: 'vertical'
     BoxLayout:
         size_hint: (1.0, 0.6)
-		rcid: 'graphcontainer'    	
+		id: graphcontainer    	
     	orientation: 'vertical'
     GridLayout:
         cols: 6

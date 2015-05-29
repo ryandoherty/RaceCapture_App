@@ -113,7 +113,7 @@ class ImuChannel(BoxLayout):
         
 class ImuChannelsView(BaseConfigView):
     editors = []
-    imuCfg = None
+    imu_cfg = None
     channelLabels = {0:'X', 1:'Y', 2:'Z', 3:'Yaw',4:'Pitch',5:'Roll',6:'Compass'}
 
     def __init__(self, **kwargs):
@@ -127,7 +127,7 @@ class ImuChannelsView(BaseConfigView):
         gyroContainer = kvFind(self, 'rcid', 'gc')
         self.appendImuChannels(gyroContainer, self.editors, IMU_GYRO_CHANNEL_IDS)
         
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)                
+        self.ids.sr.bind(on_sample_rate = self.on_sample_rate)                
         
     def appendImuChannels(self, container, editors, ids):
         for i in ids:
@@ -146,23 +146,23 @@ class ImuChannelsView(BaseConfigView):
         alertPopup('Calibration', 'Calibration Failed:\n\n' + str(result))
         
     def on_sample_rate(self, instance, value):
-        if self.imuCfg:
-            for imuChannel in self.imuCfg.channels:
+        if self.imu_cfg:
+            for imuChannel in self.imu_cfg.channels:
                 imuChannel.sampleRate = value
                 imuChannel.stale = True
                 self.dispatch('on_modified')
                 
-    def on_config_updated(self, rcpCfg):
-        imuCfg = rcpCfg.imuConfig
-        channelCount = imuCfg.channelCount
+    def on_config_updated(self, rc_cfg):
+        imu_cfg = rc_cfg.imuConfig
+        channelCount = imu_cfg.channelCount
 
-        commonSampleRate = 0
+        common_sample_rate = 0
         for i in range(channelCount):
-            imuChannel = imuCfg.channels[i]
+            imuChannel = imu_cfg.channels[i]
             editor = self.editors[i]
             editor.on_config_updated(i, imuChannel, self.channelLabels)
-            commonSampleRate = imuChannel.sampleRate if commonSampleRate < imuChannel.sampleRate else commonSampleRate
+            common_sample_rate = imuChannel.sampleRate if common_sample_rate < imuChannel.sampleRate else common_sample_rate
         
-        kvFind(self, 'rcid', 'sr').setValue(commonSampleRate)
-        self.imuCfg = imuCfg
+        self.ids.sr.setValue(common_sample_rate, rc_cfg.capabilities.sample_rates.sensor)
+        self.imu_cfg = imu_cfg
 
