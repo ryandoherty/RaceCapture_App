@@ -6,17 +6,17 @@
     height: dp(30)
     orientation: 'horizontal'
     Label:
-    	rcid: 'pidIndex'
+    	id: pidIndex
     	text: ''
     	font_size: dp(20)
     	size_hint_x: 0.1    	
     ChannelNameSpinner:
     	size_hint_x: 0.4
-        rcid: 'chanId'
+    	id: chan_id
         on_text: root.on_channel(*args)
     SampleRateSpinner:
     	size_hint_x: 0.4
-        rcid: 'sr'
+    	id: sr
         on_text: root.on_sample_rate(*args)
     IconButton:
     	size_hint_x: 0.1
@@ -28,7 +28,7 @@
     spacing: dp(20)
     orientation: 'vertical'
 	SettingsView:
-		rcid: 'obd2enable'
+		id: obd2enable
 		label_text: 'OBDII channels'
 		help_text: 'Specify one or more OBDII Channels to query and the logged sample rate'
 		size_hint_y: 0.20
@@ -54,7 +54,7 @@
 	        do_scroll_x:False
 	        do_scroll_y:True
 	        GridLayout:
-	        	rcid: 'obd2grid'
+	            id: obd2grid
 	            padding: [dp(20), dp(20)]
 	            spacing: [dp(10), dp(10)]
 	            size_hint_y: None
@@ -71,7 +71,7 @@
     		text: '\357\201\247'
     		on_release: root.on_add_obd2_channel()
 	    	disabled: True
-	    	rcid: 'addpid'
+	    	id: addpid
 	    	
     		
         

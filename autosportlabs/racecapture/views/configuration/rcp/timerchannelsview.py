@@ -21,11 +21,11 @@ class PulseChannelsView(BaseMultiChannelConfigView):
         self.channel_title = 'Timer '
         self.accordion_item_height = dp(120)
 
-    def channel_builder(self, index):
+    def channel_builder(self, index, max_sample_rate):
         editor = PulseChannel(id='timer' + str(index), channels=self.channels)
         editor.bind(on_modified=self.on_modified)
         if self.config:
-            editor.on_config_updated(self.config.channels[index])
+            editor.on_config_updated(self.config.channels[index], max_sample_rate)
         return editor
     
     def get_specific_config(self, rcp_cfg):
@@ -72,13 +72,10 @@ class PulseChannel(BaseChannelView):
             self.channelConfig.stale = True
             self.dispatch('on_modified', self.channelConfig)
                             
-    def on_config_updated(self, channel_config):
-        
-        sample_rate_spinner = kvFind(self, 'rcid', 'sr')
-        sample_rate_spinner.setValue(channel_config.sampleRate)
+    def on_config_updated(self, channel_config, max_sample_rate):
+        self.ids.sr.setValue(channel_config.sampleRate, max_sample_rate)
     
-        channel_spinner = kvFind(self, 'rcid', 'chanId')
-        channel_spinner.setValue(channel_config)
+        self.ids.chan_id.setValue(channel_config)
         
         mode_spinner = kvFind(self, 'rcid', 'mode')
         mode_spinner.setFromValue(channel_config.mode)
