@@ -2,7 +2,7 @@ import kivy
 kivy.require('1.8.0')
 
 from math import sin
-from installfix_garden_graph import Graph, MeshLinePlot
+from installfix_garden_graph import Graph, LinePlot
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.utils import get_color_from_hex as rgb
@@ -176,7 +176,7 @@ class AnalogScalingMapEditor(BoxLayout):
         graph = AnalogScaler()
         graphContainer.add_widget(graph)
         
-        plot = MeshLinePlot(color=rgb('00FF00'))
+        plot = LinePlot(color=rgb('00FF00'), line_width=1.25)
         graph.add_plot(plot)
         self.plot = plot
                 
@@ -187,36 +187,6 @@ class AnalogScalingMapEditor(BoxLayout):
         for i in range(map_size):
             volts = scalingMap.getVolts(i)
             scaled = scalingMap.getScaled(i)
-            points.append((volts, scaled))
-            if max_scaled == None or scaled > max_scaled:
-                max_scaled = scaled
-            if min_scaled == None or scaled < min_scaled:
-                min_scaled = scaled
-            
-        graph.ymin = min_scaled
-        graph.ymax = max_scaled
-        graph.xmin = 0
-        graph.xmax = 5
-        plot.points = points
-        
-        
-    def regen_plot2(self):
-        scaling_map = self.scaling_map
-        graph = self.ids.scalingGraph
-        
-        plot = self.plot
-        if not plot:
-            plot = MeshLinePlot(color=rgb('FF0000'))
-            graph.add_plot(plot)
-            self.plot = plot
-                
-        points = []
-        mapSize = self.map_size
-        max_scaled = None
-        min_scaled = None
-        for i in range(mapSize):
-            volts = scaling_map.getVolts(i)
-            scaled = scaling_map.getScaled(i)
             points.append((volts, scaled))
             if max_scaled == None or scaled > max_scaled:
                 max_scaled = scaled
