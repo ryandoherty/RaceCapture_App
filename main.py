@@ -40,6 +40,9 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
     from toolbarview import ToolbarView
+    if not is_mobile_platform():
+        kivy.config.Config.set ( 'input', 'mouse', 'mouse,disable_multitouch' )
+
 
 from kivy.app import App, Builder
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig, VersionConfig
@@ -110,7 +113,6 @@ class RaceCaptureApp(App):
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
         self.trackManager = TrackManager(user_dir=self.user_data_dir, base_dir=self.base_dir)
-
 
     def _on_keyboard_down(self, keyboard, keycode, *args):
         if keycode == 27:
