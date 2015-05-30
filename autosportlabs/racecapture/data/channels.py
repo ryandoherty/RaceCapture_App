@@ -30,12 +30,6 @@ class ChannelMeta(object):
         self.precision = kwargs.get('prec', self.precision)
         self.sampleRate = kwargs.get('sampleRate', self.sampleRate)
         self.type = kwargs.get('type', self.type)
-    
-    def format_value(self, value):
-        if self.type == CHANNEL_TYPE_TIME:
-            return "value format time"
-        else:
-            return "number format"
         
     def fromJson(self, json):
         self.name = json.get('nm', self.name)

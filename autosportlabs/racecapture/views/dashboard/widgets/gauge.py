@@ -12,10 +12,12 @@ from kivy.uix.behaviors import ButtonBehavior
 from utils import kvFind, kvquery, dist
 from functools import partial
 from kivy.app import Builder
+from kivy.logger import Logger
 from autosportlabs.racecapture.settings.prefs import Range
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
 from autosportlabs.racecapture.views.channels.channelcustomizationview import ChannelCustomizationView
 from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble
+from autosportlabs.racecapture.data.channels import *
 
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 
@@ -23,7 +25,7 @@ DEFAULT_VALUE = None
 DEFAULT_MIN = 0
 DEFAULT_MAX = 100
 DEFAULT_PRECISION = 0
-
+DEFAULT_TYPE = CHANNEL_TYPE_SENSOR
 MENU_ITEM_RADIUS = 100
 POPUP_DISMISS_TIMEOUT_SHORT = 10.0
 POPUP_DISMISS_TIMEOUT_LONG = 60.0
@@ -41,6 +43,8 @@ Builder.load_string('''
 class CustomizeGaugeBubble(CenteredBubble):
     pass
 
+NULL_LAP_TIME='--:--.---'
+
 class Gauge(ButtonBehavior, AnchorLayout):
     _customizeGaugeBubble = None
     _valueView = None
@@ -52,8 +56,10 @@ class Gauge(ButtonBehavior, AnchorLayout):
     channel = StringProperty(None, allownone=True)    
     title = StringProperty('')
     value = NumericProperty(None, allownone=True)
-    valueFormat = "{:.0f}"
+    sensor_format = "{:.0f}"
+    value_formatter = None
     precision = NumericProperty(DEFAULT_PRECISION)
+    type = NumericProperty(DEFAULT_TYPE)
     warning = ObjectProperty(Range())
     alert = ObjectProperty(Range())
     min = NumericProperty(DEFAULT_MIN)
@@ -74,6 +80,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self.settings = kwargs.get('settings', self.settings)
         self.channel = kwargs.get('targetchannel', self.channel)
         self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
+        self.value_formatter = self.sensor_formatter        
 
     def _remove_customization_bubble(self, *args):
         try:
@@ -113,12 +120,12 @@ class Gauge(ButtonBehavior, AnchorLayout):
     @property
     def valueView(self):
         if not self._valueView:
-            self._valueView = kvFind(self, 'rcid', 'value')
+            self._valueView = self.ids.value
         return self._valueView
 
     @property
     def titleView(self):
-        return kvFind(self, 'rcid', 'title')
+        return self.ids.title
 
     def select_alert_color(self):
         value = self.value
@@ -133,23 +140,45 @@ class Gauge(ButtonBehavior, AnchorLayout):
         view = self.valueView
         if view: view.color = self.select_alert_color()
         
-    def on_value(self, instance, value):
+    def refresh_value(self, value):
         view = self.valueView
-        if value != None:
-            if view:
-                view.text = self.valueFormat.format(value)
-                self.updateColors()
-        else:
-            view.text=''
+        if view:
+            view.text = self.value_formatter(value)
+            self.updateColors()
+        
+    def on_value(self, instance, value):
+        self.refresh_value(value)
 
     def on_title(self, instance, value):
         if not value == None:
-            view =  kvFind(self, 'rcid', 'title')
+            view =  self.ids.title
             view.text = str(value)
 
-    def on_precision(self, instance, value):
-        self.valueFormat = '{:.' + str(value) + 'f}'
+    def sensor_formatter(self, value):
+        return "" if value is None else self.sensor_format.format(value)
         
+    def laptime_formatter(self, value):
+        fmt = 0
+        if not value:
+            fmt =  NULL_LAP_TIME
+        else:
+            int_min_value = int(value)
+            fraction_min_view = 60.0 * (value - float(int_min_value))
+            if value == 0:
+                fmt = NULL_LAP_TIME
+            else:
+                fmt = '{}:{}'.format(int_min_value,'{0:06.3f}'.format(fraction_min_view))
+        return fmt
+        
+    def update_value_format(self):
+        if self.type == CHANNEL_TYPE_TIME:
+            self.value_formatter = self.laptime_formatter
+        else:
+            self.sensor_format = '{:.' + str(self.precision) + 'f}'
+            self.value_formatter = self.sensor_formatter
+            
+        self.refresh_value(self.value)
+                
     def on_title_color(self, instance, value):
         self.titleView.color = value
 
@@ -189,7 +218,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
             self.warning = warn_range
             self.alert = alert_range
         except Exception as e:
-            print("Error customizing channel: " + str(e))
+            Logger.error("Gauge: Error customizing channel: " + str(e))
             
         self._dismiss_popup()
              
@@ -227,7 +256,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
             self._update_channel_binding()
             self._update_channel_ranges()
         except Exception as e:
-            print('Error setting channel {} {}'.format(value, str(e)))
+            Logger.error('Gauge: Error setting channel {} {}'.format(value, str(e)))
 
     def on_settings(self, instance, value):
         #Do I have an id so I can track my settings?
@@ -241,7 +270,6 @@ class Gauge(ButtonBehavior, AnchorLayout):
 
     def update_title(self, channel_name, channel_meta):
         try:
-            channel_name
             if channel_name is not None and channel_meta is not None:
                 title = channel_meta.name
                 if channel_meta.units and len(channel_meta.units):
@@ -250,7 +278,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
             else:
                 self.title = ''
         except Exception as e:
-            print('Failed to update gauge title & units ' + str(e))
+            Logger.error('Gauge: Failed to update gauge title & units ' + str(e))
         
     def _update_display(self, channel_meta):
         try:
@@ -258,13 +286,16 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 self.min = channel_meta.min
                 self.max = channel_meta.max
                 self.precision = channel_meta.precision
+                self.type = channel_meta.type
             else:
                 self.min = DEFAULT_MIN
                 self.max = DEFAULT_MAX
                 self.precision = DEFAULT_PRECISION
                 self.value = DEFAULT_VALUE
+                self.type = DEFAULT_TYPE
+            self.update_value_format()
         except Exception as e:
-            print('Failed to update gauge min/max ' + str(e))
+            Logger.error('Gauge: Failed to update gauge min/max ' + str(e))
         
     def _update_channel_binding(self):
         dataBus = self.data_bus
