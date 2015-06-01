@@ -1,10 +1,10 @@
 from kivy.event import EventDispatcher
-from kivy.properties import OptionProperty, NumericProperty,\
-    ListProperty
+from kivy.properties import NumericProperty, ListProperty
 from kivy.clock import Clock
 from kivy.config import ConfigParser
 import json
 import os
+from os import path
 from os.path import dirname, expanduser, sep
 from kivy.utils import platform
 
@@ -52,10 +52,10 @@ class UserPrefs(EventDispatcher):
     config = None
     data_dir = '.'
 
-    def __init__(self, data_dir, save_timeout=2, **kwargs):
+    def __init__(self, save_timeout=2, **kwargs):
         self._schedule_save = Clock.create_trigger(self.save, save_timeout)
-        self.prefs_file = data_dir+'/'+self.prefs_file_name
-        self.data_dir = data_dir
+        self.data_dir = self.get_default_data_dir()
+        self.prefs_file = path.join(self.data_dir, self.prefs_file_name)
         self.load()
 
     def set_range_alert(self, key, range_alert):
@@ -77,13 +77,27 @@ class UserPrefs(EventDispatcher):
             data = self.to_json()
             prefs_file.write(data)
 
-    def get_default_user_dir(self):
-        if platform() == 'win':
-            user_path = dirname(expanduser('~')) + sep + 'Documents'
-        elif platform() == 'android':
+    def get_default_data_dir(self):
+        if platform() == 'android':
+            from jnius import autoclass
+            env = autoclass('android.os.Environment')
+            user_path = env.getDataDirectory().getPath() 
+        else:
+            user_path = self.get_default_desktop_config_dir()
+        return user_path
+        
+    def get_default_user_files_dir(self):
+        if platform() == 'android':
             from jnius import autoclass
             env = autoclass('android.os.Environment')
             user_path = env.getExternalStorageDirectory().getPath() 
+        else:
+            user_path = self.get_default_desktop_config_dir()
+        return user_path
+        
+    def get_default_desktop_config_dir(self):
+        if platform() == 'win':
+            user_path = dirname(expanduser('~')) + sep + 'Documents'
         else:
             user_path = expanduser('~') + sep + 'Documents'
         return user_path
@@ -94,9 +108,9 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'temperature_units', 'Fahrenheit')
         self.config.setdefault('preferences', 'show_laptimes', 1)
         self.config.setdefault('preferences', 'startup_screen', 'Home Page')
-        default_user_dir = self.get_default_user_dir()
-        self.config.setdefault('preferences', 'config_file_dir', default_user_dir )
-        self.config.setdefault('preferences', 'firmware_dir', default_user_dir )
+        default_user_files_dir = self.get_default_user_files_dir()
+        self.config.setdefault('preferences', 'config_file_dir', default_user_files_dir )
+        self.config.setdefault('preferences', 'firmware_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'first_time_setup', True)
 
     def load(self):
