@@ -1,4 +1,4 @@
-from autosportlabs.racecapture.data.sampledata import SystemChannels, RuntimeChannels
+from autosportlabs.racecapture.data.channels import SystemChannels, RuntimeChannels
 from autosportlabs.racecapture.settings.appconfig import AppConfig
 from autosportlabs.racecapture.settings.prefs import UserPrefs
 

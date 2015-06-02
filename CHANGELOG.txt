@@ -2,6 +2,7 @@
 * Sample rate selector for sensor channels reflect capabilities of device
 * Disabled multi-touch on desktop versions, to avoid right click red dot problem
 * Improved visibility on analog channel scaling chart lines
+* 'Time' channels (e.g. LapTime) show up as time in digital gauge view
 
 ==1.3.3==
 * Reworked Android Bluetooth comms by eliminating background service and created local Java bridge
