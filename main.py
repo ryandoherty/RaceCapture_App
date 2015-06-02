@@ -114,6 +114,9 @@ class RaceCaptureApp(App):
         self.settings.appConfig.setUserDir(self.user_data_dir)
         self.trackManager = TrackManager(user_dir=self.user_data_dir, base_dir=self.base_dir)
 
+    def on_pause(self):
+        return True
+    
     def _on_keyboard_down(self, keyboard, keycode, *args):
         if keycode == 27:
             self.switchMainView('home')
