@@ -55,7 +55,6 @@
                 size_hint_y: 0.4
                 
         BoxLayout:
-            #size_hint_x: 0.2
             orientation: 'vertical'
             spacing: dp(20)
             padding: (dp(5), dp(5))
@@ -74,19 +73,18 @@
         on_press: root.close()
 
 <TrackConfigView>:
-	padding: (dp(10),dp(20))
-	spacing: dp(20)
+    padding: [dp(10), dp(10), dp(10), dp(10)]
 	orientation: 'vertical'
 	BoxLayout:
 		orientation: 'vertical'
-		size_hint_y: 0.15
+		size_hint_y: 0.20
 		SettingsView:
 			rcid: 'autoDetect'
-			label_text: 'Automatic track detection'
-			help_text: 'Automatically detect and configure the race track upon power-up and GPS lock.'
+			label_text: 'Automatic race track detection'
+			help_text: 'Automatically detect and configure your favorite tracks'
 	ScreenManager:
 		rcid: 'screenmgr'
-		size_hint_y: 0.85
+		size_hint_y: 0.80
 
 <EmptyTrackDbView>:
 	BoxLayout:
@@ -98,7 +96,7 @@
 		Label:
 			height: dp(30)
 		Label:
-			text: 'Press the add button below to select your favorite tracks for auto-detection'
+			text: 'Press the add button to select your favorite tracks'
 			
 <TrackSelectionPopup>:
 	orientation: 'vertical'
@@ -118,53 +116,45 @@
 	BoxLayout:
 		orientation: 'horizontal'
 		TrackInfoView:
-			size_hint_x: 0.95
+			size_hint_x: 0.92
 			rcid: 'trackinfo'
 		AnchorLayout:
-            size_hint: (0.07, 1.0)
-            spacing: dp(10)
+            size_hint_x: 0.08
     		IconButton:
-                size_hint: (1, 0.25)
+                size_hint: (0.5, 0.15)
     			text: '\357\200\224'
     			on_release: root.removeTrack()
 			
 
 <AutomaticTrackConfigScreen>:
-	BoxLayout:
-		orientation: 'vertical'
-    	spacing: dp(10)
-		Label:
-			font_size: dp(20)
-			text: 'Selected Race Tracks'
-			size_hint_y: 0.05
-		ScrollView:
-			canvas.before:
-		        Color:
-		            rgba: 0.05, 0.05, 0.05, 1
-		        Rectangle:
-		            pos: self.pos
-		            size: self.size
-			size_hint_y: 0.90
-			id: scrltracks
-		    do_scroll_x:False
-		    do_scroll_y:True
-		    GridLayout:
-		    	rcid: 'tracksgrid'
-		        padding: [dp(20), dp(20)]
-		        spacing: [dp(10), dp(10)]
-		        size_hint_y: None
-		        cols: 1
-	    BoxLayout:
-	    	size_hint_y: 0.05
-	    	spacing: dp(10)
-	    	orientation: 'vertical'
-	    	IconButton:
-	    		pos_hint: {'center_x': .5, 'center_y': .5}
-	    		size_hint: (0.1, 0.1)
-	    		text: '\357\201\247'
-	    		on_release: root.on_add_track_db()
-		    	disabled: True
-		    	rcid: 'addtrack'
+    AnchorLayout:
+    	AnchorLayout:
+        	spacing: dp(10)
+    		ScrollView:
+    			canvas.before:
+    		        Color:
+    		            rgba: 0.05, 0.05, 0.05, 1
+    		        Rectangle:
+    		            pos: self.pos
+    		            size: self.size
+    			size_hint_y: 0.95
+    			id: scrltracks
+    		    do_scroll_x:False
+    		    do_scroll_y:True
+    		    GridLayout:
+    		    	rcid: 'tracksgrid'
+    		        padding: [dp(10), dp(10)]
+    		        spacing: [dp(10), dp(10)]
+    		        size_hint_y: None
+    		        cols: 1
+        AnchorLayout:
+            anchor_y: 'bottom'
+        	IconButton:
+        		size_hint: (0.2, 0.2)
+        		text: u'\uf055'
+        		on_release: root.on_add_track_db()
+    	    	disabled: True
+    	    	rcid: 'addtrack'
 	        
 
 	
@@ -172,13 +162,13 @@
 	BoxLayout:
 		orientation: 'vertical'
 		SettingsView:
-			size_hint_y: 0.25
+			size_hint_y: 0.4
 			rcid: 'sepStartFinish'
 			label_text: 'Separate start and finish lines'
-			help_text: 'Specify a separate start / finish point for Stage, Hill Climb or AutoX type courses.'
+			help_text: 'Enable for Stage, Hill Climb or AutoX type courses'
 		BoxLayout:
 			orientation: 'vertical'
-			size_hint_y: 0.75
+			size_hint_y: 0.6
 		    	
 			SectorPointView:
 				id: start_line
