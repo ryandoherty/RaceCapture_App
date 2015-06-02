@@ -34,10 +34,10 @@
 	spacing: dp(20)
     orientation: 'vertical'
     BoxLayout:
-        size_hint_y: 0.2
+        size_hint_y: 0.10
         orientation: 'horizontal'
         BoxLayout:
-        	size_hint: 0.4, 0.5
+        	size_hint: 0.4, 0.8
         	orientation: 'vertical'
 		    SampleRateSelectorView:
 		        id: sr
@@ -67,12 +67,16 @@
             text: 'Physical Mapping'
         HSeparatorMinor:
             text: 'Zero Level'
-
-    AccelChannelsView:
-    	size_hint_y: 0.45
-    	spacing: dp(5)
-    GyroChannelsView:
-    	size_hint_y: 0.45
-    	spacing: dp(5)	        
-	BoxLayout:
-		size_hint_y: 0.3
+    ScrollView:
+        id: scroller
+        size_hint_y: 0.8
+        do_scroll_x: False
+        GridLayout:
+            id: imu_channels
+            row_default_height: root.height * 0.1
+            padding: (dp(5), dp(5))
+            spacing: dp(5)
+            row_force_default: True
+            size_hint_y: None
+            height: max(self.minimum_height, scroller.height)
+            cols: 1

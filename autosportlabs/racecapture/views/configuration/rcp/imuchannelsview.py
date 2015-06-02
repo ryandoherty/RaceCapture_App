@@ -10,6 +10,7 @@ from valuefield import IntegerValueField, FloatValueField
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.config.rcpconfig import *
+import traceback
 
 IMU_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/imuchannelsview.kv'
 
@@ -28,14 +29,6 @@ class ImuMappingSpinner(MappedSpinner):
         elif imuType == 'gyro':
             self.setValueMap({3:'Yaw', 4:'Pitch', 5:'Roll'}, 'Yaw')
         
-class GyroChannelsView(BoxLayout):
-    def __init__(self, **kwargs):
-        super(GyroChannelsView, self).__init__(**kwargs)
-
-class AccelChannelsView(BoxLayout):
-    def __init__(self, **kwargs):
-        super(AccelChannelsView, self).__init__(**kwargs)
-
 class ImuChannel(BoxLayout):
     channelConfig = None
     channelLabels = []
@@ -121,13 +114,14 @@ class ImuChannelsView(BaseConfigView):
         super(ImuChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
-        accelContainer = kvFind(self, 'rcid', 'ac')
-        self.appendImuChannels(accelContainer, self.editors, IMU_ACCEL_CHANNEL_IDS)
-
-        gyroContainer = kvFind(self, 'rcid', 'gc')
-        self.appendImuChannels(gyroContainer, self.editors, IMU_GYRO_CHANNEL_IDS)
-        
-        self.ids.sr.bind(on_sample_rate = self.on_sample_rate)                
+        try:
+            imu_container = self.ids.imu_channels
+            self.appendImuChannels(imu_container, self.editors, IMU_ACCEL_CHANNEL_IDS)
+            self.appendImuChannels(imu_container, self.editors, IMU_GYRO_CHANNEL_IDS)
+            self.ids.sr.bind(on_sample_rate = self.on_sample_rate)
+        except Exception as e:
+            traceback.print_exc()
+                            
         
     def appendImuChannels(self, container, editors, ids):
         for i in ids:
