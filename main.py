@@ -112,7 +112,7 @@ class RaceCaptureApp(App):
         self.register_event_type('on_tracks_updated')
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
-        self.trackManager = TrackManager(user_dir=self.user_data_dir, base_dir=self.base_dir)
+        self.trackManager = TrackManager(user_dir=self.settings.get_default_data_dir(), base_dir=self.base_dir)
 
     def on_pause(self):
         return True
