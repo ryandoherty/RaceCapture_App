@@ -83,7 +83,7 @@ class UserPrefs(EventDispatcher):
         elif platform() == 'android':
             from jnius import autoclass
             env = autoclass('android.os.Environment')
-            user_path = env.getExternalStorageDirectory().getPath() 
+            user_path = os.path.join(env.getExternalStorageDirectory().getPath(), "racecapture"); 
         else:
             user_path = expanduser('~') + sep + 'Documents'
         return user_path
