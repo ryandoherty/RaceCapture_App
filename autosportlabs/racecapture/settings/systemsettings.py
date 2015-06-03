@@ -19,9 +19,10 @@ class SystemSettings(object):
 
     def get_default_data_dir(self):
         if platform() == 'android':
-            #TODO there's a better way to do this via the Android Context,
-            # but it's hard to actually get via Kivy
-            return self.base_dir #'/data/data/com.autosportlabs.racecapture'
+            from jnius import autoclass
+            PythonActivity = autoclass('org.renpy.android.PythonActivity')
+            activity = PythonActivity.mActivity
+            return activity.getFilesDir().getPath()
         else:
             return self.data_dir
         
