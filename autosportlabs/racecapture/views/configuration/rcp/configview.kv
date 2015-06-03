@@ -11,14 +11,16 @@
             size_hint_x: 0.2
             spacing: 0
             orientation: 'vertical'
-            spacing: dp(30)            
-            TreeView:
-                size_hint_y: 0.9
-                rcid: 'menu'
-                size_hint: (1, 1)
-                hide_root: True
-                indent_level: dp(0)
-                indent_start: dp(5)
+            spacing: dp(30)
+            ScrollView:
+                id: scroller            
+                TreeView:
+                    height: max(self.minimum_height, scroller.height)
+                    rcid: 'menu'
+                    size_hint_y: None
+                    hide_root: True
+                    indent_level: dp(0)
+                    indent_start: dp(5)
             BoxLayout:
                 size_hint_y: 0.1
                 orientation: 'horizontal'
