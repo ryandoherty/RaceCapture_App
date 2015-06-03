@@ -33,7 +33,7 @@
 		size_hint_y: 0.20
 	BoxLayout:
         size_hint_y: 0.70
-		spacing: dp(5)
+		#spacing: dp(5)
 		orientation: 'vertical'		
 	    HSeparator:
 	        text: 'OBDII Channels'
@@ -47,30 +47,35 @@
 	        HSeparatorMinor:
 	            text: 'Logging Rate'
 	        	size_hint_x: 0.3
-	    ScrollView:
-	        id: scrlobd2
-	        size_hint_y: 0.85
-	        do_scroll_x:False
-	        do_scroll_y:True
-	        GridLayout:
-	            id: obd2grid
-	            padding: [dp(20), dp(20)]
-	            spacing: [dp(10), dp(10)]
-	            size_hint_y: None
-	            height: max(self.minimum_height, scrlobd2.height)
-	            cols: 1
-	
-    BoxLayout:
-    	size_hint_y: 0.10
-    	spacing: dp(5)
-    	orientation: 'vertical'
-    	IconButton:
-    		pos_hint: {'center_x': .5, 'center_y': .5}
-    		size_hint: (0.1, 0.1)
-    		text: '\357\201\247'
-    		on_release: root.on_add_obd2_channel()
-	    	disabled: True
-	    	id: addpid
-	    	
-    		
-        
+        AnchorLayout:	        	
+        	AnchorLayout:
+        	    ScrollView:
+                    canvas.before:
+                        Color:
+                            rgba: 0.05, 0.05, 0.05, 1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size        	    
+        	        id: scrlobd2
+        	        size_hint_y: 0.95
+        	        do_scroll_x:False
+        	        do_scroll_y:True
+        	        GridLayout:
+        	            id: obd2grid
+        	            padding: [dp(20), dp(20)]
+        	            spacing: [dp(10), dp(10)]
+        	            size_hint_y: None
+        	            height: max(self.minimum_height, scrlobd2.height)
+        	            cols: 1
+            AnchorLayout:
+                anchor_y: 'bottom'
+                IconButton:
+                    size_hint: (None, None)
+                    height: root.height * .12
+                    text: u'\uf055'
+                    on_release: root.on_add_obd2_channel()
+                    disabled: True
+                    id: addpid
+    	    	
+        		
+            

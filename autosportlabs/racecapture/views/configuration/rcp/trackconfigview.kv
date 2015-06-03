@@ -149,7 +149,8 @@
         AnchorLayout:
             anchor_y: 'bottom'
         	IconButton:
-        		size_hint: (0.2, 0.2)
+                size_hint: (None, None)
+                height: root.height * .15
         		text: u'\uf055'
         		on_release: root.on_add_track_db()
     	    	disabled: True
