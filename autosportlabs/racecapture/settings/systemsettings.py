@@ -29,7 +29,7 @@ class SystemSettings(object):
         if platform() == 'android':
             from jnius import autoclass
             env = autoclass('android.os.Environment')
-            return env.getExternalStorageDirectory().getPath() 
+            return path.join(env.getExternalStorageDirectory().getPath(), 'racecapture') 
         else:
             return self.get_default_desktop_config_dir()
 
