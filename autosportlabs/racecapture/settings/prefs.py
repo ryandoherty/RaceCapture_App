@@ -78,7 +78,6 @@ class UserPrefs(EventDispatcher):
             data = self.to_json()
             prefs_file.write(data)
         
-        
     def set_config_defaults(self):
         self.config.adddefaultsection('preferences')
         self.config.setdefault('preferences', 'distance_units', 'miles')

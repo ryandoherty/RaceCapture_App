@@ -1,5 +1,4 @@
 import kivy
-from channels import *
 kivy.require('1.8.0')
 from kivy.app import Builder
 from kivy.metrics import dp
@@ -8,6 +7,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty
 from utils import *
 from autosportlabs.racecapture.views.configuration.channels.channelsview import ChannelEditor
+from autosportlabs.racecapture.data.channels import *
 
 Builder.load_file('channelnameselectorview.kv')
 

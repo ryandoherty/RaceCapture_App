@@ -36,7 +36,6 @@ from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
 from autosportlabs.racecapture.config.rcpconfig import *
-from channels import *
 
 RCP_CONFIG_FILE_EXTENSION = '.rcp'
 

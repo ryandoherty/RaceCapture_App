@@ -3,6 +3,10 @@
 * Disabled multi-touch on desktop versions, to avoid right click red dot problem
 * Improved visibility on analog channel scaling chart lines
 * Android private storage used for configuration data, so app data can be 'cleared' via Android settings
+* Correctly select default user file directory on android for saving / loading configurations
+* 'Time' channels (e.g. LapTime) show up as time in digital gauge view
+
+>>>>>>> master
 ==1.3.3==
 * Reworked Android Bluetooth comms by eliminating background service and created local Java bridge
 

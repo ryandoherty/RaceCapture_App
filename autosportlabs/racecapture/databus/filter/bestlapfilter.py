@@ -17,7 +17,7 @@ class BestLapFilter(object):
          
     def filter(self, channel_data):
         laptime = channel_data.get(self.LAST_LAPTIME_KEY)
-        if laptime != None and laptime > 0:
+        if laptime is not None and laptime > 0:
             current_best_laptime = self.best_laptime
             if current_best_laptime == 0 or laptime < current_best_laptime: 
                 current_best_laptime = laptime
