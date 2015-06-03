@@ -1,6 +1,6 @@
 import unittest
 from autosportlabs.racecapture.databus.filter.currentlaptimefilter import CurrentLapTimeFilter
-from autosportlabs.racecapture.data.sampledata import SystemChannels
+from autosportlabs.racecapture.data.channels import SystemChannels
 
 class CurrentLaptimeFilterTest(unittest.TestCase):
     system_channels = SystemChannels()

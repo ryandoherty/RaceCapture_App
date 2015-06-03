@@ -10,7 +10,6 @@ from kivy.app import Builder
 from kivy.clock import Clock
 from valuefield import *
 from utils import *
-from channels import *
 from channelnameselectorview import ChannelNameSelectorView
 from channelnamespinner import ChannelNameSpinner
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView

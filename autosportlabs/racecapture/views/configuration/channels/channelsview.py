@@ -11,9 +11,9 @@ from kivy.uix.screenmanager import Screen
 from autosportlabs.widgets.separator import HSeparator, HSeparatorMinor
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.racecapture.data.channels import ChannelMeta
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
-from channels import Channels, Channel
 from valuefield import FloatValueField, IntegerValueField, TextValueField
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/channels/channelsview.kv')
@@ -160,7 +160,7 @@ class ChannelsView(BaseConfigView):
         self.dispatch('on_modified')
         
     def on_add_channel(self):
-        newChannel = Channel(name='Channel', units='',precision=0, min=0, max=100)
+        newChannel = ChannelMeta(name='Channel', units='',precision=0, min=0, max=100)
         self.channels.items.append(newChannel)
         channelView = ChannelView(channel=newChannel)
         channelView.bind(on_delete_channel = self.on_delete_channel)
