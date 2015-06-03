@@ -5,7 +5,7 @@
 	spacing: dp(20)
 	orientation: 'vertical'
 	HSeparator:
-		text: 'Bluetooth Configuration'
+		text: 'Wireless Configuration'
 		halign: 'left'
 		size_hint_y: 0.05
 		
@@ -13,7 +13,7 @@
 		size_hint_y: 0.15
 		rcid: 'btEnable'
 		label_text: 'Bluetooth'
-		help_text: 'If the Bluetooth module add-on is connected to the expansion port, enable it here'
+		help_text: 'If the Bluetooth module is connected, enable it here'
 		
 #	SettingsView:
 #		size_hint_y: 0.15
@@ -21,10 +21,8 @@
 #		label_text: 'Configure Bluetooth device'
 #		help_text: 'Configure Bluetooth device username and password.\nNote: ensure you are first connected via USB and Bluetooth is disconnected'
 
-	HSeparator:
-		text: 'Cellular Module Configuration'
-		halign: 'left'
-		size_hint_y: 0.05
+    HLineSeparator:
+        size_hint_y: 0.05
 		
 	SettingsView:
 		size_hint_y: 0.20
@@ -36,7 +34,7 @@
 		size_hint_y: 0.25
 		rcid: 'cellprovider'
 		label_text: 'Cellular Provider'
-		help_text: 'Select the cellular provider, or specify custom APN settings below'
+		help_text: 'Select the cellular provider, or specify custom APN settings'
 	
 	BoxLayout:
 		size_hint_y: 0.30

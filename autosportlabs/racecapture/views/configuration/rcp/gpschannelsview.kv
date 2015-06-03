@@ -2,29 +2,28 @@
 
 <GPSChannelsView>:
     orientation: 'vertical'
+    spacing: dp(5)
     BoxLayout:
-    	size_hint_y: 0.1
+    	size_hint_y: 0.08
     	orientation: 'vertical'
     	SampleRateSelectorView:
             id: sr
-    BoxLayout:
-        size_hint_y: 0.01
     HSeparator:
-        size_hint_y: 0.2
+        size_hint_y: 0.1
         text: 'Channels'
     ScrollView:
         id: scroller
-        size_hint_y: 0.69
+        size_hint_y: 0.82
         do_scroll_x: False
         GridLayout:
             id: gps_grid
-            row_default_height: root.height * 0.12
+            row_default_height: root.height * 0.1
             row_force_default: True
             size_hint_y: None
             height: max(self.minimum_height, scroller.height)
             cols: 2
-            spacing: [sp(10),sp(10)]
-            padding: [sp(20),sp(20)]
+            spacing: [dp(10),dp(10)]
+            padding: [dp(5),dp(5)]
             FieldLabel:
                 text: 'Position'
                 halign: 'right'
