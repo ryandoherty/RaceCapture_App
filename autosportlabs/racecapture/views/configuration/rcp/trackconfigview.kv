@@ -1,4 +1,5 @@
 #:kivy 1.8.0
+#:import ColorScheme autosportlabs.racecapture.theme.color.ColorScheme
         
 <SectorPointView>:
 	BoxLayout:
@@ -149,7 +150,7 @@
         AnchorLayout:
             anchor_y: 'bottom'
         	IconButton:
-                color: (0, 0.737, 0.831, 1)        	
+                color: ColorScheme.get_accent()        	
                 size_hint: (None, None)
                 height: root.height * .15
         		text: u'\uf055'

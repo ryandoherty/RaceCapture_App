@@ -1,4 +1,5 @@
 #:kivy 1.8.0
+#:import ColorScheme autosportlabs.racecapture.theme.color.ColorScheme
 
 <OBD2Channel>:
     spacing: dp(10)
@@ -73,7 +74,7 @@
                     size_hint: (None, None)
                     height: root.height * .12
                     text: u'\uf055'
-                    color: (0, 0.737, 0.831, 1)
+                    color: ColorScheme.get_accent()
                     on_release: root.on_add_obd2_channel()
                     disabled: True
                     id: addpid

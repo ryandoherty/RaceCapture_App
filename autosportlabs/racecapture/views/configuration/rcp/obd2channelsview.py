@@ -9,6 +9,7 @@ from autosportlabs.racecapture.views.configuration.baseconfigview import BaseCon
 from autosportlabs.racecapture.OBD2.obd2settings import OBD2Settings
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.racecapture.theme.color import ColorScheme
 
 OBD2_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/obd2channelsview.kv'
 

@@ -37,6 +37,7 @@ from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.racecapture.theme.color import ColorScheme
 
 RCP_CONFIG_FILE_EXTENSION = '.rcp'
 
@@ -174,7 +175,7 @@ class ConfigView(Screen):
         def attach_node(text, n, view_builder):
             label = LinkedTreeViewLabel(text=text)
             label.view_builder = view_builder
-            label.color_selected =   [1.0,0,0,0.6]
+            label.color_selected = ColorScheme.get_dark_primary()
             return tree.add_node(label, n)
 
         def create_scripting_view():
