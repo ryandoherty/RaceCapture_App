@@ -31,7 +31,7 @@
     size_hint: (1.0,0.3)
 
 <ImuChannelsView>:
-	spacing: dp(20)
+	spacing: dp(15)
     orientation: 'vertical'
     BoxLayout:
         size_hint_y: 0.10
@@ -70,7 +70,7 @@
             id: imu_channels
             row_default_height: root.height * 0.1
             padding: (dp(5), dp(5))
-            spacing: dp(5)
+            spacing: dp(10)
             row_force_default: True
             size_hint_y: None
             height: max(self.minimum_height, scroller.height)

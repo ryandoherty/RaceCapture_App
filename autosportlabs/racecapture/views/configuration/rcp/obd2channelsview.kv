@@ -33,14 +33,14 @@
 		size_hint_y: 0.20
 	BoxLayout:
         size_hint_y: 0.70
-		spacing: dp(10)
+		spacing: dp(5)
 		orientation: 'vertical'		
 	    HSeparator:
 	        text: 'OBDII Channels'
 		BoxLayout:
 			orientation: 'horizontal'
-			size_hint: (1.0, 0.15)
-			spacing: dp(10)
+			size_hint_y: 0.15
+			spacing: dp(5)
 	        HSeparatorMinor:
 	            text: 'Channel'
 	        	size_hint_x: 0.3            
@@ -49,7 +49,7 @@
 	        	size_hint_x: 0.3
 	    ScrollView:
 	        id: scrlobd2
-	        size_hint_y: 0.75
+	        size_hint_y: 0.85
 	        do_scroll_x:False
 	        do_scroll_y:True
 	        GridLayout:
