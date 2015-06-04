@@ -22,7 +22,7 @@ class SystemSettings(object):
             from jnius import autoclass
             PythonActivity = autoclass('org.renpy.android.PythonActivity')
             activity = PythonActivity.mActivity
-            return activity.getFilesDir().getPath()
+            return activity.getExternalFilesDir(None).getPath()
         else:
             return self.data_dir
         
@@ -30,7 +30,7 @@ class SystemSettings(object):
         if platform() == 'android':
             from jnius import autoclass
             env = autoclass('android.os.Environment')
-            return path.join(env.getExternalStorageDirectory().getPath(), 'racecapture') 
+            return path.join(env.getExternalStorageDirectory().getPath(), 'racecapture')
         else:
             return self.get_default_desktop_config_dir()
 
