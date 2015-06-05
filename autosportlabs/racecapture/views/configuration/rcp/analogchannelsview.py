@@ -25,7 +25,7 @@ class AnalogChannelsView(BaseMultiChannelConfigView):
         Builder.load_file(ANALOG_CHANNELS_VIEW_KV)
         super(AnalogChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Analog '
-        self.accordion_item_height = dp(75)
+        self.accordion_item_height = dp(80)
         
             
     def channel_builder(self, index, max_sample_rate):
