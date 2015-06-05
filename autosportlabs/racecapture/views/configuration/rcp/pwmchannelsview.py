@@ -20,7 +20,7 @@ class AnalogPulseOutputChannelsView(BaseMultiChannelConfigView):
         Builder.load_file(ANALOG_PULSE_CHANNELS_VIEW_KV)
         super(AnalogPulseOutputChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Pulse / Analog Output '
-        self.accordion_item_height = dp(120)
+        self.accordion_item_height = dp(100)
         
     def channel_builder(self, index, max_sample_rate):
         editor = AnalogPulseOutputChannel(id='pwm' + str(index), channels=self.channels)

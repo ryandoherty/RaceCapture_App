@@ -19,7 +19,7 @@ class PulseChannelsView(BaseMultiChannelConfigView):
         Builder.load_file(TIMER_CHANNELS_VIEW_KV)
         super(PulseChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Timer '
-        self.accordion_item_height = dp(120)
+        self.accordion_item_height = dp(100)
 
     def channel_builder(self, index, max_sample_rate):
         editor = PulseChannel(id='timer' + str(index), channels=self.channels)

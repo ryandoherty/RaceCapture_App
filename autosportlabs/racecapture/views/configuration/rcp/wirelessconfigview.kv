@@ -2,74 +2,79 @@
 
 
 <WirelessConfigView>:
-	padding: (dp(10),dp(10))
 	spacing: dp(20)
 	orientation: 'vertical'
 	HSeparator:
-		text: 'Bluetooth Configuration'
+		text: 'Wireless Configuration'
 		halign: 'left'
 		size_hint_y: 0.05
 		
-	SettingsView:
-		size_hint_y: 0.15
-		rcid: 'btEnable'
-		label_text: 'Bluetooth'
-		help_text: 'If the Bluetooth module add-on is connected to the expansion port, enable it here'
-		
-#	SettingsView:
-#		size_hint_y: 0.15
-#		rcid: 'btconfig'
-#		label_text: 'Configure Bluetooth device'
-#		help_text: 'Configure Bluetooth device username and password.\nNote: ensure you are first connected via USB and Bluetooth is disconnected'
-
-	HSeparator:
-		text: 'Cellular Module Configuration'
-		halign: 'left'
-		size_hint_y: 0.05
-		
-	SettingsView:
-		size_hint_y: 0.20
-		rcid: 'cellEnable'
-		label_text: 'Cellular Module'
-		help_text: 'If the Real-Time telemetry module is installed, enable it here'
-
-	SettingsView:
-		size_hint_y: 0.25
-		rcid: 'cellprovider'
-		label_text: 'Cellular Provider'
-		help_text: 'Select the cellular provider, or specify custom APN settings below'
-	
-	BoxLayout:
-		size_hint_y: 0.30
-		orientation: 'horizontal'
-		FieldLabel:
-			size_hint_x: 0.25
-			text: 'Custom Settings'
-			font_size: sp(20)
-		GridLayout:
-			spacing: (dp(30), dp(5))
-			size_hint_x: 0.6
-			cols: 2
-			FieldLabel:
-				text: 'APN Host'
-				halign: 'right'
-			ValueField:
-				rcid: 'apnHost'
-				disabled: True
-				on_text: root.on_apn_host(*args)
-			FieldLabel:
-				halign: 'right'
-				text: 'APN User Name'
-			ValueField:
-				rcid: 'apnUser'
-				disabled: True
-				on_text: root.on_apn_user(*args)
-			FieldLabel:
-				halign: 'right'
-				text: 'APN Password'
-			ValueField:
-				rcid: 'apnPass'
-				disabled: True
-				on_text: root.on_apn_pass(*args)
-		Label:
-			size_hint_x: 0.15
+    ScrollView:
+        id: scroller
+        size_hint_y: 1.0
+        do_scroll_x: False
+        GridLayout:
+            row_default_height: dp(100) #root.height * 0.25
+            row_force_default: True
+            size_hint_y: None
+            height: max(self.minimum_height, scroller.height)                                      
+            cols: 1		
+        		
+        	SettingsView:
+        		size_hint_y: 0.15
+        		rcid: 'btEnable'
+        		label_text: 'Bluetooth'
+        		help_text: 'If the Bluetooth module is connected, enable it here'
+        		
+        #	SettingsView:
+        #		size_hint_y: 0.15
+        #		rcid: 'btconfig'
+        #		label_text: 'Configure Bluetooth device'
+        #		help_text: 'Configure Bluetooth device username and password.\nNote: ensure you are first connected via USB and Bluetooth is disconnected'
+        
+        	SettingsView:
+        		size_hint_y: 0.20
+        		rcid: 'cellEnable'
+        		label_text: 'Cellular Module'
+        		help_text: 'Enable if the Real-time telemetry module is installed'
+        
+        	SettingsView:
+        		size_hint_y: 0.25
+        		rcid: 'cellprovider'
+        		label_text: 'Cellular Provider'
+        		help_text: 'Select the cellular provider, or specify custom APN settings'
+        	
+        	BoxLayout:
+        		size_hint_y: 0.30
+        		orientation: 'horizontal'
+        		FieldLabel:
+        			size_hint_x: 0.25
+        			text: 'Custom Settings'
+        			font_size: sp(20)
+        		GridLayout:
+        			spacing: (dp(30), dp(5))
+        			size_hint_x: 0.6
+        			cols: 2
+        			FieldLabel:
+        				text: 'APN Host'
+        				halign: 'right'
+        			ValueField:
+        				rcid: 'apnHost'
+        				disabled: True
+        				on_text: root.on_apn_host(*args)
+        			FieldLabel:
+        				halign: 'right'
+        				text: 'APN User Name'
+        			ValueField:
+        				rcid: 'apnUser'
+        				disabled: True
+        				on_text: root.on_apn_user(*args)
+        			FieldLabel:
+        				halign: 'right'
+        				text: 'APN Password'
+        			ValueField:
+        				rcid: 'apnPass'
+        				disabled: True
+        				on_text: root.on_apn_pass(*args)
+        		Label:
+        			size_hint_x: 0.15

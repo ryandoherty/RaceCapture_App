@@ -22,7 +22,8 @@
 	        size_hint: (1.0, 0.5)
 	        cols: 3
 	        FieldLabel:
-        		text: 'Raw (0 - 5v)'
+        		text: 'Raw (0-5v)'
+        		font_size: sp(17)
         		halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
@@ -31,6 +32,7 @@
             Label:
 	        FieldLabel:
 	        	text: 'Linear'
+	        	font_size: sp(17)
 	        	halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'
@@ -41,6 +43,7 @@
 				on_text: root.on_linear_map_value(*args)	
 	        FieldLabel:
 	        	text: 'Mapped'
+	        	font_size: sp(17)
 	        	halign: 'right'
 	        CheckBox:
 	        	group: 'scalingType'

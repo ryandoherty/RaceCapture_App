@@ -19,7 +19,7 @@ class GPIOChannelsView(BaseMultiChannelConfigView):
         Builder.load_file(GPIO_CHANNELS_VIEW_KV)
         super(GPIOChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Digital Input/Output '
-        self.accordion_item_height = dp(100)
+        self.accordion_item_height = dp(85)
 
     def channel_builder(self, index, max_sample_rate):
         editor = GPIOChannel(id = 'gpio' + str(index), channels=self.channels)

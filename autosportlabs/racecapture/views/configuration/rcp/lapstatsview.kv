@@ -1,7 +1,6 @@
 #:kivy 1.8.0
 
 <LapStatsView>:
-    padding: (dp(10), dp(10))
     spacing: dp(20)
     orientation: 'vertical'
 	HSeparator:
@@ -12,13 +11,13 @@
         size_hint_y: 0.3
         id: lapstats
         label_text: 'Race Timing'
-        help_text: 'Enable lap/run timing for Circuit and Point to Point racing mode'
+        help_text: 'Enables lap/run timing for Circuit and Point to Point racing mode'
         
     SettingsView:
         size_hint_y: 0.3
         id: predtime
         label_text: 'Predictive Timing'
-        help_text: 'Enable the predictive lap timer'
+        help_text: 'Enables the predictive lap timer.'
 
     BoxLayout:
         size_hint_y: 0.35
