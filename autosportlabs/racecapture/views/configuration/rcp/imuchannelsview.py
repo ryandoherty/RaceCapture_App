@@ -114,14 +114,10 @@ class ImuChannelsView(BaseConfigView):
         super(ImuChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
-        try:
-            imu_container = self.ids.imu_channels
-            self.appendImuChannels(imu_container, self.editors, IMU_ACCEL_CHANNEL_IDS)
-            self.appendImuChannels(imu_container, self.editors, IMU_GYRO_CHANNEL_IDS)
-            self.ids.sr.bind(on_sample_rate = self.on_sample_rate)
-        except Exception as e:
-            traceback.print_exc()
-                            
+        imu_container = self.ids.imu_channels
+        self.appendImuChannels(imu_container, self.editors, IMU_ACCEL_CHANNEL_IDS)
+        self.appendImuChannels(imu_container, self.editors, IMU_GYRO_CHANNEL_IDS)
+        self.ids.sr.bind(on_sample_rate = self.on_sample_rate)
         
     def appendImuChannels(self, container, editors, ids):
         for i in ids:
