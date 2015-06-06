@@ -121,7 +121,7 @@ class OBD2ChannelsView(BaseConfigView):
 
     def on_delete_pid(self, instance, pidIndex):
         del self.obd2_cfg.pids[pidIndex]
-        self.reload_obd2_channel_grid(self.obd2_cfg)
+        self.reload_obd2_channel_grid(self.obd2_cfg, self.max_sample_rate)
         self.dispatch('on_modified')
                     
     def add_obd2_channel(self, index, pidConfig, max_sample_rate):
