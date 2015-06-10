@@ -53,21 +53,22 @@ class OBD2Channel(BoxLayout):
         self.channel = channel
         self.pidIndex = pidIndex
         self.channels = channels
-        self.ids.pidIndex.text = str(pidIndex + 1)
         sample_rate_spinner = self.ids.sr
         sample_rate_spinner.set_max_rate(self.max_sample_rate)        
         sample_rate_spinner.setFromValue(channel.sampleRate)
         channel_editor = self.ids.chan_id
-        channel_editor.filterList = self.obd2_settings.getChannelNames()
+        channel_editor.filter_list = self.obd2_settings.getChannelNames()
         channel_editor.on_channels_updated(channels)
         channel_editor.setValue(channel)
                 
 class OBD2ChannelsView(BaseConfigView):
+    DEFAULT_OBD2_SAMPLE_RATE = 1    
     obd2_cfg = None
     max_sample_rate = 0
     obd2_grid = None
     obd2_settings = None
     base_dir = None
+    
     def __init__(self, **kwargs):
         Builder.load_file(OBD2_CHANNELS_VIEW_KV)
         super(OBD2ChannelsView, self).__init__(**kwargs)
@@ -135,6 +136,7 @@ class OBD2ChannelsView(BaseConfigView):
     def on_add_obd2_channel(self):
         if (self.obd2_cfg):
             pidConfig = PidConfig()
+            pidConfig.sampleRate = self.DEFAULT_OBD2_SAMPLE_RATE
             self.obd2_cfg.pids.append(pidConfig)
             self.add_obd2_channel(len(self.obd2_cfg.pids) - 1, pidConfig, self.max_sample_rate)
             self.update_view_enabled()

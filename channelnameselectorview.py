@@ -24,7 +24,7 @@ class ChannelNameSelectorView(BoxLayout):
         self.bind(channel_type = self.on_channel_type)
 
     def on_filter_list(self, instance, value):
-        self.ids.channel_name.filter_list = value
+        self.ids.channel_name.filterList = value
         
     def on_channels_updated(self, runtime_channels):
         self.runtime_channels = runtime_channels
