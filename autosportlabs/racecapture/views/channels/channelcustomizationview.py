@@ -55,10 +55,15 @@ class ChannelCustomizationView(FloatLayout):
     def setupSlider(self, slider, channelMeta, initialValue):
         min = channelMeta.min
         max = channelMeta.max
+        
         slider.value = initialValue if initialValue != None else min
         slider.min = min
         slider.max = max
         slider.step = (max - min) / 100
+        
+    def sanitize_range(self, channel_range, channel_meta):
+        channel_range.min = channel_meta.min if channel_range.min < channel_meta.min else channel_range.min
+        channel_range.max = channel_meta.max if channel_range.max > channel_meta.max else channel_range.max
         
     def init_view(self):
         channel = self.channel
@@ -70,6 +75,9 @@ class ChannelCustomizationView(FloatLayout):
                     Range(min=channelMeta.max, max=channelMeta.max, color=Range.DEFAULT_WARN_COLOR))
             alertRange = self.settings.userPrefs.get_range_alert(self.getAlertPrefsKey(channel), 
                     Range(min=channelMeta.max, max=channelMeta.max, color=Range.DEFAULT_ALERT_COLOR))
+
+            self.sanitize_range(warnRange, channelMeta)
+            self.sanitize_range(alertRange, channelMeta)
             
             self.setupSlider(self.ids.warnLowSlider, channelMeta, warnRange.min)
             self.setupSlider(self.ids.warnHighSlider, channelMeta, warnRange.max)

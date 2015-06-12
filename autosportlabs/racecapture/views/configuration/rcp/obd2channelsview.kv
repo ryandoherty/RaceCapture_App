@@ -6,15 +6,9 @@
     size_hint_y: None
     height: dp(30)
     orientation: 'horizontal'
-    Label:
-    	id: pidIndex
-    	text: ''
-    	font_size: dp(20)
-    	size_hint_x: 0.1    	
-    ChannelNameSpinner:
-    	size_hint_x: 0.4
+    ChannelNameSelectorView:
+    	size_hint_x: 0.5
     	id: chan_id
-        on_text: root.on_channel(*args)
     SampleRateSpinner:
     	size_hint_x: 0.4
     	id: sr
