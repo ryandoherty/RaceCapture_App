@@ -628,7 +628,7 @@ class RcpApi:
                 
                 comms = self.comms
                 if comms and comms.isOpen():
-                    continue  #if we're already open, skip auto-detect
+                    comms.close()
                 
                 version_result = VersionResult()        
                 version_result_event = Event()
@@ -638,8 +638,8 @@ class RcpApi:
                     ports = [comms.port]
                 else:
                     ports = comms.get_available_ports()
+                    Logger.info('RCPAPI: Searching for device on all ports')
         
-                Logger.info('RCPAPI: Searching for device on all ports')
                 testVer = VersionConfig()
                 for p in ports:
                     try:
@@ -681,4 +681,5 @@ class RcpApi:
                 traceback.print_exc()
             finally:
                 Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
+            sleep(0.1) #back off to prevent auto-detect flooding
 
