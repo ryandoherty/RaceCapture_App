@@ -11,11 +11,12 @@
             halign: 'right'
         ChannelNameSpinner:
             size_hint_x: 0.4
-        	rcid: 'id'
+            id: channel_name
             on_text: root.on_channel_selected(*args)
-        IconButton:
+        BoxLayout:
             size_hint_x: 0.1
-            color: ColorScheme.get_accent()        
-            text: u'\uf013'
-            font_size: self.height * 0.7
-            on_release: root.on_customize(*args)
+            padding: (dp(2), dp(2))
+            IconButton:
+                color: ColorScheme.get_accent()        
+                text: u'\uf013'
+                on_release: root.on_customize(*args)
