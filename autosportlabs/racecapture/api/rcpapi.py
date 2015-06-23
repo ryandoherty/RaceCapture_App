@@ -3,7 +3,7 @@ import json
 import traceback
 import Queue
 from time import sleep
-from threading import Thread, RLock, Event
+from threading import Thread, Lock, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 from functools import partial
@@ -62,6 +62,7 @@ class RcpApi:
     _cmd_sequence_thread = None
     _msg_rx_thread = None
     _auto_detect_event = Event()
+    _auto_detect_busy = Event()
     
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
@@ -178,7 +179,7 @@ class RcpApi:
                 Logger.debug(traceback.format_exc())
                 msg = ''
                 error_count += 1
-                if error_count > 5:
+                if error_count > 5 and not self._auto_detect_event.is_set():
                     Logger.warn("RCPAPI: Too many Rx exceptions; re-opening connection")
                     self.recover_connection()
                     sleep(5)
@@ -626,6 +627,7 @@ class RcpApi:
                 self._auto_detect_event.clear()
                 self._enable_autodetect.wait()
                 Logger.info("RCPAPI: Starting auto-detect")
+                self._auto_detect_busy.set()
                 
                 comms = self.comms
                 if comms and comms.isOpen():
@@ -682,5 +684,6 @@ class RcpApi:
                 Logger.debug(traceback.format_exc())
             finally:
                 Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
+            self._auto_detect_busy.clear()
             sleep(1)
 
