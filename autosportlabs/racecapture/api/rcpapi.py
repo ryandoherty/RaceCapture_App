@@ -9,6 +9,7 @@ from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorExce
 from functools import partial
 from kivy.clock import Clock
 from kivy.logger import Logger
+from traceback import print_stack
 
 TRACK_ADD_MODE_IN_PROGRESS      = 1
 TRACK_ADD_MODE_COMPLETE         = 2
@@ -162,7 +163,7 @@ class RcpApi:
                                     listener(msgJson)
                                 except Exception as e:
                                     Logger.error('RCPAPI: Message Listener Exception for')
-                                    traceback.print_exc()
+                                    Logger.debug(traceback.format_exc())
                             break
                     msg = ''                        
                 else:
@@ -174,7 +175,7 @@ class RcpApi:
                 sleep(1.0)
             except Exception:
                 Logger.warn('RCPAPI: Message rx worker exception: {} | {}'.format(msg, str(Exception)))
-                traceback.print_exc()
+                Logger.debug(traceback.format_exc())
                 msg = ''
                 error_count += 1
                 if error_count > 5:
@@ -290,7 +291,7 @@ class RcpApi:
                     self.recover_connection()
                 except Exception as detail:
                     Logger.error('RCPAPI: Command sequence exception: ' + str(detail))
-                    traceback.print_exc()
+                    Logger.debug(traceback.format_exc())
                     failCallback(detail)
                     self.recover_connection()
 
@@ -678,8 +679,8 @@ class RcpApi:
                     if self.detect_fail_callback: self.detect_fail_callback()
             except Exception as e:
                 Logger.error('RCPAPI: Error running auto detect: ' + str(e))
-                traceback.print_exc()
+                Logger.debug(traceback.format_exc())
             finally:
                 Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
-            sleep(0.1) #back off to prevent auto-detect flooding
+            sleep(1)
 

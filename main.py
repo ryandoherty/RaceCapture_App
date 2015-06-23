@@ -380,8 +380,13 @@ class RaceCaptureApp(App):
                                ))
 
     def rc_detect_fail(self):
+        
+        def re_detect():
+            if not self._rc_api.comms.isOpen():
+                self._rc_api.run_auto_detect()
+                
         self.showStatus("Could not detect RaceCapture/Pro", True)
-        Clock.schedule_once(lambda dt: self._rc_api.run_auto_detect(), 1.0)
+        Clock.schedule_once(lambda dt: re_detect(), 1.0)
 
     def rc_detect_activity(self, info):
         self.showActivity('Searching {}'.format(info))
