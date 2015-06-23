@@ -86,6 +86,7 @@ def connection_message_process(connection, port, rx_queue, tx_queue, command_que
 class Comms():
     CONNECT_TIMEOUT = 1.0    
     DEFAULT_TIMEOUT = 1.0
+    QUEUE_FULL_TIMEOUT = 1.0
     _timeout = DEFAULT_TIMEOUT
     port = None
     _connection = None
@@ -151,5 +152,5 @@ class Comms():
     
     def write_message(self, message):
         if not self.isOpen(): raise Exception('Comms Exception')
-        self._tx_queue.put(message, True, 1.0 )
+        self._tx_queue.put(message, True, Comms.QUEUE_FULL_TIMEOUT )
                     
