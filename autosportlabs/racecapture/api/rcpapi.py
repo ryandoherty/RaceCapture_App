@@ -22,6 +22,7 @@ DEFAULT_MSG_RX_TIMEOUT          = 1
 
 AUTODETECT_LEVEL2_RETRIES       = 1
 DEFAULT_READ_RETRIES            = 2
+AUTODETECT_COOLOFF_TIME         = 1
 
 COMMS_KEEP_ALIVE_TIMEOUT        = 2
 
@@ -689,5 +690,5 @@ class RcpApi:
                 self._auto_detect_busy.clear()
                 self.removeListener("ver", on_ver_win)
                 self.sendCommandLock.release()
-                sleep(0.1) #back off to prevent auto-detect flooding
+                sleep(AUTODETECT_COOLOFF_TIME)
 
