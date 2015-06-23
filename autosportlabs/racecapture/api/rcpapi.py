@@ -3,7 +3,7 @@ import json
 import traceback
 import Queue
 from time import sleep
-from threading import Thread, Lock, RLock, Event
+from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 from functools import partial
@@ -20,9 +20,9 @@ SCRIPT_ADD_MODE_COMPLETE        = 2
 DEFAULT_LEVEL2_RETRIES          = 2
 DEFAULT_MSG_RX_TIMEOUT          = 1
 
+AUTODETECT_COOLOFF_TIME         = 1
 AUTODETECT_LEVEL2_RETRIES       = 1
 DEFAULT_READ_RETRIES            = 2
-AUTODETECT_COOLOFF_TIME         = 1
 
 COMMS_KEEP_ALIVE_TIMEOUT        = 2
 
