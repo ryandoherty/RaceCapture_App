@@ -617,11 +617,7 @@ class RcpApi:
         def on_ver_win(value):
             version_result.version_json = value
             version_result_event.set()
-            
-        def on_ver_fail(value):
-            Logger.info('RCPAPI: on_ver_fail')
-            version_result_event.set()
-        
+                    
         while True:
             try:
                 self._auto_detect_event.wait()
