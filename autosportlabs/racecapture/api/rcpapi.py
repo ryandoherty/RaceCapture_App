@@ -628,6 +628,8 @@ class RcpApi:
                 self._enable_autodetect.wait()
                 Logger.info("RCPAPI: Starting auto-detect")
                 self._auto_detect_busy.set()
+                self.sendCommandLock.acquire()
+                self.addListener("ver", on_ver_win)
                 
                 comms = self.comms
                 if comms and comms.isOpen():
@@ -650,8 +652,8 @@ class RcpApi:
                         if self.detect_activity_callback: self.detect_activity_callback(str(p))
                         comms.port = p
                         comms.open()
-                        self.getVersion(on_ver_win, on_ver_fail)
-                        version_result_event.wait()
+                        self.sendGetVersion()
+                        version_result_event.wait(1)
                         version_result_event.clear()
                         if version_result.version_json != None:
                             testVer.fromJson(version_result.version_json.get('ver', None))
@@ -684,6 +686,8 @@ class RcpApi:
                 Logger.debug(traceback.format_exc())
             finally:
                 Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
-            self._auto_detect_busy.clear()
-            sleep(1)
+                self._auto_detect_busy.clear()
+                self.removeListener("ver", on_ver_win)
+                self.sendCommandLock.release()
+                sleep(0.1) #back off to prevent auto-detect flooding
 

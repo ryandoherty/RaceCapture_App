@@ -10,7 +10,7 @@ COMMAND_CLOSE      = 'CLOSE'
 COMMAND_KEEP_ALIVE = 'PING'
 
 def connection_process_message_reader(rx_queue, connection, should_run):
-    Logger.info('Comms: connection process message reader started')
+    print('connection process message reader started')
     
     while should_run.is_set():
         try:
@@ -18,14 +18,14 @@ def connection_process_message_reader(rx_queue, connection, should_run):
             if msg:
                 rx_queue.put(msg)
         except:
-            Logger.error('Comms: Exception in connection_process_message_reader')
+            print('Exception in connection_process_message_reader')
             traceback.print_exc()
             should_run.clear()
             sleep(0.5)
-    Logger.info('Comms: connection process message reader exited')            
+    print('connection process message reader exited')            
             
 def connection_process_message_writer(tx_queue, connection, should_run):
-    Logger.info('Comms: connection process message writer started')
+    print('connection process message writer started')
     while should_run.is_set():
         try:
             message = tx_queue.get(True, 1.0)
@@ -34,21 +34,21 @@ def connection_process_message_writer(tx_queue, connection, should_run):
         except Empty:
             pass
         except Exception as e:
-            Logger.error('Comms: Exception in connection_process_message_writer ' + str(e))
+            print('Exception in connection_process_message_writer ' + str(e))
             traceback.print_exc()
             should_run.clear()
             sleep(0.5)
-    Logger.info('Comms: connection process message writer exited')
+    print('connection process message writer exited')
     
 def connection_message_process(connection, port, rx_queue, tx_queue, command_queue):
-    Logger.info('Comms: connection process starting')
+    print('connection process starting')
 
     try:    
         connection.open(port) 
         connection.flushInput()
         connection.flushOutput()
         
-        reader_writer_should_run = threading.Event()
+        reader_writer_should_run = threading.Evuinder theent()
         reader_writer_should_run.set()
     
         reader_thread = threading.Thread(target=connection_process_message_reader, args=(rx_queue, connection, reader_writer_should_run))
@@ -62,12 +62,12 @@ def connection_message_process(connection, port, rx_queue, tx_queue, command_que
             try:
                 command = command_queue.get(True, STAY_ALIVE_TIMEOUT)
                 if command == COMMAND_CLOSE:
-                    Logger.info('Comms: got close command')
+                    print('connection process: got close command')
                     reader_writer_should_run.clear()
             except Empty:
-                Logger.error('Comms: keep alive timeout')
+                print('keep alive timeout')
                 reader_writer_should_run.clear()
-        Logger.info('Comms: worker exiting')
+        print('connection worker exiting')
         
         reader_thread.join()
         writer_thread.join()
@@ -75,12 +75,12 @@ def connection_message_process(connection, port, rx_queue, tx_queue, command_que
         try:
             connection.close()
         except:
-            Logger.error('Comms: Exception closing connection worker connection')
+            print('Exception closing connection worker connection')
     except Exception as e:
-        Logger.error("Comms: Exception setting up connection process: " + str(type(e)) + str(e))
-        Logger.debug(traceback.format_exc())
+        print("Exception setting up connection process: " + str(type(e)) + str(e))
+        traceback.print_exc()
         
-    Logger.info('Comms: connection worker exited')
+    print('connection worker exited')
     
     
 class Comms():
@@ -119,7 +119,7 @@ class Comms():
     
     def open(self):
         connection = self._connection
-        Logger.info('Comms: Opening connection ' + str(self.port))
+        print('Opening connection ' + str(self.port))
         self.start_connection_process()
     
     def keep_alive(self):
@@ -132,15 +132,15 @@ class Comms():
         pass
     
     def close(self):
-        Logger.debug('Comms: comms.close()')
+        print('comms.close()')
         if self.isOpen():
             try:
-                Logger.info('Comms: closing connection process')
+                print('closing connection process')
                 self._command_queue.put_nowait(COMMAND_CLOSE)
                 self._connection_process.join(self._timeout * 2)
-                Logger.debug('Comms: connection process joined')
+                print('connection process joined')
             except:
-                Logger.warning('Comms: Timeout joining connection process')
+                print('Timeout joining connection process')
 
     def read_message(self):
         if not self.isOpen(): raise Exception("Comms Exception")
@@ -151,5 +151,5 @@ class Comms():
     
     def write_message(self, message):
         if not self.isOpen(): raise Exception("Comms Exception")
-        self._tx_queue.put(message)
+        self._tx_queue.put(message, True, 1.0 )
                     
