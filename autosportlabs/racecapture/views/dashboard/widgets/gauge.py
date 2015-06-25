@@ -18,7 +18,7 @@ from autosportlabs.racecapture.views.channels.channelselectview import ChannelSe
 from autosportlabs.racecapture.views.channels.channelcustomizationview import ChannelCustomizationView
 from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble
 from autosportlabs.racecapture.data.channels import *
-import traceback
+
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 
 DEFAULT_VALUE = None
