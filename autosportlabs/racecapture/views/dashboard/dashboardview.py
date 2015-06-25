@@ -59,7 +59,6 @@ class DashboardView(Screen):
         comboView = ComboView(name='comboView', dataBus=dataBus, settings=settings)  
         rawChannelView = RawChannelView(name='rawchannelView', dataBus=dataBus, settings=settings)
         
-        #screenMgr.transition=WipeTransition()
         screenMgr.add_widget(gaugeView)
         screenMgr.add_widget(tachView)
         screenMgr.add_widget(laptimeView) 
@@ -81,8 +80,10 @@ class DashboardView(Screen):
         dataBus.start_update()
 
     def on_nav_left(self):
+        self._screen_mgr.transition=SlideTransition(direction='right')        
         self._screen_mgr.current = self._screen_mgr.previous()
 
     def on_nav_right(self):
+        self._screen_mgr.transition=SlideTransition(direction='left')        
         self._screen_mgr.current = self._screen_mgr.next()
         
