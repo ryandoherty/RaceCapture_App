@@ -1,61 +1,70 @@
 #:kivy 1.8.0
 
 <GPSChannelsView>:
-    padding: [30,30]
     orientation: 'vertical'
+    spacing: dp(5)
     BoxLayout:
-    	spacing: dp(20)
-    	size_hint: (1.0,0.25)
+    	size_hint_y: 0.08
     	orientation: 'vertical'
     	SampleRateSelectorView:
-            rcid: 'sr'
-        HSeparator:
-            text: 'Channels'    		
-    GridLayout:
-    	spacing: [dp(30),dp(30)]
-    	padding: [dp(30),dp(30)]
-        cols: 2
-        FieldLabel:
-            text: 'Position'
-            halign: 'right'
-        Switch:
-            id: position
-        	on_active: root.onPosActive(*args)
-        FieldLabel:
-            text: 'Speed'
-            halign: 'right'
-        Switch:
-            id: speed
-        	halign: 'right'
-        	on_active: root.onSpeedActive(*args)
-        FieldLabel:
-            text: 'Distance'
-            halign: 'right'
-        Switch:
-            id: distance
-        	on_active: root.onDistActive(*args)
-        FieldLabel:
-            text: 'Altitude'
-            halign: 'right'
-        Switch:
-            id: altitude
-            on_active: root.onAltitudeActive(*args)
-        FieldLabel:
-            text: 'Satellites'
-            halign: 'right'
-        Switch:
-            id: satellites
-        	on_active: root.onSatsActive(*args)
-        FieldLabel:
-            text: 'GPS Fix Quality'
-            halign: 'right'
-        Switch:
-            id: quality
-            on_active: root.onGpsQualityActive(*args)
-        FieldLabel:
-            text: 'Dilution of Precision (DOP)'
-            halign: 'right'
-        Switch:
-            id: dop
-            on_active: root.onGpsDOPActive(*args)
+            id: sr
+    HSeparator:
+        size_hint_y: 0.1
+        text: 'Channels'
+    ScrollView:
+        id: scroller
+        size_hint_y: 0.82
+        do_scroll_x: False
+        GridLayout:
+            id: gps_grid
+            row_default_height: root.height * 0.1
+            row_force_default: True
+            size_hint_y: None
+            height: max(self.minimum_height, scroller.height)
+            cols: 2
+            spacing: [dp(10),dp(10)]
+            padding: [dp(5),dp(5)]
+            FieldLabel:
+                text: 'Position'
+                halign: 'right'
+            Switch:
+                id: position
+            	on_active: root.onPosActive(*args)
+            FieldLabel:
+                text: 'Speed'
+                halign: 'right'
+            Switch:
+                id: speed
+            	halign: 'right'
+            	on_active: root.onSpeedActive(*args)
+            FieldLabel:
+                text: 'Distance'
+                halign: 'right'
+            Switch:
+                id: distance
+            	on_active: root.onDistActive(*args)
+            FieldLabel:
+                text: 'Altitude'
+                halign: 'right'
+            Switch:
+                id: altitude
+                on_active: root.onAltitudeActive(*args)
+            FieldLabel:
+                text: 'Satellites'
+                halign: 'right'
+            Switch:
+                id: satellites
+            	on_active: root.onSatsActive(*args)
+            FieldLabel:
+                text: 'GPS Fix Quality'
+                halign: 'right'
+            Switch:
+                id: quality
+                on_active: root.onGpsQualityActive(*args)
+            FieldLabel:
+                text: 'Dilution of Precision (DOP)'
+                halign: 'right'
+            Switch:
+                id: dop
+                on_active: root.onGpsDOPActive(*args)
             

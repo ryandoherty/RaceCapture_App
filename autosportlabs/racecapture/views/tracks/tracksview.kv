@@ -1,4 +1,5 @@
 #:kivy 1.8.0
+#:import ColorScheme autosportlabs.racecapture.theme.color.ColorScheme
 
 <TracksUpdateStatusView>:
 	orientation: 'vertical'
@@ -60,7 +61,7 @@
 						
 
 				BoxLayout:
-					size_hint_y: 0.1
+					size_hint_y: 0.4
 					orientation: 'horizontal'
 	            	spacing: dp(10)					
 					FieldLabel:
@@ -70,7 +71,7 @@
 						text: ''
 
 				BoxLayout:
-					size_hint_y: 0.4
+					size_hint_y: 0.1
 
 				BoxLayout:
 					size_hint_y: 0.1
@@ -110,6 +111,7 @@
             id: search
             disabled: True
             text: u'\uf002'
+            color: ColorScheme.get_accent()
             on_press: root.on_search_track_name()
 		Label:
 			size_hint_x: 0.15
@@ -149,8 +151,10 @@
     	IconButton:
     		size_hint_x: 0.05
     		id: updatecheck
+    		
     		disabled: True
     		text: '\357\203\255'
+    		color: ColorScheme.get_accent()
     		on_press: root.on_update_check()
 							
 <TracksView>:

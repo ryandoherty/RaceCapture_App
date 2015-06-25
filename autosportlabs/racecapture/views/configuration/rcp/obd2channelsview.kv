@@ -1,22 +1,17 @@
 #:kivy 1.8.0
+#:import ColorScheme autosportlabs.racecapture.theme.color.ColorScheme
 
 <OBD2Channel>:
     spacing: dp(10)
     size_hint_y: None
     height: dp(30)
     orientation: 'horizontal'
-    Label:
-    	rcid: 'pidIndex'
-    	text: ''
-    	font_size: dp(20)
-    	size_hint_x: 0.1    	
-    ChannelNameSpinner:
-    	size_hint_x: 0.4
-        rcid: 'chanId'
-        on_text: root.on_channel(*args)
+    ChannelNameSelectorView:
+    	size_hint_x: 0.5
+    	id: chan_id
     SampleRateSpinner:
     	size_hint_x: 0.4
-        rcid: 'sr'
+    	id: sr
         on_text: root.on_sample_rate(*args)
     IconButton:
     	size_hint_x: 0.1
@@ -24,54 +19,59 @@
     	on_release: root.on_delete()
 
 <OBD2ChannelsView>:
-    padding: (10,10)
     spacing: dp(20)
     orientation: 'vertical'
 	SettingsView:
-		rcid: 'obd2enable'
+		id: obd2enable
 		label_text: 'OBDII channels'
-		help_text: 'Specify one or more OBDII Channels to query and the logged sample rate'
+		help_text: 'Specify one or more OBDII Channels to enable'
 		size_hint_y: 0.20
 	BoxLayout:
         size_hint_y: 0.70
-		spacing: dp(10)
+		#spacing: dp(5)
 		orientation: 'vertical'		
 	    HSeparator:
 	        text: 'OBDII Channels'
 		BoxLayout:
 			orientation: 'horizontal'
-			size_hint: (1.0, 0.15)
-			spacing: dp(10)
+			size_hint_y: 0.15
+			spacing: dp(5)
 	        HSeparatorMinor:
 	            text: 'Channel'
 	        	size_hint_x: 0.3            
 	        HSeparatorMinor:
 	            text: 'Logging Rate'
 	        	size_hint_x: 0.3
-	    ScrollView:
-	        id: scrlobd2
-	        size_hint_y: 0.75
-	        do_scroll_x:False
-	        do_scroll_y:True
-	        GridLayout:
-	        	rcid: 'obd2grid'
-	            padding: [dp(20), dp(20)]
-	            spacing: [dp(10), dp(10)]
-	            size_hint_y: None
-	            height: max(self.minimum_height, scrlobd2.height)
-	            cols: 1
-	
-    BoxLayout:
-    	size_hint_y: 0.10
-    	spacing: dp(5)
-    	orientation: 'vertical'
-    	IconButton:
-    		pos_hint: {'center_x': .5, 'center_y': .5}
-    		size_hint: (0.1, 0.1)
-    		text: '\357\201\247'
-    		on_release: root.on_add_obd2_channel()
-	    	disabled: True
-	    	rcid: 'addpid'
-	    	
-    		
-        
+        AnchorLayout:	        	
+        	AnchorLayout:
+        	    ScrollView:
+                    canvas.before:
+                        Color:
+                            rgba: 0.05, 0.05, 0.05, 1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size        	    
+        	        id: scrlobd2
+        	        size_hint_y: 0.95
+        	        do_scroll_x:False
+        	        do_scroll_y:True
+        	        GridLayout:
+        	            id: obd2grid
+        	            padding: [dp(20), dp(20)]
+        	            spacing: [dp(10), dp(10)]
+        	            size_hint_y: None
+        	            height: max(self.minimum_height, scrlobd2.height)
+        	            cols: 1
+            AnchorLayout:
+                anchor_y: 'bottom'
+                IconButton:
+                    size_hint: (None, None)
+                    height: root.height * .12
+                    text: u'\uf055'
+                    color: ColorScheme.get_accent()
+                    on_release: root.on_add_obd2_channel()
+                    disabled: True
+                    id: addpid
+    	    	
+        		
+            

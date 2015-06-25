@@ -15,6 +15,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
 from kivy.logger import Logger
+from kivy.uix.scrollview import ScrollView
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
@@ -36,7 +37,7 @@ from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
 from autosportlabs.racecapture.config.rcpconfig import *
-from channels import *
+from autosportlabs.racecapture.theme.color import ColorScheme
 
 RCP_CONFIG_FILE_EXTENSION = '.rcp'
 
@@ -63,13 +64,14 @@ class ConfigView(Screen):
     script_view = None
     _settings = None
     base_dir = None
-
+    _databus = None
+    
     def __init__(self, **kwargs):
         super(ConfigView, self).__init__(**kwargs)
 
+        self._databus = kwargs.get('databus')
         self.rc_config = kwargs.get('rcpConfig', None)
         self.rc_api = kwargs.get('rc_api', None)
-        self.dataBusPump = kwargs.get('dataBusPump', None)
         self._settings = kwargs.get('settings')
         self.base_dir = kwargs.get('base_dir')
 
@@ -173,7 +175,7 @@ class ConfigView(Screen):
         def attach_node(text, n, view_builder):
             label = LinkedTreeViewLabel(text=text)
             label.view_builder = view_builder
-            label.color_selected =   [1.0,0,0,0.6]
+            label.color_selected = ColorScheme.get_dark_primary()
             return tree.add_node(label, n)
 
         def create_scripting_view():
@@ -186,13 +188,13 @@ class ConfigView(Screen):
             
         runtime_channels = self._settings.runtimeChannels
 
-        defaultNode = attach_node('Race Track/Sectors', None, lambda: TrackConfigView())
+        defaultNode = attach_node('Race Tracks', None, lambda: TrackConfigView(databus=self._databus))
         attach_node('GPS', None, lambda: GPSChannelsView())
-        attach_node('Lap Statistics', None, lambda: LapStatsView())        
+        attach_node('Race Timing', None, lambda: LapStatsView())        
         attach_node('Analog Sensors', None, lambda: AnalogChannelsView(channels=runtime_channels))
         attach_node('Pulse/RPM Sensors', None, lambda: PulseChannelsView(channels=runtime_channels))
         attach_node('Digital In/Out', None, lambda: GPIOChannelsView(channels=runtime_channels))
-        attach_node('Accelerometer/Gyro', None, lambda: ImuChannelsView(rc_api=self.rc_api))
+        attach_node('Accel/Gyro', None, lambda: ImuChannelsView(rc_api=self.rc_api))
         attach_node('Pulse/Analog Out', None, lambda: AnalogPulseOutputChannelsView(channels=runtime_channels))
         attach_node('CAN Bus', None, lambda: CANConfigView())
         attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))

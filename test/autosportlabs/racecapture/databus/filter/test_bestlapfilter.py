@@ -1,6 +1,6 @@
 import unittest
 from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
-from autosportlabs.racecapture.data.sampledata import SystemChannels
+from autosportlabs.racecapture.data.channels import SystemChannels
 
 class BestLapFilterTest(unittest.TestCase):
     system_channels = SystemChannels()

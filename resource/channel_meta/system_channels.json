@@ -4,7 +4,7 @@
             "nm": "AccelX",
             "ut": "G",
             "sys": 1,
-            "type": 5,
+            "type": 2,
             "prec": 2,
             "min": -3,
             "max": 3
@@ -13,7 +13,7 @@
             "nm": "AccelY",
             "ut": "G",
             "sys": 1,
-            "type": 5,
+            "type": 2,
             "prec": 2,
             "min": -3,
             "max": 3
@@ -22,7 +22,7 @@
             "nm": "AccelZ",
             "ut": "G",
             "sys": 1,
-            "type": 5,
+            "type": 2,
             "prec": 2,
             "min": -3,
             "max": 3
@@ -31,7 +31,7 @@
             "nm": "Yaw",
             "ut": "Deg/Sec",
             "sys": 1,
-            "type": 5,
+            "type": 2,
             "prec": 0,
             "min": -300,
             "max": 300
@@ -40,7 +40,7 @@
             "nm": "Pitch",
             "ut": "Deg/Sec",
             "sys": 1,
-            "type": 5,
+            "type": 2,
             "prec": 0,
             "min": -300,
             "max": 300
@@ -49,7 +49,7 @@
             "nm": "Roll",
             "ut": "Deg/Sec",
             "sys": 1,
-            "type": 5,
+            "type": 2,
             "prec": 0,
             "min": -300,
             "max": 300
@@ -58,7 +58,7 @@
             "nm": "Speed",
             "ut": "MPH",
             "sys": 1,
-            "type": 6,
+            "type": 3,
             "prec": 2,
             "min": 0,
             "max": 150
@@ -67,7 +67,7 @@
             "nm": "Distance",
             "ut": "Miles",
             "sys": 1,
-            "type": 9,
+            "type": 3,
             "prec": 3,
             "min": 0,
             "max": 0
@@ -76,7 +76,7 @@
             "nm": "Altitude",
             "ut": "M",
             "sys": 1,
-            "type": 1,
+            "type": 3,
             "prec": 3,
             "min": 0,
             "max": 0
@@ -229,7 +229,7 @@
             "nm": "InjectorPW",
             "ut": "ms",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 2,
             "min": 0,
             "max": 100
@@ -238,7 +238,7 @@
             "nm": "RPM",
             "ut": "",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 10000
@@ -247,7 +247,7 @@
             "nm": "RPM2",
             "ut": "",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 10000
@@ -256,7 +256,7 @@
             "nm": "RPM3",
             "ut": "",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 10000
@@ -265,7 +265,7 @@
             "nm": "Wheel",
             "ut": "RPM",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 5000
@@ -535,7 +535,7 @@
             "nm": "Heading",
             "ut": "Degrees",
             "sys": 1,
-            "type": 5,
+            "type": 2,
             "prec": 0,
             "min": 1,
             "max": 360
@@ -544,7 +544,7 @@
             "nm": "GPSSats",
             "ut": "",
             "sys": 1,
-            "type": 8,
+            "type": 3,
             "prec": 0,
             "min": 0,
             "max": 20
@@ -553,7 +553,7 @@
             "nm": "GPSQual",
             "ut": "",
             "sys": 1,
-            "type": 8,
+            "type": 3,
             "prec": 0,
             "min": 0,
             "max": 5
@@ -562,7 +562,7 @@
             "nm": "Time",
             "ut": "",
             "sys": 1,
-            "type": 6,
+            "type": 3,
             "prec": 6,
             "min": 0,
             "max": 0
@@ -571,7 +571,7 @@
             "nm": "Latitude",
             "ut": "Degrees",
             "sys": 1,
-            "type": 6,
+            "type": 3,
             "prec": 6,
             "min": -180,
             "max": 180
@@ -580,7 +580,7 @@
             "nm": "Longitude",
             "ut": "Degrees",
             "sys": 1,
-            "type": 6,
+            "type": 3,
             "prec": 6,
             "min": -180,
             "max": 180
@@ -589,7 +589,7 @@
             "nm": "Sector",
             "ut": "Count",
             "sys": 1,
-            "type": 7,
+            "type": 5,
             "prec": 0,
             "min": 0,
             "max": 100
@@ -598,7 +598,7 @@
             "nm": "SectorTime",
             "ut": "Min",
             "sys": 1,
-            "type": 7,
+            "type": 4,
             "prec": 4,
             "min": 0,
             "max": 0
@@ -607,7 +607,7 @@
             "nm": "CurLapTime",
             "ut": "Min",
             "sys": 1,
-            "type": 7,
+            "type": 4,
             "prec": 4,
             "min": 0,
             "max": 0
@@ -616,7 +616,7 @@
             "nm": "LapTime",
             "ut": "Min",
             "sys": 1,
-            "type": 7,
+            "type": 4,
             "prec": 4,
             "min": 0,
             "max": 0
@@ -625,7 +625,7 @@
             "nm": "PredTime",
             "ut": "Min",
             "sys": 1,
-            "type": 7,
+            "type": 4,
             "prec": 4,
             "min": 0,
             "max": 0
@@ -634,7 +634,7 @@
             "nm": "BestLap",
             "ut": "Min",
             "sys": 1,
-            "type": 7,
+            "type": 4,
             "prec": 4,
             "min": 0,
             "max": 0
@@ -643,7 +643,7 @@
             "nm": "LapDelta",
             "ut": "Min",
             "sys": 1,
-            "type": 7,
+            "type": 4,
             "prec": 1,
             "min": 0,
             "max": 0
@@ -652,7 +652,7 @@
             "nm": "LapCount",
             "ut": "Count",
             "sys": 1,
-            "type": 7,
+            "type": 5,
             "prec": 0,
             "min": 0,
             "max": 1000
@@ -733,7 +733,7 @@
             "nm": "Freq1",
             "ut": "",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 1000
@@ -742,7 +742,7 @@
             "nm": "Freq2",
             "ut": "",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 1000
@@ -751,7 +751,7 @@
             "nm": "Freq3",
             "ut": "",
             "sys": 1,
-            "type": 2,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 1000
@@ -760,7 +760,7 @@
             "nm": "GPIO1",
             "ut": "",
             "sys": 1,
-            "type": 3,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 1
@@ -769,7 +769,7 @@
             "nm": "GPIO2",
             "ut": "",
             "sys": 1,
-            "type": 3,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 1
@@ -778,7 +778,7 @@
             "nm": "GPIO3",
             "ut": "",
             "sys": 1,
-            "type": 3,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 1
@@ -787,7 +787,7 @@
             "nm": "PWM1",
             "ut": "",
             "sys": 1,
-            "type": 4,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 100
@@ -796,7 +796,7 @@
             "nm": "PWM2",
             "ut": "",
             "sys": 1,
-            "type": 4,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 100
@@ -805,7 +805,7 @@
             "nm": "PWM3",
             "ut": "",
             "sys": 1,
-            "type": 4,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 100
@@ -814,7 +814,7 @@
             "nm": "PWM4",
             "ut": "",
             "sys": 1,
-            "type": 4,
+            "type": 1,
             "prec": 0,
             "min": 0,
             "max": 100

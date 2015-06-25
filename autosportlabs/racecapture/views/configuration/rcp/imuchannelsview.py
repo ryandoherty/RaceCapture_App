@@ -10,6 +10,7 @@ from valuefield import IntegerValueField, FloatValueField
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.config.rcpconfig import *
+import traceback
 
 IMU_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/imuchannelsview.kv'
 
@@ -28,14 +29,6 @@ class ImuMappingSpinner(MappedSpinner):
         elif imuType == 'gyro':
             self.setValueMap({3:'Yaw', 4:'Pitch', 5:'Roll'}, 'Yaw')
         
-class GyroChannelsView(BoxLayout):
-    def __init__(self, **kwargs):
-        super(GyroChannelsView, self).__init__(**kwargs)
-
-class AccelChannelsView(BoxLayout):
-    def __init__(self, **kwargs):
-        super(AccelChannelsView, self).__init__(**kwargs)
-
 class ImuChannel(BoxLayout):
     channelConfig = None
     channelLabels = []
@@ -113,7 +106,7 @@ class ImuChannel(BoxLayout):
         
 class ImuChannelsView(BaseConfigView):
     editors = []
-    imuCfg = None
+    imu_cfg = None
     channelLabels = {0:'X', 1:'Y', 2:'Z', 3:'Yaw',4:'Pitch',5:'Roll',6:'Compass'}
 
     def __init__(self, **kwargs):
@@ -121,13 +114,10 @@ class ImuChannelsView(BaseConfigView):
         super(ImuChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 
-        accelContainer = kvFind(self, 'rcid', 'ac')
-        self.appendImuChannels(accelContainer, self.editors, IMU_ACCEL_CHANNEL_IDS)
-
-        gyroContainer = kvFind(self, 'rcid', 'gc')
-        self.appendImuChannels(gyroContainer, self.editors, IMU_GYRO_CHANNEL_IDS)
-        
-        kvFind(self, 'rcid', 'sr').bind(on_sample_rate = self.on_sample_rate)                
+        imu_container = self.ids.imu_channels
+        self.appendImuChannels(imu_container, self.editors, IMU_ACCEL_CHANNEL_IDS)
+        self.appendImuChannels(imu_container, self.editors, IMU_GYRO_CHANNEL_IDS)
+        self.ids.sr.bind(on_sample_rate = self.on_sample_rate)
         
     def appendImuChannels(self, container, editors, ids):
         for i in ids:
@@ -146,23 +136,23 @@ class ImuChannelsView(BaseConfigView):
         alertPopup('Calibration', 'Calibration Failed:\n\n' + str(result))
         
     def on_sample_rate(self, instance, value):
-        if self.imuCfg:
-            for imuChannel in self.imuCfg.channels:
+        if self.imu_cfg:
+            for imuChannel in self.imu_cfg.channels:
                 imuChannel.sampleRate = value
                 imuChannel.stale = True
                 self.dispatch('on_modified')
                 
-    def on_config_updated(self, rcpCfg):
-        imuCfg = rcpCfg.imuConfig
-        channelCount = imuCfg.channelCount
+    def on_config_updated(self, rc_cfg):
+        imu_cfg = rc_cfg.imuConfig
+        channelCount = imu_cfg.channelCount
 
-        commonSampleRate = 0
+        common_sample_rate = 0
         for i in range(channelCount):
-            imuChannel = imuCfg.channels[i]
+            imuChannel = imu_cfg.channels[i]
             editor = self.editors[i]
             editor.on_config_updated(i, imuChannel, self.channelLabels)
-            commonSampleRate = imuChannel.sampleRate if commonSampleRate < imuChannel.sampleRate else commonSampleRate
+            common_sample_rate = imuChannel.sampleRate if common_sample_rate < imuChannel.sampleRate else common_sample_rate
         
-        kvFind(self, 'rcid', 'sr').setValue(commonSampleRate)
-        self.imuCfg = imuCfg
+        self.ids.sr.setValue(common_sample_rate, rc_cfg.capabilities.sample_rates.sensor)
+        self.imu_cfg = imu_cfg
 

@@ -1,9 +1,10 @@
 #:kivy 1.8.0
+#:import ColorScheme autosportlabs.racecapture.theme.color.ColorScheme
 
 <RaceTrackView>:
 	orientation: 'vertical'
 	TrackMap:
-        id: trackmap	   
-        trackColor: (0.8, 0.4, 0.0, 1.0)
-        size_hint_x: 0.95
+		trackColor: ColorScheme.get_primary()
+		size_hint_x: 0.95
+		rcid: 'trackmap1'
 		

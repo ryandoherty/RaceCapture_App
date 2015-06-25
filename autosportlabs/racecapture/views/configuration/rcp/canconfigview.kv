@@ -7,7 +7,6 @@
 	help_text: ''
 
 <CANConfigView>:
-	padding: (dp(10),dp(10))
 	spacing: dp(20)
 	orientation: 'vertical'
 	HSeparator:
@@ -17,7 +16,7 @@
 		
 	SettingsView:
 		size_hint_y: 0.2
-		rcid: 'canEnabled'
+		id: can_enabled
 		label_text: 'CAN bus'
 		help_text: 'CAN interface for OBDII and custom CAN channels'
 		

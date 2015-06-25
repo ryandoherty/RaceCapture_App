@@ -1,12 +1,14 @@
 import kivy
 kivy.require('1.8.0')
 
+from kivy.core.clipboard import Clipboard
 from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.popup import Popup
+from kivy.clock import Clock
 from kivy.app import Builder
 from helplabel import HelpLabel
 from fieldlabel import FieldLabel
@@ -17,49 +19,146 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.tracks.tracksview import TrackInfoView, TracksView
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.uix.toast.kivytoast import toast
 
 TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackconfigview.kv'
 
+GPS_STATUS_POLL_INTERVAL = 1.0
+GPS_NOT_LOCKED_COLOR = [0.7, 0.7, 0.0, 1.0]
+GPS_LOCKED_COLOR = [0.0, 1.0, 0.0, 1.0]
+
 class SectorPointView(BoxLayout):
-    geoPoint = None
-    latView = None
-    lonView = None
+    databus = None
+    point = None
     def __init__(self, **kwargs):
         super(SectorPointView, self).__init__(**kwargs)
+        self.databus = kwargs.get('databus')
         self.register_event_type('on_config_changed')
         title = kwargs.get('title', None)
         if title:
             self.setTitle(title)
+        Clock.schedule_interval(lambda dt: self.update_gps_status(), GPS_STATUS_POLL_INTERVAL)
 
+    def _get_gps_quality(self):
+        gps_quality = self.databus.channel_data.get('GPSQual')
+        return 0 if gps_quality is None else int(gps_quality)
+    
+    def update_gps_status(self, *args):
+        gps_quality = self._get_gps_quality()
+        self.ids.gps_target.color = GPS_NOT_LOCKED_COLOR if gps_quality < GpsConfig.GPS_QUALITY_2D else GPS_LOCKED_COLOR
+            
     def on_config_changed(self):
         pass
-    
-    def setNext(self, widget):
-        self.lonView.set_next(widget)
         
-    def getPrevious(self):
-        return self.latView
-    
     def setTitle(self, title):
         kvFind(self, 'rcid', 'title').text = title
         
-    def setPoint(self, geoPoint):
-        self.latView = kvFind(self, 'rcid', 'lat')
-        self.lonView = kvFind(self, 'rcid', 'lon')
-        self.latView.text = str(geoPoint.latitude)
-        self.lonView.text = str(geoPoint.longitude)
-        self.latView.set_next(self.lonView)        
-        self.geoPoint = geoPoint
+    def on_update_target(self, *args):
+        try:
+            if self._get_gps_quality() >= GpsConfig.GPS_QUALITY_2D:
+                channel_data = self.databus.channel_data
+                point = self.point
+                point.latitude = channel_data.get('Latitude')
+                point.longitude = channel_data.get('Longitude') 
+                self._refresh_point_view()
+                self.dispatch('on_config_changed')
+                toast('Target updated')
+            else:
+                toast('No GPS Fix', True)
+        except Exception as e:
+            toast('Error reading GPS target')
         
-    def on_lat(self, instance, value):
-        if self.geoPoint:
-            self.geoPoint.latitude = float(value)
-            self.dispatch('on_config_changed')
+    def _on_edited(self, instance, value):
+        self.set_point(value)
+        self.dispatch('on_config_changed')
     
-    def on_lon(self, instance, value):
-        if self.geoPoint:
-            self.geoPoint.longitude = float(value)
-            self.dispatch('on_config_changed')
+    def on_customize(self, *args):
+        if self.point:
+            content = GeoPointEditor(point=self.point, databus=self.databus)
+            popup = Popup(title = 'Edit Track Target',
+                          content = content, 
+                          size_hint=(None, None), size = (dp(500), dp(220)))
+            content.bind(on_close=lambda *args:popup.dismiss())                     
+            content.bind(on_point_edited=self._on_edited)
+            popup.open()
+        
+    def _refresh_point_view(self):
+        self.ids.lat.text = str(self.point.latitude)
+        self.ids.lon.text = str(self.point.longitude)
+        
+    def set_point(self, point):
+        self.point = point
+        self._refresh_point_view()
+            
+class GeoPointEditor(BoxLayout):
+    def __init__(self, point, databus, **kwargs):
+        super(GeoPointEditor, self).__init__(**kwargs)
+        self.point = point
+        self.databus = databus
+        self.register_event_type('on_point_edited')
+        self.register_event_type('on_close')
+        self._refresh_view(self.point.latitude, self.point.longitude)
+        self.ids.lat.set_next(self.ids.lon)
+        self.ids.lon.set_next(self.ids.lat)
+        Clock.schedule_interval(self.update_gps_status, GPS_STATUS_POLL_INTERVAL)
+        
+        
+    def on_latitude(self, instance, value):
+        pass
+        
+    def on_longitude(self, instance, value):
+        pass
+        
+    def _refresh_view(self, latitude, longitude):
+        self.ids.lat.text = str(latitude)
+        self.ids.lon.text = str(longitude)
+    
+    def on_point_edited(self, *args):
+        pass
+    
+    def on_close(self, *args):
+        pass
+    
+    def on_paste_point(self, *args):
+        try:
+            point_string = Clipboard.get('UTF8_STRING')
+            lat_lon = point_string.split(",")
+            lat = float(lat_lon[0])
+            lon = float(lat_lon[1])
+            self.ids.lat.text = str(lat)
+            self.ids.lon.text = str(lon)
+        except Exception:
+            toast('Required format is: Latitude, Longitude\nin NN.NNNNN decimal format', True)
+
+    def update_gps_status(self, dt,  *args):
+        gps_quality = self._get_gps_quality()
+        self.ids.gps_target.color = GPS_NOT_LOCKED_COLOR if gps_quality < GpsConfig.GPS_QUALITY_2D else GPS_LOCKED_COLOR
+            
+    def _get_gps_quality(self):
+        gps_quality = self.databus.channel_data.get('GPSQual')
+        return 0 if gps_quality is None else int(gps_quality)
+
+    def on_update_target(self, *args):
+        try:
+            if self._get_gps_quality() >= GpsConfig.GPS_QUALITY_2D:
+                channel_data = self.databus.channel_data
+                self._refresh_view(channel_data.get('Latitude'), channel_data.get('Longitude'))
+            else:
+                toast('No GPS Fix', True)
+        except Exception:
+            toast('Error reading GPS target')
+    
+    def close(self):
+        Clock.unschedule(self.update_gps_status)              
+        point = self.point
+        try:
+            point.latitude = float(self.ids.lat.text)
+            point.longitude = float(self.ids.lon.text)
+            self.dispatch('on_point_edited', self.point)
+        except Exception:
+            toast('NN.NNNNN decimal latitude/longitude format required', True)
+        self.dispatch('on_close')
+
             
 class EmptyTrackDbView(BoxLayout):
     def __init__(self, **kwargs):
@@ -197,16 +296,22 @@ class ManualTrackConfigScreen(Screen):
     startLineView = None
     finishLineView = None
     separateStartFinish = False
+    _databus = None
 
     def __init__(self, **kwargs):
         super(ManualTrackConfigScreen, self).__init__(**kwargs)
-        
+        self._databus = kwargs.get('databus')
         sepStartFinish = kvFind(self, 'rcid', 'sepStartFinish') 
         sepStartFinish.bind(on_setting=self.on_separate_start_finish)
         sepStartFinish.setControl(SettingsSwitch())
         
-        self.separateStartFinish = False        
-        sectorsContainer = kvFind(self, 'rcid', 'sectorsGrid')
+        self.startLineView = self.ids.start_line
+        self.startLineView.databus = self._databus
+        self.finishLineView = self.ids.finish_line
+        self.finishLineView.databus = self._databus
+        
+        self.separateStartFinish = False
+        sectorsContainer = self.ids.sectors_grid        
         self.sectorsContainer = sectorsContainer
         self.initSectorViews()
             
@@ -231,9 +336,7 @@ class ManualTrackConfigScreen(Screen):
         sectorsContainer = self.sectorsContainer
         sectorsContainer.clear_widgets()
         
-        self.startLineView = kvFind(self, 'rcid', 'startLine')
         self.startLineView.bind(on_config_changed=self.on_config_changed)
-        self.finishLineView = kvFind(self, 'rcid', 'finishLine')
         self.finishLineView.bind(on_config_changed=self.on_config_changed)
                                 
         self.updateTrackViewState()
@@ -251,14 +354,7 @@ class ManualTrackConfigScreen(Screen):
             self.startLineView.setTitle('Start Line')
             self.finishLineView.setTitle('Finish Line')
             self.finishLineView.disabled = False
-    
-    def update_tabs(self):
-        prevSectorView = None
-        for sectorView in self.sectorViews:
-            if prevSectorView:
-                prevSectorView.setNext(sectorView.getPrevious())
-            prevSectorView = sectorView
-        
+            
     def on_config_updated(self, rcpCfg):
         trackCfg = rcpCfg.trackConfig
         
@@ -270,18 +366,17 @@ class ManualTrackConfigScreen(Screen):
 
         sectorsContainer.clear_widgets()
         for i in range(0, trackCfg.track.sectorCount):
-            sectorView = SectorPointView(title = 'Sector ' + str(i))
+            sectorView = SectorPointView(title = 'Sector ' + str(i), databus=self._databus)
             sectorView.bind(on_config_changed=self.on_config_changed)
             sectorsContainer.add_widget(sectorView)
-            sectorView.setPoint(trackCfg.track.sectors[i])
+            sectorView.set_point(trackCfg.track.sectors[i])
             self.sectorViews.append(sectorView)
 
-        self.startLineView.setPoint(trackCfg.track.startLine)
-        self.finishLineView.setPoint(trackCfg.track.finishLine)
+        self.startLineView.set_point(trackCfg.track.startLine)
+        self.finishLineView.set_point(trackCfg.track.finishLine)
         
         self.trackCfg = trackCfg
         self.updateTrackViewState()
-        self.update_tabs()
             
 class TrackConfigView(BaseConfigView):
     trackCfg = None
@@ -290,13 +385,15 @@ class TrackConfigView(BaseConfigView):
     screenManager = None
     manualTrackConfigView = None
     autoConfigView = None
+    _databus = None
     
     def __init__(self, **kwargs):
         Builder.load_file(TRACK_CONFIG_VIEW_KV)
         super(TrackConfigView, self).__init__(**kwargs)
+        self._databus = kwargs.get('databus')
         self.register_event_type('on_config_updated')
         
-        self.manualTrackConfigView = ManualTrackConfigScreen(name='manual')
+        self.manualTrackConfigView = ManualTrackConfigScreen(name='manual', databus=self._databus)
         self.manualTrackConfigView.bind(on_modified=self.on_modified)
         
         self.autoConfigView = AutomaticTrackConfigScreen(name='auto')
@@ -335,3 +432,5 @@ class TrackConfigView(BaseConfigView):
             self.trackCfg.autoDetect = value
             self.trackCfg.stale = True
             self.dispatch('on_modified')
+            
+            

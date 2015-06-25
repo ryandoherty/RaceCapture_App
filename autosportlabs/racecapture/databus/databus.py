@@ -1,11 +1,13 @@
 from kivy.clock import Clock
 from time import sleep
 from threading import Thread, Event
-from autosportlabs.racecapture.data.sampledata import Sample, ChannelMeta, SampleMetaException,\
-    ChannelMetaCollection
+from autosportlabs.racecapture.data.channels import ChannelMeta
+from autosportlabs.racecapture.data.sampledata import Sample, SampleMetaException, ChannelMetaCollection
 from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
 from autosportlabs.racecapture.databus.filter.currentlaptimefilter import CurrentLapTimeFilter
+from autosportlabs.util.threadutil import safe_thread_exit
+
 
 DEFAULT_DATABUS_UPDATE_INTERVAL = 0.1 #10Hz UI update rate
 
@@ -222,4 +224,5 @@ class DataBusPump(object):
                     sample_event.clear()
                 
         print("DataBus Sampler Exiting")
+        safe_thread_exit()
 

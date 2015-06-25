@@ -163,7 +163,10 @@ class StatusView(Screen):
         self.update()
 
     def _on_status_updated(self, status):
-        self.status = status['status']
+        def safe_update_status(status):
+            self.status = status['status']
+            
+        Clock.schedule_once(lambda dt: safe_update_status(status))
         
     def update(self):
         _bg_current = RAW_STATUS_BGCOLOR_1

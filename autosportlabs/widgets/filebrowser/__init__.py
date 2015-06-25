@@ -76,6 +76,7 @@ import string
 from os.path import sep, dirname, expanduser, isdir
 from os import walk
 from functools import partial
+from utils import is_mobile_platform
 
 platform = core_platform()
 if platform == 'win':
@@ -247,21 +248,22 @@ class LinkTree(TreeView):
                 user_path += sep
         else:
             user_path = expanduser(u'~') + sep
-        self._favs = self.add_node(TreeLabel(text='Favorites', is_open=True,
-                                             no_selection=True))
+            
+        self._favs = self.add_node(TreeLabel(text='Favorites', is_open=True, no_selection=True))
         self.reload_favs(fav_list)
 
-        libs = self.add_node(TreeLabel(text='Libraries', is_open=True,
-                                       no_selection=True))
-        places = ('Documents', 'Music', 'Pictures', 'Videos')
-        for place in places:
-            if isdir(user_path + place):
-                self.add_node(TreeLabel(text=place, path=user_path +
-                                        place), libs)
-        self._computer_node = self.add_node(TreeLabel(text='Computer',\
-        is_open=True, no_selection=True))
-        self._computer_node.bind(on_touch_down=self._drives_touch)
-        self.reload_drives()
+        if not is_mobile_platform():
+            libs = self.add_node(TreeLabel(text='Libraries', is_open=True,
+                                           no_selection=True))
+            places = ('Documents', 'Music', 'Pictures', 'Videos')
+            for place in places:
+                if isdir(user_path + place):
+                    self.add_node(TreeLabel(text=place, path=user_path +
+                                            place), libs)
+            self._computer_node = self.add_node(TreeLabel(text='Computer',\
+            is_open=True, no_selection=True))
+            self._computer_node.bind(on_touch_down=self._drives_touch)
+            self.reload_drives()
 
     def _drives_touch(self, obj, touch):
         if obj.collide_point(*touch.pos):
