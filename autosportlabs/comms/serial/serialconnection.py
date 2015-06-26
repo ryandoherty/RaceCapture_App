@@ -2,6 +2,7 @@ import serial
 from serial import SerialException
 from serial.tools import list_ports
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
+from kivy.logger import Logger
 
 class SerialConnection():
     DEFAULT_WRITE_TIMEOUT = 1
@@ -15,10 +16,10 @@ class SerialConnection():
         pass
     
     def get_available_ports(self):
-        print("getting available ports")
+        Logger.debug("SerialConnection: getting available ports")
         ports = [x[0] for x in list_ports.comports()]
         ports.sort()
-        filtered_ports = filter(lambda port: not port.startswith('/dev/ttyS') and not port.startswith('/dev/cu.Bluetooth-Incoming-Port'), ports)
+        filtered_ports = filter(lambda port: not port.startswith('/dev/ttyUSB') and not port.startswith('/dev/ttyS') and not port.startswith('/dev/cu.Bluetooth-Incoming-Port'), ports)
         return filtered_ports
             
     def isOpen(self):
