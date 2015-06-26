@@ -3,6 +3,7 @@
 * Navigation screen transitions direction matches arrow direction
 * Navigation screen arrows are brighter
 * CurrentLap channel in tachometer dashboard view now actually shows CurrentLap
+* Resolved hanging issue / auto-detect issue typically seen upon USB disconnect / reconnect
 
 ==1.3.4==
 * Sample rate selector for sensor channels reflect capabilities of device
