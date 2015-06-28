@@ -9,6 +9,7 @@ from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorExce
 from functools import partial
 from kivy.clock import Clock
 from kivy.logger import Logger
+from traceback import print_stack
 
 TRACK_ADD_MODE_IN_PROGRESS      = 1
 TRACK_ADD_MODE_COMPLETE         = 2
@@ -19,6 +20,7 @@ SCRIPT_ADD_MODE_COMPLETE        = 2
 DEFAULT_LEVEL2_RETRIES          = 2
 DEFAULT_MSG_RX_TIMEOUT          = 1
 
+AUTODETECT_COOLOFF_TIME         = 1
 AUTODETECT_LEVEL2_RETRIES       = 1
 DEFAULT_READ_RETRIES            = 2
 
@@ -61,6 +63,7 @@ class RcpApi:
     _cmd_sequence_thread = None
     _msg_rx_thread = None
     _auto_detect_event = Event()
+    _auto_detect_busy = Event()
     
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
@@ -162,7 +165,7 @@ class RcpApi:
                                     listener(msgJson)
                                 except Exception as e:
                                     Logger.error('RCPAPI: Message Listener Exception for')
-                                    traceback.print_exc()
+                                    Logger.debug(traceback.format_exc())
                             break
                     msg = ''                        
                 else:
@@ -174,10 +177,10 @@ class RcpApi:
                 sleep(1.0)
             except Exception:
                 Logger.warn('RCPAPI: Message rx worker exception: {} | {}'.format(msg, str(Exception)))
-                traceback.print_exc()
+                Logger.debug(traceback.format_exc())
                 msg = ''
                 error_count += 1
-                if error_count > 5:
+                if error_count > 5 and not self._auto_detect_event.is_set():
                     Logger.warn("RCPAPI: Too many Rx exceptions; re-opening connection")
                     self.recover_connection()
                     sleep(5)
@@ -290,7 +293,7 @@ class RcpApi:
                     self.recover_connection()
                 except Exception as detail:
                     Logger.error('RCPAPI: Command sequence exception: ' + str(detail))
-                    traceback.print_exc()
+                    Logger.debug(traceback.format_exc())
                     failCallback(detail)
                     self.recover_connection()
 
@@ -614,21 +617,20 @@ class RcpApi:
         def on_ver_win(value):
             version_result.version_json = value
             version_result_event.set()
-            
-        def on_ver_fail(value):
-            Logger.info('RCPAPI: on_ver_fail')
-            version_result_event.set()
-        
+                    
         while True:
             try:
                 self._auto_detect_event.wait()
                 self._auto_detect_event.clear()
                 self._enable_autodetect.wait()
                 Logger.info("RCPAPI: Starting auto-detect")
+                self._auto_detect_busy.set()
+                self.sendCommandLock.acquire()
+                self.addListener("ver", on_ver_win)
                 
                 comms = self.comms
                 if comms and comms.isOpen():
-                    continue  #if we're already open, skip auto-detect
+                    comms.close()
                 
                 version_result = VersionResult()        
                 version_result_event = Event()
@@ -638,8 +640,8 @@ class RcpApi:
                     ports = [comms.port]
                 else:
                     ports = comms.get_available_ports()
+                    Logger.info('RCPAPI: Searching for device on all ports')
         
-                Logger.info('RCPAPI: Searching for device on all ports')
                 testVer = VersionConfig()
                 for p in ports:
                     try:
@@ -647,8 +649,8 @@ class RcpApi:
                         if self.detect_activity_callback: self.detect_activity_callback(str(p))
                         comms.port = p
                         comms.open()
-                        self.getVersion(on_ver_win, on_ver_fail)
-                        version_result_event.wait()
+                        self.sendGetVersion()
+                        version_result_event.wait(1)
                         version_result_event.clear()
                         if version_result.version_json != None:
                             testVer.fromJson(version_result.version_json.get('ver', None))
@@ -678,7 +680,11 @@ class RcpApi:
                     if self.detect_fail_callback: self.detect_fail_callback()
             except Exception as e:
                 Logger.error('RCPAPI: Error running auto detect: ' + str(e))
-                traceback.print_exc()
+                Logger.debug(traceback.format_exc())
             finally:
                 Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
+                self._auto_detect_busy.clear()
+                self.removeListener("ver", on_ver_win)
+                self.sendCommandLock.release()
+                sleep(AUTODETECT_COOLOFF_TIME)
 

@@ -286,7 +286,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 self.min = channel_meta.min
                 self.max = channel_meta.max
                 self.precision = channel_meta.precision
-                self.type = channel_meta.type
+                self.type = channel_meta.type if channel_meta.type is not CHANNEL_TYPE_UNKNOWN else self.type
             else:
                 self.min = DEFAULT_MIN
                 self.max = DEFAULT_MAX
