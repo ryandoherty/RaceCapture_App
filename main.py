@@ -70,7 +70,7 @@ class RaceCaptureApp(App):
     trackManager = None
 
     #Application Status bars
-    statusBar = None
+    status_bar = None
 
     #Main Views
     configView = None
@@ -245,10 +245,10 @@ class RaceCaptureApp(App):
             Clock.schedule_once(lambda dt: self.showMainView(viewKey), 0.25)
 
     def showStatus(self, status, isAlert):
-        self.statusBar.dispatch('on_status', status, isAlert)
+        self.status_bar.dispatch('on_status', status, isAlert)
 
     def showActivity(self, status):
-        self.statusBar.dispatch('on_activity', status)
+        self.status_bar.dispatch('on_activity', status)
 
     def _setX(self, x):
         pass
@@ -265,14 +265,14 @@ class RaceCaptureApp(App):
 
     def build(self):
         Builder.load_file('racecapture.kv')
-        statusBar = kvFind(self.root, 'rcid', 'statusbar')
-        statusBar.bind(on_main_menu=self.on_main_menu)
-        self.statusBar = statusBar
+        root = self.root
+        status_bar = root.ids.status_bar
+        status_bar.bind(on_main_menu=self.on_main_menu)
+        self.status_bar = status_bar
 
-        mainMenu = kvFind(self.root, 'rcid', 'mainMenu')
-        mainMenu.bind(on_main_menu_item=self.on_main_menu_item)
+        root.ids.main_menu.bind(on_main_menu_item=self.on_main_menu_item)
 
-        self.mainNav = kvFind(self.root, 'rcid', 'mainNav')
+        self.mainNav = root.ids.main_nav
 
         #reveal_below_anim
         #reveal_below_simple
@@ -295,9 +295,9 @@ class RaceCaptureApp(App):
 
         rcComms = self._rc_api
         rcComms.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: configView.on_logfile(value)))
-        rcComms.on_progress = lambda value: statusBar.dispatch('on_progress', value)
-        rcComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
-        rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
+        rcComms.on_progress = lambda value: status_bar.dispatch('on_progress', value)
+        rcComms.on_rx = lambda value: status_bar.dispatch('on_rc_rx', value)
+        rcComms.on_tx = lambda value: status_bar.dispatch('on_rc_tx', value)
 
         status_view = StatusView(
                                  self.trackManager,
@@ -315,7 +315,7 @@ class RaceCaptureApp(App):
         analysisView = AnalysisView(name='analysis', data_bus=self._databus, settings=self.settings)
         preferences_view = PreferencesView(self.settings, name='preferences', base_dir=self.base_dir)
 
-        screenMgr = kvFind(self.root, 'rcid', 'main')
+        screenMgr = root.ids.main
 
         #NoTransition
         #SlideTransition
