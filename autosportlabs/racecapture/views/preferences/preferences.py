@@ -10,7 +10,7 @@ from kivy.app import Builder
 from utils import *
 import os
 
-Builder.load_file('autosportlabs/racecapture/views/preferences/preferences.kv')
+PREFERENCES_KV_FILE = 'autosportlabs/racecapture/views/preferences/preferences.kv'
 
 class PreferencesView(Screen):
     settings = None
@@ -18,6 +18,7 @@ class PreferencesView(Screen):
     base_dir = None
 
     def __init__(self, settings, **kwargs):
+        Builder.load_file(PREFERENCES_KV_FILE)
         super(PreferencesView, self).__init__(**kwargs)
         self.settings = settings
         self.base_dir = kwargs.get('base_dir')
@@ -27,7 +28,3 @@ class PreferencesView(Screen):
 
         self.content = kvFind(self, 'rcid', 'preferences')
         self.content.add_widget(settings_view)
-        self.register_event_type('on_tracks_updated')
-    
-    def on_tracks_updated(self, track_manager):
-        pass

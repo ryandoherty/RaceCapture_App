@@ -1,6 +1,6 @@
 import kivy
 kivy.require('1.8.0')
-from kivy.properties import NumericProperty
+from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 from kivy.uix.label import Label
@@ -17,7 +17,8 @@ from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from utils import *
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
-Builder.load_file('autosportlabs/racecapture/views/tracks/tracksview.kv')
+
+TRACKS_KV_FILE = 'autosportlabs/racecapture/views/tracks/tracksview.kv'
 
 class SearchInput(TextInput):
     
@@ -111,19 +112,28 @@ class TrackInfoView(BoxLayout):
     
 class TracksView(Screen):
     loaded = False
+    track_manager = ObjectProperty(None)
     
     def __init__(self, **kwargs):
+        Builder.load_file(TRACKS_KV_FILE)
         super(TracksView, self).__init__(**kwargs)
-        self.trackManager = kwargs.get('trackManager')
+        self.track_manager = kwargs.get('track_manager')
         self.register_event_type('on_tracks_updated')
-                
+
+    def init_browser(self):
+        self.ids.browser.set_trackmanager(self.track_manager)
+        self.ids.browser.init_view()
+
+    def on_track_manager(self, instance, value):
+        if value:
+            Clock.schedule_once(lambda dt: self.init_browser())
+
     def on_enter(self):
         if not self.loaded:
-            self.ids.browser.init_view()
             self.loaded = True
             
     def on_tracks_updated(self, track_manager):
-        self.ids.browser.set_trackmanager(track_manager)
+        self.track_manager = track_manager
     
     def check_for_update(self):
         self.ids.browser.on_update_check()

@@ -12,7 +12,7 @@ from datetime import timedelta
 from utils import *
 from fieldlabel import FieldLabel
 
-Builder.load_file('autosportlabs/racecapture/views/status/statusview.kv')
+STATUS_KV_FILE = 'autosportlabs/racecapture/views/status/statusview.kv'
 
 RAW_STATUS_BGCOLOR_1 = [0  , 0  , 0  , 1.0]
 RAW_STATUS_BGCOLOR_2 = [0.10, 0.10, 0.10, 1.0]
@@ -124,6 +124,7 @@ class StatusView(Screen):
     menu_select_color = [1.0,0,0,0.6]
 
     def __init__(self, track_manager, rc_api, **kwargs):
+        Builder.load_file(STATUS_KV_FILE)
         super(StatusView, self).__init__(**kwargs)
         self.track_manager = track_manager
         self.rc_api = rc_api

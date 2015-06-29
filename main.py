@@ -55,6 +55,9 @@ class RaceCaptureApp(App):
     #things that care about configuration being loaded
     config_listeners = []
 
+    #things that care about tracks being loaded
+    tracks_listeners = []
+
     #map of view keys to factory functions for building top level views
     view_builders = {}
     
@@ -227,9 +230,8 @@ class RaceCaptureApp(App):
         alertPopup('Error Reading', 'Could not read configuration:\n\n' + str(detail))
 
     def on_tracks_updated(self, track_manager):
-        for view in self.mainViews.itervalues():
-            if view is not None:
-                view.dispatch('on_tracks_updated', track_manager)
+        for view in self.tracks_listeners:
+            view.dispatch('on_tracks_updated', track_manager)
 
     def notifyTracksUpdated(self):
         self.dispatch('on_tracks_updated', self.trackManager)
@@ -239,22 +241,6 @@ class RaceCaptureApp(App):
 
     def on_main_menu(self, instance, *args):
         self.mainNav.toggle_state()
-
-    def showMainView(self, view_name):
-        try:
-            view = self.mainViews.get(view_name)
-            if not view:
-                view = self.view_builders[view_name]()
-                self.screenMgr.add_widget(view)
-                self.mainViews[view_name] = view
-            self.screenMgr.current = view_name
-        except Exception as detail:
-            print('Failed to load main view ' + str(view_name) + ' ' + str(detail))
-            traceback.print_stack()
-
-    def switchMainView(self, view_name):
-            self.mainNav.anim_to_state('closed')
-            Clock.schedule_once(lambda dt: self.showMainView(view_name), 0.25)
 
     def showStatus(self, status, isAlert):
         self.status_bar.dispatch('on_status', status, isAlert)
@@ -273,6 +259,22 @@ class RaceCaptureApp(App):
     
     def on_stop(self):
         self._rc_api.cleanup_comms()
+
+    def showMainView(self, view_name):
+        #try:
+        view = self.mainViews.get(view_name)
+        if not view:
+            view = self.view_builders[view_name]()
+            self.screenMgr.add_widget(view)
+            self.mainViews[view_name] = view
+        self.screenMgr.current = view_name
+        #except Exception as detail:
+         #   print('Failed to load main view ' + str(view_name) + ' ' + str(detail))
+          #  traceback.print_stack()
+
+    def switchMainView(self, view_name):
+            self.mainNav.anim_to_state('closed')
+            Clock.schedule_once(lambda dt: self.showMainView(view_name), 0.25)
     
     def build_config_view(self):
         config_view = ConfigView(name='config',
@@ -288,39 +290,47 @@ class RaceCaptureApp(App):
         config_view.bind(on_set_logfile_level=self.on_set_logfile_level)
         self._rc_api.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: config_view.on_logfile(value)))
         self.config_listeners.append(config_view)
+        self.tracks_listeners.append(config_view)
         return config_view
     
     def build_status_view(self):
-        status_view = StatusView(
-                                 self.trackManager,
-                                 rc_api,
-                                 name='status')
+        status_view = StatusView(self.trackManager, self._rc_api, name='status')
         status_view.start_status()
+        self.tracks_listeners.append(status_view)
         return status_view
     
     def build_tracks_view(self):
-        tracks_view = TracksView(name='tracks')
+        tracks_view = TracksView(name='tracks', track_manager=self.trackManager)
+        self.tracks_listeners.append(tracks_view)
         return tracks_view
     
     def build_dash_view(self):
         dash_view = DashboardView(name='dash', dataBus=self._databus, settings=self.settings)
+        self.tracks_listeners.append(dash_view)
         return dash_view
     
     def build_analysis_view(self):
         analysis_view = AnalysisView(name='analysis', data_bus=self._databus, settings=self.settings)
+        self.tracks_listeners.append(analysis_view)
         return analysis_view
     
     def build_preferences_view(self):
         preferences_view = PreferencesView(name='preferences', settings=self.settings, base_dir=self.base_dir)
         return preferences_view
     
+    def build_homepage_view(self):
+        homepage_view = HomePageView(name='home')
+        homepage_view.bind(on_select_view = lambda instance, view_name: self.switchMainView(view_name))
+        return homepage_view
+
     def init_viewbuilders(self):
         self.view_builders = {'config': self.build_config_view,
                               'tracks': self.build_tracks_view,
                               'dash': self.build_dash_view,
                               'analysis': self.build_analysis_view,
                               'preferences': self.build_preferences_view,
-                              'status': self.build_status_view
+                              'status': self.build_status_view,
+                              'home': self.build_homepage_view
                               }
         
     def build(self):
@@ -349,7 +359,6 @@ class RaceCaptureApp(App):
         rc_api.on_rx = lambda value: status_bar.dispatch('on_rc_rx', value)
         rc_api.on_tx = lambda value: status_bar.dispatch('on_rc_tx', value)
 
-
         screenMgr = root.ids.main
         #NoTransition
         #SlideTransition
@@ -359,15 +368,13 @@ class RaceCaptureApp(App):
         #FallOutTransition
         #RiseInTransition
         screenMgr.transition=NoTransition()
-        homepageView = HomePageView(name='home')
-        homepageView.bind(on_select_view = lambda instance, view_name: self.switchMainView(view_name))
-        screenMgr.add_widget(homepageView)
 
         self.screenMgr = screenMgr
         self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')
         Clock.schedule_once(lambda dt: self.post_launch(), 1.0)
 
     def post_launch(self):
+        self.showMainView('home')
         Clock.schedule_once(lambda dt: self.init_data())
         Clock.schedule_once(lambda dt: self.init_rc_comms())
         self.check_first_time_setup()
@@ -416,7 +423,6 @@ class RaceCaptureApp(App):
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')
-
 
 if __name__ == '__main__':
     RaceCaptureApp().run()

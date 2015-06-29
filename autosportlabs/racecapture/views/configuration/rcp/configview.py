@@ -66,6 +66,7 @@ class ConfigView(Screen):
     _databus = None
     
     def __init__(self, **kwargs):
+        Builder.load_file(CONFIG_VIEW_KV)
         super(ConfigView, self).__init__(**kwargs)
 
         self._databus = kwargs.get('databus')
@@ -125,8 +126,6 @@ class ConfigView(Screen):
         Clock.schedule_once(lambda dt: self._reset_stale())
                 
     def init_screen(self):                
-        Builder.load_file(CONFIG_VIEW_KV)
-        Builder.apply(self)
         self.createConfigViews()
         
     def on_enter(self):
