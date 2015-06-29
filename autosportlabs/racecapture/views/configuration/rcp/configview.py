@@ -49,7 +49,6 @@ class LinkedTreeViewLabel(TreeViewLabel):
 
 class ConfigView(Screen):
     #file save/load
-    config = ObjectProperty(None)
     loaded = BooleanProperty(False)
     loadfile = ObjectProperty(None)
     savefile = ObjectProperty(None)
@@ -102,15 +101,12 @@ class ConfigView(Screen):
         self.update_runtime_channels(runtime_channels)
         
     def on_config_updated(self, config):
-        self.config = config
+        self.rc_config = config
         self.update_config_views()        
             
     def on_track_manager(self, instance, value):
         self.update_tracks()
-        
-    def on_config(self, instance, value):
-        self.update_config_views()
-    
+            
     def on_loaded(self, instance, value):
         self.update_config_views()
         self.update_tracks()
@@ -122,7 +118,7 @@ class ConfigView(Screen):
         self.writeStale = False
         
     def update_config_views(self):
-        config = self.config
+        config = self.rc_config
         if config and self.loaded:        
             for view in self.configViews:
                 view.dispatch('on_config_updated', config)
@@ -152,8 +148,8 @@ class ConfigView(Screen):
                     view.bind(on_config_modified=self.on_config_modified)
                     node.view = view
                     if self.loaded:
-                        if self.config:
-                            view.dispatch('on_config_updated', self.config)
+                        if self.rc_config:
+                            view.dispatch('on_config_updated', self.rc_config)
                         if self.track_manager:
                             view.dispatch('on_tracks_updated', self.track_manager)                                    
                 Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
