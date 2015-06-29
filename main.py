@@ -115,7 +115,7 @@ class RaceCaptureApp(App):
         self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
         self.settings.runtimeChannels.data_bus = self._databus        
 
-        Window.bind(on_key_down=self._on_keyboard_down)
+        Window.bind(on_keyboard=self._on_keyboard)
         self.register_event_type('on_tracks_updated')
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
@@ -124,7 +124,7 @@ class RaceCaptureApp(App):
     def on_pause(self):
         return True
     
-    def _on_keyboard_down(self, keyboard, keycode, *args):
+    def _on_keyboard(self, keyboard, keycode, *args):
         if keycode == 27:
             self.switchMainView('home')
 

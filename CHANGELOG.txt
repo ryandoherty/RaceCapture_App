@@ -1,6 +1,7 @@
 ==1.3.6==
 * Make AT&T Alt #1 the primary for AT&T APN settings
 * Improve launch time by lazy-loading main screens
+* Back button / Escape does not drop back to main view if dismissing keyboard or dialog
 
 ==1.3.5==
 * Improved formatting on tachometer view to allow more space for laptime / delta from best
