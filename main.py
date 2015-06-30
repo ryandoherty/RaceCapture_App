@@ -16,6 +16,7 @@ if __name__ == '__main__':
     from functools import partial
     from kivy.clock import Clock
     from kivy.config import Config
+    from kivy.logger import Logger
     kivy.require('1.8.0')
     Config.set('graphics', 'width', '1024')
     Config.set('graphics', 'height', '576')
@@ -153,7 +154,7 @@ class RaceCaptureApp(App):
         self.settings.userPrefs.set_pref('preferences', 'first_time_setup', False)
         
     def loadCurrentTracksSuccess(self):
-        print('Current Tracks Loaded')
+        Logger.info('RaceCaptureApp: Current Tracks Loaded')
         Clock.schedule_once(lambda dt: self.notifyTracksUpdated())            
 
     def loadCurrentTracksError(self, details):
@@ -188,7 +189,7 @@ class RaceCaptureApp(App):
         self._rc_api.runScript(self.on_run_script_complete, self.on_run_script_error)
 
     def on_run_script_complete(self, result):
-        print('run script complete: ' + str(result))
+        Logger.info('RaceCaptureApp: run script complete: ' + str(result))
 
     def on_run_script_error(self, detail):
         alertPopup('Error Running', 'Error Running Script:\n\n' + str(detail))
@@ -264,16 +265,15 @@ class RaceCaptureApp(App):
         self._rc_api.cleanup_comms()
 
     def showMainView(self, view_name):
-        #try:
-        view = self.mainViews.get(view_name)
-        if not view:
-            view = self.view_builders[view_name]()
-            self.screenMgr.add_widget(view)
-            self.mainViews[view_name] = view
-        self.screenMgr.current = view_name
-        #except Exception as detail:
-         #   print('Failed to load main view ' + str(view_name) + ' ' + str(detail))
-          #  traceback.print_stack()
+        try:
+            view = self.mainViews.get(view_name)
+            if not view:
+                view = self.view_builders[view_name]()
+                self.screenMgr.add_widget(view)
+                self.mainViews[view_name] = view
+            self.screenMgr.current = view_name
+        except Exception as detail:
+            Logger.info('RaceCaptureApp: Failed to load main view ' + str(view_name) + ' ' + str(detail))
 
     def switchMainView(self, view_name):
             self.mainNav.anim_to_state('closed')
