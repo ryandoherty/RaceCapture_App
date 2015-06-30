@@ -5,7 +5,7 @@ Next Gen version of the RaceCapture App.
 
 Dependencies:
 * Python 2.7.x
-* Kivy 1.8.x
+* Kivy 1.9.x
 * Pyserial 2.6.x
 * Pygame
 * Included in package right now but ultimately shouldn't be:
@@ -17,7 +17,7 @@ Dependencies:
 
 ## dev installation (OS X)
 
-1. download [Kivy](http://kivy.org/#download) (current is 1.8.0)
+1. download [Kivy](http://kivy.org/#download) (current is 1.9.0)
 1. follow Kivy install instructions
 - Chris Rae: I found step 3 a bit easier installing pip (`sudo easy_install pip`) and then virtualenv (`sudo pip install virtualenv`). But I don't know about Macs so I'm not actually editing the instructions. :)
 1. install [virtualenv](http://www.virtualenv.org)
@@ -56,7 +56,7 @@ Dependencies:
 
 ## installation (Win7)
 
-1. download [Kivy](http://kivy.org/#download) (current is 1.8.0) - remember to get the py2.7 version
+1. download [Kivy](http://kivy.org/#download) (current is 1.9.0) - remember to get the py2.7 version
 1. follow Kivy install instructions
 1. `my_kivy_install_folder\kivy.bat` (sets path variables for current shell)
 1. install [virtualenv]: `pip install virtualenv`
