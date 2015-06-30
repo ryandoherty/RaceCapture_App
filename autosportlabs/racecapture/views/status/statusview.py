@@ -1,6 +1,5 @@
 import kivy
 kivy.require('1.8.0')
-from kivy.clock import Clock
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
@@ -36,8 +35,6 @@ class StatusView(Screen):
 
     _bg_current = RAW_STATUS_BGCOLOR_1
     
-    STATUS_QUERY_INTERVAL = 2.0
-
     #Dict object that contains the status of RCP
     status = ObjectProperty(None)
 
@@ -49,8 +46,8 @@ class StatusView(Screen):
     #Track manager for getting track name
     track_manager = None
 
-    #Comms object for communicating with RCP
-    rc_api = None
+    #Connection to status pump
+    _status_pump = None
 
     #Used for building the left side menu
     _menu_keys = {
@@ -123,18 +120,14 @@ class StatusView(Screen):
     _menu_node = None
     menu_select_color = [1.0,0,0,0.6]
 
-    def __init__(self, track_manager, rc_api, **kwargs):
+    def __init__(self, track_manager, status_pump, **kwargs):
         Builder.load_file(STATUS_KV_FILE)
         super(StatusView, self).__init__(**kwargs)
         self.track_manager = track_manager
-        self.rc_api = rc_api
         self.register_event_type('on_tracks_updated')
-        self.rc_api.addListener('status', self._on_status_updated)
         self._menu_node = self.ids.menu
         self._menu_node.bind(selected_node=self._on_menu_select)
-
-    def start_status(self):
-        Clock.schedule_interval(lambda dt: self.rc_api.get_status(), self.STATUS_QUERY_INTERVAL)
+        status_pump.add_listener(self.status_updated)
         
     def _build_menu(self):
         if self._menu_built:
@@ -163,11 +156,8 @@ class StatusView(Screen):
         self._selected_item = value.id
         self.update()
 
-    def _on_status_updated(self, status):
-        def safe_update_status(status):
-            self.status = status['status']
-            
-        Clock.schedule_once(lambda dt: safe_update_status(status))
+    def status_updated(self, status):
+        self.status = status['status']
         
     def update(self):
         _bg_current = RAW_STATUS_BGCOLOR_1

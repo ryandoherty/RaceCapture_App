@@ -48,6 +48,7 @@ if __name__ == '__main__':
 from kivy.app import App, Builder
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig, VersionConfig
 from autosportlabs.racecapture.databus.databus import DataBusFactory, DataBusPump
+from autosportlabs.racecapture.status.statuspump import StatusPump
 from autosportlabs.racecapture.api.rcpapi import RcpApi
 
 class RaceCaptureApp(App):
@@ -76,6 +77,8 @@ class RaceCaptureApp(App):
     #pumps data from rcApi to dataBus. kind of like a bridge
     dataBusPump = DataBusPump()
 
+    _status_pump = StatusPump()
+    
     #Track database manager
     trackManager = None
 
@@ -295,8 +298,7 @@ class RaceCaptureApp(App):
         return config_view
     
     def build_status_view(self):
-        status_view = StatusView(self.trackManager, self._rc_api, name='status')
-        status_view.start_status()
+        status_view = StatusView(self.trackManager, self._status_pump, name='status')
         self.tracks_listeners.append(status_view)
         return status_view
     
@@ -392,6 +394,7 @@ class RaceCaptureApp(App):
         rc_api.detect_fail_callback = self.rc_detect_fail
         rc_api.detect_activity_callback = self.rc_detect_activity
         rc_api.init_comms(comms)
+        self._status_pump.start(rc_api)        
         rc_api.run_auto_detect()
 
     def rc_detect_win(self, version):
