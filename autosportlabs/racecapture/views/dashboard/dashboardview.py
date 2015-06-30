@@ -12,7 +12,7 @@ from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachome
 from utils import kvFind, kvFindClass
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 
-Builder.load_file('autosportlabs/racecapture/views/dashboard/dashboardview.kv')
+DASHBOARD_VIEW_KV = 'autosportlabs/racecapture/views/dashboard/dashboardview.kv'
 
 class DashboardView(Screen):
     
@@ -26,6 +26,7 @@ class DashboardView(Screen):
     _comboView = None
     
     def __init__(self, **kwargs):
+        Builder.load_file(DASHBOARD_VIEW_KV)
         super(DashboardView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
         self._databus = kwargs.get('dataBus')

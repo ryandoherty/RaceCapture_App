@@ -3,14 +3,14 @@ BoxLayout:
     orientation: 'vertical'
     pos_hint: {'center_x': .5, 'center_y': .5}
     ToolbarView:
-        rcid: 'statusbar'
+        id: status_bar
 
         size_hint: (1.0	, 0.05)
 
     NavigationDrawer:
         size_hint: (1.0, 0.95)
-        rcid: 'mainNav'
+        id: main_nav
         MainMenu:
-            rcid: 'mainMenu'
+            id: main_menu
         ScreenManager:
-            rcid: 'main'
+            id: main

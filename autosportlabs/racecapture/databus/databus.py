@@ -1,5 +1,6 @@
 from kivy.clock import Clock
 from time import sleep
+from kivy.logger import Logger
 from threading import Thread, Event
 from autosportlabs.racecapture.data.channels import ChannelMeta
 from autosportlabs.racecapture.data.sampledata import Sample, SampleMetaException, ChannelMetaCollection
@@ -182,7 +183,7 @@ class DataBusPump(object):
 
     def _request_meta_handler(self):
             if self._meta_is_stale_counter <= 0:
-                print('Sample Meta is stale, requesting meta')
+                Logger.info('DataBusPump: Sample Meta is stale, requesting meta')
                 self._meta_is_stale_counter = SAMPLES_TO_WAIT_FOR_META
                 self.request_meta()
             else:
@@ -202,12 +203,12 @@ class DataBusPump(object):
         rc_api = self._rc_api
         sample_event = self._sample_event
         
-        print("DataBus Sampler Starting")
+        Logger.info('DataBusPump: DataBus Sampler Starting')
         sample_event.clear()
         if sample_event.wait(SAMPLE_POLL_TEST_TIMEOUT) == True:
-            print('Async sampling detected')
+            Logger.info('DataBusPump: Async sampling detected')
         else:
-            print("Synchronous sampling mode enabled")
+            Logger.info('DataBusPump: Synchronous sampling mode enabled')
             while self._running.is_set():
                 try:
                     #the timeout here is designed to be longer than the streaming rate of 
@@ -219,10 +220,10 @@ class DataBusPump(object):
                     sleep(SAMPLE_POLL_INTERVAL_TIMEOUT)
                 except Exception as e:
                     sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
-                    print('Exception in sample_worker: ' + str(e))
+                    Logger.error('DataBusPump: Exception in sample_worker: ' + str(e))
                 finally:
                     sample_event.clear()
                 
-        print("DataBus Sampler Exiting")
+        Logger.info('DataBusPump: DataBus Sampler Exiting')
         safe_thread_exit()
 
