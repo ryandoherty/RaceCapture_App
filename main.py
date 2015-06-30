@@ -2,7 +2,6 @@
 __version__ = "1.3.6"
 import sys
 import os
-import traceback
 
 if __name__ == '__main__' and sys.platform == 'win32':
     from multiprocessing import freeze_support
@@ -210,7 +209,7 @@ class RaceCaptureApp(App):
         self.dataBusPump.meta_is_stale()
         for listener in self.config_listeners:
             Clock.schedule_once(lambda dt: listener.dispatch('on_config_written'))
-        Clock.schedule_once(lambda dt: self.showActivity(''), 1.0)
+        Clock.schedule_once(lambda dt: self.showActivity(''), 5.0)
 
     def on_write_config_error(self, detail):
         alertPopup('Error Writing', 'Could not write configuration:\n\n' + str(detail))

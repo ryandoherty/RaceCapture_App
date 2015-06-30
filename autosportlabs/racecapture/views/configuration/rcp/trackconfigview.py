@@ -27,7 +27,7 @@ TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackc
 GPS_STATUS_POLL_INTERVAL = 1.0
 GPS_NOT_LOCKED_COLOR = [0.7, 0.7, 0.0, 1.0]
 GPS_LOCKED_COLOR = [0.0, 1.0, 0.0, 1.0]
-        
+
 class SectorPointView(BoxLayout):
     databus = None
     point = None
