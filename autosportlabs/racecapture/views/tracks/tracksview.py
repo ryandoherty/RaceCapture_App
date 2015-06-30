@@ -18,7 +18,7 @@ from autosportlabs.uix.track.racetrackview import RaceTrackView
 from utils import *
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 
-TRACKS_KV_FILE = 'autosportlabs/racecapture/views/tracks/tracksview.kv'
+Builder.load_file('autosportlabs/racecapture/views/tracks/tracksview.kv')
 
 class SearchInput(TextInput):
     
@@ -115,7 +115,6 @@ class TracksView(Screen):
     track_manager = ObjectProperty(None)
     
     def __init__(self, **kwargs):
-        Builder.load_file(TRACKS_KV_FILE)
         super(TracksView, self).__init__(**kwargs)
         self.track_manager = kwargs.get('track_manager')
         self.register_event_type('on_tracks_updated')

@@ -1,6 +1,7 @@
 import kivy
 kivy.require('1.8.0')
 
+from kivy.properties import ObjectProperty
 from kivy.core.clipboard import Clipboard
 from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
@@ -101,7 +102,6 @@ class GeoPointEditor(BoxLayout):
         self.ids.lat.set_next(self.ids.lon)
         self.ids.lon.set_next(self.ids.lat)
         Clock.schedule_interval(self.update_gps_status, GPS_STATUS_POLL_INTERVAL)
-        
         
     def on_latitude(self, instance, value):
         pass
@@ -205,7 +205,7 @@ class TrackSelectionPopup(BoxLayout):
 class AutomaticTrackConfigScreen(Screen):
     trackDb = None
     tracksGrid = None
-    trackManager = None
+    track_manager = ObjectProperty(None)
     TRACK_ITEM_MIN_HEIGHT = 200
     searchRadiusMeters = 2000
     searchBearing = 360
@@ -223,15 +223,15 @@ class AutomaticTrackConfigScreen(Screen):
         self.trackDb = rcpCfg.trackDb
         self.init_tracks_list()
         
-    def on_tracks_updated(self, track_manager):
-        self.trackManager = track_manager
+    def on_track_manager(self, instance, value):
+        self.track_manager = value
         self.init_tracks_list()
     
     def on_tracks_selected(self, instance, selectedTrackIds):
         if self.trackDb:
             failures = False
             for trackId in selectedTrackIds:
-                trackMap = self.trackManager.getTrackById(trackId)
+                trackMap = self.track_manager.getTrackById(trackId)
                 if trackMap:
                     startFinish = trackMap.startFinishPoint
                     if startFinish and startFinish.latitude and startFinish.longitude:
@@ -247,17 +247,17 @@ class AutomaticTrackConfigScreen(Screen):
             self.dispatch('on_modified')
                     
     def on_add_track_db(self):
-        trackSelectionPopup = TrackSelectionPopup(track_manager=self.trackManager)
+        trackSelectionPopup = TrackSelectionPopup(track_manager=self.track_manager)
         popup = Popup(title = 'Add Race Tracks', content = trackSelectionPopup, size_hint=(0.9, 0.9))
         trackSelectionPopup.bind(on_tracks_selected=self.on_tracks_selected)
         popup.open()
         self.trackSelectionPopup = popup
     
     def init_tracks_list(self):
-        if self.trackManager and self.trackDb:
+        if self.track_manager and self.trackDb:
             matchedTracks = []
             for track in self.trackDb.tracks:
-                matchedTrack = self.trackManager.findTrackByShortId(track.trackId)
+                matchedTrack = self.track_manager.findTrackByShortId(track.trackId)
                 if matchedTrack:
                     matchedTracks.append(matchedTrack)
                     
@@ -405,12 +405,14 @@ class TrackConfigView(BaseConfigView):
         screenMgr.add_widget(self.manualTrackConfigView)
         self.screenManager = screenMgr
         
-        autoDetect = kvFind(self, 'rcid', 'autoDetect') 
+        autoDetect = kvFind(self, 'rcid', 'autoDetect')
         autoDetect.bind(on_setting=self.on_auto_detect)
         autoDetect.setControl(SettingsSwitch())
+        
+        self.autoConfigView.track_manager = kwargs.get('track_manager')
 
     def on_tracks_updated(self, track_manager):
-        self.autoConfigView.on_tracks_updated(track_manager)
+        self.autoConfigView.track_manager = track_manager
         
     def on_config_updated(self, rcpCfg):
         trackCfg = rcpCfg.trackConfig
