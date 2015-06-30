@@ -5,7 +5,7 @@ from autosportlabs.racecapture.views.dashboard.laptimeview import LaptimeView
 from autosportlabs.racecapture.views.dashboard.comboview import ComboView
 from autosportlabs.racecapture.views.dashboard.gaugeview import GaugeView
 from autosportlabs.racecapture.views.dashboard.widgets.digitalgauge import DigitalGauge
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.app import Builder
 from kivy.uix.screenmanager import *
 from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer

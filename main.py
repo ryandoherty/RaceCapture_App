@@ -16,7 +16,7 @@ if __name__ == '__main__':
     from kivy.clock import Clock
     from kivy.config import Config
     from kivy.logger import Logger
-    kivy.require('1.8.0')
+    kivy.require('1.9.0')
     Config.set('graphics', 'width', '1024')
     Config.set('graphics', 'height', '576')
     Config.set('kivy', 'exit_on_escape', 0)
