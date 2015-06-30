@@ -125,6 +125,7 @@
     	spacing: dp(30)
 		size_hint_y: 0.68
 		ScrollView:
+            on_scroll_move: root.on_scroll(*args)
 			id: scrltracks
 		    do_scroll_x:False
 		    do_scroll_y:True

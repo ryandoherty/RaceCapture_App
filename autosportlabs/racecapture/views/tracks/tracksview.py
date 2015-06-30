@@ -145,10 +145,36 @@ class TracksBrowser(BoxLayout):
     initialized = False
     tracksGrid = None
     selectedTrackIds = None
+    tracks_loading = False
+    last_scroll_y = 1.0
+    INITIAL_DISPLAY_LIMIT = 10
+    LAZY_DISPLAY_CHUNK_COUNT = 1
+    
     def __init__(self, **kwargs):
         super(TracksBrowser, self).__init__(**kwargs)
         self.register_event_type('on_track_selected')
         self.selectedTrackIds = set()
+        
+    def on_scroll(self, instance, value):
+        scroll_y = self.ids.scrltracks.scroll_y
+        last_scroll_y = self.last_scroll_y
+        self.last_scroll_y = scroll_y 
+        #only check to lazy load if we're scrolling towards the bottom
+        if  scroll_y < last_scroll_y:
+            self.lazy_load_more_maybe()
+        
+    def lazy_load_more_maybe(self):
+        sb = self.ids.scrltracks
+        current_index = self.load_limit
+        tracks_count = len(self.current_track_ids)
+        if sb.scroll_y < 0.1 and not self.tracks_loading and current_index < tracks_count:
+            new_load_limit = current_index + self.LAZY_DISPLAY_CHUNK_COUNT
+            if new_load_limit > tracks_count:
+                new_load_limit = tracks_count
+            self.load_limit = new_load_limit
+            self.tracks_loading = True
+            self.ids.tracksgrid.height = self.trackHeight * self.load_limit 
+            self.addNextTrack(current_index, self.current_track_ids)
          
     def set_trackmanager(self, track_manager):
         self.trackManager = track_manager
@@ -207,17 +233,22 @@ class TracksBrowser(BoxLayout):
         self.trackManager.updateAllTracks(tracksUpdateView.on_progress, self.on_update_check_success, self.on_update_check_error)
         
     def addNextTrack(self, index, keys):
-        if index < len(keys):
+        if index < self.load_limit:
             track = self.trackManager.tracks[keys[index]]
             trackView = TrackItemView(track=track)
             trackView.bind(on_track_selected=self.on_track_selected)
             trackView.size_hint_y = None
             trackView.height = self.trackHeight
             self.tracksGrid.add_widget(trackView)
-            Clock.schedule_once(lambda dt: self.addNextTrack(index + 1, keys))
+            Clock.schedule_once(lambda dt: self.addNextTrack(index + 1, keys), 0.1)
         else:
             self.dismissPopups()
             self.setViewDisabled(False)
+            self.last_scroll_y = self.ids.scrltracks.scroll_y
+            self.tracks_loading = False
+            #add a little bit extra to the bottom once we're 100% done loading screens            
+            if index >= len(keys): 
+                self.ids.tracksgrid.height += self.trackHeight * 2
         
     def refreshTrackList(self):
         region = self.ids.regions.text
@@ -233,19 +264,24 @@ class TracksBrowser(BoxLayout):
             trackIds = self.trackManager.getAllTrackIds()
         trackCount = len(trackIds)
         grid = self.ids.tracksgrid
-        grid.height = self.trackHeight * (trackCount + 1)
         grid.clear_widgets()
         self.tracksGrid = grid
-
+        self.ids.scrltracks.height = 0
+        self.ids.scrltracks.scroll_y = 1.0
+        self.last_scroll_y = 1.0
+        self.loading = False                        
 
         self.dismissPopups()
         if trackCount == 0:
             self.tracksGrid.add_widget(Label(text="No tracks found - try checking for updates"))
             self.setViewDisabled(False)            
-            self.ids.namefilter.focus = True                        
+            self.ids.namefilter.focus = True
         else:
-            self.showProgressPopup("", "Loading")        
+            self.load_limit = self.INITIAL_DISPLAY_LIMIT if len(trackIds) > self.INITIAL_DISPLAY_LIMIT else len(trackIds)
+            self.ids.tracksgrid.height = self.trackHeight * self.load_limit
+            self.current_track_ids = trackIds         
             self.addNextTrack(0, trackIds)
+            self.tracks_loading = True
             
     def initRegionsList(self):
         regions = self.trackManager.regions
