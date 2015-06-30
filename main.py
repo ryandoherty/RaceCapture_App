@@ -325,7 +325,7 @@ class RaceCaptureApp(App):
         homepage_view.bind(on_select_view = lambda instance, view_name: self.switchMainView(view_name))
         return homepage_view
 
-    def init_viewbuilders(self):
+    def init_view_builders(self):
         self.view_builders = {'config': self.build_config_view,
                               'tracks': self.build_tracks_view,
                               'dash': self.build_dash_view,
@@ -336,7 +336,7 @@ class RaceCaptureApp(App):
                               }
         
     def build(self):
-        self.init_viewbuilders()
+        self.init_view_builders()
         
         Builder.load_file('racecapture.kv')
         root = self.root
