@@ -1,11 +1,11 @@
 <RoundedRect>:
 	line_width: (self.height * 0.2) + 1
-	radius: self.height * 0.05
+	radius: self.height * 0.01
     canvas:
         Color: 
         	rgb: self.rect_color
         Line:
-            rounded_rectangle: (self.x, self.y, self.right - self.x, self.top - self.y, self.radius)      
+            rounded_rectangle: (self.x + (self.line_width / 2), self.y + (self.line_width / 2), self.right - self.x - self.line_width, self.top - self.y - self.line_width, self.radius)      
             width: self.line_width
         Rectangle:
             pos: self.pos
@@ -36,16 +36,7 @@
         rect_color: root.tile_color
     BoxLayout:
         orientation: 'horizontal'
-        Label:
-            id: label
-            valign: 'middle'
-            text_size: (self.width, None)
-            font_name: root.title_font
-            font_size: self.height 
-            color: root.title_color
-            size_hint_y: 1.0
-            size_hint_x: 0.7
-            text: root.title    
+        spacing: dp(5)
         IconButton:
             id: icon
             size_hint_x: 0.3
@@ -53,6 +44,17 @@
             font_size: self.height * 1.1
             text: root.icon
             on_press: root.pressed(*args)
+        Label:
+            id: label
+            valign: 'middle'
+            halign: 'left'
+            text_size: (self.width, None)
+            font_name: root.title_font
+            font_size: self.height * 0.9
+            color: root.title_color
+            size_hint_y: 1.0
+            size_hint_x: 0.7
+            text: root.title    
 
 <IconButton>:
     background_color: [0, 0, 0, 0]

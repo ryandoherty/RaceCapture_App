@@ -96,8 +96,9 @@
     orientation: 'vertical'
     spacing: dp(10)
     BoxLayout:
-        size_hint_y: None
         height: dp(30)
+        size_hint_y: None
+        padding: (dp(20), dp(2))
         orientation: 'horizontal'
         Label:
             size_hint_x: 0.1
@@ -122,8 +123,7 @@
             on_text: root.on_region_selected(*args)
                         
     BoxLayout:
-        spacing: dp(30)
-        size_hint_y: 0.68
+        size_hint_y: 0.84
         ScrollView:
             on_scroll_move: root.on_scroll(*args)
             id: scrltracks
@@ -137,7 +137,9 @@
                 cols: 1
             
     BoxLayout:
-        size_hint_y: 0.06
+        height: dp(30)
+        size_hint_y: None
+        padding: (dp(20), dp(2))
         orientation: 'horizontal'
         CheckBox:
             size_hint_x: 0.05
@@ -148,14 +150,15 @@
             text: 'Select All'
             halign: 'left'
         Label:
-            size_hint_x: 0.7
-        IconButton:
-            size_hint_x: 0.05
+            size_hint_x: 0.53
+
+        LabelIconButton:
+            size_hint_x: None
+            width: dp(120)
             id: updatecheck
-            
             disabled: True
-            text: '\357\203\255'
-            color: ColorScheme.get_accent()
+            title: 'Update'
+            icon: '\357\203\255'
             on_press: root.on_update_check()
                             
 <TracksView>:

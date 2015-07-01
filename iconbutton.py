@@ -9,6 +9,7 @@ from kivy.graphics import Color
 from kivy.properties import NumericProperty, ListProperty, StringProperty, ObjectProperty
 from fieldlabel import FieldLabel
 from math import sin, cos, pi
+from autosportlabs.racecapture.theme.color import ColorScheme 
 
 Builder.load_file('iconbutton.kv')
 
@@ -44,9 +45,9 @@ class TileIconButton(AnchorLayout):
 class LabelIconButton(ButtonBehavior, AnchorLayout):
     title_font = StringProperty('resource/fonts/ASL_regular.ttf')
     title_font_size = NumericProperty(20)
-    tile_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))    
-    icon_color = ObjectProperty((1.0, 1.0, 1.0, 0.8))
-    title_color = ObjectProperty((1.0, 1.0, 1.0, 0.8))
+    tile_color = ObjectProperty(ColorScheme.get_accent())    
+    icon_color = ObjectProperty((0.0, 0.0, 0.0, 1.0))
+    title_color = ObjectProperty((0.0, 0.0, 0.0, 1.9))
     icon = StringProperty('')
     title = StringProperty('')
     
