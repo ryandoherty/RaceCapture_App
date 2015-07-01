@@ -24,7 +24,7 @@ class RoundedRect(BoxLayout):
     points = ObjectProperty((0,0,0,0,0))
     radius = NumericProperty(10)
         
-class TileIconButton(AnchorLayout):
+class TileIconButton(ButtonBehavior, AnchorLayout):
     title_font = StringProperty('')
     title_font_size = NumericProperty(20)
     tile_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))    
@@ -35,13 +35,6 @@ class TileIconButton(AnchorLayout):
  
     def __init__(self, **kwargs):
         super(TileIconButton, self).__init__(**kwargs)
-        self.register_event_type('on_press')
-
-    def on_button_press(self, *args):
-        self.dispatch('on_press')
-        
-    def on_press(self, *args):
-        pass
     
 class LabelIconButton(ButtonBehavior, AnchorLayout):
     title_font = StringProperty('resource/fonts/ASL_regular.ttf')
@@ -56,6 +49,3 @@ class LabelIconButton(ButtonBehavior, AnchorLayout):
     def __init__(self, **kwargs):
         super(LabelIconButton, self).__init__(**kwargs)
         
-        
-    def pressed(self, *args):
-        self.dispatch('on_press')

@@ -16,17 +16,17 @@
 		rect_color: root.tile_color
 	BoxLayout:
 		orientation: 'vertical'
-	    IconButton:
+	    Label:
 	    	id: icon
+            font_name: 'resource/fonts/fa.ttf'	    	
 	    	color: root.icon_color
 	    	size_hint_y: 0.7
-	    	font_size: self.height * 0.8
+	    	font_size: self.height * 0.7
 	    	text: root.icon
-	    	on_press: root.on_button_press()
 	    Label:
 	    	id: label
 	    	font_name: root.title_font
-	    	font_size: self.height * 0.5
+	    	font_size: self.height * 0.4
 	    	color: root.title_color
 	    	size_hint_y: 0.3
 	    	text: root.title	
