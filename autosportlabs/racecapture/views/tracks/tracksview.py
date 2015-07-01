@@ -148,7 +148,9 @@ class TracksBrowser(BoxLayout):
     tracks_loading = False
     last_scroll_y = 1.0
     INITIAL_DISPLAY_LIMIT = 10
-    LAZY_DISPLAY_CHUNK_COUNT = 1
+    LAZY_DISPLAY_CHUNK_COUNT = 2
+    LOOK_AHEAD_TRACKS = 10
+    TRACK_HEIGHT_PADDING = dp(10)
     
     def __init__(self, **kwargs):
         super(TracksBrowser, self).__init__(**kwargs)
@@ -167,14 +169,16 @@ class TracksBrowser(BoxLayout):
         sb = self.ids.scrltracks
         current_index = self.load_limit
         tracks_count = len(self.current_track_ids)
-        if sb.scroll_y < 0.1 and not self.tracks_loading and current_index < tracks_count:
-            new_load_limit = current_index + self.LAZY_DISPLAY_CHUNK_COUNT
-            if new_load_limit > tracks_count:
-                new_load_limit = tracks_count
-            self.load_limit = new_load_limit
-            self.tracks_loading = True
-            self.ids.tracksgrid.height = self.trackHeight * self.load_limit 
-            self.addNextTrack(current_index, self.current_track_ids)
+        current_pct_loaded = 1.0 - (float(current_index - self.LOOK_AHEAD_TRACKS ) / float(tracks_count))
+        if sb.scroll_y < current_pct_loaded and current_index < tracks_count:
+            if not self.tracks_loading:   
+                new_load_limit = current_index + self.LAZY_DISPLAY_CHUNK_COUNT
+                if new_load_limit > tracks_count:
+                    new_load_limit = tracks_count
+                self.load_limit = new_load_limit
+                self.tracks_loading = True
+                self.addNextTrack(current_index, self.current_track_ids)
+            Clock.schedule_once(lambda dt: self.lazy_load_more_maybe(),1.0)
          
     def set_trackmanager(self, track_manager):
         self.trackManager = track_manager
@@ -246,9 +250,6 @@ class TracksBrowser(BoxLayout):
             self.setViewDisabled(False)
             self.last_scroll_y = self.ids.scrltracks.scroll_y
             self.tracks_loading = False
-            #add a little bit extra to the bottom once we're 100% done loading screens            
-            if index >= len(keys): 
-                self.ids.tracksgrid.height += self.trackHeight * 2
         
     def refreshTrackList(self):
         region = self.ids.regions.text
@@ -258,29 +259,29 @@ class TracksBrowser(BoxLayout):
             foundIds = self.trackManager.filterTracksByName(search, foundIds)
         self.initTracksList(foundIds)
         
-    def initTracksList(self, trackIds = None):
+    def initTracksList(self, track_ids = None):
         self.setViewDisabled(True)
-        if trackIds == None:
-            trackIds = self.trackManager.getAllTrackIds()
-        trackCount = len(trackIds)
+        if track_ids == None:
+            track_ids = self.trackManager.getAllTrackIds()
+        track_count = len(track_ids)
         grid = self.ids.tracksgrid
         grid.clear_widgets()
         self.tracksGrid = grid
+        self.ids.tracksgrid.height = ((track_count) * (self.trackHeight + self.TRACK_HEIGHT_PADDING))  
         self.ids.scrltracks.height = 0
         self.ids.scrltracks.scroll_y = 1.0
         self.last_scroll_y = 1.0
         self.loading = False                        
 
         self.dismissPopups()
-        if trackCount == 0:
+        if track_count == 0:
             self.tracksGrid.add_widget(Label(text="No tracks found - try checking for updates"))
             self.setViewDisabled(False)            
             self.ids.namefilter.focus = True
         else:
-            self.load_limit = self.INITIAL_DISPLAY_LIMIT if len(trackIds) > self.INITIAL_DISPLAY_LIMIT else len(trackIds)
-            self.ids.tracksgrid.height = self.trackHeight * self.load_limit
-            self.current_track_ids = trackIds         
-            self.addNextTrack(0, trackIds)
+            self.load_limit = self.INITIAL_DISPLAY_LIMIT if len(track_ids) > self.INITIAL_DISPLAY_LIMIT else len(track_ids)
+            self.current_track_ids = track_ids         
+            self.addNextTrack(0, track_ids)
             self.tracks_loading = True
             
     def initRegionsList(self):
