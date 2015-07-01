@@ -393,14 +393,13 @@ class RaceCaptureApp(App):
         rc_api.detect_fail_callback = self.rc_detect_fail
         rc_api.detect_activity_callback = self.rc_detect_activity
         rc_api.init_comms(comms)
-        self._status_pump.start(rc_api)        
         rc_api.run_auto_detect()
 
     def rc_detect_win(self, version):
         if version.is_compatible_version():
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
             self.dataBusPump.startDataPump(self._databus, self._rc_api)
-    
+            self._status_pump.start(self._rc_api)        
             if self.rc_config.loaded == False:
                 Clock.schedule_once(lambda dt: self.on_read_config(self))
             else:
