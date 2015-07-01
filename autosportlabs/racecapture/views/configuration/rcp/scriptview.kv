@@ -41,7 +41,7 @@
             padding: [10,10]
             orientation: 'horizontal'
             BoxLayout:
-            	size_hint_x: 0.25
+            	size_hint_x: 0.2
             	orientation: 'horizontal'
             	CheckBox:
             		rcid: 'pollLog'
@@ -53,7 +53,7 @@
             		text: 'Poll logfile'
 
 			BoxLayout:
-				size_hint_x: 0.45
+				size_hint_x: 0.3
 				spacing: dp(5)
 				orientation: 'horizontal'
             	FieldLabel:
@@ -65,20 +65,20 @@
         			size_hint_y: 1.0
         			rcid: 'logLevel'
         			on_control: root.on_loglevel_selected(*args)
-        			
             Label:
-            	size_hint_x: 0.05
-            	
-            IconButton:
-            	size_hint_x: 0.1
-            	text: "\357\200\215"
-            	color: ColorScheme.get_accent()
-            	on_release: root.clearLog()
+                size_hint_x: 0.1        			            	
+            LabelIconButton:
+            	size_hint_x: 0.15
+            	title: "Clear"
+            	icon: "\357\200\215"
+            	tile_color: ColorScheme.get_accent()
+            	on_press: root.clearLog()
             Label:
             	size_hint_x: 0.1
-            IconButton:
-                size_hint_x: 0.1
-                text: "\357\200\241"
-                color: ColorScheme.get_accent()
-                on_release: root.runScript()
+            LabelIconButton:
+                size_hint_x: 0.15
+                title: "Run"
+                icon: "\357\200\241"
+                tile_color: ColorScheme.get_accent()
+                on_press: root.runScript()
             	
