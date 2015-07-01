@@ -83,6 +83,10 @@ class ScalingMap(object):
         return self.raw[mapBin]
      
     def setVolts(self, map_bin, value):
+        try:
+            value = float(value)
+        except:
+            raise ScalingMapException("Value must be numeric")
         if map_bin < SCALING_MAP_POINTS - 1:
             next_value = self.raw[map_bin+1]
             if value > next_value:
