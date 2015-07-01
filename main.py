@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.3.5"
+__version__ = "1.3.6"
 import sys
 import os
 
@@ -15,6 +15,7 @@ if __name__ == '__main__':
     from functools import partial
     from kivy.clock import Clock
     from kivy.config import Config
+    from kivy.logger import Logger
     kivy.require('1.8.0')
     Config.set('graphics', 'width', '1024')
     Config.set('graphics', 'height', '576')
@@ -47,10 +48,20 @@ if __name__ == '__main__':
 from kivy.app import App, Builder
 from autosportlabs.racecapture.config.rcpconfig import RcpConfig, VersionConfig
 from autosportlabs.racecapture.databus.databus import DataBusFactory, DataBusPump
+from autosportlabs.racecapture.status.statuspump import StatusPump
 from autosportlabs.racecapture.api.rcpapi import RcpApi
 
 class RaceCaptureApp(App):
 
+    #things that care about configuration being loaded
+    config_listeners = []
+
+    #things that care about tracks being loaded
+    tracks_listeners = []
+
+    #map of view keys to factory functions for building top level views
+    view_builders = {}
+    
     #container for all settings
     settings = None
 
@@ -66,14 +77,13 @@ class RaceCaptureApp(App):
     #pumps data from rcApi to dataBus. kind of like a bridge
     dataBusPump = DataBusPump()
 
+    _status_pump = StatusPump()
+    
     #Track database manager
     trackManager = None
 
     #Application Status bars
-    statusBar = None
-
-    #Main Views
-    configView = None
+    status_bar = None
 
     #main navigation menu
     mainNav = None
@@ -82,7 +92,7 @@ class RaceCaptureApp(App):
     screenMgr = None
 
     #main view references for dispatching notifications
-    mainViews = None
+    mainViews = {}
 
     #application arguments - initialized upon startup
     app_args = []
@@ -108,7 +118,7 @@ class RaceCaptureApp(App):
         self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
         self.settings.runtimeChannels.data_bus = self._databus        
 
-        Window.bind(on_key_down=self._on_keyboard_down)
+        Window.bind(on_keyboard=self._on_keyboard)
         self.register_event_type('on_tracks_updated')
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
@@ -117,7 +127,7 @@ class RaceCaptureApp(App):
     def on_pause(self):
         return True
     
-    def _on_keyboard_down(self, keyboard, keycode, *args):
+    def _on_keyboard(self, keyboard, keycode, *args):
         if keycode == 27:
             self.switchMainView('home')
 
@@ -143,7 +153,7 @@ class RaceCaptureApp(App):
         self.settings.userPrefs.set_pref('preferences', 'first_time_setup', False)
         
     def loadCurrentTracksSuccess(self):
-        print('Current Tracks Loaded')
+        Logger.info('RaceCaptureApp: Current Tracks Loaded')
         Clock.schedule_once(lambda dt: self.notifyTracksUpdated())            
 
     def loadCurrentTracksError(self, details):
@@ -178,7 +188,7 @@ class RaceCaptureApp(App):
         self._rc_api.runScript(self.on_run_script_complete, self.on_run_script_error)
 
     def on_run_script_complete(self, result):
-        print('run script complete: ' + str(result))
+        Logger.info('RaceCaptureApp: run script complete: ' + str(result))
 
     def on_run_script_error(self, detail):
         alertPopup('Error Running', 'Error Running Script:\n\n' + str(detail))
@@ -197,9 +207,9 @@ class RaceCaptureApp(App):
         self.showActivity("Writing completed")
         self.rc_config.stale = False
         self.dataBusPump.meta_is_stale()
-        Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_written'))
-        Clock.schedule_once(lambda dt: self.showActivity(''), 5)
-        
+        for listener in self.config_listeners:
+            Clock.schedule_once(lambda dt: listener.dispatch('on_config_written'))
+        Clock.schedule_once(lambda dt: self.showActivity(''), 5.0)
 
     def on_write_config_error(self, detail):
         alertPopup('Error Writing', 'Could not write configuration:\n\n' + str(detail))
@@ -214,7 +224,8 @@ class RaceCaptureApp(App):
             self._serial_warning()
 
     def on_read_config_complete(self, rcpCfg):
-        Clock.schedule_once(lambda dt: self.configView.dispatch('on_config_updated', self.rc_config))
+        for listener in self.config_listeners:
+            Clock.schedule_once(lambda dt: listener.dispatch('on_config_updated', self.rc_config))
         self.rc_config.stale = False
         self.showActivity('')
 
@@ -222,7 +233,7 @@ class RaceCaptureApp(App):
         alertPopup('Error Reading', 'Could not read configuration:\n\n' + str(detail))
 
     def on_tracks_updated(self, track_manager):
-        for view in self.mainViews.itervalues():
+        for view in self.tracks_listeners:
             view.dispatch('on_tracks_updated', track_manager)
 
     def notifyTracksUpdated(self):
@@ -234,21 +245,11 @@ class RaceCaptureApp(App):
     def on_main_menu(self, instance, *args):
         self.mainNav.toggle_state()
 
-    def showMainView(self, viewKey):
-        try:
-            self.screenMgr.current = viewKey
-        except Exception as detail:
-            print('Failed to load main view ' + str(viewKey) + ' ' + str(detail))
-
-    def switchMainView(self, viewKey):
-            self.mainNav.anim_to_state('closed')
-            Clock.schedule_once(lambda dt: self.showMainView(viewKey), 0.25)
-
     def showStatus(self, status, isAlert):
-        self.statusBar.dispatch('on_status', status, isAlert)
+        self.status_bar.dispatch('on_status', status, isAlert)
 
     def showActivity(self, status):
-        self.statusBar.dispatch('on_activity', status)
+        self.status_bar.dispatch('on_activity', status)
 
     def _setX(self, x):
         pass
@@ -257,22 +258,96 @@ class RaceCaptureApp(App):
         pass
 
     def on_start(self):
-        Clock.schedule_once(lambda dt: self.init_data())
-        Clock.schedule_once(lambda dt: self.init_rc_comms())
-
+        pass
+    
     def on_stop(self):
         self._rc_api.cleanup_comms()
 
+    def showMainView(self, view_name):
+        try:
+            view = self.mainViews.get(view_name)
+            if not view:
+                view = self.view_builders[view_name]()
+                self.screenMgr.add_widget(view)
+                self.mainViews[view_name] = view
+            self.screenMgr.current = view_name
+        except Exception as detail:
+            Logger.info('RaceCaptureApp: Failed to load main view ' + str(view_name) + ' ' + str(detail))
+
+    def switchMainView(self, view_name):
+            self.mainNav.anim_to_state('closed')
+            Clock.schedule_once(lambda dt: self.showMainView(view_name), 0.25)
+    
+    def build_config_view(self):
+        config_view = ConfigView(name='config',
+                                rcpConfig=self.rc_config,
+                                rc_api=self._rc_api,
+                                databus=self._databus,
+                                settings=self.settings,
+                                base_dir=self.base_dir,
+                                track_manager=self.trackManager)
+        config_view.bind(on_read_config=self.on_read_config)
+        config_view.bind(on_write_config=self.on_write_config)
+        config_view.bind(on_run_script=self.on_run_script)
+        config_view.bind(on_poll_logfile=self.on_poll_logfile)
+        config_view.bind(on_set_logfile_level=self.on_set_logfile_level)
+        self._rc_api.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: config_view.on_logfile(value)))
+        self.config_listeners.append(config_view)
+        self.tracks_listeners.append(config_view)
+        return config_view
+    
+    def build_status_view(self):
+        status_view = StatusView(self.trackManager, self._status_pump, name='status')
+        self.tracks_listeners.append(status_view)
+        return status_view
+    
+    def build_tracks_view(self):
+        tracks_view = TracksView(name='tracks', track_manager=self.trackManager)
+        self.tracks_listeners.append(tracks_view)
+        return tracks_view
+    
+    def build_dash_view(self):
+        dash_view = DashboardView(name='dash', dataBus=self._databus, settings=self.settings)
+        self.tracks_listeners.append(dash_view)
+        return dash_view
+    
+    def build_analysis_view(self):
+        analysis_view = AnalysisView(name='analysis', data_bus=self._databus, settings=self.settings)
+        self.tracks_listeners.append(analysis_view)
+        return analysis_view
+    
+    def build_preferences_view(self):
+        preferences_view = PreferencesView(name='preferences', settings=self.settings, base_dir=self.base_dir)
+        return preferences_view
+    
+    def build_homepage_view(self):
+        homepage_view = HomePageView(name='home')
+        homepage_view.bind(on_select_view = lambda instance, view_name: self.switchMainView(view_name))
+        return homepage_view
+
+    def init_view_builders(self):
+        self.view_builders = {'config': self.build_config_view,
+                              'tracks': self.build_tracks_view,
+                              'dash': self.build_dash_view,
+                              'analysis': self.build_analysis_view,
+                              'preferences': self.build_preferences_view,
+                              'status': self.build_status_view,
+                              'home': self.build_homepage_view
+                              }
+        
     def build(self):
+        self.init_view_builders()
+        
         Builder.load_file('racecapture.kv')
-        statusBar = kvFind(self.root, 'rcid', 'statusbar')
-        statusBar.bind(on_main_menu=self.on_main_menu)
-        self.statusBar = statusBar
+        root = self.root
+        
+        status_bar = root.ids.status_bar
+        status_bar.bind(on_main_menu=self.on_main_menu)
+        self.status_bar = status_bar
 
-        mainMenu = kvFind(self.root, 'rcid', 'mainMenu')
-        mainMenu.bind(on_main_menu_item=self.on_main_menu_item)
+        root.ids.main_menu.bind(on_main_menu_item=self.on_main_menu_item)
 
-        self.mainNav = kvFind(self.root, 'rcid', 'mainNav')
+        self.mainNav = root.ids.main_nav
 
         #reveal_below_anim
         #reveal_below_simple
@@ -281,42 +356,12 @@ class RaceCaptureApp(App):
         #fade_in
         self.mainNav.anim_type = 'slide_above_anim'
 
-        configView = ConfigView(name='config',
-                                rcpConfig=self.rc_config,
-                                rc_api=self._rc_api,
-                                databus=self._databus,
-                                settings=self.settings,
-                                base_dir=self.base_dir)
-        configView.bind(on_read_config=self.on_read_config)
-        configView.bind(on_write_config=self.on_write_config)
-        configView.bind(on_run_script=self.on_run_script)
-        configView.bind(on_poll_logfile=self.on_poll_logfile)
-        configView.bind(on_set_logfile_level=self.on_set_logfile_level)
+        rc_api = self._rc_api
+        rc_api.on_progress = lambda value: status_bar.dispatch('on_progress', value)
+        rc_api.on_rx = lambda value: status_bar.dispatch('on_rc_rx', value)
+        rc_api.on_tx = lambda value: status_bar.dispatch('on_rc_tx', value)
 
-        rcComms = self._rc_api
-        rcComms.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: configView.on_logfile(value)))
-        rcComms.on_progress = lambda value: statusBar.dispatch('on_progress', value)
-        rcComms.on_rx = lambda value: statusBar.dispatch('on_rc_rx', value)
-        rcComms.on_tx = lambda value: statusBar.dispatch('on_rc_tx', value)
-
-        status_view = StatusView(
-                                 self.trackManager,
-                                 rcComms,
-                                 name='status',
-                                )
-
-        tracksView = TracksView(name='tracks')
-
-        dashView = DashboardView(name='dash', dataBus=self._databus, settings=self.settings)
-
-        homepageView = HomePageView(name='home')
-        homepageView.bind(on_select_view = lambda instance, viewKey: self.switchMainView(viewKey))
-
-        analysisView = AnalysisView(name='analysis', data_bus=self._databus, settings=self.settings)
-        preferences_view = PreferencesView(self.settings, name='preferences', base_dir=self.base_dir)
-
-        screenMgr = kvFind(self.root, 'rcid', 'main')
-
+        screenMgr = root.ids.main
         #NoTransition
         #SlideTransition
         #SwapTransition
@@ -326,28 +371,16 @@ class RaceCaptureApp(App):
         #RiseInTransition
         screenMgr.transition=NoTransition()
 
-        screenMgr.add_widget(homepageView)
-        screenMgr.add_widget(configView)
-        screenMgr.add_widget(tracksView)
-        screenMgr.add_widget(dashView)
-        screenMgr.add_widget(analysisView)
-        screenMgr.add_widget(preferences_view)
-        screenMgr.add_widget(status_view)
-
-        self.mainViews = {'config' : configView,
-                          'tracks': tracksView,
-                          'dash': dashView,
-                          'analysis': analysisView,
-                          'preferences': preferences_view,
-                          'status': status_view
-                          }
-
         self.screenMgr = screenMgr
-        self.configView = configView
-        self.status_view = status_view
         self.icon = ('resource/images/app_icon_128x128.ico' if sys.platform == 'win32' else 'resource/images/app_icon_128x128.png')
-        self.check_first_time_setup()
+        Clock.schedule_once(lambda dt: self.post_launch(), 1.0)
 
+    def post_launch(self):
+        self.showMainView('home')
+        Clock.schedule_once(lambda dt: self.init_data())
+        Clock.schedule_once(lambda dt: self.init_rc_comms())
+        self.check_first_time_setup()
+        
     def check_first_time_setup(self):
         if self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'True':
             Clock.schedule_once(lambda dt: self.first_time_setup(), 0.5)
@@ -366,8 +399,7 @@ class RaceCaptureApp(App):
         if version.is_compatible_version():
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
             self.dataBusPump.startDataPump(self._databus, self._rc_api)
-            self.status_view.start_status()
-    
+            self._status_pump.start(self._rc_api)        
             if self.rc_config.loaded == False:
                 Clock.schedule_once(lambda dt: self.on_read_config(self))
             else:
@@ -393,7 +425,6 @@ class RaceCaptureApp(App):
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')
-
 
 if __name__ == '__main__':
     RaceCaptureApp().run()

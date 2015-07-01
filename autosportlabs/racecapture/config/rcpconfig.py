@@ -637,7 +637,7 @@ class Track(object):
 class TrackConfig(object):
     def __init__(self, **kwargs):
         self.stale=False
-        self.track = None
+        self.track = Track()
         self.radius = 0
         self.autoDetect = 0
         

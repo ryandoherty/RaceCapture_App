@@ -22,7 +22,7 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 
 
-Builder.load_file('autosportlabs/racecapture/views/analysis/analysisview.kv')
+ANALYSIS_VIEW_KV = 'autosportlabs/racecapture/views/analysis/analysisview.kv'
 
 class AnalysisView(Screen):
     INIT_DATASTORE_TIMEOUT = 10.0
@@ -34,6 +34,7 @@ class AnalysisView(Screen):
     _popup = None
 
     def __init__(self, **kwargs):
+        Builder.load_file(ANALYSIS_VIEW_KV)
         super(AnalysisView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
         self._databus = kwargs.get('dataBus')

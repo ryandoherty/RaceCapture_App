@@ -1,3 +1,8 @@
+==1.3.6==
+* Make AT&T Alt #1 the primary for AT&T APN settings
+* Improve launch time by lazy-loading main screens
+* Back button / Escape does not drop back to main view if dismissing keyboard or dialog
+
 ==1.3.5==
 * Improved formatting on tachometer view to allow more space for laptime / delta from best
 * Navigation screen transitions direction matches arrow direction
@@ -15,7 +20,6 @@
 * Corrected config screen layout for phone form factors
 * OBDII channels are now configurable 
 
->>>>>>> master
 ==1.3.3==
 * Reworked Android Bluetooth comms by eliminating background service and created local Java bridge
 
