@@ -1,15 +1,15 @@
 <RoundedRect>:
-	line_width: (self.height * 0.2) + 1
-	radius: self.height * 0.01
+	line_width: (self.height * 0.15) + 1
+	radius: self.height * 0.007
     canvas:
         Color: 
         	rgb: self.rect_color
         Line:
-            rounded_rectangle: (self.x + (self.line_width / 2), self.y + (self.line_width / 2), self.right - self.x - self.line_width, self.top - self.y - self.line_width, self.radius)      
+            rounded_rectangle: (self.x + (self.line_width), self.y + (self.line_width), self.right - self.x - self.line_width * 2, self.top - self.y - self.line_width *2, self.radius)      
             width: self.line_width
         Rectangle:
-            pos: self.pos
-            size: self.size
+            pos: (self.x + self.line_width, self.y + self.line_width) 
+            size: (self.width - self. line_width*2, self.height - self.line_width * 2)
 
 <TileIconButton>:
 	RoundedRect:
@@ -20,7 +20,7 @@
 	    	id: icon
 	    	color: root.icon_color
 	    	size_hint_y: 0.7
-	    	font_size: self.height * 0.9
+	    	font_size: self.height * 0.8
 	    	text: root.icon
 	    	on_press: root.on_button_press()
 	    Label:
@@ -36,24 +36,24 @@
         rect_color: root.tile_color
     BoxLayout:
         orientation: 'horizontal'
-        spacing: dp(5)
-        IconButton:
+        padding: (dp(8), 0)
+        spacing: dp(8)
+        Label:
             id: icon
-            size_hint_x: 0.3
+            size_hint_x: 0.25
+            font_name: 'resource/fonts/fa.ttf'
             color: root.icon_color
-            font_size: self.height * 1.1
+            font_size: root.icon_size
             text: root.icon
-            on_press: root.pressed(*args)
         Label:
             id: label
             valign: 'middle'
             halign: 'left'
             text_size: (self.width, None)
             font_name: root.title_font
-            font_size: self.height * 0.9
+            font_size: root.title_font_size
             color: root.title_color
-            size_hint_y: 1.0
-            size_hint_x: 0.7
+            size_hint_x: 0.75
             text: root.title    
 
 <IconButton>:

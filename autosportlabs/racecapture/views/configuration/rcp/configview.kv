@@ -9,55 +9,65 @@
         orientation: 'horizontal'
         BoxLayout:
             size_hint_x: 0.2
-            spacing: 0
             orientation: 'vertical'
-            spacing: dp(30)
             ScrollView:
+                size_hint_y: 0.75
                 id: scroller            
                 TreeView:
                     height: max(self.minimum_height, scroller.height)
-                    rcid: 'menu'
+                    id: menu
                     size_hint_y: None
                     hide_root: True
                     indent_level: dp(0)
                     indent_start: dp(5)
             BoxLayout:
-                size_hint_y: 0.1
-                orientation: 'horizontal'
-                spacing: dp(30)
-                IconButton:
-                    id: 'open'
-                    size_hint: (1.0, 1.0)
-                    pos_hint: {'center_x': .5, 'center_y': .5}                                  
-                    text: '\357\204\225'
-                    rcid: 'openconfig'
-                    on_release: root.openConfig()
-                IconButton:
-                    id: 'save'
-                    size_hint: (1.0, 1.0)
-                    pos_hint: {'center_x': .5, 'center_y': .5}
-                    text: '\357\203\207'
-                    rcid: 'saveconfig'
-                    on_release: root.saveConfig()
-            BoxLayout:
-                size_hint_y: 0.1
-                orientation: 'horizontal'
-                spacing: dp(30)                
-                IconButton:
-                    id: 'read'
-                    size_hint: (1.0, 1.0)
-                    pos_hint: {'center_x': .5, 'center_y': .5}
-                    text: '\357\202\223'
-                    rcid: 'readconfig'
-                    on_release: root.readConfig()
-                IconButton:
-                    id: 'write'
-                    size_hint: (1.0, 1.0)                
-                    pos_hint: {'center_x': .5, 'center_y': .5}
-                    text: '\357\200\231'
-                    rcid: 'writeconfig'
-                    on_release: root.writeConfig()
-                    disabled: True
+                padding: (dp(5), dp(5))           
+                size_hint_y: 0.25
+                BoxLayout:
+                    orientation: 'vertical'
+                    padding: (dp(0), dp(10))
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint_y: 0.45
+                        spacing: dp(7)
+                        LabelIconButton:
+                            id: open
+                            title: 'Open'
+                            icon_size: self.height * 0.5
+                            title_font_size: self.height * 0.35
+                            icon: '\357\204\225'
+                            on_press: root.openConfig()
+                                
+                        LabelIconButton:
+                            id: save
+                            title: 'Save'
+                            icon_size: self.height * 0.5
+                            title_font_size: self.height * 0.35
+                            icon: '\357\203\207'
+                            on_press: root.saveConfig()
+                    BoxLayout:
+                        size_hint_y: 0.1                        
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint_y: 0.45
+                        spacing: dp(7)                        
+                        LabelIconButton:
+                            id: read
+                            title: 'Read'
+                            icon_size: self.height * 0.5
+                            title_font_size: self.height * 0.35                 
+                            icon: '\357\202\223'
+                            on_press: root.readConfig()
+        
+                        LabelIconButton:
+                            id: write
+                            title: 'Write'
+                            icon_size: self.height * 0.5
+                            title_font_size: self.height * 0.35
+                            icon: '\357\200\231'
+                            on_press: root.writeConfig()
+                            disabled: True
+    
         BoxLayout:
             size_hint_x: 0.8
             padding: [sp(10), sp(10), 0, 0]

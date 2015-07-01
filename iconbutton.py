@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.app import Builder
 from kivy.graphics import Color
+from kivy.metrics import sp, dp
 from kivy.properties import NumericProperty, ListProperty, StringProperty, ObjectProperty
 from fieldlabel import FieldLabel
 from math import sin, cos, pi
@@ -19,7 +20,7 @@ class IconButton(Button):
 
 class RoundedRect(BoxLayout):
     rect_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))
-    line_width = NumericProperty(10)
+    line_width = NumericProperty(dp(10))
     points = ObjectProperty((0,0,0,0,0))
     radius = NumericProperty(10)
         
@@ -44,11 +45,12 @@ class TileIconButton(AnchorLayout):
     
 class LabelIconButton(ButtonBehavior, AnchorLayout):
     title_font = StringProperty('resource/fonts/ASL_regular.ttf')
-    title_font_size = NumericProperty(20)
+    title_font_size = NumericProperty(sp(20))
     tile_color = ObjectProperty(ColorScheme.get_accent())    
     icon_color = ObjectProperty((0.0, 0.0, 0.0, 1.0))
     title_color = ObjectProperty((0.0, 0.0, 0.0, 1.9))
     icon = StringProperty('')
+    icon_size = NumericProperty(sp(25))
     title = StringProperty('')
     
     def __init__(self, **kwargs):
