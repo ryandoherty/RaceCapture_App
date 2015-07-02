@@ -1,6 +1,8 @@
 import re
 from kivy.uix.textinput import TextInput
 from kivy.properties import NumericProperty
+from kivy.core.window import Window
+
 class ValueField(TextInput):
     
     def __init__(self, *args, **kwargs):
@@ -8,18 +10,20 @@ class ValueField(TextInput):
         self.multiline = False
         super(ValueField, self).__init__(*args, **kwargs)
 
+    def on_focus(self, instance, value):
+        if value:
+            Window.bind(on_keyboard=self._on_keyboard)
+        else:
+            Window.unbind(on_keyboard=self._on_keyboard)
+            self.dispatch('on_text_validate')
+
     def set_next(self, next):
         self.next = next
 
-    def _keyboard_on_key_down(self, window, keycode, text, modifiers):
-        key, key_str = keycode
-        if key in (9, 13) and self.next is not None:
+    def _on_keyboard(self, keyboard, keycode, *args):
+        if keycode == 9: #tab
             self.next.focus = True
-            self.next.select_all()
             self.dispatch('on_text_validate')
-        else:
-            super(ValueField, self)._keyboard_on_key_down(window, keycode, text, modifiers)
-            
 
 class TextValueField(ValueField):
     max_len = NumericProperty(100)

@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 
 from math import sin
 from installfix_garden_graph import Graph, LinePlot
@@ -204,35 +204,40 @@ class AnalogScalingMapEditor(BoxLayout):
     def _refocus(self, widget):
         widget.focus = True
         
-    def on_volts(self, mapBin, instance, focus_value):
-        if not focus_value:
-            value = instance.text.strip()
-            if value == '' or value == "." or value == "-": value = 0
-            try:
-                value = float(value)
-                if self.scaling_map:
-                    self.scaling_map.setVolts(mapBin, value)
-                    self.dispatch('on_map_updated')
-                    self.regen_plot()
-            except ScalingMapException as e:
-                warn = CenteredBubble()
-                warn.add_widget(WarnLabel(text=str(e)))
-                warn.auto_dismiss_timeout(WARN_DISMISS_TIMEOUT)
-                warn.background_color = (1, 0, 0, 1.0)
-                warn.size = (dp(200), dp(50))
-                warn.size_hint = (None,None)
-                self.get_root_window().add_widget(warn)
-                warn.center_on(instance)
-                original_value = self.scaling_map.getVolts(mapBin)
-                self.set_volts_cell(instance, original_value)
-                Clock.schedule_once(lambda dt: self._refocus(instance))
-            except Exception as e:
-                
-                alertPopup('Scaling Map', str(e))
-                original_value = self.scaling_map.getVolts(mapBin)
-                self.set_volts_cell(instance, original_value)
-                    
+    def on_volts(self, mapBin, instance):
+        value = instance.text.strip()
+        if value == '' or value == "." or value == "-":
+            value = 0
+            instance.text = str(value)
+        try:
+            value = float(value)
+            if self.scaling_map:
+                self.scaling_map.setVolts(mapBin, value)
+                self.dispatch('on_map_updated')
+                self.regen_plot()
+        except ScalingMapException as e:
+            warn = CenteredBubble()
+            warn.add_widget(WarnLabel(text=str(e)))
+            warn.auto_dismiss_timeout(WARN_DISMISS_TIMEOUT)
+            warn.background_color = (1, 0, 0, 1.0)
+            warn.size = (dp(200), dp(50))
+            warn.size_hint = (None,None)
+            self.get_root_window().add_widget(warn)
+            warn.center_on(instance)
+            original_value = self.scaling_map.getVolts(mapBin)
+            self.set_volts_cell(instance, original_value)
+            Clock.schedule_once(lambda dt: self._refocus(instance))
+        except Exception as e:
+
+            alertPopup('Scaling Map', str(e))
+            original_value = self.scaling_map.getVolts(mapBin)
+            self.set_volts_cell(instance, original_value)
+
     def on_scaled(self, mapBin, instance, value):
+        value = value.strip()
+        if value == '' or value == "." or value == "-":
+            value = 0
+            instance.text = str(value)
         try:
             value = float(value)
             if self.scaling_map:

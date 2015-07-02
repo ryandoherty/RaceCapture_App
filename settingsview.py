@@ -1,6 +1,6 @@
 import kivy
 from valuefield import ValueField
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout

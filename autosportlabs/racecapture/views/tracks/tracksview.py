@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
@@ -10,6 +10,7 @@ from kivy.uix.textinput import TextInput
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
+from kivy.core.window import Window
 import json
 import sets
 from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
@@ -26,12 +27,8 @@ class SearchInput(TextInput):
         self.register_event_type('on_search')
         super(SearchInput, self).__init__(*args, **kwargs)
     
-    def _keyboard_on_key_down(self, window, keycode, text, modifiers):
-        key, key_str = keycode
-        if key in (9,13):
-            self.dispatch('on_search')
-        else:
-            super(SearchInput, self)._keyboard_on_key_down(window, keycode, text, modifiers)
+    def on_text_validate(self, *args):
+        self.dispatch('on_search')
             
     def on_search(self, *args):
         pass

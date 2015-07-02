@@ -143,7 +143,7 @@ class Graph(Widget):
         super(Graph, self).__init__(**kwargs)
 
         with self.canvas:
-            self._fbo = Fbo(size=self.size, with_stencilbuffer=True)
+            self._fbo = Fbo(size=self.size)
 
         with self._fbo:
             self._background_color = Color(*self.background_color)
@@ -155,7 +155,7 @@ class Graph(Widget):
 
         with self.canvas:
             Color(1, 1, 1)
-            self._fbo_rect = Rectangle(size=self.size, texture=self._fbo.texture)
+            self._fbo_rect = Rectangle(size=self.size)
 
         mesh = self._mesh_rect
         mesh.vertices = [0] * (5 * 4)
@@ -900,9 +900,13 @@ class Plot(EventDispatcher):
         funcy = log10 if params['ylog'] else lambda x: x
         xmin = funcx(params['xmin'])
         ymin = funcy(params['ymin'])
+        ymax = funcy(params['ymax'])
+        xmax = funcy(params['xmax'])
         size = params['size']
-        ratiox = (size[2] - size[0]) / float(funcx(params['xmax']) - xmin)
-        ratioy = (size[3] - size[1]) / float(funcy(params['ymax']) - ymin)
+        yrange = ymax - ymin
+        xrange = xmax - xmin
+        ratioy = 1 if yrange == 0 else (size[3] - size[1]) / float(ymax - ymin)
+        ratiox = 1 if xrange == 0 else (size[2] - size[0]) / float(xmax - xmin)
         for x, y in self.points:
             yield (
                 (funcx(x) - xmin) * ratiox + size[0],

@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from utils import kvFind
 from kivy.core.window import Window
 from kivy.properties import NumericProperty
