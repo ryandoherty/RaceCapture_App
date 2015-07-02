@@ -21,7 +21,6 @@ class IconButton(Button):
 class RoundedRect(BoxLayout):
     rect_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))
     line_width = NumericProperty(dp(10))
-    points = ObjectProperty((0,0,0,0,0))
     radius = NumericProperty(10)
         
 class TileIconButton(ButtonBehavior, AnchorLayout):
