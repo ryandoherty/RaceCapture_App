@@ -28,24 +28,10 @@
 					BoxLayout:
 						orientation: 'horizontal'
 						TimeDelta:
-							size_hint_x: 0.50
 							rcid: 'delta'
 							channel: 'LapDelta'
 							halign: 'left'
 							value: None
-						BoxLayout:
-							size_hint_x: 0.50
-							orientation: 'vertical'
-							Widget:
-								size_hint_y: 0.25
-							Laptime:
-								size_hint_y: 0.50
-								rcid: 'bestLap'
-								channel: 'BestLap'
-								halign: 'center'
-								normal_color: [1.0, 0.0 , 1.0, 1.0]
-							Widget:
-								size_hint_y: 0.25
 		AnchorLayout:
 			anchor_x: 'left'
 			anchor_y: 'center'
