@@ -1,4 +1,5 @@
 import kivy
+import traceback
 kivy.require('1.9.0')
 from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty, DictProperty,\
     BooleanProperty
@@ -150,9 +151,12 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self.refresh_value(value)
 
     def on_title(self, instance, value):
-        if not value == None:
-            view =  self.ids.title
-            view.text = str(value)
+        try:
+            if value is not None:
+                view =  self.ids.title
+                view.text = str(value)
+        except: #the gauge may not have a title
+            pass
 
     def sensor_formatter(self, value):
         return "" if value is None else self.sensor_format.format(value)
@@ -248,15 +252,20 @@ class Gauge(ButtonBehavior, AnchorLayout):
             self._popup.dismiss()
             self._popup = None
                 
-    def on_channel(self, instance, value):
+                
+    def _update_gauge_meta(self):
         try:
-            channel_meta = self.settings.runtimeChannels.channels.get(value)
-            self._update_display(channel_meta)
-            self.update_title(value, channel_meta)                
-            self._update_channel_binding()
-            self._update_channel_ranges()
+            if self.settings:
+                channel_meta = self.settings.runtimeChannels.channels.get(self.channel)
+                self._update_display(channel_meta)
+                self.update_title(self.channel, channel_meta)                
+                self._update_channel_binding()
+                self._update_channel_ranges()
         except Exception as e:
             Logger.error('Gauge: Error setting channel {} {}'.format(value, str(e)))
+        
+    def on_channel(self, instance, value):
+        self._update_gauge_meta()
 
     def on_settings(self, instance, value):
         #Do I have an id so I can track my settings?
@@ -264,21 +273,22 @@ class Gauge(ButtonBehavior, AnchorLayout):
             channel = self.settings.userPrefs.get_gauge_config(self.rcid)
             if channel:
                 self.channel = channel
-
+                self._update_gauge_meta()
+                
     def on_data_bus(self, instance, value):
         self._update_channel_binding()
 
     def update_title(self, channel_name, channel_meta):
         try:
+            title = ''
             if channel_name is not None and channel_meta is not None:
                 title = channel_meta.name
                 if channel_meta.units and len(channel_meta.units):
                     title += '\n({})'.format(channel_meta.units)
-                self.title = title
-            else:
-                self.title = ''
+            self.title = title
         except Exception as e:
-            Logger.error('Gauge: Failed to update gauge title & units ' + str(e))
+            Logger.error('Gauge: Failed to update gauge title & units ' + str(e) + ' ' + str(title))
+            traceback.print_exc()
         
     def _update_display(self, channel_meta):
         try:
