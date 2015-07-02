@@ -18,6 +18,7 @@ from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from utils import *
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+from iconbutton import LabelIconButton
 
 Builder.load_file('autosportlabs/racecapture/views/tracks/tracksview.kv')
 
