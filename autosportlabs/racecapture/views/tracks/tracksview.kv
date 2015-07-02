@@ -2,110 +2,110 @@
 #:import ColorScheme autosportlabs.racecapture.theme.color.ColorScheme
 
 <TracksUpdateStatusView>:
-	orientation: 'vertical'
-	ProgressBar:
-		id: progress
-	Label:
-		id: updatemsg
-		
+    orientation: 'vertical'
+    ProgressBar:
+        id: progress
+    Label:
+        id: updatemsg
+        
 <TrackInfoView>:
-	orientation: 'vertical'
-	spacing: dp(10)
-	canvas.before:
+    orientation: 'vertical'
+    spacing: dp(10)
+    canvas.before:
         Color:
             rgba: 0.1, 0.1, 0.1, 1
         Rectangle:
             pos: self.pos
             size: self.size
-	Label:
-    	font_size: dp(20)
-    	bold: True
-    	size_hint_y: 0.1
-		text: ''
-		id: name
-	BoxLayout:
-		orientation: 'horizontal'
-		BoxLayout:
-			size_hint_x: 0.90
-			padding: (dp(10), dp(10))
-			spacing: dp(30)
-			orientation: 'horizontal'
-			RaceTrackView:
-				id: track
-				size_hint_x: 0.7
-		    BoxLayout:
-            	spacing: dp(10)
-		    	orientation: 'vertical'
-				size_hint_x: 0.3
-		    	padding: (dp(10), dp(10))
-				canvas.before:
-			        Color:
-			            rgba: 0.15, 0.15, 0.15, 1
-			        Rectangle:
-			            pos: self.pos
-			            size: self.size
-			            
-				AnchorLayout:
-					size_hint_y: 0.4
-					anchor_x: 'center'
-					canvas.before:
-				        Color:
-				            rgba: 0.2, 0.2, 0.2, 1
-				        Rectangle:
-				            pos: self.pos
-				            size: self.size
-					size_hint_x: 1.0
-	            	Image:
-	            		id: flag
-	            		size_hint_x: None	            	
-						
+    Label:
+        font_size: dp(20)
+        bold: True
+        size_hint_y: 0.1
+        text: ''
+        id: name
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            size_hint_x: 0.90
+            padding: (dp(10), dp(10))
+            spacing: dp(30)
+            orientation: 'horizontal'
+            RaceTrackView:
+                id: track
+                size_hint_x: 0.7
+            BoxLayout:
+                spacing: dp(10)
+                orientation: 'vertical'
+                size_hint_x: 0.3
+                padding: (dp(10), dp(10))
+                canvas.before:
+                    Color:
+                        rgba: 0.15, 0.15, 0.15, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                        
+                AnchorLayout:
+                    size_hint_y: 0.4
+                    anchor_x: 'center'
+                    canvas.before:
+                        Color:
+                            rgba: 0.2, 0.2, 0.2, 1
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    size_hint_x: 1.0
+                    Image:
+                        id: flag
+                        size_hint_x: None                   
+                        
 
-				BoxLayout:
-					size_hint_y: 0.4
-					orientation: 'horizontal'
-	            	spacing: dp(10)					
-					FieldLabel:
-						halign: 'center'
-						size_hint_x: 0.4
-						id: configuration
-						text: ''
+                BoxLayout:
+                    size_hint_y: 0.4
+                    orientation: 'horizontal'
+                    spacing: dp(10)                 
+                    FieldLabel:
+                        halign: 'center'
+                        size_hint_x: 0.4
+                        id: configuration
+                        text: ''
 
-				BoxLayout:
-					size_hint_y: 0.1
+                BoxLayout:
+                    size_hint_y: 0.1
 
-				BoxLayout:
-					size_hint_y: 0.1
-					orientation: 'horizontal'
-	            	spacing: dp(10)					
-					FieldLabel:
-						halign: 'center'
-						size_hint_x: 0.4
-						id: length
-		
+                BoxLayout:
+                    size_hint_y: 0.1
+                    orientation: 'horizontal'
+                    spacing: dp(10)                 
+                    FieldLabel:
+                        halign: 'center'
+                        size_hint_x: 0.4
+                        id: length
+        
 <TrackItemView>:
-	BoxLayout:
-		orientation: 'horizontal'
-		CheckBox:
-			size_hint_x: 0.10
-			on_active: root.track_select(*args)
-			id: select
-		TrackInfoView:
-			id: trackinfo
+    BoxLayout:
+        orientation: 'horizontal'
+        CheckBox:
+            size_hint_x: 0.10
+            on_active: root.track_select(*args)
+            id: select
+        TrackInfoView:
+            id: trackinfo
 
 <TracksBrowser>:
-	orientation: 'vertical'
-	spacing: dp(10)
+    orientation: 'vertical'
+    spacing: dp(10)
     BoxLayout:
-	    size_hint_y: None
-	    height: dp(30)
-    	orientation: 'horizontal'
-    	Label:
-    		size_hint_x: 0.1
-    		text: 'Search'
-		SearchInput:
-			size_hint_x: 0.50
-			id: namefilter
-			multiline: False
+        size_hint_y: None
+        height: dp(30)
+        orientation: 'horizontal'
+        Label:
+            size_hint_x: 0.1
+            text: 'Search'
+        SearchInput:
+            size_hint_x: 0.50
+            id: namefilter
+            multiline: False
         IconButton:
             size_hint_x: 0.05
             id: search
@@ -113,62 +113,63 @@
             text: u'\uf002'
             color: ColorScheme.get_accent()
             on_press: root.on_search_track_name()
-		Label:
-			size_hint_x: 0.15
-			text: 'Region'
-		Spinner:
-			size_hint_x: 0.25
-			id: regions
-			on_text: root.on_region_selected(*args)
-			 			
-	BoxLayout:
-    	spacing: dp(30)
-		size_hint_y: 0.68
-		ScrollView:
-			id: scrltracks
-		    do_scroll_x:False
-		    do_scroll_y:True
-		    GridLayout:
-		    	id: tracksgrid
-		        padding: [dp(20), dp(20)]
-		        spacing: [dp(10), dp(10)]
-		        size_hint_y: None
-		        cols: 1
-	        
+        Label:
+            size_hint_x: 0.15
+            text: 'Region'
+        Spinner:
+            size_hint_x: 0.25
+            id: regions
+            on_text: root.on_region_selected(*args)
+                        
     BoxLayout:
-    	size_hint_y: 0.06
-    	orientation: 'horizontal'
-    	CheckBox:
-    		size_hint_x: 0.05
-    		id: selectall
-    		on_active: root.selectAll(*args)
-    	FieldLabel:
-    		size_hint_x: 0.25
-    		text: 'Select All'
-    		halign: 'left'
-    	Label:
-    		size_hint_x: 0.7
-    	IconButton:
-    		size_hint_x: 0.05
-    		id: updatecheck
-    		
-    		disabled: True
-    		text: '\357\203\255'
-    		color: ColorScheme.get_accent()
-    		on_press: root.on_update_check()
-							
+        spacing: dp(30)
+        size_hint_y: 0.68
+        ScrollView:
+            on_scroll_move: root.on_scroll(*args)
+            id: scrltracks
+            do_scroll_x:False
+            do_scroll_y:True
+            GridLayout:
+                id: tracksgrid
+                padding: [dp(20), dp(20)]
+                spacing: [dp(10), dp(10)]
+                size_hint_y: None
+                cols: 1
+            
+    BoxLayout:
+        size_hint_y: 0.06
+        orientation: 'horizontal'
+        CheckBox:
+            size_hint_x: 0.05
+            id: selectall
+            on_active: root.selectAll(*args)
+        FieldLabel:
+            size_hint_x: 0.25
+            text: 'Select All'
+            halign: 'left'
+        Label:
+            size_hint_x: 0.7
+        IconButton:
+            size_hint_x: 0.05
+            id: updatecheck
+            
+            disabled: True
+            text: '\357\203\255'
+            color: ColorScheme.get_accent()
+            on_press: root.on_update_check()
+                            
 <TracksView>:
-	BoxLayout:
-	    size_hint: (1.0, 1.0)
-	    orientation: 'vertical'
-	    padding: [dp(5),dp(5)]
-	    spacing: dp(5)
-		HSeparator:
-			text: 'Race Tracks'
-			size_hint_y: 0.05
-			halign: 'left'    
-		BoxLayout:
-			size_hint_y: 0.01
-			Label:
-		TracksBrowser:
-		    id: browser
+    BoxLayout:
+        size_hint: (1.0, 1.0)
+        orientation: 'vertical'
+        padding: [dp(5),dp(5)]
+        spacing: dp(5)
+        HSeparator:
+            text: 'Race Tracks'
+            size_hint_y: 0.05
+            halign: 'left'    
+        BoxLayout:
+            size_hint_y: 0.01
+            Label:
+        TracksBrowser:
+            id: browser
