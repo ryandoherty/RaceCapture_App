@@ -5,13 +5,13 @@ from kivy.app import Builder
 from kivy.metrics import dp
 from utils import kvFind, kvquery
 from kivy.properties import NumericProperty, ObjectProperty
-from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+from autosportlabs.racecapture.views.dashboard.widgets.gauge import CustomizableGauge
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/digitalgauge.kv')
 
 DEFAULT_BACKGROUND_COLOR = [0, 0, 0, 0]
 
-class DigitalGauge(Gauge):
+class DigitalGauge(CustomizableGauge):
 
     alert_background_color = ObjectProperty(DEFAULT_BACKGROUND_COLOR)        
     

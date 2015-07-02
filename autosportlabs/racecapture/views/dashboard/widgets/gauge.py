@@ -46,42 +46,187 @@ class CustomizeGaugeBubble(CenteredBubble):
 
 NULL_LAP_TIME='--:--.---'
 
-class Gauge(ButtonBehavior, AnchorLayout):
-    _customizeGaugeBubble = None
+class Gauge(AnchorLayout):
     _valueView = None
-    is_removable = BooleanProperty(True)
-    is_channel_selectable = BooleanProperty(True)
     settings = ObjectProperty(None)    
     value_size = NumericProperty(0)
     title_size = NumericProperty(0)
-    channel = StringProperty(None, allownone=True)    
     title = StringProperty('')
-    value = NumericProperty(None, allownone=True)
-    sensor_format = "{:.0f}"
-    value_formatter = None
-    precision = NumericProperty(DEFAULT_PRECISION)
-    type = NumericProperty(DEFAULT_TYPE)
-    warning = ObjectProperty(Range())
-    alert = ObjectProperty(Range())
-    min = NumericProperty(DEFAULT_MIN)
-    max = NumericProperty(DEFAULT_MAX)
-    title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
-    normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
-    pressed = ListProperty([0,0])
     data_bus = ObjectProperty(None)
     rcid = None
-    _popup = None
-
-    _dismiss_customization_popup_trigger = None
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
         self.rcid = kwargs.get('rcid', self.rcid)
         self.data_bus = kwargs.get('dataBus', self.data_bus)
         self.settings = kwargs.get('settings', self.settings)
+
+    @property
+    def valueView(self):
+        if not self._valueView:
+            self._valueView = self.ids.value
+        return self._valueView
+
+    @property
+    def titleView(self):
+        return self.ids.title
+        
+
+    def on_title(self, instance, value):
+        try:
+            if value is not None:
+                view =  self.ids.title
+                view.text = str(value)
+        except: #the gauge may not have a title
+            pass
+                
+    def on_title_color(self, instance, value):
+        self.titleView.color = value
+    
+    def on_title_size(self, instance, value):
+        view = self.titleView
+        if view:
+            view.font_size = value
+    
+    def update_title(self, channel_name, channel_meta):
+        try:
+            title = ''
+            if channel_name is not None and channel_meta is not None:
+                title = channel_meta.name
+                if channel_meta.units and len(channel_meta.units):
+                    title += '\n({})'.format(channel_meta.units)
+            self.title = title
+        except Exception as e:
+            Logger.error('Gauge: Failed to update gauge title & units ' + str(e) + ' ' + str(title))
+            traceback.print_exc()
+                 
+class SingleChannelGauge(Gauge):
+    channel = StringProperty(None, allownone=True)    
+    value = NumericProperty(None, allownone=True)
+    sensor_format = "{:.0f}"
+    value_formatter = None
+    precision = NumericProperty(DEFAULT_PRECISION)
+    type = NumericProperty(DEFAULT_TYPE)
+    title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
+    normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
+
+    def __init__(self, **kwargs):
+        super(SingleChannelGauge, self).__init__(**kwargs)
         self.channel = kwargs.get('targetchannel', self.channel)
-        self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
         self.value_formatter = self.sensor_formatter        
+
+    def on_channel_meta(self, channel_metas):
+        channel = self.channel
+        channel_meta = channel_metas.get(channel)
+        if channel_meta is not None:
+            self._update_display(channel_meta)            
+            self.update_title(channel, channel_meta)
+                
+    def _update_gauge_meta(self):
+        try:
+            if self.settings:
+                channel_meta = self.settings.runtimeChannels.channels.get(self.channel)
+                self._update_display(channel_meta)
+                self.update_title(self.channel, channel_meta)                
+                self._update_channel_binding()
+                self._update_channel_ranges()
+        except Exception as e:
+            Logger.error('Gauge: Error setting channel {} {}'.format(value, str(e)))
+        
+    def on_settings(self, instance, value):
+        #Do I have an id so I can track my settings?
+        if self.rcid:
+            channel = self.settings.userPrefs.get_gauge_config(self.rcid)
+            if channel:
+                self.channel = channel
+                self._update_gauge_meta()
+                
+    def on_data_bus(self, instance, value):
+        self._update_channel_binding()
+    
+    def refresh_value(self, value):
+        view = self.valueView
+        if view:
+            view.text = self.value_formatter(value)
+            self.updateColors()
+        
+    def on_value(self, instance, value):
+        self.refresh_value(value)
+
+    def sensor_formatter(self, value):
+        return "" if value is None else self.sensor_format.format(value)
+        
+    def laptime_formatter(self, value):
+        fmt = 0
+        if not value:
+            fmt =  NULL_LAP_TIME
+        else:
+            int_min_value = int(value)
+            fraction_min_view = 60.0 * (value - float(int_min_value))
+            if value == 0:
+                fmt = NULL_LAP_TIME
+            else:
+                fmt = '{}:{}'.format(int_min_value,'{0:06.3f}'.format(fraction_min_view))
+        return fmt
+        
+    def update_value_format(self):
+        if self.type == CHANNEL_TYPE_TIME:
+            self.value_formatter = self.laptime_formatter
+        else:
+            self.sensor_format = '{:.' + str(self.precision) + 'f}'
+            self.value_formatter = self.sensor_formatter
+            
+        self.refresh_value(self.value)
+
+    def on_value_size(self, instance, value):
+        view = self.valueView
+        if view:
+            view.font_size = value
+    
+    def on_channel(self, instance, value):
+        self._update_gauge_meta()
+        
+    def _update_display(self, channel_meta):
+        try:
+            if channel_meta:
+                self.min = channel_meta.min
+                self.max = channel_meta.max
+                self.precision = channel_meta.precision
+                self.type = channel_meta.type if channel_meta.type is not CHANNEL_TYPE_UNKNOWN else self.type
+            else:
+                self.min = DEFAULT_MIN
+                self.max = DEFAULT_MAX
+                self.precision = DEFAULT_PRECISION
+                self.value = DEFAULT_VALUE
+                self.type = DEFAULT_TYPE
+            self.update_value_format()
+        except Exception as e:
+            Logger.error('Gauge: Failed to update gauge min/max ' + str(e))
+        
+    def _update_channel_binding(self):
+        dataBus = self.data_bus
+        channel = self.channel
+        if dataBus and channel:
+            dataBus.addChannelListener(str(channel), self.setValue)
+            dataBus.addMetaListener(self.on_channel_meta)
+            
+    def setValue(self, value):
+        self.value = value
+    
+class CustomizableGauge(ButtonBehavior, SingleChannelGauge):
+    _popup = None
+    _customizeGaugeBubble = None
+    warning = ObjectProperty(Range())
+    alert = ObjectProperty(Range())
+    min = NumericProperty(DEFAULT_MIN)
+    max = NumericProperty(DEFAULT_MAX)
+    _dismiss_customization_popup_trigger = None
+    is_removable = BooleanProperty(True)
+    is_channel_selectable = BooleanProperty(True)
+
+    def __init__(self, **kwargs):
+        super(CustomizableGauge, self).__init__(**kwargs)
+        self._dismiss_customization_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
 
     def _remove_customization_bubble(self, *args):
         try:
@@ -118,16 +263,6 @@ class Gauge(ButtonBehavior, AnchorLayout):
         self._remove_customization_bubble()
         self.showChannelSelectDialog()        
 
-    @property
-    def valueView(self):
-        if not self._valueView:
-            self._valueView = self.ids.value
-        return self._valueView
-
-    @property
-    def titleView(self):
-        return self.ids.title
-
     def select_alert_color(self):
         value = self.value
         color = self.normal_color
@@ -140,72 +275,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
     def updateColors(self):
         view = self.valueView
         if view: view.color = self.select_alert_color()
-        
-    def refresh_value(self, value):
-        view = self.valueView
-        if view:
-            view.text = self.value_formatter(value)
-            self.updateColors()
-        
-    def on_value(self, instance, value):
-        self.refresh_value(value)
 
-    def on_title(self, instance, value):
-        try:
-            if value is not None:
-                view =  self.ids.title
-                view.text = str(value)
-        except: #the gauge may not have a title
-            pass
-
-    def sensor_formatter(self, value):
-        return "" if value is None else self.sensor_format.format(value)
-        
-    def laptime_formatter(self, value):
-        fmt = 0
-        if not value:
-            fmt =  NULL_LAP_TIME
-        else:
-            int_min_value = int(value)
-            fraction_min_view = 60.0 * (value - float(int_min_value))
-            if value == 0:
-                fmt = NULL_LAP_TIME
-            else:
-                fmt = '{}:{}'.format(int_min_value,'{0:06.3f}'.format(fraction_min_view))
-        return fmt
-        
-    def update_value_format(self):
-        if self.type == CHANNEL_TYPE_TIME:
-            self.value_formatter = self.laptime_formatter
-        else:
-            self.sensor_format = '{:.' + str(self.precision) + 'f}'
-            self.value_formatter = self.sensor_formatter
-            
-        self.refresh_value(self.value)
-                
-    def on_title_color(self, instance, value):
-        self.titleView.color = value
-
-    def on_value_size(self, instance, value):
-        view = self.valueView
-        if view:
-            view.font_size = value
-    
-    def on_title_size(self, instance, value):
-        view = self.titleView
-        if view:
-            view.font_size = value
-    
-    def on_channel_meta(self, channel_metas):
-        channel = self.channel
-        channel_meta = channel_metas.get(channel)
-        if channel_meta is not None:
-            self._update_display(channel_meta)            
-            self.update_title(channel, channel_meta)
-            
-    def setValue(self, value):
-        self.value = value
-            
     def showChannelSelectDialog(self):  
         content = ChannelSelectView(settings=self.settings, channel=self.channel)
         content.bind(on_channel_selected=self.channel_selected)
@@ -223,7 +293,6 @@ class Gauge(ButtonBehavior, AnchorLayout):
             self.alert = alert_range
         except Exception as e:
             Logger.error("Gauge: Error customizing channel: " + str(e))
-            
         self._dismiss_popup()
              
     def showChannelConfigDialog(self):          
@@ -251,69 +320,7 @@ class Gauge(ButtonBehavior, AnchorLayout):
         if self._popup:
             self._popup.dismiss()
             self._popup = None
-                
-                
-    def _update_gauge_meta(self):
-        try:
-            if self.settings:
-                channel_meta = self.settings.runtimeChannels.channels.get(self.channel)
-                self._update_display(channel_meta)
-                self.update_title(self.channel, channel_meta)                
-                self._update_channel_binding()
-                self._update_channel_ranges()
-        except Exception as e:
-            Logger.error('Gauge: Error setting channel {} {}'.format(value, str(e)))
-        
-    def on_channel(self, instance, value):
-        self._update_gauge_meta()
 
-    def on_settings(self, instance, value):
-        #Do I have an id so I can track my settings?
-        if self.rcid:
-            channel = self.settings.userPrefs.get_gauge_config(self.rcid)
-            if channel:
-                self.channel = channel
-                self._update_gauge_meta()
-                
-    def on_data_bus(self, instance, value):
-        self._update_channel_binding()
-
-    def update_title(self, channel_name, channel_meta):
-        try:
-            title = ''
-            if channel_name is not None and channel_meta is not None:
-                title = channel_meta.name
-                if channel_meta.units and len(channel_meta.units):
-                    title += '\n({})'.format(channel_meta.units)
-            self.title = title
-        except Exception as e:
-            Logger.error('Gauge: Failed to update gauge title & units ' + str(e) + ' ' + str(title))
-            traceback.print_exc()
-        
-    def _update_display(self, channel_meta):
-        try:
-            if channel_meta:
-                self.min = channel_meta.min
-                self.max = channel_meta.max
-                self.precision = channel_meta.precision
-                self.type = channel_meta.type if channel_meta.type is not CHANNEL_TYPE_UNKNOWN else self.type
-            else:
-                self.min = DEFAULT_MIN
-                self.max = DEFAULT_MAX
-                self.precision = DEFAULT_PRECISION
-                self.value = DEFAULT_VALUE
-                self.type = DEFAULT_TYPE
-            self.update_value_format()
-        except Exception as e:
-            Logger.error('Gauge: Failed to update gauge min/max ' + str(e))
-        
-    def _update_channel_binding(self):
-        dataBus = self.data_bus
-        channel = self.channel
-        if dataBus and channel:
-            dataBus.addChannelListener(str(channel), self.setValue)
-            dataBus.addMetaListener(self.on_channel_meta)
-                 
     def on_release(self):
         if not self.channel:
             self.showChannelSelectDialog()
@@ -336,3 +343,4 @@ class Gauge(ButtonBehavior, AnchorLayout):
                 bubble.auto_dismiss_timeout(POPUP_DISMISS_TIMEOUT_SHORT)
                 self._customizeGaugeBubble = bubble
                 self.add_widget(bubble)
+    
