@@ -7,7 +7,7 @@ from kivy.metrics import dp
 from kivy.graphics import Color
 from utils import kvFind
 from fieldlabel import FieldLabel
-from kivy.properties import BoundedNumericProperty, StringProperty, NumericProperty, ObjectProperty
+from kivy.properties import BoundedNumericProperty, StringProperty, ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge, SingleChannelGauge
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/laptime.kv')
@@ -46,21 +46,16 @@ class CurrentLaptime(Gauge):
     _lap_time = 0
     _predicted_time = 0
     _current_lap = 0
-    _lap_count = None
+    _lap_count = 0
+    
     _new_lap = False
     _flash_count = 0
+    _value_view = None
 
     halign = StringProperty(None)
     valign = StringProperty(None)
-    
     value = ObjectProperty(None)    
-        
-    _value_view = None
-    last_laptime = NumericProperty(None)
-    elapsed_time = NumericProperty(None)
-    predicted_time = NumericProperty(None)
-    current_lap = NumericProperty(None)
-    
+            
     def on_halign(self, instance, value):
         self.valueView.halign = value 
     
@@ -153,6 +148,4 @@ class CurrentLaptime(Gauge):
                     else:
                         view.text = '{}:{}'.format(intMinuteValue,'{0:06.3f}'.format(fractionMinuteValue))
 
-    def on_halign(self, instance, value):
-        self.valueView.halign = value 
         
