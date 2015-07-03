@@ -2,24 +2,27 @@
 	BoxLayout:
 		orientation: 'vertical'
 		CurrentLaptime:
-			size_hint_y: 0.25
+			size_hint_y: 0.3
 			rcid: 'curLap'
 			halign: 'center'
+			normal_color: [1.0, 1.0 , 1.0, 1.0]
 		BoxLayout:
-			size_hint_y: 0.6
+			size_hint_y: 0.55
 			orientation: 'horizontal'
 			AnchorLayout:
 				size_hint_x: 0.25
 				BigNumberView:
-					size_hint: (0.6, 0.6)
+					size_hint: (0.8, 0.8)
 					channel: 'CurrentLap'
 					warning_color: [0.2, 0.2, 0.2, 1.0]
 					alert_color: [0.2, 0.2, 0.2, 1.0]
 			TimeDelta:
 				size_hint_x: 0.65
+				size_hint_y: 0.8
 				rcid: 'delta'
 				channel: 'LapDelta'
 				halign: 'right'
+				valign: 'middle'
 			BoxLayout:
 				size_hint_x: 0.1
 		BoxLayout:

@@ -2,11 +2,12 @@ import kivy
 kivy.require('1.9.0')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
+from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.graphics import Color
 from utils import kvFind
 from fieldlabel import FieldLabel
-from kivy.properties import BoundedNumericProperty, StringProperty, NumericProperty
+from kivy.properties import BoundedNumericProperty, StringProperty, NumericProperty, ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge, SingleChannelGauge
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/laptime.kv')
@@ -17,7 +18,6 @@ MAX_LAP_TIME=99.999
 class Laptime(SingleChannelGauge):
     NULL_LAP_TIME='--:--.---'
     value = BoundedNumericProperty(0, min=MIN_LAP_TIME, max=MAX_LAP_TIME, errorhandler=lambda x: MAX_LAP_TIME if x > MAX_LAP_TIME else MIN_LAP_TIME)
-    halign = StringProperty(None)
         
     def __init__(self, **kwargs):
         super(Laptime, self).__init__(**kwargs)
@@ -34,52 +34,125 @@ class Laptime(SingleChannelGauge):
                     view.text = self.NULL_LAP_TIME
                 else:
                     view.text = '{}:{}'.format(intMinuteValue,'{0:06.3f}'.format(fractionMinuteValue))
-        self.updateColors()
-
-    def on_halign(self, instance, value):
-        self.valueView.halign = value 
         
-    def on_touch_down(self, touch, *args):
-        pass
-
-    def on_touch_move(self, touch, *args):
-        pass
-
-    def on_touch_up(self, touch, *args):
-        pass
+    def on_normal_color(self, instance, value):
+        self.valueView.color = value
         
-
-class CurrentLaptime(Laptime):
+class CurrentLaptime(Gauge):
+    _FLASH_INTERVAL = 0.25
+    _FLASH_COUNT = 10
     NULL_LAP_TIME='--:--.---'
+    _elapsed_time = 0
+    _lap_time = 0
+    _predicted_time = 0
+    _current_lap = 0
+    _lap_count = None
+    _new_lap = False
+    _flash_count = 0
+
+    halign = StringProperty(None)
+    valign = StringProperty(None)
+    
+    value = ObjectProperty(None)    
+        
+    _value_view = None
     last_laptime = NumericProperty(None)
     elapsed_time = NumericProperty(None)
     predicted_time = NumericProperty(None)
     current_lap = NumericProperty(None)
     
+    def on_halign(self, instance, value):
+        self.valueView.halign = value 
+    
+    def on_valign(self, instance, value):
+        self.valueView.valign = value 
+
+    def on_normal_color(self, instance, value):
+        self.valueView.color = value
+
+    def on_value_size(self, instance, value):
+        view = self.valueView
+        if view:
+            view.font_size = value
+    
     def on_data_bus(self, instance, value):
-        print("currentLaptime onDAtabus")
-        dataBus = self.data_bus
-        channel = self.channel
-        if dataBus and channel:
-            dataBus.addMetaListener(self.on_channel_meta)
-            dataBus.addChannelListener("LapTime", self.set_lap_time)
-            dataBus.addChannelListener("ElapsedTime" , self.set_elapsed_time)
-            dataBus.addChannelListener("PredTime", self.set_predicted_time)
-            dataBus.addChannelListener("LapCount", self.set_lap_count)
-            dataBus.addChannelListener("CurrentLap", self.set_current_lap)
+        data_bus = self.data_bus
+        if data_bus:
+            data_bus.addMetaListener(self.on_channel_meta)
+            data_bus.addChannelListener("ElapsedTime" , self.set_elapsed_time)
+            data_bus.addChannelListener("LapTime", self.set_lap_time)
+            data_bus.addChannelListener("PredTime", self.set_predicted_time)
+            data_bus.addChannelListener("CurrentLap", self.set_current_lap)
+            data_bus.addChannelListener("LapCount", self.set_lap_count)
 
     def set_lap_time(self, value):
-        pass
+        self._lap_time = value
     
     def set_elapsed_time(self, value):
-        pass
+        self._elapsed_time = value
+        self.update_value()
     
     def set_predicted_time(self, value):
-        pass
+        self._predicted_time = value
+        self.update_value()
     
     def set_lap_count(self, value):
-        pass
+        if value > self._lap_count and self._current_lap > 0:
+            self._new_lap = True
+            self._flash_count = 0
+            self.flash_value()
+        self._lap_count = value
     
     def set_current_lap(self, value):
-        pass
+        self._current_lap = value
+        self.update_value()
+    
+    def flash_value(self):
+        self.value = self._lap_time if self._flash_count % 2 == 0 else ''
+        self._flash_count += 1
+        if self._flash_count < self._FLASH_COUNT * 2:
+            Clock.schedule_once(lambda dt: self.flash_value(), self._FLASH_INTERVAL)
+        else:
+            self._new_lap = False
+        
+    """"
+    Display logic:
+    if we haven't completed a lap yet, only display elapsed time to give a stopwatch effect
+    if we've completed a lap, flash last lap time for 5 seconds,
+    then show predicted time, if present in stream. if not present, show last lap time statically
+    """ 
+    def update_value(self):
+        if not self._new_lap:
+            if self._lap_count == 0:
+                self.value = self._elapsed_time
+            else:
+                if self._predicted_time > 0:
+                    self.value = self._predicted_time
+                else:
+                    self.value = self._lap_time
+        
+    @property
+    def valueView(self):
+        if not self._value_view:
+            self._value_view = self.ids.value
+        return self._value_view
+
+    def on_value(self, instance, value):
+        view = self.valueView
+        if view:
+            if value == '':
+                view.text = ''
+            else:
+                if value == None:
+                    view.text = self.NULL_LAP_TIME
+                else:
+                    intMinuteValue = int(value)
+                    fractionMinuteValue = 60.0 * (value - float(intMinuteValue))
+                    if value == MIN_LAP_TIME:
+                        view.text = self.NULL_LAP_TIME
+                    else:
+                        view.text = '{}:{}'.format(intMinuteValue,'{0:06.3f}'.format(fractionMinuteValue))
+
+    def on_halign(self, instance, value):
+        self.valueView.halign = value 
         

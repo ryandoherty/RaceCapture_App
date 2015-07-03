@@ -47,13 +47,14 @@ class CustomizeGaugeBubble(CenteredBubble):
 NULL_LAP_TIME='--:--.---'
 
 class Gauge(AnchorLayout):
-    _valueView = None
+    rcid = None
     settings = ObjectProperty(None)    
     value_size = NumericProperty(0)
     title_size = NumericProperty(0)
     title = StringProperty('')
     data_bus = ObjectProperty(None)
-    rcid = None
+    title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
+    normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
     
     def __init__(self, **kwargs):
         super(Gauge, self).__init__(**kwargs)
@@ -62,15 +63,8 @@ class Gauge(AnchorLayout):
         self.settings = kwargs.get('settings', self.settings)
 
     @property
-    def valueView(self):
-        if not self._valueView:
-            self._valueView = self.ids.value
-        return self._valueView
-
-    @property
     def titleView(self):
         return self.ids.title
-        
 
     def on_title(self, instance, value):
         try:
@@ -100,20 +94,36 @@ class Gauge(AnchorLayout):
             Logger.error('Gauge: Failed to update gauge title & units ' + str(e) + ' ' + str(title))
             traceback.print_exc()
                  
+    def on_channel_meta(self, channel_metas):
+        pass
+    
 class SingleChannelGauge(Gauge):
+    _valueView = None    
     channel = StringProperty(None, allownone=True)    
     value = NumericProperty(None, allownone=True)
     sensor_format = "{:.0f}"
     value_formatter = None
     precision = NumericProperty(DEFAULT_PRECISION)
     type = NumericProperty(DEFAULT_TYPE)
-    title_color   = ObjectProperty(DEFAULT_NORMAL_COLOR)
-    normal_color  = ObjectProperty(DEFAULT_NORMAL_COLOR)
+    halign = StringProperty(None)
+    valign = StringProperty(None)
 
     def __init__(self, **kwargs):
         super(SingleChannelGauge, self).__init__(**kwargs)
         self.channel = kwargs.get('targetchannel', self.channel)
         self.value_formatter = self.sensor_formatter        
+
+    @property
+    def valueView(self):
+        if not self._valueView:
+            self._valueView = self.ids.value
+        return self._valueView
+
+    def on_halign(self, instance, value):
+        self.valueView.halign = value 
+
+    def on_valign(self, instance, value):
+        self.valueView.valign = value 
 
     def on_channel_meta(self, channel_metas):
         channel = self.channel
@@ -144,6 +154,11 @@ class SingleChannelGauge(Gauge):
     def on_data_bus(self, instance, value):
         self._update_channel_binding()
     
+    def updateColors(self):
+        view = self.valueView
+        if view:
+            view.color = self.normal_color
+        
     def refresh_value(self, value):
         view = self.valueView
         if view:
@@ -274,7 +289,8 @@ class CustomizableGauge(ButtonBehavior, SingleChannelGauge):
         
     def updateColors(self):
         view = self.valueView
-        if view: view.color = self.select_alert_color()
+        if view:
+            view.color = self.select_alert_color()
 
     def showChannelSelectDialog(self):  
         content = ChannelSelectView(settings=self.settings, channel=self.channel)
