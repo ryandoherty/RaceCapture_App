@@ -5,7 +5,7 @@ from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from utils import kvFind, kvFindClass
 from autosportlabs.racecapture.views.dashboard.widgets.laptime import Laptime
-from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+from autosportlabs.racecapture.views.dashboard.widgets.gauge import SingleChannelGauge, Gauge
 Builder.load_file('autosportlabs/racecapture/views/dashboard/laptimeview.kv')
 
 class LaptimeView(Screen):
@@ -20,7 +20,7 @@ class LaptimeView(Screen):
         self.initScreen()
         
     def on_meta(self, channelMetas):
-        gauges = self.findActiveGauges()
+        gauges = self.findActiveGauges(SingleChannelGauge)
         
         for gauge in gauges:
             channel = gauge.channel
@@ -31,15 +31,15 @@ class LaptimeView(Screen):
                     gauge.min = channelMeta.min
                     gauge.max = channelMeta.max
 
-    def findActiveGauges(self):
-        return list(kvFindClass(self, Gauge))
+    def findActiveGauges(self, gauge_type):
+        return list(kvFindClass(self, gauge_type))
         
     def initScreen(self):
         dataBus = self._databus
         settings = self._settings
         dataBus.addMetaListener(self.on_meta)
         
-        gauges = self.findActiveGauges()
+        gauges = self.findActiveGauges(Gauge)
         for gauge in gauges:
             gauge.settings = settings
             gauge.data_bus = dataBus

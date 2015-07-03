@@ -7,7 +7,7 @@ from kivy.graphics import Color
 from utils import kvFind
 from fieldlabel import FieldLabel
 from kivy.properties import BoundedNumericProperty, ObjectProperty, BooleanProperty, StringProperty
-from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+from autosportlabs.racecapture.views.dashboard.widgets.gauge import SingleChannelGauge
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/timedelta.kv')
 
 MIN_TIME_DELTA  = -99.0
@@ -16,10 +16,9 @@ MAX_TIME_DELTA  = 99.0
 DEFAULT_AHEAD_COLOR  = [0.0, 1.0 , 0.0, 1.0]
 DEFAULT_BEHIND_COLOR = [1.0, 0.65, 0.0 ,1.0]
 
-class TimeDelta(Gauge):
+class TimeDelta(SingleChannelGauge):
     ahead_color = ObjectProperty(DEFAULT_AHEAD_COLOR)
     behind_color = ObjectProperty(DEFAULT_BEHIND_COLOR)
-    halign = StringProperty(None)
     NULL_TIME_DELTA = u'--.-\u2206'    
     
     def __init__(self, **kwargs):
@@ -38,10 +37,7 @@ class TimeDelta(Gauge):
 
     def update_delta_color(self):
         self.valueView.color = self.ahead_color if self.value < 0 else self.behind_color
-        
-    def on_halign(self, instance, value):
-        self.valueView.halign = value 
-        
+                
     def on_touch_down(self, touch, *args):
         pass
 

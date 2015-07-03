@@ -14,38 +14,27 @@
 					anchor_x: 'center'
 					anchor_y: 'center'
 					BigNumberView:
-						size_hint: (0.5, 0.6)
+						size_hint: (0.8, 0.8)
 						channel: 'CurrentLap'
 						warning_color: [0.2, 0.2, 0.2, 1.0]
 						alert_color: [0.2, 0.2, 0.2, 1.0]
 				BoxLayout:
 					size_hint: (0.7, 1.0)
 					orientation: 'vertical'
-					Laptime:
+					CurrentLaptime:
 						rcid: 'curLap'
-						channel: 'CurLapTime'
-						halign: 'left'
+                        normal_color: [1.0, 1.0 , 1.0, 1.0]						
 					BoxLayout:
 						orientation: 'horizontal'
 						TimeDelta:
-							size_hint_x: 0.50
 							rcid: 'delta'
 							channel: 'LapDelta'
-							halign: 'left'
+							halign: 'right'
+							valign: 'middle'
 							value: None
+							size_hint_x: 0.8
 						BoxLayout:
-							size_hint_x: 0.50
-							orientation: 'vertical'
-							Widget:
-								size_hint_y: 0.25
-							Laptime:
-								size_hint_y: 0.50
-								rcid: 'bestLap'
-								channel: 'BestLap'
-								halign: 'center'
-								normal_color: [1.0, 0.0 , 1.0, 1.0]
-							Widget:
-								size_hint_y: 0.25
+                            size_hint_x: 0.2
 		AnchorLayout:
 			anchor_x: 'left'
 			anchor_y: 'center'
