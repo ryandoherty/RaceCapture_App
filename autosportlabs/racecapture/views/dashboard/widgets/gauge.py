@@ -1,5 +1,4 @@
 import kivy
-import traceback
 kivy.require('1.9.0')
 from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty, DictProperty,\
     BooleanProperty
@@ -92,7 +91,6 @@ class Gauge(AnchorLayout):
             self.title = title
         except Exception as e:
             Logger.error('Gauge: Failed to update gauge title & units ' + str(e) + ' ' + str(title))
-            traceback.print_exc()
                  
     def on_channel_meta(self, channel_metas):
         pass
