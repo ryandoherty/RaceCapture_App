@@ -643,7 +643,7 @@
             "nm": "LapDelta",
             "ut": "Min",
             "sys": 1,
-            "type": 4,
+            "type": 5,
             "prec": 1,
             "min": 0,
             "max": 0
