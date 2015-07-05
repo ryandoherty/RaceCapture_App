@@ -7,6 +7,9 @@
 * Icon buttons with text to clarify usage and meaning
 * New Dasboard Laptime behavior: shows elapsed time on first lap, then flashes last lap time
   for 5 seconds before returning to displaying predicted time
+* Fixed Spurious Unknown channel (should be ElapsedTime) by sanitizing/cleaning
+  Racing Stats configuration upon loading configuration
+
 ==1.3.5==
 * Improved formatting on tachometer view to allow more space for laptime / delta from best
 * Navigation screen transitions direction matches arrow direction
