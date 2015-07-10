@@ -3,6 +3,7 @@ release_apk.sh
 *.floo*
 *~
 *.py[cod]
+.DS_Store
 
 # C extensions
 *.so
@@ -46,3 +47,8 @@ _ve/
 *.sublime*
 *.class
 doeet.sh
+
+#OSX build stuff
+Kivy.App
+RaceCapture.dmg
+RaceCapture.App

@@ -41,18 +41,15 @@ Dependencies:
 
 ## Preparing to build installers (OSX)
 
-1. activate the virtualenv: `_ve/bin/activate`
-1. Install [PYInstaller] (http://www.pyinstaller.org) `pip install pyinstaller`
-1. Try `pyinstaller --version` - should return "2.1" or similar
-1. Open `/Applications/Kivy.app/Contents/Resources/lib/sitepackages/pygments/lexers/__init__.py` and add a line "from pygments.lexers.agile import PythonLexer" near the top. Yes, I know this is bad form. It's to fix an error ("AttributeError: 'module' object has no attribute 'PythonLexer'") where PyInstaller failed to find an import and I couldn't work out how to force it. -CLR 2014-05-29
-1. Open `/Applications/Kivy.app/Contents/Resources/kivy/kivy/uix/codeinput.py`, add "from pygments.lexers import PythonLexer" and change "self.lexer = lexers.PythonLexer()" to "self.lexer = PythonLexer()". Yes this is bad form, Kivy, Pyinstaller or Pygments is broken and this fixes it.
+1. Make sure all dependencies are installed inside Kivy's venv 
+1. `cd /Applications/Kivy.app/Contents/Resources/venv/bin` && `source activate`
+1. `cd /path/to/RaceCapture_App` && `pip install -r requirements.txt`
 
 ## Creating installer for current version (OSX)
+1. `cd install/osx`
+1. `./build-osx.sh`
 
-1. activate the virtualenv: `_ve/bin/activate`
-1. `cd install`
-1.`./buildmacinstall.sh`
-1. The install builder creates a .dmg file in the dist folder that is intended to be the app for distribution. However, it doesn't work right now ("Application damaged or incomplete") and I'm not sure why. -CLR 2014-05-29
+The script will create the .App file and .dmg for distribution.
 
 ## installation (Win7)
 
