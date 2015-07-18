@@ -9,16 +9,8 @@
     	text: '+'
     	color: (0.5, 0.5, 0.5, 1.0)
     	font_size: self.height * 0.2
-	Label:
-		font_name: 'resource/fonts/dial-gauge.ttf'
-		rcid: 'gaugeShadow'
-		text: u'\uE663'
-		color: (0.15, 0.15, 0.15, 1.0)
-		font_size: root.gauge_size				
-	Label:
-		font_name: 'resource/fonts/dial-gauge.ttf'
-		rcid: 'gauge'
-		font_size: root.gauge_size
+	SvgRoundGauge:
+	    id: svg_gauge
 	FieldLabel:
 		id: value
 		font_size: root.value_size
