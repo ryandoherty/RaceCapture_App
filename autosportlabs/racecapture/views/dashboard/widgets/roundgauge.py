@@ -105,6 +105,8 @@ class RoundGauge(CustomizableGauge):
             offset = railedValue - min
             value = offset * 100 / range
             self.ids.svg_gauge.value = value
-                
         except Exception as e:
             print('error setting font gauge value ' + str(e))
+            
+        return super(RoundGauge, self).on_value(instance, value)
+            
