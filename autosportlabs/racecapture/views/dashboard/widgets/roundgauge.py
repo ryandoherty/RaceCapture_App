@@ -8,16 +8,19 @@ from autosportlabs.racecapture.views.dashboard.widgets.gauge import Customizable
 from utils import kvFind
 from kivy.graphics import *
 from kivy.graphics.svg import Svg
-from kivy.properties import NumericProperty
-
+from kivy.properties import NumericProperty, ListProperty
+from xml.etree.cElementTree import parse
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/roundgauge.kv')
 
+
 class SvgRoundGauge(BoxLayout):
+    #these values match the dimensions of the svg elements used in this gauge.
     gauge_height = 85.485
     mask_offset = -14.515
     gauge_width = 100
     value = NumericProperty(0)
-        
+    color = ListProperty([1,1,1,1])
+    
     def __init__(self, **kwargs):
         super(SvgRoundGauge, self).__init__(**kwargs)
 
@@ -28,10 +31,10 @@ class SvgRoundGauge(BoxLayout):
 
         with self.canvas:
             PushMatrix()
-            self.t=Translate(x_center, self.pos[1], 0)
-            self.sc=Scale(x=gauge_height, y=gauge_height)
-            Svg('resource/gauge/round_gauge_270.svg',  bezier_points=1, circle_points=1)
-            self.mask_t = Translate(0, self.mask_offset)
+            self.gauge_translate=Translate(x_center, self.pos[1], 0)
+            self.gauge_scale=Scale(x=gauge_height, y=gauge_height)
+            self.dial = Svg('resource/gauge/round_gauge_270.svg',  bezier_points=1, circle_points=1,color=[1,1,1,1])
+            Translate(0, self.mask_offset)
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-135, axis=(0,0,1), origin=(self.center[0], self.center[1])))
             Svg('resource/gauge/gauge_mask.svg')
@@ -48,8 +51,8 @@ class SvgRoundGauge(BoxLayout):
 
         with self.canvas.after:
             PushMatrix()
-            self.t_shadow=Translate(x_center, self.pos[1], 0)
-            self.sc_shadow=Scale(x=gauge_height, y=gauge_height)
+            self.shadow_translate=Translate(x_center, self.pos[1], 0)
+            self.shadow_scale=Scale(x=gauge_height, y=gauge_height)
             Svg('resource/gauge/round_gauge_270_shadow.svg', bezier_points=1, circle_points=1)
             PopMatrix()
             
@@ -60,15 +63,15 @@ class SvgRoundGauge(BoxLayout):
         gauge_height = size / self.gauge_height
 
         x_center = self.pos[0] + self.width / 2 - (self.gauge_width / 2) * gauge_height
-        self.t.x = x_center 
-        self.t.y = self.pos[1]
-        self.t_shadow.x = x_center
-        self.t_shadow.y = self.pos[1]
+        self.gauge_translate.x = x_center 
+        self.gauge_translate.y = self.pos[1]
+        self.shadow_translate.x = x_center
+        self.shadow_translate.y = self.pos[1]
 
-        self.sc.x=gauge_height
-        self.sc.y=gauge_height
-        self.sc_shadow.x = gauge_height
-        self.sc_shadow.y = gauge_height
+        self.gauge_scale.x=gauge_height
+        self.gauge_scale.y=gauge_height
+        self.shadow_scale.x = gauge_height
+        self.shadow_scale.y = gauge_height
 
     def on_value(self, instance, value):
         angle = (value * 270) / 100
@@ -76,6 +79,9 @@ class SvgRoundGauge(BoxLayout):
         self.mask_rotations[1].angle = -135 - angle  if angle > 90 else -225
         self.mask_rotations[2].angle = -135 - angle  if angle > 180 else -315
 
+    def on_color(self, instance, value):
+        self.dial.color = value
+        
 class RoundGauge(CustomizableGauge):
     
     def __init__(self, **kwargs):
@@ -89,6 +95,11 @@ class RoundGauge(CustomizableGauge):
         addChannelView = self.ids.get('add_gauge')
         if addChannelView: addChannelView.text = '+' if value == None else ''
         return super(RoundGauge, self).on_channel(instance, value)
+    
+    
+    def updateColors(self):
+        self.ids.svg_gauge.color = self.select_alert_color()
+        return super(RoundGauge, self).updateColors()
     
     def on_value(self, instance, value):
         try:
