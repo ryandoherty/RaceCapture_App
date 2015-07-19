@@ -1,7 +1,5 @@
-==1.3.7==
-* Fixed periodic crashing issue when showing channel select widget
-
 ==1.3.6==
+* Fixed periodic crashing issue when showing channel select widget
 * Improve launch time (3-5 seconds depending on device)
 * Track map browser performance improvement when showing a large number of results
 * Back button / Escape does not drop back to main view if dismissing keyboard or dialog
