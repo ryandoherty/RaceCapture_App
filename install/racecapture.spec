@@ -8,11 +8,6 @@ from kivy.tools.packaging.pyinstaller_hooks import install_hooks
 import os
 install_hooks(globals())
 
-def getResource(identifier, *args, **kwargs):
-    if identifier == 'pygame_icon.tiff':
-        raise IOError()
-    return _original_getResource(identifier, *args, **kwargs)
-
 def addDataFiles():
     allFiles = Tree('..//')
     extraDatas = []
