@@ -13,11 +13,6 @@ def getResource(identifier, *args, **kwargs):
         raise IOError()
     return _original_getResource(identifier, *args, **kwargs)
 
-import pygame.pkgdata
-_original_getResource = pygame.pkgdata.getResource
-pygame.pkgdata.getResource = getResource
-
-
 def addDataFiles():
     allFiles = Tree('..//')
     extraDatas = []
@@ -46,6 +41,7 @@ exe = EXE(pyz,
           console=False )
 
 coll = COLLECT(exe,
+			   Tree([f for f in os.environ.get('KIVY_SDL2_PATH', '').split(';') if 'bin' in f][0]),
                a.binaries,
                a.zipfiles,
                a.datas,
