@@ -5,7 +5,19 @@
 # (or add any other file types that are required) then these will need to be manually
 # enumerated in this file. CLR 2014-05-26
 from kivy.tools.packaging.pyinstaller_hooks import install_hooks
-install_hooks(globals(), ['hooks'])
+import os
+install_hooks(globals())
+
+def getResource(identifier, *args, **kwargs):
+    if identifier == 'pygame_icon.tiff':
+        raise IOError()
+    return _original_getResource(identifier, *args, **kwargs)
+
+import pygame.pkgdata
+_original_getResource = pygame.pkgdata.getResource
+pygame.pkgdata.getResource = getResource
+
+
 def addDataFiles():
     allFiles = Tree('..//')
     extraDatas = []
