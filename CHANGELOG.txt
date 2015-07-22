@@ -4,7 +4,7 @@
 * Track map browser performance improvement when showing a large number of results
 * Back button / Escape does not drop back to main view if dismissing keyboard or dialog
 * Icon buttons with text to clarify usage and meaning
-* New Dasboard Laptime behavior: shows elapsed time on first lap, then flashes last lap time
+* New Dashboard Laptime behavior: shows elapsed time on first lap, then flashes last lap time
   for 5 seconds before returning to displaying predicted time
 * Make AT&T Alt #1 the primary for AT&T APN settings
 * Kivy 1.9 support
