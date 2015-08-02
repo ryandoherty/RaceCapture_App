@@ -5,7 +5,9 @@
 # (or add any other file types that are required) then these will need to be manually
 # enumerated in this file. CLR 2014-05-26
 from kivy.tools.packaging.pyinstaller_hooks import install_hooks
-install_hooks(globals(), ['hooks'])
+import os
+install_hooks(globals())
+
 def addDataFiles():
     allFiles = Tree('..//')
     extraDatas = []
@@ -34,6 +36,7 @@ exe = EXE(pyz,
           console=False )
 
 coll = COLLECT(exe,
+			   Tree([f for f in os.environ.get('KIVY_SDL2_PATH', '').split(';') if 'bin' in f][0]),
                a.binaries,
                a.zipfiles,
                a.datas,
