@@ -19,6 +19,8 @@ class SvgRoundGauge(BoxLayout):
     gauge_height = 85.485
     mask_offset = -14.515
     gauge_width = 100
+    trim_factor = 0.97
+    
     value = NumericProperty(0)
     color = ListProperty([1,1,1,1])
     
@@ -29,10 +31,11 @@ class SvgRoundGauge(BoxLayout):
         size = self.height if self.height < self.width else self.width
         gauge_height = size / self.gauge_height
         x_center = self.pos[0] + self.width / 2 - self.gauge_width / 2
+        y_center = self.pos[1] + self.height / 2 - self.gauge_height / 2
 
         with self.canvas:
             PushMatrix()
-            self.gauge_translate=Translate(x_center, self.pos[1], 0)
+            self.gauge_translate=Translate(x_center, y_center, 0)
             self.gauge_scale=Scale(x=gauge_height, y=gauge_height)
             self.dial = Svg('resource/gauge/round_gauge_270.svg',  bezier_points=1, circle_points=1,color=[1,1,1,1])
             Translate(0, self.mask_offset)
@@ -52,7 +55,7 @@ class SvgRoundGauge(BoxLayout):
 
         with self.canvas.after:
             PushMatrix()
-            self.shadow_translate=Translate(x_center, self.pos[1], 0)
+            self.shadow_translate=Translate(x_center, y_center, 0)
             self.shadow_scale=Scale(x=gauge_height, y=gauge_height)
             Svg('resource/gauge/round_gauge_270_shadow.svg', bezier_points=1, circle_points=1)
             PopMatrix()
@@ -61,13 +64,15 @@ class SvgRoundGauge(BoxLayout):
 
     def update_all(self, *args):
         size = self.height if self.height < self.width else self.width
-        gauge_height = size / self.gauge_height
+        gauge_height = size / self.gauge_height * self.trim_factor
 
         x_center = self.pos[0] + self.width / 2 - (self.gauge_width / 2) * gauge_height
+        y_center = self.pos[1] + self.height / 2 - (self.gauge_height / 2) * gauge_height
+        
         self.gauge_translate.x = x_center 
-        self.gauge_translate.y = self.pos[1]
+        self.gauge_translate.y = y_center
         self.shadow_translate.x = x_center
-        self.shadow_translate.y = self.pos[1]
+        self.shadow_translate.y = y_center 
 
         self.gauge_scale.x=gauge_height
         self.gauge_scale.y=gauge_height
