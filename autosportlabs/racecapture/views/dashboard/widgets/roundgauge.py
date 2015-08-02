@@ -10,6 +10,7 @@ from kivy.graphics import *
 from kivy.graphics.svg import Svg
 from kivy.properties import NumericProperty, ListProperty
 from xml.etree.cElementTree import parse
+from kivy.logger import Logger
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/roundgauge.kv')
 
 
@@ -114,10 +115,9 @@ class RoundGauge(CustomizableGauge):
     
             range = max - min
             offset = railedValue - min
-            value = offset * 100 / range
-            self.ids.svg_gauge.value = value
+            self.ids.svg_gauge.value = offset * 100 / range
         except Exception as e:
-            print('error setting font gauge value ' + str(e))
+            Logger.error('RoundGauge: error setting font gauge value ' + str(e)) 
             
         return super(RoundGauge, self).on_value(instance, value)
             
