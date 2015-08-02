@@ -24,13 +24,13 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1600"
-     inkscape:window-height="876"
+     inkscape:window-width="1920"
+     inkscape:window-height="1004"
      id="namedview4408"
      showgrid="false"
-     inkscape:zoom="2.5371828"
-     inkscape:cx="53.834962"
-     inkscape:cy="62.355494"
+     inkscape:zoom="7.1762366"
+     inkscape:cx="70.202791"
+     inkscape:cy="37.809403"
      inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -51,7 +51,7 @@
   </metadata>
   <g
      id="layer1"
-     transform="matrix(1.054633,0,0,1.054633,-2.7043324,-54.734715)">
+     transform="matrix(1.0123332,0,0,1.0123332,-0.60939844,-12.355085)">
     <path
        d="M 305.71429,959.50507 A 124.28571,124.28571 0 0 1 181.42858,1083.7908 l -1e-5,-124.28573 z"
        transform="matrix(0.39827587,0,0,0.39827587,-22.258622,620.21447)"
