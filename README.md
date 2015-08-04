@@ -19,7 +19,7 @@ Dependencies:
 
 1. download patched 1.9.0 kivy from https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched 
 1. Install from source
-- > make && sudo make install
+- > Instructions: http://kivy.org/docs/installation/installation-macosx.html
 1. install [virtualenv](http://www.virtualenv.org)
 1. create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. activate the virtualenv: `. _ve/bin/activate`
