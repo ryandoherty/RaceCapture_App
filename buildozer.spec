@@ -33,7 +33,7 @@ version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3, kivy, pygments
-requirements = kivy==1.9.0, sqlite3, openssl
+requirements = kivy==1.9.0, sqlite3, openssl, pygments
 
 # (list) Garden requirements
 #garden_requirements =
