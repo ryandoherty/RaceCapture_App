@@ -111,9 +111,8 @@ The script will create the .App file and .dmg for distribution.
 ## dev installation (Linux - Ubuntu)
 
 1. Download patched source from https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched
-1. Enter downloaded source
-1. build and install kivy
- * make && make install
+1. Install from source. From the downloaded kivy source execute:
+* > sudo python setup.py install
 1. install [virtualenv]: `sudo pip install virtualenv`
 1. create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. activate the virtualenv: `. _ve/bin/activate`
