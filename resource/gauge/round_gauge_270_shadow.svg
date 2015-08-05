@@ -117,7 +117,7 @@
      id="layer1">
     <path
        sodipodi:type="arc"
-       style="fill:#ffffff10;fill-rule:evenodd;stroke-width:0.97986567px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="fill:#ffffff30;stroke:#ffffff10;fill-rule:nonzero;stroke-width:0.97986567px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
        id="path3481"
        sodipodi:cx="56.5"
        sodipodi:cy="1008.8622"
