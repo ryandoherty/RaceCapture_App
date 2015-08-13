@@ -29,6 +29,8 @@ class DataBus(object):
     Typical use:
     (CHANNEL LISTENERS) => DataBus.addChannelListener()  -- listeners receive updates with a particular channel's value
     (META LISTENERS) => DataBus.addMetaListener() -- Listeners receive updates with meta data
+
+    Note: DataBus must be started via start_update before any data flows
     """
     channel_metas = {}
     channel_data = {}
@@ -36,15 +38,20 @@ class DataBus(object):
     meta_listeners = []
     meta_updated = False
     data_filters = []
-    
+    sample_listeners = []
+    _polling = False
+
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
 
     def start_update(self, interval = DEFAULT_DATABUS_UPDATE_INTERVAL):
-        Clock.schedule_interval(self.notify_listeners, interval)
+        if not self._polling:
+            Clock.schedule_interval(self.notify_listeners, interval)
+            self._polling = True
 
     def stop_update(self):
         Clock.unschedule(self.notify_listeners)
+        self._polling = False
 
     def _update_datafilter_meta(self, datafilter):
         metas = datafilter.get_channel_meta()
@@ -110,6 +117,9 @@ class DataBus(object):
                 listeners.remove(callback)
         except:
             pass
+
+    def add_sample_listener(self, callback):
+        self.sample_listeners.append(callback)
                     
     def addMetaListener(self, callback):
         self.meta_listeners.append(callback)

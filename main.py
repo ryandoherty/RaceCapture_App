@@ -40,6 +40,7 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.menu.homepageview import HomePageView
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
+    from autosportlabs.telemetry.telemetryconnection import TelemetryManager
     from toolbarview import ToolbarView
     if not is_mobile_platform():
         kivy.config.Config.set ( 'input', 'mouse', 'mouse,disable_multitouch' )
@@ -123,6 +124,7 @@ class RaceCaptureApp(App):
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
         self.trackManager = TrackManager(user_dir=self.settings.get_default_data_dir(), base_dir=self.base_dir)
+        self.setup_telemetry()
 
     def on_pause(self):
         return True
@@ -134,6 +136,8 @@ class RaceCaptureApp(App):
     def processArgs(self):
         parser = argparse.ArgumentParser(description='Autosport Labs Race Capture App')
         parser.add_argument('-p','--port', help='Port', required=False)
+        parser.add_argument('--telemetry-host', help='Telemetry host', required=False)
+
         if sys.platform == 'win32':
             parser.add_argument('--multiprocessing-fork', required=False, action='store_true')
 
@@ -208,7 +212,7 @@ class RaceCaptureApp(App):
         self.rc_config.stale = False
         self.dataBusPump.meta_is_stale()
         for listener in self.config_listeners:
-            Clock.schedule_once(lambda dt: listener.dispatch('on_config_written'))
+            Clock.schedule_once(lambda dt: listener.dispatch('on_config_written', self.rc_config))
         Clock.schedule_once(lambda dt: self.showActivity(''), 5.0)
 
     def on_write_config_error(self, detail):
@@ -425,6 +429,11 @@ class RaceCaptureApp(App):
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')
+
+    def setup_telemetry(self):
+        self._telemetry_connection = TelemetryManager(self._databus)
+        self._telemetry_connection.start()
+
 
 if __name__ == '__main__':
     RaceCaptureApp().run()
