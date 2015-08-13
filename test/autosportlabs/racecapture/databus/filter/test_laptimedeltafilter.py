@@ -21,14 +21,14 @@ class LaptimeDeltaFilterTest(unittest.TestCase):
         channel_data = {LaptimeDeltaFilter.LAPTIME_KEY:1.0,
                         LaptimeDeltaFilter.BEST_LAPTIME_KEY:2.0}
         sample_filter.filter(channel_data)
-        self.assertEqual(-1.0, channel_data.get(LaptimeDeltaFilter.LAP_DELTA_KEY))
+        self.assertEqual(-60.0, channel_data.get(LaptimeDeltaFilter.LAP_DELTA_KEY))
 
     def test_laptime_delta_only_predtime(self):
         sample_filter = LaptimeDeltaFilter(self.system_channels)
         channel_data = {LaptimeDeltaFilter.PREDTIME_KEY:1.0,
                         LaptimeDeltaFilter.BEST_LAPTIME_KEY:2.0}
         sample_filter.filter(channel_data)
-        self.assertEqual(-1.0, channel_data.get(LaptimeDeltaFilter.LAP_DELTA_KEY))
+        self.assertEqual(-60.0, channel_data.get(LaptimeDeltaFilter.LAP_DELTA_KEY))
 
     def test_laptime_delta_predtime_and_laptime_present(self):
         sample_filter = LaptimeDeltaFilter(self.system_channels)
@@ -36,5 +36,5 @@ class LaptimeDeltaFilterTest(unittest.TestCase):
                         LaptimeDeltaFilter.LAPTIME_KEY:1.0,
                         LaptimeDeltaFilter.BEST_LAPTIME_KEY:2.0}
         sample_filter.filter(channel_data)
-        self.assertEqual(1.0, channel_data.get(LaptimeDeltaFilter.LAP_DELTA_KEY))
+        self.assertEqual(60.0, channel_data.get(LaptimeDeltaFilter.LAP_DELTA_KEY))
         
