@@ -1,7 +1,7 @@
 from kivy.logger import Logger
 from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.event import EventDispatcher
-from multiprocessing import Process, Pipe
+import threading
 import asynchat, socket
 
 
@@ -14,7 +14,7 @@ class TelemetryManager(EventDispatcher):
     device_id = StringProperty(None)
     socket = None
     connection = None
-    auto_start = False
+    auto_start = True
     _connection_process = None
     _data_bus = None
     _transmitting = False
@@ -49,42 +49,44 @@ class TelemetryManager(EventDispatcher):
         self.channels = channel_metas
 
     def on_channels(self, instance, value):
+        Logger.info("TelemetryManager: got channels")
         if not self._connection_process and self.auto_start:
             self.start()
         elif self._connection_process:
-            #New meta, need to
+            #New meta, need to pause, send new channel info and restart
+            Logger.info("TelemetryManager: connection exists, stopping and starting")
             self.stop()
-            self._send_meta()
             self.start()
 
-    def on_device_id(self):
+    def on_device_id(self, instance, value):
         # Disconnect, re-auth, etc
         Logger.info("TelemetryManager: Got new device id")
 
         if not self._connection_process and self.auto_start:
             self.start()
         elif self._connection_process:
-            # Send disconnect to connection process, reestablish
-            pass
+            Logger.info("TelemetryManager: connection previously established, restarting")
 
     def on_config_updated(self, config):
-        self.device_id = config.connectivityConfig.deviceId
+        self.device_id = config.connectivityConfig.telemetryConfig.deviceId
 
     def on_config_written(self, config):
-        self.device_id = config.connectivityConfig.deviceId
+        self.device_id = config.connectivityConfig.telemetryConfig.deviceId
 
     def start(self):
+        Logger.info("TelemetryManager: start()")
         if not self._connection_process:
             if self.device_id and self.channels:
+                Logger.info("TelemetryManager: starting telemetry thread")
                 self._connection_input, self._connection_output = Pipe()
                 self.connection = TelemetryConnection(self.host, self.port, self.device_id, self.channels)
-                self._connection_process = Process(target=self.connection.run, args=(self._connection_output, self._connection_input))
+                self._connection_process = threading.Thread(target=self.connection.run, args=(self._connection_output, self._connection_input))
                 self._connection_process.start()
             else:
                 Logger.warning("TelemetryManager: Device id and/or channels missing when attempting to start, waiting for config to get device id")
 
     def stop(self):
-        pass
+        Logger.info("TelemetryManager: stop()")
 
 class TelemetryConnection(asynchat.async_chat):
 
@@ -104,12 +106,12 @@ class TelemetryConnection(asynchat.async_chat):
         self.meta = meta
         self.timeout = timeout
 
-        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connect(self.host, self.port)
-
     def run(self, output_pipe, input_pipe):
         self._output_pipe = output_pipe
         self._input_pipe = input_pipe
+
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connect(self.host, self.port)
         Logger.info("TelemetryConnection: thread started")
 
     def handle_read(self):
