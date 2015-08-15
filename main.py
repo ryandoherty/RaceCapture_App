@@ -432,6 +432,8 @@ class RaceCaptureApp(App):
 
     def setup_telemetry(self):
         self._telemetry_connection = TelemetryManager(self._databus)
+        self.config_listeners.append(self._telemetry_connection)
+
         self._telemetry_connection.start()
 
 
