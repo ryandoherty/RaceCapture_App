@@ -16,6 +16,7 @@ fi
 rm -rf RaceCapture.app/Contents/Frameworks/GStreamer.framework
 rm -rf RaceCapture.app/Contents/Resources/kivy/examples
 rm -rf RaceCapture.app/Contents/Resources/kivy/doc
+rm -rf RaceCapture.app/Contents/Resources/kivy/.git
 
 #We have to customize their theme so checkboxes show up
 cp defaulttheme-0.png RaceCapture.app/Contents/Resources/kivy/kivy/data/images/ 
