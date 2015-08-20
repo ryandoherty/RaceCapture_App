@@ -34,6 +34,7 @@ class DataBus(object):
     """
     channel_metas = {}
     channel_data = {}
+    sample = None
     channel_listeners = {}
     meta_listeners = []
     meta_updated = False
@@ -71,7 +72,10 @@ class DataBus(object):
             self._update_datafilter_meta(f)
                 
         self.meta_updated = True
-        
+
+    def addSampleListener(self, callback):
+        self.sample_listeners.append(callback)
+
     def update_samples(self, sample):
         """Update channel data with new samples
         """
@@ -79,18 +83,24 @@ class DataBus(object):
             channel = sample_item.channelMeta.name
             value = sample_item.value
             self.channel_data[channel] = value
-        
+
         #apply filters to updated data
         for f in self.data_filters:
             f.filter(self.channel_data)
 
     def notify_listeners(self, dt):
+        sample_data = {}
+
         if self.meta_updated:
             self.notify_meta_listeners(self.channel_metas)
             self.meta_updated = False
-        
+
         for channel,value in self.channel_data.iteritems():
             self.notify_channel_listeners(channel, value)
+            sample_data[channel] = value
+
+        for listener in self.sample_listeners:
+            listener(sample_data)
                 
     def notify_channel_listeners(self, channel, value):
         listeners = self.channel_listeners.get(str(channel))

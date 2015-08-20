@@ -102,6 +102,8 @@ class RaceCaptureApp(App):
 
     base_dir = None
 
+    _telemetry_connection = None
+
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
 
@@ -136,7 +138,7 @@ class RaceCaptureApp(App):
     def processArgs(self):
         parser = argparse.ArgumentParser(description='Autosport Labs Race Capture App')
         parser.add_argument('-p','--port', help='Port', required=False)
-        parser.add_argument('--telemetry-host', help='Telemetry host', required=False)
+        parser.add_argument('--telemetryhost', help='Telemetry host', required=False)
 
         if sys.platform == 'win32':
             parser.add_argument('--multiprocessing-fork', required=False, action='store_true')
@@ -266,6 +268,7 @@ class RaceCaptureApp(App):
     
     def on_stop(self):
         self._rc_api.cleanup_comms()
+        self._telemetry_connection.stop()
 
     def showMainView(self, view_name):
         try:
@@ -431,10 +434,28 @@ class RaceCaptureApp(App):
         self.switchMainView('preferences')
 
     def setup_telemetry(self):
-        self._telemetry_connection = TelemetryManager(self._databus)
+        host = self.getAppArg('telemetryhost')
+
+        self._telemetry_connection = TelemetryManager(self._databus, host=host)
         self.config_listeners.append(self._telemetry_connection)
+        self._telemetry_connection.bind(on_connected=self.telemetry_connected)
+        self._telemetry_connection.bind(on_disconnected=self.telemetry_disconnected)
+        self._telemetry_connection.bind(on_streaming=self.telemetry_streaming)
+        self._telemetry_connection.bind(on_error=self.telemetry_error)
 
         self._telemetry_connection.start()
+
+    def telemetry_connected(self, instance, msg):
+        self.showActivity(msg)
+
+    def telemetry_disconnected(self, instance, msg):
+        self.showActivity(msg)
+
+    def telemetry_streaming(self, instance, msg):
+        self.showActivity(msg)
+
+    def telemetry_error(self, instance, msg):
+        self.showActivity(msg)
 
 
 if __name__ == '__main__':
