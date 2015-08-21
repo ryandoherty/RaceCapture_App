@@ -2,11 +2,12 @@ from kivy.logger import Logger
 from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.event import EventDispatcher
 import threading
-import asynchat, socket, asyncore
+import asynchat, asyncore
 import json
 import socket
 import sys
 import errno
+import math
 
 
 class TelemetryManager(EventDispatcher):
@@ -20,9 +21,10 @@ class TelemetryManager(EventDispatcher):
         self.host = 'race-capture.com'
         self.port = 8080
         self.connection = None
-        self.auto_start = True
+        self.auto_start = False
         self._connection_process = None
         self._retry_count = 0
+        self._connection_timer = None
 
         self.register_event_type('on_connected')
         self.register_event_type('on_disconnected')
@@ -35,11 +37,6 @@ class TelemetryManager(EventDispatcher):
 
         self._data_bus.addMetaListener(self._on_meta)
         self._data_bus.start_update()
-
-        meta = self._data_bus.getMeta()
-
-        if len(meta) > 0:
-            self.channels = meta
 
         if host is not None:
             self.host = host
@@ -57,11 +54,10 @@ class TelemetryManager(EventDispatcher):
         self.channels = channel_metas
 
     def on_channels(self, instance, value):
-        Logger.info("TelemetryManager: got channels")
         if not self._connection_process and self.auto_start:
             self.start()
         elif self._connection_process:
-            #New meta, need to pause, send new channel info and restart
+            # New meta, need to pause, send new channel info and restart
             Logger.info("TelemetryManager: connection exists, stopping and starting")
             self.stop()
             self.start()
@@ -83,20 +79,30 @@ class TelemetryManager(EventDispatcher):
 
     def start(self):
         Logger.info("TelemetryManager: start()")
-        if not self._connection_process:
+        if self._connection_process:
+            # We have a connection object, could be alive or dead
+            if self._connection_process.is_alive():
+                pass
+            else:
+                self._connect()
+        else:
             if self.device_id and self.channels:
                 Logger.info("TelemetryManager: starting telemetry thread")
-                self.connection = TelemetryConnection(self.host, self.port, self.device_id,
-                                                      self.channels, self._data_bus, self.status)
-                self._connection_process = threading.Thread(target=self.connection.run)
-                self._connection_process.daemon = True
-                self._connection_process.start()
-                Logger.info("TelemetryManager: thread started")
-                self._connection_timer = threading.Timer(5.0, self._check_connection)
-                self._connection_timer.start()
+                self._connect()
             else:
-                Logger.warning("TelemetryManager: Device id and/or channels missing when attempting to start, waiting for config to get device id")
+                Logger.warning('TelemetryManager: Device id and/or channels missing '
+                               'when attempting to start, waiting for config to get device id')
                 self.auto_start = True
+
+    def _connect(self):
+        self.connection = TelemetryConnection(self.host, self.port, self.device_id,
+                                              self.channels, self._data_bus, self.status)
+        self._connection_process = threading.Thread(target=self.connection.run)
+        self._connection_process.daemon = True
+        self._connection_process.start()
+        Logger.info("TelemetryManager: thread started")
+        self._connection_timer = threading.Timer(5.0, self._check_connection)
+        self._connection_timer.start()
 
     def stop(self):
         Logger.info("TelemetryManager: stop()")
@@ -105,11 +111,18 @@ class TelemetryManager(EventDispatcher):
 
     def _check_connection(self):
         if self._connection_process.is_alive():
-            Logger.info("TelemetryManager: thread is alive")
+            Logger.info("TelemetryManager: connection thread is alive")
+            self._connection_timer = threading.Timer(5.0, self._check_connection)
+            self._connection_timer.start()
         else:
-            Logger.info("TelemetryManager: thread is dead")
-        self._connection_timer = threading.Timer(5.0, self._check_connection)
-        self._connection_timer.start()
+            Logger.info("TelemetryManager: connection thread is dead")
+            if self._retry_count < self.MAX_RETRIES:
+                self.dispatch('on_disconnected', "Reconnecting to RaceCapture/Live")
+                self._retry_count += 1
+                self._connect()
+            else:
+                self.dispatch('on_disconnected', "Failed to reconnect to RaceCapture/Live")
+                self._retry_count = 0
 
     def status(self, status, msg, status_code):
         if status_code == TelemetryConnection.STATUS_CONNECTED:
@@ -120,7 +133,8 @@ class TelemetryManager(EventDispatcher):
             self.dispatch('on_streaming', msg)
         elif status_code in [TelemetryConnection.ERROR_AUTHENTICATING,
                              TelemetryConnection.ERROR_CONNECTING,
-                             TelemetryConnection.ERROR_UNKNOWN]:
+                             TelemetryConnection.ERROR_UNKNOWN,
+                             TelemetryConnection.ERROR_UNKNOWN_MESSAGE]:
             self.dispatch('on_error', msg)
 
     def on_connected(self, *args):
@@ -149,29 +163,31 @@ class TelemetryConnection(asynchat.async_chat):
     ERROR_UNKNOWN = 2
     ERROR_CONNECTION_REFUSED = 3
     ERROR_TIMEOUT = 4
+    ERROR_UNKNOWN_MESSAGE = 5
 
-    def __init__(self, host, port, device_id, meta, data_bus, update_status_cb, timeout=5):
+    def __init__(self, host, port, device_id, channels, data_bus, update_status_cb, timeout=5):
         asynchat.async_chat.__init__(self)
 
         self.status = self.STATUS_UNINITIALIZED
         self.input_buffer = []
         self.timeout = timeout
         self._connect_timeout_timer = None
+        self._sample_timer = None
 
-        #State is hard
-        self._connected = False
+        # State is hard
+        self.connected = False
         self._connecting = False
-        self._authorized = False
+        self.authorized = False
+        self.streaming = False
         self.meta_sent = False
 
-        self._channel_data = {}
-        self._update_status = None
+        self._channel_data = channels
+        self._sample_data = None
         self._error = False
 
         self.host = host
         self.port = port
         self.device_id = device_id
-        self.meta = meta
         self._data_bus = data_bus
         self._update_status = update_status_cb
 
@@ -180,18 +196,29 @@ class TelemetryConnection(asynchat.async_chat):
         self.set_terminator("\n")
 
     def _on_sample(self, sample):
-        self._channel_data = sample
+        self._sample_data = sample
 
     def _on_meta(self, meta):
-        # TODO: stop sending data to RCL, send meta, start sending data
-        self.meta = meta
+        Logger.info("TelemetryConnection: got new meta")
+        self._channel_data = meta
+
+        if self._sample_timer:
+            self._sample_timer.cancel()
+
+        self._send_meta()
+        self._start_sample_timer()
+
+    def _start_sample_timer(self):
+        self._sample_timer = threading.Timer(0.1, self._send_sample)
+        self._sample_timer.start()
 
     def run(self):
-        # TODO: handle timeouts due to network
         Logger.info("TelemetryConnection: connecting to: " + self.host + " " + str(self.port))
 
         self._connecting = True
 
+        # No try/except here because the connect call ends up calling socket.connect_ex,
+        # which does not throw any errors. Async FTW! (Sorta)
         self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connect((self.host, self.port))
 
@@ -206,17 +233,18 @@ class TelemetryConnection(asynchat.async_chat):
     def handle_expt(self):
         #Something really bad happened if we're here
         Logger.info("TelemetryConnection: handle_expt, closing connection")
-        self.close()
+        self._update_status("ok", "Unknown error, disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
+        self.close_when_done()
 
     def handle_write(self):
         Logger.info("TelemetryConnection: socket writable")
         self._update_status("ok", "Connected to RaceCapture/Live", self.STATUS_CONNECTED)
-        self._connected = True
+        self.connected = True
         self._connecting = False
         self._send_auth()
 
     def handle_close(self):
-        self._connected = False
+        self.connected = False
         self._connecting = False
         Logger.info("TelemetryConnection: got disconnect")
         self._update_status("ok", "Disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
@@ -226,10 +254,11 @@ class TelemetryConnection(asynchat.async_chat):
         Logger.info("TelemetryConnection: handle_accept()")
 
     def handle_error(self):
-        #Guess what, when async_chat has errors, it calls this with 0 information
-        #So we have to inspect the callstack to figure out what happened. \o/
+        # Guess what, when async_chat has errors, it calls this with 0 information
+        # So we have to inspect the callstack to figure out what happened. \o/
         t, v, trace = sys.exc_info()
 
+        # Socket error objects will have a .errno attribute
         if hasattr(v, 'errno'):
             if v.errno == errno.ECONNREFUSED:
                 Logger.info("TelemetryConnection: connection refused")
@@ -241,14 +270,20 @@ class TelemetryConnection(asynchat.async_chat):
                 Logger.info("TelemetryConnection: unknown error connecting " + str(t) + " " +str(v))
                 self._update_status("error", "Timeout connecting", self.ERROR_UNKNOWN)
         else:
-            Logger.info("TelemetryConnection: unknown error")
-            self._update_status("error", "Timeout connecting", self.ERROR_UNKNOWN)
+            Logger.info("TelemetryConnection: unknown error " + str(v))
+            self._update_status("error", "Unknown error connecting", self.ERROR_UNKNOWN)
 
+        self.connected = False
+        self._connecting = False
+        self.streaming = False
+        self.authorized = False
         self._error = True
         self.close()
 
     def send_msg(self, msg):
+        msg += "\n"
         msg = msg.encode('ascii')
+
         self.push(msg)
 
     def collect_incoming_data(self, data):
@@ -264,33 +299,87 @@ class TelemetryConnection(asynchat.async_chat):
 
     def _handle_msg(self, msg_object):
         if "status" in msg_object:
-            if msg_object["status"] == "ok" and not self._authorized:
+            if msg_object["status"] == "ok" and not self.authorized:
                 self._update_status("ok", "Authorized with RaceCapture/Live",
                                     self.STATUS_AUTHORIZED)
                 Logger.info("TelemetryConnection: authorized to RaceCapture/Live")
-                self._authorized = True
+                self.authorized = True
                 self._send_meta()
-            elif not self._authorized:
+                self._start_sample_timer()
+            elif not self.authorized:
                 # We failed, abort
                 Logger.info("TelemetryConnection: failed to authorize, closing")
                 self._update_status("error", "Failed to authorize with RaceCapture/Live",
                                     self.ERROR_AUTHENTICATING)
                 self.close_connection()
         else:
-            Logger.error("TelemetryConnection: unknown error. Msg: " + str(msg_object))
-            self._update_status("error", "Unknown telemetry error", self.ERROR_UNKNOWN)
+            Logger.error("TelemetryConnection: unknown message. Msg: " + str(msg_object))
+            self._update_status("error", "Unknown telemetry message", self.ERROR_UNKNOWN_MESSAGE)
 
     def _send_auth(self):
         Logger.info("TelemetryConnection: sending auth")
-        auth_cmd = '{"cmd":{"schemaVer":2,"auth":{"deviceId":"' + self.device_id + '"}}}' + "\n"
+        auth_cmd = '{"cmd":{"schemaVer":2,"auth":{"deviceId":"' + self.device_id + '"}}}'
         self.send_msg(auth_cmd)
 
     def _send_meta(self):
-        #{"s":{"meta":[{"nm":"Coolant","ut":"F","sr":1},{"nm":"MAP","ut":"KPa","sr":5}]}}
-        pass
+        # Meta format: {"s":{"meta":[{"nm":"Coolant","ut":"F","sr":1},{"nm":"MAP","ut":"KPa","sr":5}]}}
+        Logger.info("TelemetryConnection: sending meta")
+
+        msg = {"s":{"meta":[]}}
+        meta = []
+
+        for channel_name, channel_config in self._channel_data.iteritems():
+            channel = {
+                "nm": channel_config.name,
+                "ut": channel_config.units,
+                "sr": channel_config.sampleRate,
+                "min": channel_config.min,
+                "max": channel_config.max
+            }
+            meta.append(channel)
+
+        msg["s"]["meta"] = meta
+        msg_json = json.dumps(msg)
+
+        self.send_msg(msg_json)
+
+    def _send_sample(self):
+        if self._sample_data is not None:
+            update = {"s": {"d": None}}
+            bitmasks = []
+            bitmasks_needed = int(max(0, math.floor((len(self._channel_data) - 1) / 32)) + 1)
+            channel_bit_position = 0
+            bitmask_index = 0
+
+            data = []
+
+            for x in range(0, bitmasks_needed):
+                bitmasks.append(0)
+
+            for channel_name, value in self._channel_data.iteritems():
+                if channel_bit_position > 31:
+                    bitmask_index += 1
+                    channel_bit_position = 0
+
+                if channel_name in self._sample_data:
+                    value = self._sample_data[channel_name]
+                    bitmasks[bitmask_index] = bitmasks[bitmask_index] | (1 << channel_bit_position)
+                    data.append(value)
+
+                channel_bit_position += 1
+
+            for bitmask in bitmasks:
+                data.append(bitmask)
+
+            update["s"]["d"] = data
+            update_json = json.dumps(update)
+
+            self.send_msg(update_json)
+            self._start_sample_timer()
 
     def end(self):
         Logger.info("TelemetryConnection: end()")
-        if self._connected:
+        if self.connected:
+            self._sample_timer.cancel()
             self.close_when_done()
 
