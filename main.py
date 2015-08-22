@@ -436,7 +436,7 @@ class RaceCaptureApp(App):
     def setup_telemetry(self):
         host = self.getAppArg('telemetryhost')
 
-        self._telemetry_connection = TelemetryManager(self._databus, host=host)
+        self._telemetry_connection = TelemetryManager(self._databus, host=host, auto_start=True)
         self.config_listeners.append(self._telemetry_connection)
         self._telemetry_connection.bind(on_connected=self.telemetry_connected)
         self._telemetry_connection.bind(on_disconnected=self.telemetry_disconnected)

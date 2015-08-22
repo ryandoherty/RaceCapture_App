@@ -9,9 +9,8 @@ import sys
 import errno
 import math
 
-
 class TelemetryManager(EventDispatcher):
-    MAX_RETRIES = 5
+    RETRY_WAIT = 2
     channels = ObjectProperty(None)
     device_id = StringProperty(None)
 
@@ -23,8 +22,6 @@ class TelemetryManager(EventDispatcher):
         self.connection = None
         self.auto_start = False
         self._connection_process = None
-        self._retry_count = 0
-        self._connection_timer = None
 
         self.register_event_type('on_connected')
         self.register_event_type('on_disconnected')
@@ -37,6 +34,13 @@ class TelemetryManager(EventDispatcher):
 
         self._data_bus.addMetaListener(self._on_meta)
         self._data_bus.start_update()
+
+        meta = self._data_bus.getMeta()
+
+        if len(meta) > 1:
+            self.channels = meta
+        else:
+            self.channels = None
 
         if host is not None:
             self.host = host
@@ -51,15 +55,12 @@ class TelemetryManager(EventDispatcher):
             self.start()
 
     def _on_meta(self, channel_metas):
+        Logger.info("TelemetryManager: Got meta")
         self.channels = channel_metas
 
     def on_channels(self, instance, value):
+        Logger.info("TelemetryManager: Got channels")
         if not self._connection_process and self.auto_start:
-            self.start()
-        elif self._connection_process:
-            # New meta, need to pause, send new channel info and restart
-            Logger.info("TelemetryManager: connection exists, stopping and starting")
-            self.stop()
             self.start()
 
     def on_device_id(self, instance, value):
@@ -70,6 +71,7 @@ class TelemetryManager(EventDispatcher):
             self.start()
         elif self._connection_process:
             Logger.info("TelemetryManager: connection previously established, restarting")
+            self.connection.end()  # Connection will re-start
 
     def on_config_updated(self, config):
         self.device_id = config.connectivityConfig.telemetryConfig.deviceId
@@ -95,40 +97,24 @@ class TelemetryManager(EventDispatcher):
                 self.auto_start = True
 
     def _connect(self):
+        Logger.info("TelemetryManager: starting connection")
         self.connection = TelemetryConnection(self.host, self.port, self.device_id,
                                               self.channels, self._data_bus, self.status)
         self._connection_process = threading.Thread(target=self.connection.run)
         self._connection_process.daemon = True
         self._connection_process.start()
         Logger.info("TelemetryManager: thread started")
-        self._connection_timer = threading.Timer(5.0, self._check_connection)
-        self._connection_timer.start()
 
     def stop(self):
         Logger.info("TelemetryManager: stop()")
-        self._connection_timer.cancel()
         self.connection.end()
-
-    def _check_connection(self):
-        if self._connection_process.is_alive():
-            Logger.info("TelemetryManager: connection thread is alive")
-            self._connection_timer = threading.Timer(5.0, self._check_connection)
-            self._connection_timer.start()
-        else:
-            Logger.info("TelemetryManager: connection thread is dead")
-            if self._retry_count < self.MAX_RETRIES:
-                self.dispatch('on_disconnected', "Reconnecting to RaceCapture/Live")
-                self._retry_count += 1
-                self._connect()
-            else:
-                self.dispatch('on_disconnected', "Failed to reconnect to RaceCapture/Live")
-                self._retry_count = 0
 
     def status(self, status, msg, status_code):
         if status_code == TelemetryConnection.STATUS_CONNECTED:
             self.dispatch('on_connected', msg)
         elif status_code == TelemetryConnection.STATUS_DISCONNECTED:
             self.dispatch('on_disconnected', msg)
+            threading.Timer(self.RETRY_WAIT, self._connect).start()
         elif status_code == TelemetryConnection.STATUS_STREAMING:
             self.dispatch('on_streaming', msg)
         elif status_code in [TelemetryConnection.ERROR_AUTHENTICATING,
@@ -200,13 +186,14 @@ class TelemetryConnection(asynchat.async_chat):
 
     def _on_meta(self, meta):
         Logger.info("TelemetryConnection: got new meta")
-        self._channel_data = meta
+        if self.authorized:
+            self._channel_data = meta
 
-        if self._sample_timer:
-            self._sample_timer.cancel()
+            if self._sample_timer:
+                self._sample_timer.cancel()
 
-        self._send_meta()
-        self._start_sample_timer()
+            self._send_meta()
+            self._start_sample_timer()
 
     def _start_sample_timer(self):
         self._sample_timer = threading.Timer(0.1, self._send_sample)
@@ -231,7 +218,7 @@ class TelemetryConnection(asynchat.async_chat):
         Logger.info("TelemetryConnection: got connect")
 
     def handle_expt(self):
-        #Something really bad happened if we're here
+        # Something really bad happened if we're here
         Logger.info("TelemetryConnection: handle_expt, closing connection")
         self._update_status("ok", "Unknown error, disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
         self.close_when_done()
@@ -248,7 +235,6 @@ class TelemetryConnection(asynchat.async_chat):
         self._connecting = False
         Logger.info("TelemetryConnection: got disconnect")
         self._update_status("ok", "Disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
-        self.close()
 
     def handle_accept(self):
         Logger.info("TelemetryConnection: handle_accept()")
@@ -278,10 +264,10 @@ class TelemetryConnection(asynchat.async_chat):
         self.streaming = False
         self.authorized = False
         self._error = True
-        self.close()
+        self.close_when_done()
 
     def send_msg(self, msg):
-        msg += "\n"
+        msg = msg + "\n"
         msg = msg.encode('ascii')
 
         self.push(msg)

@@ -196,6 +196,8 @@ class TelemetryConnectionTest(unittest.TestCase):
         sample['sensor38'] = random.randint(-50, 50)
         sample['sensor39'] = random.randint(-50, 50)
 
+
+        self.telemetry_connection.authorized = True
         self.telemetry_connection._on_meta(meta)
 
         self.telemetry_connection._on_sample(sample)
