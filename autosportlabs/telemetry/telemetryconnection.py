@@ -9,6 +9,13 @@ import sys
 import errno
 import math
 
+#  Manager that creates a new telemetry connection in a separate thread
+#  Bubbles up connectionn events back up to the main app, watch for disconnects
+#  and attempts to reconnect.
+#
+#  Requires channels and device id before connecting.
+#
+# Init => start() => telemetry thread => bubble up events
 class TelemetryManager(EventDispatcher):
     RETRY_WAIT = 2
     channels = ObjectProperty(None)
@@ -54,15 +61,19 @@ class TelemetryManager(EventDispatcher):
         if self.auto_start:
             self.start()
 
+    # Event handler for when meta (channel list) changes
     def _on_meta(self, channel_metas):
         Logger.info("TelemetryManager: Got meta")
         self.channels = channel_metas
 
+    # Event handler for when self.channels changes, don't restart connection b/c
+    # the TelemetryConnection object will handle new channels
     def on_channels(self, instance, value):
         Logger.info("TelemetryManager: Got channels")
         if not self._connection_process and self.auto_start:
             self.start()
 
+    # Event handler for when self.device_id changes, need to restart connection
     def on_device_id(self, instance, value):
         # Disconnect, re-auth, etc
         Logger.info("TelemetryManager: Got new device id")
@@ -73,12 +84,15 @@ class TelemetryManager(EventDispatcher):
             Logger.info("TelemetryManager: connection previously established, restarting")
             self.connection.end()  # Connection will re-start
 
+    # Event handler for when config is pulled from RCP
     def on_config_updated(self, config):
         self.device_id = config.connectivityConfig.telemetryConfig.deviceId
 
+    # Event handler for when config is written to RCP
     def on_config_written(self, config):
         self.device_id = config.connectivityConfig.telemetryConfig.deviceId
 
+    # Starts connection, checks to see if requirements are met
     def start(self):
         Logger.info("TelemetryManager: start()")
         if self._connection_process:
@@ -96,6 +110,7 @@ class TelemetryManager(EventDispatcher):
                                'when attempting to start, waiting for config to get device id')
                 self.auto_start = True
 
+    # Creates new TelemetryConnection in separate thread
     def _connect(self):
         Logger.info("TelemetryManager: starting connection")
         self.connection = TelemetryConnection(self.host, self.port, self.device_id,
@@ -109,6 +124,8 @@ class TelemetryManager(EventDispatcher):
         Logger.info("TelemetryManager: stop()")
         self.connection.end()
 
+    # Status function that receives events from TelemetryConnection thread
+    # Bubbles up events into main app
     def status(self, status, msg, status_code):
         if status_code == TelemetryConnection.STATUS_CONNECTED:
             self.dispatch('on_connected', msg)
@@ -135,7 +152,7 @@ class TelemetryManager(EventDispatcher):
     def on_error(self, *args):
         pass
 
-
+# Handles connecting to RCL, auth, sending data
 class TelemetryConnection(asynchat.async_chat):
 
     STATUS_UNINITIALIZED = -1
@@ -151,12 +168,11 @@ class TelemetryConnection(asynchat.async_chat):
     ERROR_TIMEOUT = 4
     ERROR_UNKNOWN_MESSAGE = 5
 
-    def __init__(self, host, port, device_id, channels, data_bus, update_status_cb, timeout=5):
+    def __init__(self, host, port, device_id, channels, data_bus, update_status_cb):
         asynchat.async_chat.__init__(self)
 
         self.status = self.STATUS_UNINITIALIZED
         self.input_buffer = []
-        self.timeout = timeout
         self._connect_timeout_timer = None
         self._sample_timer = None
 
@@ -181,9 +197,11 @@ class TelemetryConnection(asynchat.async_chat):
         self._data_bus.addMetaListener(self._on_meta)
         self.set_terminator("\n")
 
+    # Event handler for when RCP sends data to app
     def _on_sample(self, sample):
         self._sample_data = sample
 
+    # Event handler for when RCP's channel list changes
     def _on_meta(self, meta):
         Logger.info("TelemetryConnection: got new meta")
         if self.authorized:
@@ -195,6 +213,7 @@ class TelemetryConnection(asynchat.async_chat):
             self._send_meta()
             self._start_sample_timer()
 
+    # Sets up timer to send data to RCL every 100ms
     def _start_sample_timer(self):
         self._sample_timer = threading.Timer(0.1, self._send_sample)
         self._sample_timer.start()
@@ -223,6 +242,7 @@ class TelemetryConnection(asynchat.async_chat):
         self._update_status("ok", "Unknown error, disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
         self.close_when_done()
 
+    # This is when the socket is actually usable
     def handle_write(self):
         Logger.info("TelemetryConnection: socket writable")
         self._update_status("ok", "Connected to RaceCapture/Live", self.STATUS_CONNECTED)
@@ -236,9 +256,12 @@ class TelemetryConnection(asynchat.async_chat):
         Logger.info("TelemetryConnection: got disconnect")
         self._update_status("ok", "Disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
 
+    # When the socket is open, not necessarily usable
     def handle_accept(self):
         Logger.info("TelemetryConnection: handle_accept()")
 
+    # *All* errors come here, even errors thrown in this code because all functions in this object
+    # are called in the asyncore.loop() function
     def handle_error(self):
         # Guess what, when async_chat has errors, it calls this with 0 information
         # So we have to inspect the callstack to figure out what happened. \o/
@@ -272,9 +295,11 @@ class TelemetryConnection(asynchat.async_chat):
 
         self.push(msg)
 
+    # asynchat calls this function when new data comes in, we are responsible for buffering
     def collect_incoming_data(self, data):
         self.input_buffer.append(data)
 
+    # asynchat will find the \n for us and call this when it sees it
     def found_terminator(self):
         msg = ''.join(self.input_buffer)
         self.input_buffer = []
