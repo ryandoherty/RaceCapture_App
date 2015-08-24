@@ -41,7 +41,7 @@ class Range(EventDispatcher):
     @staticmethod
     def from_dict(range_dict):
         return Range(minimum=range_dict['min'], maximum=range_dict['max'], color=range_dict['color'])
-    
+
 class UserPrefs(EventDispatcher):
     _schedule_save = None
     _prefs_dict = {'range_alerts': {}, 'gauge_settings':{}}
@@ -77,7 +77,7 @@ class UserPrefs(EventDispatcher):
         with open(self.prefs_file, 'w+') as prefs_file:
             data = self.to_json()
             prefs_file.write(data)
-        
+
     def set_config_defaults(self):
         self.config.adddefaultsection('preferences')
         self.config.setdefault('preferences', 'distance_units', 'miles')
@@ -88,6 +88,7 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'config_file_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'firmware_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'first_time_setup', True)
+        self.config.setdefault('preferences', 'send_telemetry', False)
 
     def load(self):
         print("the data dir " + self.data_dir)

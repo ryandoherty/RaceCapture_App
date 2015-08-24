@@ -41,6 +41,7 @@ class DataBus(object):
     data_filters = []
     sample_listeners = []
     _polling = False
+    rcp_meta_read = False
 
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
@@ -72,6 +73,7 @@ class DataBus(object):
             self._update_datafilter_meta(f)
                 
         self.meta_updated = True
+        self.rcp_meta_read = True
 
     def addSampleListener(self, callback):
         self.sample_listeners.append(callback)

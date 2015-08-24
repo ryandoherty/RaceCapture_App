@@ -23,8 +23,8 @@ class PreferencesView(Screen):
         self.settings = settings
         self.base_dir = kwargs.get('base_dir')
 
-        settings_view = SettingsWithNoMenu()
-        settings_view.add_json_panel('Preferences', self.settings.userPrefs.config, os.path.join(self.base_dir, 'resource', 'settings', 'settings.json'))
+        self.settings_view = SettingsWithNoMenu()
+        self.settings_view.add_json_panel('Preferences', self.settings.userPrefs.config, os.path.join(self.base_dir, 'resource', 'settings', 'settings.json'))
 
         self.content = kvFind(self, 'rcid', 'preferences')
-        self.content.add_widget(settings_view)
+        self.content.add_widget(self.settings_view)

@@ -325,6 +325,7 @@ class RaceCaptureApp(App):
     
     def build_preferences_view(self):
         preferences_view = PreferencesView(name='preferences', settings=self.settings, base_dir=self.base_dir)
+        preferences_view.settings_view.bind(on_config_change=self._on_config_change)
         return preferences_view
     
     def build_homepage_view(self):
@@ -436,27 +437,40 @@ class RaceCaptureApp(App):
     def setup_telemetry(self):
         host = self.getAppArg('telemetryhost')
 
-        self._telemetry_connection = TelemetryManager(self._databus, host=host, auto_start=True)
+        self._telemetry_connection = TelemetryManager(self._databus, host=host)
         self.config_listeners.append(self._telemetry_connection)
         self._telemetry_connection.bind(on_connected=self.telemetry_connected)
         self._telemetry_connection.bind(on_disconnected=self.telemetry_disconnected)
         self._telemetry_connection.bind(on_streaming=self.telemetry_streaming)
         self._telemetry_connection.bind(on_error=self.telemetry_error)
 
-        self._telemetry_connection.start()
+        if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1":
+            self._telemetry_connection.start()
 
     def telemetry_connected(self, instance, msg):
+        self.status_bar.dispatch('on_tele_status', True)
         self.showActivity(msg)
 
     def telemetry_disconnected(self, instance, msg):
+        self.status_bar.dispatch('on_tele_status', False)
         self.showActivity(msg)
 
     def telemetry_streaming(self, instance, msg):
-        self.showActivity(msg)
+        self.status_bar.dispatch('on_tele_status', True)
 
     def telemetry_error(self, instance, msg):
         self.showActivity(msg)
 
+    def on_config_change(self, config, section, key, value):
+        """Called any time the app preferences are changed
+        """
+        token = (section, key)
+
+        if token == ('preferences', 'send_telemetry'):
+            if value == "1":  # Boolean settings values are 1/0, not True/False
+                self._telemetry_connection.start()
+            else:
+                self._telemetry_connection.stop()
 
 if __name__ == '__main__':
     RaceCaptureApp().run()
