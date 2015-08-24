@@ -54,13 +54,13 @@ class TelemetryConnectionTest(unittest.TestCase):
     def test_sends_auth(self, asyncore_loop_mock):
         self.telemetry_connection.run()
 
-        self.telemetry_connection.handle_write()
+        self.telemetry_connection.handle_connect()
 
         self.telemetry_connection.push.assert_called_with('{"cmd":{"schemaVer":2,"auth":{"deviceId":"' + self.device_id + '"}}}' + "\n")
 
     def test_sends_authorized_status(self, asyncore_loop_mock):
         self.telemetry_connection.run()
-        self.telemetry_connection.handle_write()
+        self.telemetry_connection.handle_connect()
 
         args, kwargs = self.status_function.call_args
         status, message, status_code = args
@@ -72,12 +72,12 @@ class TelemetryConnectionTest(unittest.TestCase):
         args, kwargs = self.status_function.call_args
         status, message, status_code = args
 
-        self.assertEqual(status_code, TelemetryConnection.STATUS_AUTHORIZED)
+        self.assertEqual(status_code, TelemetryConnection.STATUS_STREAMING)
 
     def test_sends_error_authenticating_status(self, asyncore_loop_mock):
 
         self.telemetry_connection.run()
-        self.telemetry_connection.handle_write()
+        self.telemetry_connection.handle_connect()
 
         self.telemetry_connection.collect_incoming_data('{"status":"error","message":"invalid serial number"}')
         self.telemetry_connection.found_terminator()
@@ -89,7 +89,7 @@ class TelemetryConnectionTest(unittest.TestCase):
 
     def test_sends_unknown_error(self, asyncore_loop_mock):
         self.telemetry_connection.run()
-        self.telemetry_connection.handle_write()
+        self.telemetry_connection.handle_connect()
 
         self.telemetry_connection.collect_incoming_data('{"foo":"bar"}')
         self.telemetry_connection.found_terminator()
@@ -101,7 +101,7 @@ class TelemetryConnectionTest(unittest.TestCase):
 
     def test_sends_meta(self, asyncore_loop_mock):
         self.telemetry_connection.run()
-        self.telemetry_connection.handle_write()
+        self.telemetry_connection.handle_connect()
 
         args, kwargs = self.status_function.call_args
         status, message, status_code = args

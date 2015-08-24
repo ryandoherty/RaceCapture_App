@@ -47,9 +47,11 @@ class DataBus(object):
         super(DataBus, self).__init__(**kwargs)
 
     def start_update(self, interval = DEFAULT_DATABUS_UPDATE_INTERVAL):
-        if not self._polling:
-            Clock.schedule_interval(self.notify_listeners, interval)
-            self._polling = True
+        if self._polling:
+            return
+
+        Clock.schedule_interval(self.notify_listeners, interval)
+        self._polling = True
 
     def stop_update(self):
         Clock.unschedule(self.notify_listeners)

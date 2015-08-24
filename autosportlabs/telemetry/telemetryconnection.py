@@ -9,13 +9,14 @@ import sys
 import errno
 import math
 
-#  Manager that creates a new telemetry connection in a separate thread
-#  Bubbles up connection events back up to the main app, watch for disconnects
-#  and attempts to reconnect.
-#
-#  Requires channels and device id before connecting.
-#
-# Init => start() => telemetry thread => bubble up events
+"""Manager that creates a new telemetry connection in a separate thread
+  Bubbles up connection events back up to the main app, watch for disconnects
+  and attempts to reconnect.
+
+  Requires channels and device id before connecting.
+
+ Init => start() => telemetry thread => bubble up events
+"""
 class TelemetryManager(EventDispatcher):
     RETRY_WAIT = 2.0
     channels = ObjectProperty(None)
@@ -93,12 +94,8 @@ class TelemetryManager(EventDispatcher):
     def start(self):
         Logger.info("TelemetryManager: start()")
         self.auto_start = True
-        if self._connection_process:
-            # We have a connection object, could be alive or dead
-            if self._connection_process.is_alive():
-                pass
-            else:
-                self._connect()
+        if self._connection_process and not self._connection_process.is_alive():
+            self._connect()
         else:
             if self.device_id and self.channels:
                 Logger.info("TelemetryManager: starting telemetry thread")
@@ -145,6 +142,8 @@ class TelemetryManager(EventDispatcher):
                              TelemetryConnection.ERROR_UNKNOWN_MESSAGE]:
             self.dispatch('on_error', msg)
 
+        Logger.debug("TelemetryManager: got telemetry status: " + status + " message: " + msg)
+
     def on_connected(self, *args):
         pass
 
@@ -166,12 +165,12 @@ class TelemetryConnection(asynchat.async_chat):
     STATUS_AUTHORIZED = 2
     STATUS_STREAMING = 3
 
+    ERROR_UNKNOWN_MESSAGE = -1
     ERROR_CONNECTING = 0
     ERROR_AUTHENTICATING = 1
     ERROR_UNKNOWN = 2
     ERROR_CONNECTION_REFUSED = 3
     ERROR_TIMEOUT = 4
-    ERROR_UNKNOWN_MESSAGE = 5
 
     def __init__(self, host, port, device_id, channels, data_bus, update_status_cb):
         asynchat.async_chat.__init__(self)
@@ -224,7 +223,7 @@ class TelemetryConnection(asynchat.async_chat):
         self._sample_timer.start()
 
     def run(self):
-        Logger.info("TelemetryConnection: connecting to: " + self.host + " " + str(self.port))
+        Logger.info("TelemetryConnection: connecting to: %s:%d" % (self.host, self.port))
 
         self._connecting = True
 

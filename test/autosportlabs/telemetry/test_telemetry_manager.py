@@ -10,7 +10,7 @@ import asyncore
 
 @patch.object(asyncore, 'loop')
 @patch('autosportlabs.telemetry.telemetryconnection.TelemetryConnection', autospec=True)
-@patch('autosportlabs.racecapture.databus.databus.DataBus')
+@patch('autosportlabs.racecapture.databus.databus.DataBus', autospec=True)
 class TelemetryManagerTest(unittest.TestCase):
 
     def test_no_start(self, mock_data_bus_pump, mock_telemetry_connection, mock_asyncore):
@@ -18,6 +18,8 @@ class TelemetryManagerTest(unittest.TestCase):
         device_id = "ADER45"
         host = 'foobar.com'
         port = 5555
+
+        data_bus.rcp_meta_read = False
 
         telemetry_manager = TelemetryManager(data_bus, device_id=device_id, host=host, port=port)
         telemetry_manager.start()
