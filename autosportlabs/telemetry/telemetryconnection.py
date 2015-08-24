@@ -142,7 +142,7 @@ class TelemetryManager(EventDispatcher):
                              TelemetryConnection.ERROR_UNKNOWN_MESSAGE]:
             self.dispatch('on_error', msg)
 
-        Logger.debug("TelemetryManager: got telemetry status: " + status + " message: " + msg)
+        Logger.debug("TelemetryManager: got telemetry status: " + str(status) + " message: " + str(msg))
 
     def on_connected(self, *args):
         pass
@@ -271,6 +271,23 @@ class TelemetryConnection(asynchat.async_chat):
         # So we have to inspect the callstack to figure out what happened. \o/
         t, v, trace = sys.exc_info()
 
+        tbinfo = []
+        if not trace: # Must have a traceback
+            raise AssertionError("traceback does not exist")
+        while trace:
+            tbinfo.append((
+                trace.tb_frame.f_code.co_filename,
+                trace.tb_frame.f_code.co_name,
+                str(trace.tb_lineno)
+            ))
+            trace = trace.tb_next
+
+        # just to be safe
+        del trace
+
+        file, function, line = tbinfo[-1]
+        info = ' '.join(['[%s|%s|%s]' % x for x in tbinfo])
+
         # Socket error objects will have a .errno attribute
         if hasattr(v, 'errno'):
             if v.errno == errno.ECONNREFUSED:
@@ -283,7 +300,7 @@ class TelemetryConnection(asynchat.async_chat):
                 Logger.info("TelemetryConnection: unknown error connecting " + str(t) + " " +str(v))
                 self._update_status("error", "Unknown error", self.ERROR_UNKNOWN)
         else:
-            Logger.info("TelemetryConnection: unknown error " + str(v))
+            Logger.info("TelemetryConnection: unknown error " + str(v) + str(file) + " " + str(function) + ":" + str(line))
             self._update_status("error", "Unknown error connecting", self.ERROR_UNKNOWN)
 
         self._connected = False
