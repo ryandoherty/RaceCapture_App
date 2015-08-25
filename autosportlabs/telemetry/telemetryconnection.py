@@ -61,25 +61,25 @@ class TelemetryManager(EventDispatcher):
 
     # Event handler for when meta (channel list) changes
     def _on_meta(self, channel_metas):
-        Logger.info("TelemetryManager: Got meta")
+        Logger.debug("TelemetryManager: Got meta")
         self.channels = channel_metas
 
     # Event handler for when self.channels changes, don't restart connection b/c
     # the TelemetryConnection object will handle new channels
     def on_channels(self, instance, value):
-        Logger.info("TelemetryManager: Got channels")
+        Logger.debug("TelemetryManager: Got channels")
         if not self._connection_process and self.auto_start:
             self.start()
 
     # Event handler for when self.device_id changes, need to restart connection
     def on_device_id(self, instance, value):
         # Disconnect, re-auth, etc
-        Logger.info("TelemetryManager: Got new device id")
+        Logger.debug("TelemetryManager: Got new device id")
 
         if not self._connection_process and self.auto_start:
             self.start()
         elif self._connection_process:
-            Logger.info("TelemetryManager: connection previously established, restarting")
+            Logger.debug("TelemetryManager: connection previously established, restarting")
             self.connection.end()  # Connection will re-start
 
     # Event handler for when config is pulled from RCP
@@ -92,13 +92,13 @@ class TelemetryManager(EventDispatcher):
 
     # Starts connection, checks to see if requirements are met
     def start(self):
-        Logger.info("TelemetryManager: start()")
+        Logger.debug("TelemetryManager: start()")
         self.auto_start = True
         if self._connection_process and not self._connection_process.is_alive():
             self._connect()
         else:
             if self.device_id and self.channels:
-                Logger.info("TelemetryManager: starting telemetry thread")
+                Logger.debug("TelemetryManager: starting telemetry thread")
                 self._connect()
             else:
                 Logger.warning('TelemetryManager: Device id and/or channels missing '
@@ -106,16 +106,16 @@ class TelemetryManager(EventDispatcher):
 
     # Creates new TelemetryConnection in separate thread
     def _connect(self):
-        Logger.info("TelemetryManager: starting connection")
+        Logger.debug("TelemetryManager: starting connection")
         self.connection = TelemetryConnection(self.host, self.port, self.device_id,
                                               self.channels, self._data_bus, self.status)
         self._connection_process = threading.Thread(target=self.connection.run)
         self._connection_process.daemon = True
         self._connection_process.start()
-        Logger.info("TelemetryManager: thread started")
+        Logger.debug("TelemetryManager: thread started")
 
     def stop(self):
-        Logger.info("TelemetryManager: stop()")
+        Logger.debug("TelemetryManager: stop()")
         if self.connection:
             self.connection.end()
             self.auto_start = False
@@ -207,7 +207,7 @@ class TelemetryConnection(asynchat.async_chat):
 
     # Event handler for when RCP's channel list changes
     def _on_meta(self, meta):
-        Logger.info("TelemetryConnection: got new meta")
+        Logger.debug("TelemetryConnection: got new meta")
         if self.authorized:
             self._channel_data = meta
 
@@ -248,7 +248,7 @@ class TelemetryConnection(asynchat.async_chat):
 
     def handle_expt(self):
         # Something really bad happened if we're here
-        Logger.info("TelemetryConnection: handle_expt, closing connection")
+        Logger.error("TelemetryConnection: handle_expt, closing connection")
         self._update_status("ok", "Unknown error, disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
         self.close_when_done()
 
@@ -262,7 +262,7 @@ class TelemetryConnection(asynchat.async_chat):
 
     # When the socket is open, not necessarily usable
     def handle_accept(self):
-        Logger.info("TelemetryConnection: handle_accept()")
+        Logger.debug("TelemetryConnection: handle_accept()")
 
     # *All* errors come here, even errors thrown in this code because all functions in this object
     # are called in the asyncore.loop() function
@@ -291,16 +291,16 @@ class TelemetryConnection(asynchat.async_chat):
         # Socket error objects will have a .errno attribute
         if hasattr(v, 'errno'):
             if v.errno == errno.ECONNREFUSED:
-                Logger.info("TelemetryConnection: connection refused")
+                Logger.error("TelemetryConnection: connection refused")
                 self._update_status("error", "Connection refused", self.ERROR_CONNECTION_REFUSED)
             elif v.errno == errno.ETIMEDOUT:
-                Logger.info("TelemetryConnection: timeout connecting")
+                Logger.error("TelemetryConnection: timeout connecting")
                 self._update_status("error", "Timeout connecting", self.ERROR_TIMEOUT)
             else:
-                Logger.info("TelemetryConnection: unknown error connecting " + str(t) + " " +str(v))
+                Logger.error("TelemetryConnection: unknown error connecting " + str(t) + " " +str(v))
                 self._update_status("error", "Unknown error", self.ERROR_UNKNOWN)
         else:
-            Logger.info("TelemetryConnection: unknown error " + str(v) + str(file) + " " + str(function) + ":" + str(line))
+            Logger.error("TelemetryConnection: unknown error " + str(v) + str(file) + " " + str(function) + ":" + str(line))
             self._update_status("error", "Unknown error connecting", self.ERROR_UNKNOWN)
 
         self._connected = False
@@ -325,7 +325,7 @@ class TelemetryConnection(asynchat.async_chat):
         msg = ''.join(self.input_buffer)
         self.input_buffer = []
 
-        Logger.info("TelemetryConnection: " + msg)
+        Logger.debug("TelemetryConnection: " + msg)
         msg_object = json.loads(msg)
         self._handle_msg(msg_object)
 
@@ -351,13 +351,13 @@ class TelemetryConnection(asynchat.async_chat):
             self._update_status("error", "Unknown telemetry message", self.ERROR_UNKNOWN_MESSAGE)
 
     def _send_auth(self):
-        Logger.info("TelemetryConnection: sending auth")
+        Logger.debug("TelemetryConnection: sending auth")
         auth_cmd = '{"cmd":{"schemaVer":2,"auth":{"deviceId":"' + self.device_id + '"}}}'
         self.send_msg(auth_cmd)
 
     def _send_meta(self):
         # Meta format: {"s":{"meta":[{"nm":"Coolant","ut":"F","sr":1},{"nm":"MAP","ut":"KPa","sr":5}]}}
-        Logger.info("TelemetryConnection: sending meta")
+        Logger.debug("TelemetryConnection: sending meta")
 
         msg = {"s":{"meta":[]}}
         meta = []
@@ -412,7 +412,7 @@ class TelemetryConnection(asynchat.async_chat):
             self._start_sample_timer()
 
     def end(self):
-        Logger.info("TelemetryConnection: end()")
+        Logger.debug("TelemetryConnection: end()")
         if self._connected:
             if self._sample_timer:
                 self._sample_timer.cancel()
