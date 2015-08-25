@@ -210,11 +210,14 @@ class RaceCaptureApp(App):
             self._serial_warning()
 
     def on_write_config_complete(self, result):
+        Logger.info("RaceCaptureApp: Config written")
         self.showActivity("Writing completed")
         self.rc_config.stale = False
         self.dataBusPump.meta_is_stale()
         for listener in self.config_listeners:
-            Clock.schedule_once(lambda dt: listener.dispatch('on_config_written', self.rc_config))
+            Logger.info("Notifying config written listener " + str(listener))
+            #listener.dispatch('on_config_written', self.rc_config)
+            Clock.schedule_once(lambda dt, foobar=listener: foobar.dispatch('on_config_written', self.rc_config))
         Clock.schedule_once(lambda dt: self.showActivity(''), 5.0)
 
     def on_write_config_error(self, detail):
@@ -461,13 +464,15 @@ class RaceCaptureApp(App):
     def telemetry_error(self, instance, msg):
         self.showActivity(msg)
 
-    def on_config_change(self, config, section, key, value):
+    def _on_config_change(self, menu, config, section, key, value):
         """Called any time the app preferences are changed
         """
         token = (section, key)
 
         if token == ('preferences', 'send_telemetry'):
             if value == "1":  # Boolean settings values are 1/0, not True/False
+                if self.rc_config.connectivityConfig.cellConfig.cellEnabled:
+                    alertPopup('Telemetry error', "Turn off RaceCapture's telemetry module for app to stream telemetry.")
                 self._telemetry_connection.start()
             else:
                 self._telemetry_connection.stop()

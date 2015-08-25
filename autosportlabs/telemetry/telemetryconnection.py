@@ -23,6 +23,7 @@ class TelemetryManager(EventDispatcher):
     RETRY_WAIT_MAX_TIME = 10
     channels = ObjectProperty(None)
     device_id = StringProperty(None)
+    cell_enabled = BooleanProperty(False)
 
     def __init__(self, data_bus, device_id=None, host=None, port=None, **kwargs):
         super(TelemetryManager, self).__init__(**kwargs)
@@ -40,6 +41,7 @@ class TelemetryManager(EventDispatcher):
         self.register_event_type('on_disconnected')
         self.register_event_type('on_streaming')
         self.register_event_type('on_config_updated')
+        self.register_event_type('on_config_written')
         self.register_event_type('on_error')
 
         self._data_bus = data_bus
@@ -72,7 +74,7 @@ class TelemetryManager(EventDispatcher):
     # the TelemetryConnection object will handle new channels
     def on_channels(self, instance, value):
         Logger.debug("TelemetryManager: Got channels")
-        if not self._connection_process and self.auto_start:
+        if self.auto_start:
             self.start()
 
     # Event handler for when self.device_id changes, need to restart connection
@@ -80,18 +82,31 @@ class TelemetryManager(EventDispatcher):
         # Disconnect, re-auth, etc
         Logger.debug("TelemetryManager: Got new device id")
 
-        if not self._connection_process and self.auto_start:
+        if self.auto_start:
             self.start()
         elif self._connection_process:
             Logger.debug("TelemetryManager: connection previously established, restarting")
             self.connection.end()  # Connection will re-start
+            self._connection_process.join()
+
+    def on_cell_enabled(self, instance, value):
+        Logger.info("TelemetryManager: on_cell_enabled: " + str(value))
+        if value and self._connection_process:
+            Logger.info("TelemetryManager: cell enabled, disconnecting " + str(value))
+            #  Nope
+            self.auto_start = False
+            self.stop()
+        elif self.auto_start:
+            self.start()
 
     # Event handler for when config is pulled from RCP
     def on_config_updated(self, config):
+        self.cell_enabled = config.connectivityConfig.cellConfig.cellEnabled
         self.device_id = config.connectivityConfig.telemetryConfig.deviceId
 
     # Event handler for when config is written to RCP
     def on_config_written(self, config):
+        self.cell_enabled = config.connectivityConfig.cellConfig.cellEnabled
         self.device_id = config.connectivityConfig.telemetryConfig.deviceId
 
     # Starts connection, checks to see if requirements are met
@@ -99,18 +114,19 @@ class TelemetryManager(EventDispatcher):
         Logger.debug("TelemetryManager: start()")
         self.auto_start = True
         if self._connection_process and not self._connection_process.is_alive():
+            Logger.info("TelemetryManager: connection process is dead")
             self._connect()
-        else:
-            if self.device_id and self.channels:
+        elif not self._connection_process:
+            if self.device_id and self.channels and not self.cell_enabled:
                 Logger.debug("TelemetryManager: starting telemetry thread")
                 self._connect()
             else:
-                Logger.warning('TelemetryManager: Device id and/or channels missing '
-                               'when attempting to start, waiting for config to get device id')
+                Logger.warning('TelemetryManager: Device id, channels missing or RCP cell enabled '
+                               'when attempting to start. Aborting.')
 
     # Creates new TelemetryConnection in separate thread
     def _connect(self):
-        Logger.debug("TelemetryManager: starting connection")
+        Logger.info("TelemetryManager: starting connection")
         self.connection = TelemetryConnection(self.host, self.port, self.device_id,
                                               self.channels, self._data_bus, self.status)
         self._connection_process = threading.Thread(target=self.connection.run)
@@ -120,12 +136,14 @@ class TelemetryManager(EventDispatcher):
 
     def stop(self):
         Logger.debug("TelemetryManager: stop()")
-        if self.connection:
-            self.connection.end()
-            self.auto_start = False
+        self.auto_start = False
 
         if self._retry_timer:
             self._retry_timer.cancel()
+
+        if self.connection:
+            self.connection.end()
+            self._connection_process.join()
 
     # Status function that receives events from TelemetryConnection thread
     # Bubbles up events into main app
@@ -421,8 +439,8 @@ class TelemetryConnection(asynchat.async_chat):
             self._start_sample_timer()
 
     def end(self):
-        Logger.debug("TelemetryConnection: end()")
         if self._connected:
+            Logger.info("TelemetryConnection: closing connection")
             if self._sample_timer:
                 self._sample_timer.cancel()
             self.close_when_done()

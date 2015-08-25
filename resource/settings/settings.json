@@ -37,7 +37,7 @@
     {
         "type": "bool",
         "title": "Send telemetry",
-        "desc": "App will send telemetry to race-capture.com using the connected RaceCapture device ID",
+        "desc": "App will send telemetry to race-capture.com using the connected RaceCapture device ID. NOTE: app will not send telemetry if RaceCapture's telemetry module is on.",
         "section": "preferences",
         "key": "send_telemetry",
         "true": "auto"
