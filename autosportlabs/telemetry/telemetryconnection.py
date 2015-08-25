@@ -18,7 +18,9 @@ import math
  Init => start() => telemetry thread => bubble up events
 """
 class TelemetryManager(EventDispatcher):
-    RETRY_WAIT = 2.0
+    RETRY_WAIT_START = 0.1
+    RETRY_MULTIPLIER = 10
+    RETRY_WAIT_MAX_TIME = 10
     channels = ObjectProperty(None)
     device_id = StringProperty(None)
 
@@ -31,6 +33,8 @@ class TelemetryManager(EventDispatcher):
         self.auto_start = False
         self._connection_process = None
         self._retry_timer = None
+        self._retry_wait = self.RETRY_WAIT_START
+        self._retry_count = 0
 
         self.register_event_type('on_connected')
         self.register_event_type('on_disconnected')
@@ -128,12 +132,17 @@ class TelemetryManager(EventDispatcher):
     def status(self, status, msg, status_code):
         if status_code == TelemetryConnection.STATUS_CONNECTED:
             self.dispatch('on_connected', msg)
+            self._retry_count = 0
         elif status_code == TelemetryConnection.STATUS_DISCONNECTED:
             self.dispatch('on_disconnected', msg)
             if self.auto_start:
+                wait = self.RETRY_WAIT_START if self._retry_count == 0 else \
+                    min(self.RETRY_WAIT_MAX_TIME, (math.pow(self.RETRY_MULTIPLIER, self._retry_count) *
+                                                   self.RETRY_WAIT_START))
                 Logger.warning("TelemetryManager: got disconnect, reconnecting in 2s")
-                self._retry_timer = threading.Timer(self.RETRY_WAIT, self._connect)
+                self._retry_timer = threading.Timer(wait, self._connect)
                 self._retry_timer.start()
+                self._retry_count += 1
         elif status_code == TelemetryConnection.STATUS_STREAMING:
             self.dispatch('on_streaming', True)
         elif status_code in [TelemetryConnection.ERROR_AUTHENTICATING,

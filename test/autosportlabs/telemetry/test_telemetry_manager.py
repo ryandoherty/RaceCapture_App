@@ -1,12 +1,9 @@
 import unittest
 from mock import patch
 import mock
-import socket
 from autosportlabs.telemetry.telemetryconnection import *
-from autosportlabs.racecapture.databus.databus import DataBusFactory, DataBusPump, DataBus
 import asyncore
-#from kivy.logger import Logger
-#Logger.setLevel(51)  # Hide all Kivy Logger calls
+import math
 
 @patch.object(asyncore, 'loop')
 @patch('autosportlabs.telemetry.telemetryconnection.TelemetryConnection', autospec=True)
@@ -82,7 +79,24 @@ class TelemetryManagerTest(unittest.TestCase):
         timeout, connect = args
 
         self.assertEqual('_connect', connect.__name__)
-        self.assertEqual(TelemetryManager.RETRY_WAIT, timeout)
-
+        self.assertEqual(TelemetryManager.RETRY_WAIT_START, timeout)
         self.assertTrue(mock_timer.called)
+
+        telemetry_manager.status("error", "Disconnected", TelemetryConnection.STATUS_DISCONNECTED)
+        args, kwargs = mock_timer.call_args
+        timeout, connect = args
+
+        self.assertEqual(TelemetryManager.RETRY_WAIT_START * TelemetryManager.RETRY_MULTIPLIER, timeout)
+
+        telemetry_manager.status("error", "Disconnected", TelemetryConnection.STATUS_DISCONNECTED)
+        args, kwargs = mock_timer.call_args
+        timeout, connect = args
+
+        self.assertEqual(TelemetryManager.RETRY_WAIT_START * (math.pow(TelemetryManager.RETRY_MULTIPLIER, 2)), timeout)
+
+        telemetry_manager.status("error", "Disconnected", TelemetryConnection.STATUS_DISCONNECTED)
+        args, kwargs = mock_timer.call_args
+        timeout, connect = args
+
+        self.assertEqual(TelemetryManager.RETRY_WAIT_START * (math.pow(TelemetryManager.RETRY_MULTIPLIER, 2)), timeout)
 
