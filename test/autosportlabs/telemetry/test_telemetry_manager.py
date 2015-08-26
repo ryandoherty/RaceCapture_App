@@ -38,13 +38,14 @@ class TelemetryManagerTest(unittest.TestCase):
         host = 'foobar.com'
         port = 5555
 
-        telemetry_manager = TelemetryManager(data_bus, device_id=device_id, host=host, port=port,
-                                             auto_start=True)
+        telemetry_manager = TelemetryManager(data_bus, device_id=device_id, host=host, port=port, telemetry_enabled=True)
         telemetry_manager._on_meta({
             'Foo': 'bar',
             'Bar': 'baz',
             'Fizz': 'buzz'
         })
+
+        telemetry_manager.telemetry_enabled = True
 
         args, kwargs = mock_telemetry_connection.call_args
         host_arg, port_arg, device_id_arg, meta_arg, bus_arg, status_arg = args
@@ -65,7 +66,7 @@ class TelemetryManagerTest(unittest.TestCase):
         port = 5555
 
         telemetry_manager = TelemetryManager(data_bus, device_id=device_id, host=host, port=port,
-                                             auto_start=True)
+                                             telemetry_enabled=True)
         telemetry_manager._on_meta({
             'Foo': 'bar',
             'Bar': 'baz',
