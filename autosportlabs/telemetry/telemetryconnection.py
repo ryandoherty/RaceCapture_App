@@ -1,6 +1,7 @@
 from kivy.logger import Logger
 from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.event import EventDispatcher
+from kivy.clock import Clock
 import threading
 import asynchat, asyncore
 import json
@@ -268,8 +269,7 @@ class TelemetryConnection(asynchat.async_chat):
 
     # Sets up timer to send data to RCL every 100ms
     def _start_sample_timer(self):
-        self._sample_timer = threading.Timer(0.1, self._send_sample)
-        self._sample_timer.start()
+        self._sample_timer = Clock.schedule_interval(self._send_sample, 0.1)
 
     def run(self):
         Logger.info("TelemetryConnection: connecting to: %s:%d" % (self.host, self.port))
@@ -430,7 +430,7 @@ class TelemetryConnection(asynchat.async_chat):
 
         self.send_msg(msg_json)
 
-    def _send_sample(self):
+    def _send_sample(self, *args):
         if self._sample_data is not None:
             update = {"s": {"d": None}}
             bitmasks = []
@@ -462,7 +462,6 @@ class TelemetryConnection(asynchat.async_chat):
             update_json = json.dumps(update)
 
             self.send_msg(update_json)
-            self._start_sample_timer()
 
     def end(self):
         if self._connected:
