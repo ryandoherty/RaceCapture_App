@@ -8,9 +8,7 @@ import socket
 import sys
 import errno
 import math
-import inspect
 
-Logger.setLevel(10)
 """Manager that creates a new telemetry connection in a separate thread
   Bubbles up connection events back up to the main app, watch for disconnects
   and attempts to reconnect.
