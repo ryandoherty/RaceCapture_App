@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.3.7"
+__version__ = "1.3.8"
 import sys
 import os
 
@@ -40,6 +40,7 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.menu.homepageview import HomePageView
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
+    from autosportlabs.telemetry.telemetryconnection import TelemetryManager
     from toolbarview import ToolbarView
     if not is_mobile_platform():
         kivy.config.Config.set ( 'input', 'mouse', 'mouse,disable_multitouch' )
@@ -101,6 +102,8 @@ class RaceCaptureApp(App):
 
     base_dir = None
 
+    _telemetry_connection = None
+
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
 
@@ -123,6 +126,7 @@ class RaceCaptureApp(App):
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
         self.trackManager = TrackManager(user_dir=self.settings.get_default_data_dir(), base_dir=self.base_dir)
+        self.setup_telemetry()
 
     def on_pause(self):
         return True
@@ -134,6 +138,8 @@ class RaceCaptureApp(App):
     def processArgs(self):
         parser = argparse.ArgumentParser(description='Autosport Labs Race Capture App')
         parser.add_argument('-p','--port', help='Port', required=False)
+        parser.add_argument('--telemetryhost', help='Telemetry host', required=False)
+
         if sys.platform == 'win32':
             parser.add_argument('--multiprocessing-fork', required=False, action='store_true')
 
@@ -204,11 +210,12 @@ class RaceCaptureApp(App):
             self._serial_warning()
 
     def on_write_config_complete(self, result):
+        Logger.info("RaceCaptureApp: Config written")
         self.showActivity("Writing completed")
         self.rc_config.stale = False
         self.dataBusPump.meta_is_stale()
         for listener in self.config_listeners:
-            Clock.schedule_once(lambda dt: listener.dispatch('on_config_written'))
+            Clock.schedule_once(lambda dt, inner_listener=listener: inner_listener.dispatch('on_config_written', self.rc_config))
         Clock.schedule_once(lambda dt: self.showActivity(''), 5.0)
 
     def on_write_config_error(self, detail):
@@ -225,7 +232,7 @@ class RaceCaptureApp(App):
 
     def on_read_config_complete(self, rcpCfg):
         for listener in self.config_listeners:
-            Clock.schedule_once(lambda dt: listener.dispatch('on_config_updated', self.rc_config))
+            Clock.schedule_once(lambda dt, inner_listener=listener: inner_listener.dispatch('on_config_updated', self.rc_config))
         self.rc_config.stale = False
         self.showActivity('')
 
@@ -262,6 +269,7 @@ class RaceCaptureApp(App):
     
     def on_stop(self):
         self._rc_api.cleanup_comms()
+        self._telemetry_connection.telemetry_enabled = False
 
     def showMainView(self, view_name):
         try:
@@ -318,6 +326,7 @@ class RaceCaptureApp(App):
     
     def build_preferences_view(self):
         preferences_view = PreferencesView(name='preferences', settings=self.settings, base_dir=self.base_dir)
+        preferences_view.settings_view.bind(on_config_change=self._on_config_change)
         return preferences_view
     
     def build_homepage_view(self):
@@ -425,6 +434,50 @@ class RaceCaptureApp(App):
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')
+
+    def setup_telemetry(self):
+        host = self.getAppArg('telemetryhost')
+
+        telemetry_enabled = True if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" else False
+
+        self._telemetry_connection = TelemetryManager(self._databus, host=host, telemetry_enabled=telemetry_enabled)
+        self.config_listeners.append(self._telemetry_connection)
+        self._telemetry_connection.bind(on_connected=self.telemetry_connected)
+        self._telemetry_connection.bind(on_disconnected=self.telemetry_disconnected)
+        self._telemetry_connection.bind(on_streaming=self.telemetry_streaming)
+        self._telemetry_connection.bind(on_error=self.telemetry_error)
+        self._telemetry_connection.bind(on_auth_error=self.telemetry_auth_error)
+
+    def telemetry_connected(self, instance, msg):
+        self.status_bar.dispatch('on_tele_status', True)
+        self.showActivity(msg)
+
+    def telemetry_disconnected(self, instance, msg):
+        self.status_bar.dispatch('on_tele_status', False)
+        self.showActivity(msg)
+
+    def telemetry_streaming(self, instance, msg):
+        self.status_bar.dispatch('on_tele_status', True)
+
+    def telemetry_auth_error(self, instance, msg):
+        self.status_bar.dispatch('on_tele_status', False)
+        self.showActivity(msg)
+
+    def telemetry_error(self, instance, msg):
+        self.showActivity(msg)
+
+    def _on_config_change(self, menu, config, section, key, value):
+        """Called any time the app preferences are changed
+        """
+        token = (section, key)
+
+        if token == ('preferences', 'send_telemetry'):
+            if value == "1":  # Boolean settings values are 1/0, not True/False
+                if self.rc_config.connectivityConfig.cellConfig.cellEnabled:
+                    alertPopup('Telemetry error', "Turn off RaceCapture's telemetry module for app to stream telemetry.")
+                self._telemetry_connection.telemetry_enabled = True
+            else:
+                self._telemetry_connection.telemetry_enabled = False
 
 if __name__ == '__main__':
     RaceCaptureApp().run()
