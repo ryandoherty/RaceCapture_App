@@ -224,6 +224,8 @@ class TelemetryConnection(asynchat.async_chat):
     ERROR_CONNECTION_REFUSED = 13
     ERROR_TIMEOUT = 14
 
+    SAMPLE_INTERVAL = 0.1
+
     def __init__(self, host, port, device_id, channels, data_bus, update_status_cb):
         asynchat.async_chat.__init__(self)
 
@@ -269,7 +271,7 @@ class TelemetryConnection(asynchat.async_chat):
 
     # Sets up timer to send data to RCL every 100ms
     def _start_sample_timer(self):
-        self._sample_timer = Clock.schedule_interval(self._send_sample, 0.1)
+        self._sample_timer = Clock.schedule_interval(self._send_sample, self.SAMPLE_INTERVAL)
 
     def run(self):
         Logger.info("TelemetryConnection: connecting to: %s:%d" % (self.host, self.port))
