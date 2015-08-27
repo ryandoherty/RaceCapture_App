@@ -15,6 +15,16 @@ PROGRESS_COMPLETE_LINGER_DURATION = 5.0
 ACTIVITY_MESSAGE_LINGER_DURATION = 10.0
 
 class ToolbarView(BoxLayout):
+    TELEMETRY_IDLE = 0
+    TELEMETRY_ACTIVE = 1
+    TELEMETRY_CONNECTING = 2
+    TELEMETRY_ERROR = 3
+    
+    telemetry_color = {TELEMETRY_IDLE:[0.0, 1.0, 0.0, 0.2],
+                       TELEMETRY_ACTIVE:[0.0, 1.0, 0.0, 1.0],
+                       TELEMETRY_CONNECTING:[1.0, 1.0, 0.0, 1.0],
+                       TELEMETRY_ERROR:[1.0, 0.0, 0.0, 1.0]
+                       }
     txOffColor = [0.0, 1.0, 0.0, 0.2]
     rxOffColor = [0.0, 0.8, 1.0, 0.2]
     txOnColor = [0.0, 1.0, 0.0, 1.0]
@@ -99,8 +109,11 @@ class ToolbarView(BoxLayout):
         self.rcRxStatus.color = self.rxOnColor if value else self.rxOffColor
         self._rcRxDecay()        
 
-    def on_tele_status(self, connected):
+    def on_tele_status(self, status):
         if not self.teleStatus:
             self.teleStatus = kvFind(self, 'rcid', 'teleStatus')
-        self.teleStatus.color = self.txOnColor if connected else self.txOffColor
+        try:        
+            self.teleStatus.color = self.telemetry_color[status]
+        except:
+            pass
 

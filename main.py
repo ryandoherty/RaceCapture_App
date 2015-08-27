@@ -442,29 +442,35 @@ class RaceCaptureApp(App):
 
         self._telemetry_connection = TelemetryManager(self._databus, host=host, telemetry_enabled=telemetry_enabled)
         self.config_listeners.append(self._telemetry_connection)
+        self._telemetry_connection.bind(on_connecting=self.telemetry_connecting)
         self._telemetry_connection.bind(on_connected=self.telemetry_connected)
         self._telemetry_connection.bind(on_disconnected=self.telemetry_disconnected)
         self._telemetry_connection.bind(on_streaming=self.telemetry_streaming)
         self._telemetry_connection.bind(on_error=self.telemetry_error)
         self._telemetry_connection.bind(on_auth_error=self.telemetry_auth_error)
 
+    def telemetry_connecting(self, instance, msg):
+        self.status_bar.dispatch('on_tele_status', ToolbarView.TELEMETRY_CONNECTING)
+        self.showActivity(msg)
+
     def telemetry_connected(self, instance, msg):
-        self.status_bar.dispatch('on_tele_status', True)
+        self.status_bar.dispatch('on_tele_status', ToolbarView.TELEMETRY_CONNECTING)
         self.showActivity(msg)
 
     def telemetry_disconnected(self, instance, msg):
-        self.status_bar.dispatch('on_tele_status', False)
+        self.status_bar.dispatch('on_tele_status', ToolbarView.TELEMETRY_IDLE)
         self.showActivity(msg)
 
     def telemetry_streaming(self, instance, msg):
-        self.status_bar.dispatch('on_tele_status', True)
+        self.status_bar.dispatch('on_tele_status', ToolbarView.TELEMETRY_ACTIVE)
 
     def telemetry_auth_error(self, instance, msg):
-        self.status_bar.dispatch('on_tele_status', False)
+        self.status_bar.dispatch('on_tele_status', ToolbarView.TELEMETRY_ERROR)
         self.showActivity(msg)
 
     def telemetry_error(self, instance, msg):
         self.showActivity(msg)
+        self.status_bar.dispatch('on_tele_status', ToolbarView.TELEMETRY_ERROR)
 
     def _on_config_change(self, menu, config, section, key, value):
         """Called any time the app preferences are changed
