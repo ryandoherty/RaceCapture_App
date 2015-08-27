@@ -167,6 +167,7 @@ class TelemetryManager(EventDispatcher):
         Logger.debug("TelemetryManager: got telemetry status: " + str(status) + " message: " + str(msg) + " code: "+ str(status_code))
         if status_code == TelemetryConnection.STATUS_CONNECTED:
             self.dispatch('on_connected', msg)
+        elif status_code == TelemetryConnection.STATUS_AUTHORIZED:
             self._retry_count = 0
         elif status_code == TelemetryConnection.ERROR_AUTHENTICATING:
             Logger.warning("TelemetryManager: authentication failed")
@@ -280,8 +281,11 @@ class TelemetryConnection(asynchat.async_chat):
 
     def _sample_worker(self):
         while self._running.is_set():
-            self._send_sample()
-            sleep(self.SAMPLE_INTERVAL)
+            try:
+                self._send_sample()
+                sleep(self.SAMPLE_INTERVAL)
+            except Exception as e:
+                Logger.error("TelemetryConnection: error sending sample: " + str(e))
 
     def run(self):
         Logger.info("TelemetryConnection: connecting to: %s:%d" % (self.host, self.port))
