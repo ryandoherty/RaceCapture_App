@@ -382,8 +382,8 @@ class TelemetryConnection(asynchat.async_chat):
 
         try:
             self.push(msg)
-        except:
-            pass
+        except Exception as e:
+            Logger.error("TelemetryConnection: error sending message: " + str(e))
 
     # asynchat calls this function when new data comes in, we are responsible for buffering
     def collect_incoming_data(self, data):
