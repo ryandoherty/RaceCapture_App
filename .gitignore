@@ -46,7 +46,7 @@ _ve/
 # Sublime Text
 *.sublime*
 *.class
-doeet.sh
+doeet*.sh
 
 #OSX build stuff
 Kivy.App
