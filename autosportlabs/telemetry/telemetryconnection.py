@@ -38,6 +38,7 @@ class TelemetryManager(EventDispatcher):
         self._retry_count = 0
         self._auth_failed = False
 
+        self.register_event_type('on_connecting')
         self.register_event_type('on_connected')
         self.register_event_type('on_disconnected')
         self.register_event_type('on_streaming')
@@ -99,7 +100,7 @@ class TelemetryManager(EventDispatcher):
     def on_cell_enabled(self, instance, value):
         Logger.debug("TelemetryManager: on_cell_enabled: " + str(value))
         if value:
-            self.stop()
+            self._user_stopped()
         else:
             Logger.info("TelemetryManager: on_cell_enabled, starting")
             self.start()
@@ -109,7 +110,7 @@ class TelemetryManager(EventDispatcher):
         if value:
             self.start()
         else:
-            self.stop()
+            self._user_stopped()
 
     # Event handler for when config is pulled from RCP
     def on_config_updated(self, config):
@@ -141,6 +142,7 @@ class TelemetryManager(EventDispatcher):
     # Creates new TelemetryConnection in separate thread
     def _connect(self):
         Logger.info("TelemetryManager: starting connection")
+        self.dispatch('on_connecting', "Connecting to RaceCapture/Live")
         self.connection = TelemetryConnection(self.host, self.port, self.device_id,
                                               self.channels, self._data_bus, self.status)
         self._connection_process = threading.Thread(target=self.connection.run)
@@ -161,6 +163,10 @@ class TelemetryManager(EventDispatcher):
             except:
                 pass
 
+    def _user_stopped(self):
+        self.dispatch('on_disconnected', '')
+        self.stop()
+
     # Status function that receives events from TelemetryConnection thread
     # Bubbles up events into main app
     def status(self, status, msg, status_code):
@@ -173,7 +179,7 @@ class TelemetryManager(EventDispatcher):
             Logger.warning("TelemetryManager: authentication failed")
             self._auth_failed = True
             self.stop()
-            self.dispatch('on_auth_error', "Error connecting to RaceCapture/Live, invalid device id")
+            self.dispatch('on_auth_error', "RaceCapture/Live: invalid device id")
         elif status_code == TelemetryConnection.STATUS_DISCONNECTED:
             Logger.info("TelemetryManager: disconnected")
             self.stop()
@@ -194,6 +200,9 @@ class TelemetryManager(EventDispatcher):
                              TelemetryConnection.ERROR_UNKNOWN,
                              TelemetryConnection.ERROR_UNKNOWN_MESSAGE]:
             self.dispatch('on_error', msg)
+
+    def on_connecting(self, *args):
+        pass
 
     def on_connected(self, *args):
         pass
@@ -319,7 +328,7 @@ class TelemetryConnection(asynchat.async_chat):
     def handle_expt(self):
         # Something really bad happened if we're here
         Logger.error("TelemetryConnection: handle_expt, closing connection")
-        self._update_status("ok", "Unknown error, disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
+        self._update_status("error", "Unknown error, disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
         self.end()
 
     def handle_close(self):
@@ -486,6 +495,7 @@ class TelemetryConnection(asynchat.async_chat):
         if self._connected:
             self._running.clear()
             Logger.info("TelemetryConnection: closing connection")
-            self._sample_timer.join()
+            if self._sample_timer:
+                self._sample_timer.join()
             self.close_when_done()
 
