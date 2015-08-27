@@ -276,7 +276,10 @@ class TelemetryConnection(asynchat.async_chat):
             self._channel_data = meta
 
             self._running.clear()
-            self._sample_timer.join()
+            try:
+                self._sample_timer.join()
+            except Exception as e:
+                Logger.warn("TelemetryConnection: Failed to join sample_timer: " + str(e))
 
             self._send_meta()
             self._start_sample_timer()
