@@ -334,9 +334,17 @@ class RcpApi:
             self.sendCommand({name: payload})
                             
     def getRcpCfgCallback(self, cfg, rcpCfgJson, winCallback):
+        # Fake it until you make it, faking a RC/T's response to querying for things it doesn't have
+        rcpCfgJson["rcpCfg"]["scriptCfg"] = {"rc": 0}
+        rcpCfgJson["rcpCfg"]["timerCfg"] = {"rc": 0}
+        rcpCfgJson["rcpCfg"]["gpioCfg"] = {"rc": 0}
+        rcpCfgJson["rcpCfg"]["pwmCfg"] = {"rc": 0}
+        rcpCfgJson["rcpCfg"]["analogCfg"] = {"rc": 0}
+        rcpCfgJson["rcpCfg"]["connCfg"] = {"rc": 0}
         cfg.fromJson(rcpCfgJson)
+
         winCallback(cfg)
-        
+
     def getRcpCfg(self, cfg, winCallback, failCallback):
         cmdSequence = [       RcpCmd('ver',         self.sendGetVersion),
                               RcpCmd('capabilities',self.getCapabilities),
@@ -582,6 +590,8 @@ class RcpApi:
         self.executeSingle(RcpCmd('ver', self.sendGetVersion), winCallback, failCallback)
 
     def getCapabilities(self):
+        # RCT: {"capabilities":{"channels":{"analog":1,"imu":7,"can":1},"sampleRates":{"sensor":1000,"gps":50},"db":{"tracks":20,"sectors":20}}}
+        # RCP: {"capabilities":{"channels":{"analog":8,"imu":7,"gpio":3,"timer":3,"pwm":4,"can":2},"sampleRates":{"sensor":1000,"gps":50},"db":{"tracks":240,"sectors":20,"script":10240}}}
         self.sendGet('getCapabilities')
         
     def sendCalibrateImu(self):

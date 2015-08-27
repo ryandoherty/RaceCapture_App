@@ -824,7 +824,10 @@ class LuaScript(object):
         pass
             
     def fromJson(self, jsonScript):
-        self.script = jsonScript['data']
+        if 'data' in jsonScript:
+            self.script = jsonScript['data']
+        else:
+            self.script = ''
         self.stale = False
         
     def toJson(self):
