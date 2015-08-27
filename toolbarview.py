@@ -7,6 +7,7 @@ from kivy.uix.progressbar import ProgressBar
 from kivy.app import Builder
 from kivy.clock import Clock
 from iconbutton import IconButton
+from kivy.logger import Logger
 
 Builder.load_file('toolbarview.kv')
 
@@ -115,5 +116,5 @@ class ToolbarView(BoxLayout):
         try:        
             self.teleStatus.color = self.telemetry_color[status]
         except:
-            pass
+            Logger.error("ToolbarView: Invalid telemetry status: " + str(status))
 
