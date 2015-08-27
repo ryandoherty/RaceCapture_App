@@ -100,7 +100,7 @@ class TelemetryManager(EventDispatcher):
     def on_cell_enabled(self, instance, value):
         Logger.debug("TelemetryManager: on_cell_enabled: " + str(value))
         if value:
-            self.stop()
+            self._user_stopped()
         else:
             Logger.info("TelemetryManager: on_cell_enabled, starting")
             self.start()
@@ -110,7 +110,7 @@ class TelemetryManager(EventDispatcher):
         if value:
             self.start()
         else:
-            self.stop()
+            self._user_stopped()
 
     # Event handler for when config is pulled from RCP
     def on_config_updated(self, config):
@@ -162,6 +162,10 @@ class TelemetryManager(EventDispatcher):
                 self._connection_process.join(1)
             except:
                 pass
+
+    def _user_stopped(self):
+        self.dispatch('on_disconnected', '')
+        self.stop()
 
     # Status function that receives events from TelemetryConnection thread
     # Bubbles up events into main app
