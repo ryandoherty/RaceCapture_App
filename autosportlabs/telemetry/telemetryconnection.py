@@ -2,6 +2,7 @@ from kivy.logger import Logger
 from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.event import EventDispatcher
 from kivy.clock import Clock
+from time import sleep
 import threading
 import asynchat, asyncore
 import json
@@ -233,6 +234,7 @@ class TelemetryConnection(asynchat.async_chat):
         self.input_buffer = []
         self._connect_timeout_timer = None
         self._sample_timer = None
+        self._running = threading.Event()
 
         # State is hard
         self._connected = False
@@ -263,15 +265,23 @@ class TelemetryConnection(asynchat.async_chat):
         if self.authorized:
             self._channel_data = meta
 
-            if self._sample_timer:
-                self._sample_timer.cancel()
+            self._running.clear()
+            self._sample_timer.join()
 
             self._send_meta()
             self._start_sample_timer()
 
     # Sets up timer to send data to RCL every 100ms
     def _start_sample_timer(self):
-        self._sample_timer = Clock.schedule_interval(self._send_sample, self.SAMPLE_INTERVAL)
+        self._running.set()
+        self._sample_timer = threading.Thread(target=self._sample_worker)
+        self._sample_timer.daemon = True
+        self._sample_timer.start()
+
+    def _sample_worker(self):
+        while self._running.is_set():
+            self._send_sample()
+            sleep(self.SAMPLE_INTERVAL)
 
     def run(self):
         Logger.info("TelemetryConnection: connecting to: %s:%d" % (self.host, self.port))
@@ -366,7 +376,10 @@ class TelemetryConnection(asynchat.async_chat):
         msg = msg + "\n"
         msg = msg.encode('ascii')
 
-        self.push(msg)
+        try:
+            self.push(msg)
+        except:
+            pass
 
     # asynchat calls this function when new data comes in, we are responsible for buffering
     def collect_incoming_data(self, data):
@@ -467,8 +480,8 @@ class TelemetryConnection(asynchat.async_chat):
 
     def end(self):
         if self._connected:
+            self._running.clear()
             Logger.info("TelemetryConnection: closing connection")
-            if self._sample_timer:
-                self._sample_timer.cancel()
+            self._sample_timer.join()
             self.close_when_done()
 
