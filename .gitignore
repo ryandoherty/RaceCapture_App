@@ -52,3 +52,6 @@ doeet*.sh
 Kivy.App
 RaceCapture.dmg
 RaceCapture.App
+
+#Crash reporting
+.sentry

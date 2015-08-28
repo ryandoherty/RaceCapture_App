@@ -41,6 +41,11 @@ Dependencies:
 
     /Applications/Kivy.app/Contents/Resources/script main.py
 
+
+## Building releases (all platforms)
+1. Add a .sentry file with the app's platform-specific DSN for Sentry
+1. Follow the platform-specific build instructions
+
 ## Preparing to build installers (OSX)
 
 1. Make sure all dependencies are installed inside Kivy's venv 
