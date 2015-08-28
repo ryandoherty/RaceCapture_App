@@ -48,10 +48,10 @@ if __name__ == '__main__':
         kivy.config.Config.set ( 'input', 'mouse', 'mouse,disable_multitouch' )
 
     # If we have a Sentry config file, create a client to send crash reports to
-    if os.path.isfile('.sentry'):
+    if os.path.isfile('sentry.cfg'):
         import raven
         # .sentry file contains our Sentry DSN
-        sentry_file = open('.sentry', 'r')
+        sentry_file = open('sentry.cfg', 'r')
         dsn = sentry_file.read().rstrip()
         sentry_client = raven.Client(dsn=dsn, release=__version__)
 

@@ -54,4 +54,4 @@ RaceCapture.dmg
 RaceCapture.App
 
 #Crash reporting
-.sentry
+sentry.cfg
