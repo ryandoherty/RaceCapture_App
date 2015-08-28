@@ -281,7 +281,6 @@ class RaceCaptureApp(App):
         self._telemetry_connection.telemetry_enabled = False
 
     def showMainView(self, view_name):
-        error = 1/0
         try:
             view = self.mainViews.get(view_name)
             if not view:
