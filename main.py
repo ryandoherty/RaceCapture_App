@@ -497,6 +497,9 @@ class RaceCaptureApp(App):
 
 class CrashHandler(ExceptionHandler):
     def handle_exception(self, exception_info):
+        if type(exception_info) == KeyboardInterrupt:
+            Logger.info("Main: KeyboardInterrupt")
+            sys.exit()
         if 'sentry_client' in globals():
             ident = sentry_client.captureException(value=exception_info, stack=True)
             Logger.critical("CrashHandler: crash caught: Reference is %s" % ident)
