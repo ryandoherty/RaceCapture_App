@@ -501,7 +501,7 @@ class CrashHandler(ExceptionHandler):
             Logger.info("Main: KeyboardInterrupt")
             sys.exit()
         if 'sentry_client' in globals():
-            ident = sentry_client.captureException(value=exception_info, stack=True)
+            ident = sentry_client.captureException(value=exception_info)
             Logger.critical("CrashHandler: crash caught: Reference is %s" % ident)
             traceback.print_exc()
         return ExceptionManager.PASS
@@ -512,7 +512,7 @@ if __name__ == '__main__':
         RaceCaptureApp().run()
     except:
         if 'sentry_client' in globals():
-            ident = sentry_client.captureException(stack=True)
+            ident = sentry_client.captureException()
             Logger.error("Main: crash caught: Reference is %s" % ident)
             traceback.print_exc()
         else:
