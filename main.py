@@ -19,6 +19,7 @@ if __name__ == '__main__':
     from kivy.config import Config
     from kivy.logger import Logger
     kivy.require('1.9.0')
+    from kivy.base import ExceptionManager, ExceptionHandler
     Config.set('graphics', 'width', '1024')
     Config.set('graphics', 'height', '576')
     Config.set('kivy', 'exit_on_escape', 0)
@@ -494,13 +495,25 @@ class RaceCaptureApp(App):
             else:
                 self._telemetry_connection.telemetry_enabled = False
 
+class CrashHandler(ExceptionHandler):
+    def handle_exception(self, exception_info):
+        if type(exception_info) == KeyboardInterrupt:
+            Logger.info("Main: KeyboardInterrupt")
+            sys.exit()
+        if 'sentry_client' in globals():
+            ident = sentry_client.captureException(value=exception_info)
+            Logger.critical("CrashHandler: crash caught: Reference is %s" % ident)
+            traceback.print_exc()
+        return ExceptionManager.PASS
+
 if __name__ == '__main__':
+    ExceptionManager.add_handler(CrashHandler())
     try:
         RaceCaptureApp().run()
     except:
         if 'sentry_client' in globals():
             ident = sentry_client.captureException()
-            Logger.error("Exception caught; reference is %s" % ident)
+            Logger.error("Main: crash caught: Reference is %s" % ident)
             traceback.print_exc()
         else:
             raise
