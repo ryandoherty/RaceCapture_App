@@ -9,7 +9,6 @@ DIR=$( cd ../.. && pwd )
 #Kivy's build/packaging tools expect the Kivy app here
 if [ ! -f "./Kivy.App" ]; then
 	cp -a /Applications/Kivy.app ./Kivy.App
-	#rsync -a /Applications/Kivy.App/ ./Kivy.App
 fi
 
 ./package-app.sh "$DIR/"
