@@ -11,6 +11,8 @@ from kivy.uix.screenmanager import *
 from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer
 from utils import kvFind, kvFindClass
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+from kivy.logger import Logger
+from kivy.clock import Clock
 
 DASHBOARD_VIEW_KV = 'autosportlabs/racecapture/views/dashboard/dashboardview.kv'
 
@@ -79,12 +81,23 @@ class DashboardView(Screen):
         self._comboView = comboView
         self._screen_mgr = screenMgr
         dataBus.start_update()
+        Clock.schedule_once(lambda dt: self._show_last_view())
 
     def on_nav_left(self):
-        self._screen_mgr.transition=SlideTransition(direction='right')        
-        self._screen_mgr.current = self._screen_mgr.previous()
+        self._screen_mgr.transition=SlideTransition(direction='right')
+        self._show_screen(self._screen_mgr.previous())
 
     def on_nav_right(self):
-        self._screen_mgr.transition=SlideTransition(direction='left')        
-        self._screen_mgr.current = self._screen_mgr.next()
-        
+        self._screen_mgr.transition=SlideTransition(direction='left')
+        self._show_screen(self._screen_mgr.next())
+
+    def _show_screen(self, screen):
+        self._screen_mgr.current = screen
+        self._settings.userPrefs.set_pref('preferences', 'last_dash_screen', screen)
+
+    def _show_last_view(self):
+        try:
+            last_screen_name = self._settings.userPrefs.get_pref('preferences', 'last_dash_screen')
+            self._screen_mgr.current = last_screen_name
+        except:
+            Logger.error("DashboardView: failed loading last")

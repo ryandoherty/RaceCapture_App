@@ -395,14 +395,26 @@ class RaceCaptureApp(App):
         Clock.schedule_once(lambda dt: self.post_launch(), 1.0)
 
     def post_launch(self):
-        self.showMainView('home')
         Clock.schedule_once(lambda dt: self.init_data())
         Clock.schedule_once(lambda dt: self.init_rc_comms())
+        Clock.schedule_once(lambda dt: self.show_startup_view())
         self.check_first_time_setup()
         
     def check_first_time_setup(self):
         if self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'True':
             Clock.schedule_once(lambda dt: self.first_time_setup(), 0.5)
+
+    def show_startup_view(self):
+        settings_to_view = {'Home Page':'home',
+                            'Dashboard':'dash',
+                            'Analysis': 'analysis',
+                            'Configuration': 'config' }
+        try:
+            view_pref = self.settings.userPrefs.get_pref('preferences', 'startup_screen')
+            view = settings_to_view[view_pref]
+            self.showMainView(view)
+        except:
+            Logger.error("RaceCaptureApp: could not show main view " + str(view_pref))
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
@@ -431,7 +443,7 @@ class RaceCaptureApp(App):
                                ))
 
     def rc_detect_fail(self):
-        
+
         def re_detect():
             if not self._rc_api.comms.isOpen():
                 self._rc_api.run_auto_detect()
