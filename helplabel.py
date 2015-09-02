@@ -2,7 +2,7 @@ import kivy
 kivy.require('1.9.0')
 
 from kivy.uix.label import Label
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 
 class HelpLabel(FieldLabel):
     def __init__(self, **kwargs):

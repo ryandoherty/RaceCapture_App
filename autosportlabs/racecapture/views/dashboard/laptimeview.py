@@ -1,6 +1,6 @@
 import kivy
 kivy.require('1.9.0')
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from utils import kvFind, kvFindClass

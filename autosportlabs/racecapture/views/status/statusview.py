@@ -5,7 +5,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.uix.treeview import TreeView, TreeViewLabel
-from kivy.uix.label import Label
+from autosportlabs.uix.fieldlabel import FieldLabel
 from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from datetime import timedelta
 from utils import *

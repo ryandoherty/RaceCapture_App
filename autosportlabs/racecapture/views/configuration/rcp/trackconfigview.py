@@ -12,7 +12,7 @@ from kivy.uix.popup import Popup
 from kivy.clock import Clock
 from kivy.app import Builder
 from helplabel import HelpLabel
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from settingsview import *
 from utils import *
 from valuefield import FloatValueField

@@ -6,7 +6,7 @@ from kivy.clock import Clock
 from kivy.metrics import dp
 from kivy.graphics import Color
 from utils import kvFind
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from kivy.properties import BoundedNumericProperty, StringProperty, ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge, SingleChannelGauge
 

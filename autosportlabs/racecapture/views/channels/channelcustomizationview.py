@@ -6,7 +6,7 @@ from kivy.metrics import dp
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from kivy.uix.slider import Slider
 from utils import kvFind
 from autosportlabs.racecapture.views.color.colorpickerview import ColorBlock

@@ -5,7 +5,7 @@ from kivy.app import Builder
 from kivy.metrics import dp
 from kivy.graphics import Color
 from utils import kvFind
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from kivy.properties import BoundedNumericProperty, ObjectProperty, BooleanProperty, StringProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import SingleChannelGauge
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/timedelta.kv')

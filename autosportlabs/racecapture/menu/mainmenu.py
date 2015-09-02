@@ -4,7 +4,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.properties import StringProperty, ListProperty, BooleanProperty
 
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from utils import kvFind
 import mainfonts
 

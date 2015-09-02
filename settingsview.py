@@ -8,7 +8,7 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.switch import Switch
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from autosportlabs.uix.textwidget import TextWidget
 from helplabel import HelpLabel
 from kivy.app import Builder

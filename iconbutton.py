@@ -8,7 +8,7 @@ from kivy.app import Builder
 from kivy.graphics import Color
 from kivy.metrics import sp, dp
 from kivy.properties import NumericProperty, ListProperty, StringProperty, ObjectProperty
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 from math import sin, cos, pi
 from autosportlabs.racecapture.theme.color import ColorScheme 
 
