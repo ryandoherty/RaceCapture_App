@@ -21,7 +21,7 @@ from kivy import platform
 from datetime import datetime
 
 def strip_whitespace(value):
-    return value.replace('\n','').replace('\r','').strip() if value else ''
+    return value.replace('\n','').replace('\r','').strip()
 
 def is_mobile_platform():
     return True if platform == 'android' or platform == 'ios' else False
