@@ -1,4 +1,7 @@
 #!/bin/bash
+# WARNING: there be dragons here. The pip commands fail often when run via this script
+# Honestly you're just better off forgetting this script exists and using the packaged
+# Kivy app from the Kivy website
 
 VERSION=stable
 
@@ -80,12 +83,19 @@ pushd Kivy.app/Contents/Resources/
 
 echo "-- Create a virtualenv"
 virtualenv -p /System/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python venv
+exit
 
 echo "-- Install dependencies"
 source venv/bin/activate
 pip install cython==0.21.2
 pip install pygments docutils
 pip install osxrelocator
+
+popd
+pushd ../../
+pip install -r requirements.txt
+popd
+pushd Kivy.app/Contents/Resources/
 
 echo "-- Link python to the right location for relocation"
 ln -s venv/bin/python .
@@ -96,11 +106,7 @@ popd
 
 echo "-- Download and compile Kivy"
 pushd Kivy.app/Contents/Resources
-curl -L -O https://github.com/kivy/kivy/archive/$VERSION.zip
-unzip $VERSION.zip
-rm $VERSION.zip
-mv kivy-$VERSION kivy
-
+git clone https://github.com/autosportlabs/kivy.git --branch asl_1.9.0_patched --single-branch kivy
 cd kivy
 USE_SDL2=1 make
 

@@ -51,6 +51,8 @@ Dependencies:
 1. Make sure all dependencies are installed inside Kivy's venv 
 1. `cd /Applications/Kivy.app/Contents/Resources/venv/bin` && `source activate`
 1. `cd /path/to/RaceCapture_App` && `pip install -r requirements.txt`
+1. If we're using a custom build of Kivy, we need to fix the paths for some libraries, run the install/osx/fix-osx-paths.sh script.
+
 
 ## Creating installer for current version (OSX)
 1. `cd install/osx`
