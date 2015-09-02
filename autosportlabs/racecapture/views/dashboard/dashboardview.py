@@ -96,8 +96,5 @@ class DashboardView(Screen):
         self._settings.userPrefs.set_pref('preferences', 'last_dash_screen', screen)
 
     def _show_last_view(self):
-        try:
-            last_screen_name = self._settings.userPrefs.get_pref('preferences', 'last_dash_screen')
-            self._screen_mgr.current = last_screen_name
-        except:
-            Logger.error("DashboardView: failed loading last")
+        last_screen_name = self._settings.userPrefs.get_pref('preferences', 'last_dash_screen')
+        self._screen_mgr.current = last_screen_name
