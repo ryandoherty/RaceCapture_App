@@ -89,6 +89,7 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'firmware_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'first_time_setup', True)
         self.config.setdefault('preferences', 'send_telemetry', False)
+        self.config.setdefault('preferences', 'last_dash_screen', 'gaugeView')
 
     def load(self):
         print("the data dir " + self.data_dir)

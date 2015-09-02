@@ -33,7 +33,7 @@ class TelemetryConfigView(BaseConfigView):
     def on_device_id(self, instance, value):
         Logger.info("TelemetryConfig: got id:  " + value )
         if self.connectivityConfig:
-            value = value.strip()
+            value = strip_whitespace(value)
             self.ids.device_id.ids.error.text = ''
             if len(value) > 0:
                 if self.validate_device_id(value):

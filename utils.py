@@ -9,7 +9,8 @@ __all__ = ('is_mobile_platform', 'intersection', 'difference', 'curry', 'strtotu
            'is_color_transparent', 'boundary', 'dist',
            'deprecated', 'SafeList',
            'interpolate', 'OrderedDict', 'kvFind', 'kvFindClass', 'kvPrintAttr',
-           'breadth_first', 'walk_tree', 'filter_tree', 'kvquery', 'pct_h', 'pct_w', 'time_to_epoch')
+           'breadth_first', 'walk_tree', 'filter_tree', 'kvquery', 'pct_h', 'pct_w',
+           'time_to_epoch', 'strip_whitespace')
 
 import time
 import calendar
@@ -18,6 +19,9 @@ from UserDict import DictMixin
 from kivy.core.window import Window
 from kivy import platform
 from datetime import datetime
+
+def strip_whitespace(value):
+    return value.replace('\n','').replace('\r','').strip()
 
 def is_mobile_platform():
     return True if platform == 'android' or platform == 'ios' else False
