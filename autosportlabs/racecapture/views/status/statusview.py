@@ -9,7 +9,7 @@ from autosportlabs.uix.fieldlabel import FieldLabel
 from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from datetime import timedelta
 from utils import *
-from fieldlabel import FieldLabel
+from autosportlabs.uix.fieldlabel import FieldLabel
 
 STATUS_KV_FILE = 'autosportlabs/racecapture/views/status/statusview.kv'
 

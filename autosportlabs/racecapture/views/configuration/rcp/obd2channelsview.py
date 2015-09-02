@@ -3,7 +3,7 @@ kivy.require('1.9.0')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.switch import Switch
 from kivy.app import Builder
-from iconbutton import IconButton
+from autosportlabs.uix.iconbutton import TileIconButton
 from settingsview import SettingsSwitch
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.OBD2.obd2settings import OBD2Settings

@@ -7,7 +7,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.image import Image
 from kivy.app import Builder
 from utils import kvFind
-from iconbutton import TileIconButton
+from autosportlabs.uix.iconbutton import TileIconButton
 from kivy.metrics import dp
 import mainfonts
 

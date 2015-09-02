@@ -1,6 +1,6 @@
 import kivy
 kivy.require('1.9.0')
-from iconbutton import IconButton
+from autosportlabs.uix.iconbutton import TileIconButton
 from kivy.app import Builder
 from kivy.metrics import dp
 from kivy.uix.popup import Popup

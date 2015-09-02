@@ -6,7 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.progressbar import ProgressBar
 from kivy.app import Builder
 from kivy.clock import Clock
-from iconbutton import IconButton
+from autosportlabs.uix.iconbutton import IconButton
 from kivy.logger import Logger
 
 Builder.load_file('toolbarview.kv')

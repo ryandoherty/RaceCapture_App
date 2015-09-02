@@ -7,7 +7,7 @@ from collections import OrderedDict
 from kivy.metrics import dp, sp
 from kivy.graphics import Color
 from utils import kvFind
-from iconbutton import TileIconButton
+from autosportlabs.uix.iconbutton import TileIconButton
 from kivy.clock import Clock
 from kivy.properties import StringProperty, NumericProperty, ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import CustomizableGauge
