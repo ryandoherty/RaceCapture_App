@@ -290,7 +290,7 @@ class RaceCaptureApp(App):
                 self.mainViews[view_name] = view
             self.screenMgr.current = view_name
         except Exception as detail:
-            Logger.info('RaceCaptureApp: Failed to load main view ' + str(view_name) + ' ' + str(detail))
+            Logger.error('RaceCaptureApp: Failed to load main view ' + str(view_name) + ' ' + str(detail))
 
     def switchMainView(self, view_name):
             self.mainNav.anim_to_state('closed')
@@ -409,12 +409,8 @@ class RaceCaptureApp(App):
                             'Dashboard':'dash',
                             'Analysis': 'analysis',
                             'Configuration': 'config' }
-        try:
-            view_pref = self.settings.userPrefs.get_pref('preferences', 'startup_screen')
-            view = settings_to_view[view_pref]
-            self.showMainView(view)
-        except:
-            Logger.error("RaceCaptureApp: could not show main view " + str(view_pref))
+        view_pref = self.settings.userPrefs.get_pref('preferences', 'startup_screen')
+        self.showMainView(settings_to_view[view_pref])
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
