@@ -1,32 +1,6 @@
 [
     {
         "type": "options",
-        "title": "Distance Units",
-        "desc": "",
-        "section": "preferences",
-        "key": "distance_units",
-        "true": "auto",
-        "options": ["miles", "kilometers"]
-    },
-    {
-        "type": "options",
-        "title": "Temperature Units",
-        "desc": "",
-        "section": "preferences",
-        "key": "temperature_units",
-        "true": "auto",
-        "options": ["Fahrenheit", "Celcius"]
-    },
-    {
-        "type": "bool",
-        "title": "Show laptimes in dashboard view",
-        "desc": "",
-        "section": "preferences",
-        "key": "show_laptimes",
-        "true": "auto"
-    },
-    {
-        "type": "options",
         "title": "Startup screen",
         "desc": "",
         "section": "preferences",
