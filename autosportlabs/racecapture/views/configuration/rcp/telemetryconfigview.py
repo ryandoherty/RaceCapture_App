@@ -29,7 +29,7 @@ class TelemetryConfigView(BaseConfigView):
         
     def on_device_id(self, instance, value):
         if self.connectivityConfig:
-            self.connectivityConfig.telemetryConfig.deviceId = value
+            self.connectivityConfig.telemetryConfig.deviceId = strip_whitespace(value)
             self.connectivityConfig.stale = True
             self.dispatch('on_modified')
                 
