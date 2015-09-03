@@ -313,7 +313,7 @@ class CustomizableGauge(ButtonBehavior, SingleChannelGauge):
         content = ChannelCustomizationView(settings=self.settings, channel=self.channel)
         content.bind(on_channel_customization_close=self.on_channel_customization_close)
 
-        popup = Popup(title='Customize {}'.format(self.channel), content=content, size_hint=(0.6, 0.7))
+        popup = Popup(title='Customize {}'.format(self.channel), content=content, size_hint=(0.6, 0.8))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
         self._popup = popup
