@@ -2,6 +2,7 @@ from kivy.event import EventDispatcher
 from kivy.properties import NumericProperty, ListProperty
 from kivy.clock import Clock
 from kivy.config import ConfigParser
+from kivy.logger import Logger
 import json
 import os
 from os import path
@@ -22,7 +23,7 @@ class Range(EventDispatcher):
     def is_in_range(self, value):
         min = self.min
         max = self.max
-        return (min and max) and self.min <= value <= self.max
+        return (min is not None and max is not None) and self.min <= value <= self.max
 
     def to_json(self):
         return json.dumps(self.to_dict())
