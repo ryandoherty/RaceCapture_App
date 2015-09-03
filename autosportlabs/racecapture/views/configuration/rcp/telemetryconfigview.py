@@ -29,6 +29,7 @@ class TelemetryConfigView(BaseConfigView):
         bgStream = kvFind(self, 'rcid', 'bgStream')
         bgStream.bind(on_setting=self.on_bg_stream)
         bgStream.setControl(SettingsSwitch())
+        self.ids.device_id.ids.error.markup = True
         
     def on_device_id(self, instance, value):
         if self.connectivityConfig:
@@ -41,7 +42,7 @@ class TelemetryConfigView(BaseConfigView):
                     self.connectivityConfig.stale = True
                     self.dispatch('on_modified')
                 else:
-                    self.ids.device_id.ids.error.text = 'Invalid device id. Id must only be numbers and letters.'
+                    self.ids.device_id.ids.error.text = '[color=#E50000]Id should contain only numbers and letters.[/color]'
 
     def on_bg_stream(self, instance, value):
         if self.connectivityConfig:
