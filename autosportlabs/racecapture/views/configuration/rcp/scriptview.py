@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.stacklayout import StackLayout
@@ -11,7 +11,7 @@ from kivy.extras.highlight import KivyLexer
 from pygments import lexers
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
-from iconbutton import IconButton
+from iconbutton import IconButton, LabelIconButton
 from settingsview import SettingsMappedSpinner
 
 SCRIPT_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/scriptview.kv'

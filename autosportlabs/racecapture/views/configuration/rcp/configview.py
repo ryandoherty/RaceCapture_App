@@ -2,12 +2,12 @@ import os
 import traceback
 import kivy
 from time import sleep
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from utils import *
 from copy import *
-from kivy.metrics import dp
+from kivy.metrics import dp, sp
 from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.popup import Popup
@@ -133,7 +133,7 @@ class ConfigView(Screen):
             Clock.schedule_once(lambda dt: self.init_screen())
         
     def createConfigViews(self):
-        tree = kvFind(self, 'rcid', 'menu')
+        tree = self.ids.menu
         
         def create_tree(text):
             return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))
@@ -208,7 +208,7 @@ class ConfigView(Screen):
         
     def updateControls(self):
         Logger.debug("ConfigView: data is stale: " + str(self.writeStale))
-        kvFind(self, 'rcid', 'writeconfig').disabled = not self.writeStale
+        self.ids.write.disabled = not self.writeStale
         
     def update_tracks(self):
         track_manager = self.track_manager

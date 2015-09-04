@@ -1,6 +1,6 @@
 import kivy
 import math
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget

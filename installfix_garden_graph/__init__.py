@@ -143,7 +143,7 @@ class Graph(Widget):
         super(Graph, self).__init__(**kwargs)
 
         with self.canvas:
-            self._fbo = Fbo(size=self.size, with_stencilbuffer=True)
+            self._fbo = Fbo(size=self.size)
 
         with self._fbo:
             self._background_color = Color(*self.background_color)
@@ -155,7 +155,7 @@ class Graph(Widget):
 
         with self.canvas:
             Color(1, 1, 1)
-            self._fbo_rect = Rectangle(size=self.size, texture=self._fbo.texture)
+            self._fbo_rect = Rectangle(size=self.size)
 
         mesh = self._mesh_rect
         mesh.vertices = [0] * (5 * 4)

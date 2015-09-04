@@ -1,11 +1,11 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from utils import kvFind
 from kivy.core.window import Window
 from kivy.properties import NumericProperty
-from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+from autosportlabs.racecapture.views.dashboard.widgets.gauge import CustomizableGauge
 
-class GraphicalGauge(Gauge):
+class GraphicalGauge(CustomizableGauge):
     _gaugeView = None
     gauge_size = NumericProperty(0)
     

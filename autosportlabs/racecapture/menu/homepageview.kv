@@ -1,4 +1,12 @@
 #:kivy 1.8
+
+<DisabledFeatureButton>
+	tile_color: (0.3, 0.3, 0.3, 1.0)
+	
+<FeatureButton>
+	title_font: 'resource/fonts/ASL_regular.ttf'
+	icon_color: (0.0, 0.0, 0.0, 1.0)
+	title_color: (0.2, 0.2, 0.2, 1.0)
 	
 <HomePageView>:
 	BoxLayout:
@@ -24,8 +32,8 @@
 					pos_hint: {'center_y':0.57}
 					text: 'Welcome To RaceCapture'
 		GridLayout:
-			padding: [self.height * 0.1, self.height * 0.1]
-			spacing: self.height * 0.16
+			padding: [self.height * 0.05, self.height * 0.05]
+			spacing: self.height * 0.025
 			rows: 2
 			cols: 2
 			FeatureButton:

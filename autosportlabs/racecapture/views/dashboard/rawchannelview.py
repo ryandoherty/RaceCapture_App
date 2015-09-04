@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.app import Builder
@@ -58,7 +58,11 @@ class RawChannelView(Screen):
     def initScreen(self):
         dataBus = self._data_bus
         dataBus.addMetaListener(self.on_meta)
-        
+        meta = self._data_bus.getMeta()
+
+        if len(meta) > 0:
+            self.on_meta(meta)
+
     def _enableNoDataStatus(self, enabled):
         statusView = kvFind(self, 'rcid', 'statusMsg')
         statusView.text = NO_DATA_MSG if enabled else DATA_MSG

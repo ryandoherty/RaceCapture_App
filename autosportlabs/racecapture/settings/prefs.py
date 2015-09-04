@@ -2,6 +2,7 @@ from kivy.event import EventDispatcher
 from kivy.properties import NumericProperty, ListProperty
 from kivy.clock import Clock
 from kivy.config import ConfigParser
+from kivy.logger import Logger
 import json
 import os
 from os import path
@@ -22,7 +23,7 @@ class Range(EventDispatcher):
     def is_in_range(self, value):
         min = self.min
         max = self.max
-        return (min and max) and self.min <= value <= self.max
+        return (min is not None and max is not None) and self.min <= value <= self.max
 
     def to_json(self):
         return json.dumps(self.to_dict())
@@ -80,7 +81,7 @@ class UserPrefs(EventDispatcher):
         with open(self.prefs_file, 'w+') as prefs_file:
             data = self.to_json()
             prefs_file.write(data)
-        
+
     def set_config_defaults(self):
         self.config.adddefaultsection('preferences')
         self.config.setdefault('preferences', 'distance_units', 'miles')
@@ -93,6 +94,8 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'firmware_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'import_datalog_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'first_time_setup', True)
+        self.config.setdefault('preferences', 'send_telemetry', False)
+        self.config.setdefault('preferences', 'last_dash_screen', 'gaugeView')
 
     def load(self):
         print("the data dir " + self.data_dir)

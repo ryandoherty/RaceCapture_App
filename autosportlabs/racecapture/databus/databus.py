@@ -10,7 +10,7 @@ from autosportlabs.racecapture.databus.filter.currentlaptimefilter import Curren
 from autosportlabs.util.threadutil import safe_thread_exit
 
 
-DEFAULT_DATABUS_UPDATE_INTERVAL = 0.1 #10Hz UI update rate
+DEFAULT_DATABUS_UPDATE_INTERVAL = 0.02 #50Hz UI update rate
 
 class DataBusFactory(object):
     def create_standard_databus(self, system_channels):
@@ -29,22 +29,33 @@ class DataBus(object):
     Typical use:
     (CHANNEL LISTENERS) => DataBus.addChannelListener()  -- listeners receive updates with a particular channel's value
     (META LISTENERS) => DataBus.addMetaListener() -- Listeners receive updates with meta data
+
+    Note: DataBus must be started via start_update before any data flows
     """
     channel_metas = {}
     channel_data = {}
+    sample = None
     channel_listeners = {}
     meta_listeners = []
     meta_updated = False
     data_filters = []
-    
+    sample_listeners = []
+    _polling = False
+    rcp_meta_read = False
+
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
 
     def start_update(self, interval = DEFAULT_DATABUS_UPDATE_INTERVAL):
+        if self._polling:
+            return
+
         Clock.schedule_interval(self.notify_listeners, interval)
+        self._polling = True
 
     def stop_update(self):
         Clock.unschedule(self.notify_listeners)
+        self._polling = False
 
     def _update_datafilter_meta(self, datafilter):
         metas = datafilter.get_channel_meta()
@@ -64,7 +75,11 @@ class DataBus(object):
             self._update_datafilter_meta(f)
                 
         self.meta_updated = True
-        
+        self.rcp_meta_read = True
+
+    def addSampleListener(self, callback):
+        self.sample_listeners.append(callback)
+
     def update_samples(self, sample):
         """Update channel data with new samples
         """
@@ -72,18 +87,24 @@ class DataBus(object):
             channel = sample_item.channelMeta.name
             value = sample_item.value
             self.channel_data[channel] = value
-        
+
         #apply filters to updated data
         for f in self.data_filters:
             f.filter(self.channel_data)
 
     def notify_listeners(self, dt):
+        sample_data = {}
+
         if self.meta_updated:
             self.notify_meta_listeners(self.channel_metas)
             self.meta_updated = False
-        
+
         for channel,value in self.channel_data.iteritems():
             self.notify_channel_listeners(channel, value)
+            sample_data[channel] = value
+
+        for listener in self.sample_listeners:
+            listener(sample_data)
                 
     def notify_channel_listeners(self, channel, value):
         listeners = self.channel_listeners.get(str(channel))
@@ -110,6 +131,9 @@ class DataBus(object):
                 listeners.remove(callback)
         except:
             pass
+
+    def add_sample_listener(self, callback):
+        self.sample_listeners.append(callback)
                     
     def addMetaListener(self, callback):
         self.meta_listeners.append(callback)
@@ -125,7 +149,7 @@ class DataBus(object):
         return self.channel_data[channel]
 
 SAMPLE_POLL_TEST_TIMEOUT       = 3.0
-SAMPLE_POLL_INTERVAL_TIMEOUT   = 0.1 #10Hz polling
+SAMPLE_POLL_INTERVAL_TIMEOUT   = 0.02 #50Hz polling
 SAMPLE_POLL_EVENT_TIMEOUT      = 1.0
 SAMPLE_POLL_EXCEPTION_RECOVERY = 10.0
 SAMPLES_TO_WAIT_FOR_META       = 5.0

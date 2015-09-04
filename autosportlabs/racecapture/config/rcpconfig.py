@@ -83,6 +83,10 @@ class ScalingMap(object):
         return self.raw[mapBin]
      
     def setVolts(self, map_bin, value):
+        try:
+            value = float(value)
+        except:
+            raise ScalingMapException("Value must be numeric")
         if map_bin < SCALING_MAP_POINTS - 1:
             next_value = self.raw[map_bin+1]
             if value > next_value:
@@ -290,7 +294,7 @@ class LapConfig(object):
 
     def predtime_stats_enabled(self):
         return self.predTime.sampleRate > 0 
-    
+
     def fromJson(self, jsonCfg):
         if jsonCfg:
             lapCount = jsonCfg.get('lapCount')
@@ -321,8 +325,68 @@ class LapConfig(object):
             if currentLap: 
                 self.currentLap.fromJson(currentLap)
 
+            self.sanitize_config()
+
             self.stale = False
-            
+
+    """some config files are sneaking in bad values and they're making
+    it up to the firmware config. UI doesn't allow editing of all of these
+    values b/c we simplified the interface, so we need to compensate.
+    This function will sanitize the configuration upon loading.
+
+    Yes, this is a hack, for now. LapStats will change in the future
+    when we break the API with a major version. When that breaks, lapstats
+    will be updated to have only have two boolean values:
+    stats_enabled and pred_time_enabled, and this sanitize function can
+    be removed.
+
+    Channel configuration data will not be editable.
+
+    TODO: remove this sanitization upon 3.x API
+    """
+    def sanitize_config(self):
+        self.lapCount.name = "LapCount"
+        self.lapCount.units = ""
+        self.lapCount.min = 0
+        self.lapCount.max = 0
+        self.lapCount.precision = 0
+
+        self.lapTime.name = "LapTime"
+        self.lapTime.units = "Min"
+        self.lapTime.min = 0
+        self.lapTime.max = 0
+        self.lapTime.precision = 4
+
+        self.sector.name = "Sector"
+        self.sector.units = ""
+        self.sector.min = 0
+        self.sector.max = 0
+        self.sector.precision = 0
+
+        self.sectorTime.name = "SectorTime"
+        self.sectorTime.units = "Min"
+        self.sectorTime.min = 0
+        self.sectorTime.max = 0
+        self.sectorTime.precision = 4
+
+        self.predTime.name = "PredTime"
+        self.predTime.units = "Min"
+        self.predTime.min = 0
+        self.predTime.max = 0
+        self.predTime.precision = 4
+
+        self.elapsedTime.name = "ElapsedTime"
+        self.elapsedTime.units = "Min"
+        self.elapsedTime.min = 0
+        self.elapsedTime.max = 0
+        self.elapsedTime.precision = 4
+
+        self.currentLap.name = "CurrentLap"
+        self.currentLap.units = ""
+        self.currentLap.min = 0
+        self.currentLap.max = 0
+        self.currentLap.precision = 0
+
     def toJson(self):
         lapCfgJson = {'lapCfg':{
                                   'lapCount': self.lapCount.toJson(),

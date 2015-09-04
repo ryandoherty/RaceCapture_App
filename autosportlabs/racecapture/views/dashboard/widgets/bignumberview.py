@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.label import Label
 from kivy.app import Builder
@@ -10,14 +10,14 @@ from utils import kvFind
 from iconbutton import TileIconButton
 from kivy.clock import Clock
 from kivy.properties import StringProperty, NumericProperty, ObjectProperty
-from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
+from autosportlabs.racecapture.views.dashboard.widgets.gauge import CustomizableGauge
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/bignumberview.kv')
 
 DEFAULT_NORMAL_COLOR  = [0.2, 0.2 , 0.2, 1.0]
 DEFAULT_VALUE_FONT_SIZE = sp(180)
 DEFAULT_TITLE_FONT_SIZE = sp(25)
 
-class BigNumberView(Gauge):
+class BigNumberView(CustomizableGauge):
 
     _backgroundView  = None
     title_font_size = NumericProperty(DEFAULT_TITLE_FONT_SIZE)

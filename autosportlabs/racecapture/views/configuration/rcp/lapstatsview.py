@@ -1,6 +1,6 @@
 import traceback
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder

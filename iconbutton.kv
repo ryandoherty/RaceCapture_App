@@ -1,37 +1,61 @@
 <RoundedRect>:
-	on_pos: self.compute_points()
-	on_size: self.compute_points()
-	on_corners: self.compute_points()
-	on_resolution: self.compute_points()
-	corners: [self.height * 0.01, self.height * 0.01, self.height * 0.01, self.height * 0.01]
-	line_width: self.height * 0.2
+	line_width: (self.height * 0.15) + 1
+	radius: self.height * 0.007
     canvas:
         Color: 
         	rgb: self.rect_color
         Line:
-            points: self.points
+            rounded_rectangle: (self.x + (self.line_width), self.y + (self.line_width), self.right - self.x - self.line_width * 2, self.top - self.y - self.line_width *2, self.radius)      
             width: self.line_width
+        Rectangle:
+            pos: (self.x + self.line_width, self.y + self.line_width) 
+            size: (self.width - self. line_width*2, self.height - self.line_width * 2)
 
 <TileIconButton>:
 	RoundedRect:
 		rect_color: root.tile_color
 	BoxLayout:
 		orientation: 'vertical'
-	    IconButton:
+	    Label:
 	    	id: icon
+            font_name: 'resource/fonts/fa.ttf'	    	
 	    	color: root.icon_color
 	    	size_hint_y: 0.7
-	    	font_size: self.height * 0.9
+	    	font_size: self.height * 0.7
 	    	text: root.icon
-	    	on_press: root.on_button_press()
 	    Label:
 	    	id: label
 	    	font_name: root.title_font
-	    	font_size: self.height * 0.5
+	    	font_size: self.height * 0.4
 	    	color: root.title_color
 	    	size_hint_y: 0.3
 	    	text: root.title	
             
+<LabelIconButton>:
+    RoundedRect:
+        rect_color: root.tile_color
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: (dp(8), 0)
+        spacing: dp(8)
+        Label:
+            id: icon
+            size_hint_x: 0.25
+            font_name: 'resource/fonts/fa.ttf'
+            color: root.icon_color
+            font_size: root.icon_size
+            text: root.icon
+        Label:
+            id: label
+            valign: 'middle'
+            halign: 'left'
+            text_size: (self.width, None)
+            font_name: root.title_font
+            font_size: root.title_font_size
+            color: root.title_color
+            size_hint_x: 0.75
+            text: root.title    
+
 <IconButton>:
     background_color: [0, 0, 0, 0]
     background_down: ''

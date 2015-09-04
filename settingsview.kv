@@ -1,31 +1,44 @@
-#:kivy 1.8.0
+#:kivy 1.9.0
 
 <SettingsView>:
-	orientation: 'vertical'
-	BoxLayout:
-		size_hint_y: 0.25
-		rcid: 'fieldContainer'
-		orientation: 'horizontal'
-		FieldLabel:
-			size_hint: (0.6, 1.0)
-			rcid: 'fieldLabel'
-			halign: 'right'
-			font_size: sp(20)
-			text: ''
-		AnchorLayout:
-			anchor_x: 'center'
-			anchor_y: 'center'
-			size_hint: (0.4, 1.0)
-			rcid: 'control'
-	HelpLabel:
-		size_hint_y: 0.75
-		rcid: 'helpLabel'
-		halign: 'left'
-		text: ''
+    BoxLayout:
+        rcid: 'fieldContainer'
+        orientation: 'horizontal'
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: 5
+            size_hint: (0.65, 1.0)
+            FieldLabel:
+                size_hint: (1, 1.0)
+                rcid: 'fieldLabel'
+                halign: 'right'
+                font_size: sp(20)
+                text: ''
+            TextWidget:
+                size_hint: (1, 1.0)
+                rcid: 'helpLabel'
+                halign: 'right'
+                text: ''
+        BoxLayout:
+            padding: [0, 10, 0, 10]
+            size_hint: (0.35, 1.0)
+            orientation: 'vertical'
+            halign: 'left'
+            spacing: 5
+            BoxLayout:
+                padding: [10,0]
+                rcid: 'control'
+                halign: 'left'
+            TextWidget:
+                padding: [10,2]
+                size_hint_x: 1
+                id: error
+                rcid: 'error'
+                halign: 'left'
+                text: ''
 
 <SettingsMappedSpinner>:
 	rcid: 'settingsCtrl'
-	size_hint: (0.6, 0.3)
 	on_text: root.on_text(*args)
 	
 <SettingsSwitch>:	
@@ -40,5 +53,5 @@
 	
 <SettingsTextField>:
 	rcid: 'settingsCtrl'
-	size_hint: (0.6, 0.3)
+	size_hint: (0.5, 0.3)
 	on_text: root.on_text(*args)

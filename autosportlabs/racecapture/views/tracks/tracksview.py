@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.properties import NumericProperty, ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
@@ -10,6 +10,7 @@ from kivy.uix.textinput import TextInput
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
+from kivy.core.window import Window
 import json
 import sets
 from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
@@ -17,6 +18,7 @@ from autosportlabs.uix.track.trackmap import TrackMap
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from utils import *
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+from iconbutton import LabelIconButton
 
 Builder.load_file('autosportlabs/racecapture/views/tracks/tracksview.kv')
 
@@ -26,12 +28,8 @@ class SearchInput(TextInput):
         self.register_event_type('on_search')
         super(SearchInput, self).__init__(*args, **kwargs)
     
-    def _keyboard_on_key_down(self, window, keycode, text, modifiers):
-        key, key_str = keycode
-        if key in (9,13):
-            self.dispatch('on_search')
-        else:
-            super(SearchInput, self)._keyboard_on_key_down(window, keycode, text, modifiers)
+    def on_text_validate(self, *args):
+        self.dispatch('on_search')
             
     def on_search(self, *args):
         pass
@@ -145,10 +143,40 @@ class TracksBrowser(BoxLayout):
     initialized = False
     tracksGrid = None
     selectedTrackIds = None
+    tracks_loading = False
+    last_scroll_y = 1.0
+    INITIAL_DISPLAY_LIMIT = 10
+    LAZY_DISPLAY_CHUNK_COUNT = 2
+    LOOK_AHEAD_TRACKS = 10
+    TRACK_HEIGHT_PADDING = dp(10)
+    
     def __init__(self, **kwargs):
         super(TracksBrowser, self).__init__(**kwargs)
         self.register_event_type('on_track_selected')
         self.selectedTrackIds = set()
+        
+    def on_scroll(self, instance, value):
+        scroll_y = self.ids.scrltracks.scroll_y
+        last_scroll_y = self.last_scroll_y
+        self.last_scroll_y = scroll_y 
+        #only check to lazy load if we're scrolling towards the bottom
+        if  scroll_y < last_scroll_y:
+            self.lazy_load_more_maybe()
+        
+    def lazy_load_more_maybe(self):
+        sb = self.ids.scrltracks
+        current_index = self.load_limit
+        tracks_count = len(self.current_track_ids)
+        current_pct_loaded = 1.0 - (float(current_index - self.LOOK_AHEAD_TRACKS ) / float(tracks_count))
+        if sb.scroll_y < current_pct_loaded and current_index < tracks_count:
+            if not self.tracks_loading:   
+                new_load_limit = current_index + self.LAZY_DISPLAY_CHUNK_COUNT
+                if new_load_limit > tracks_count:
+                    new_load_limit = tracks_count
+                self.load_limit = new_load_limit
+                self.tracks_loading = True
+                self.addNextTrack(current_index, self.current_track_ids)
+            Clock.schedule_once(lambda dt: self.lazy_load_more_maybe(),1.0)
          
     def set_trackmanager(self, track_manager):
         self.trackManager = track_manager
@@ -207,17 +235,19 @@ class TracksBrowser(BoxLayout):
         self.trackManager.updateAllTracks(tracksUpdateView.on_progress, self.on_update_check_success, self.on_update_check_error)
         
     def addNextTrack(self, index, keys):
-        if index < len(keys):
+        if index < self.load_limit:
             track = self.trackManager.tracks[keys[index]]
             trackView = TrackItemView(track=track)
             trackView.bind(on_track_selected=self.on_track_selected)
             trackView.size_hint_y = None
             trackView.height = self.trackHeight
             self.tracksGrid.add_widget(trackView)
-            Clock.schedule_once(lambda dt: self.addNextTrack(index + 1, keys))
+            Clock.schedule_once(lambda dt: self.addNextTrack(index + 1, keys), 0.1)
         else:
             self.dismissPopups()
             self.setViewDisabled(False)
+            self.last_scroll_y = self.ids.scrltracks.scroll_y
+            self.tracks_loading = False
         
     def refreshTrackList(self):
         region = self.ids.regions.text
@@ -227,25 +257,30 @@ class TracksBrowser(BoxLayout):
             foundIds = self.trackManager.filterTracksByName(search, foundIds)
         self.initTracksList(foundIds)
         
-    def initTracksList(self, trackIds = None):
+    def initTracksList(self, track_ids = None):
         self.setViewDisabled(True)
-        if trackIds == None:
-            trackIds = self.trackManager.getAllTrackIds()
-        trackCount = len(trackIds)
+        if track_ids == None:
+            track_ids = self.trackManager.getAllTrackIds()
+        track_count = len(track_ids)
         grid = self.ids.tracksgrid
-        grid.height = self.trackHeight * (trackCount + 1)
         grid.clear_widgets()
         self.tracksGrid = grid
-
+        self.ids.tracksgrid.height = ((track_count) * (self.trackHeight + self.TRACK_HEIGHT_PADDING))  
+        self.ids.scrltracks.height = 0
+        self.ids.scrltracks.scroll_y = 1.0
+        self.last_scroll_y = 1.0
+        self.loading = False                        
 
         self.dismissPopups()
-        if trackCount == 0:
+        if track_count == 0:
             self.tracksGrid.add_widget(Label(text="No tracks found - try checking for updates"))
             self.setViewDisabled(False)            
-            self.ids.namefilter.focus = True                        
+            self.ids.namefilter.focus = True
         else:
-            self.showProgressPopup("", "Loading")        
-            self.addNextTrack(0, trackIds)
+            self.load_limit = self.INITIAL_DISPLAY_LIMIT if len(track_ids) > self.INITIAL_DISPLAY_LIMIT else len(track_ids)
+            self.current_track_ids = track_ids         
+            self.addNextTrack(0, track_ids)
+            self.tracks_loading = True
             
     def initRegionsList(self):
         regions = self.trackManager.regions

@@ -1,6 +1,6 @@
 import kivy
 from valuefield import ValueField
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
@@ -9,6 +9,7 @@ from kivy.uix.switch import Switch
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
 from fieldlabel import FieldLabel
+from autosportlabs.uix.textwidget import TextWidget
 from helplabel import HelpLabel
 from kivy.app import Builder
 from utils import *

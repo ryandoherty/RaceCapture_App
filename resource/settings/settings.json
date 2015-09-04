@@ -1,38 +1,20 @@
 [
     {
         "type": "options",
-        "title": "Distance Units",
-        "desc": "",
-        "section": "preferences",
-        "key": "distance_units",
-        "true": "auto",
-        "options": ["miles", "kilometers"]
-    },
-    {
-        "type": "options",
-        "title": "Temperature Units",
-        "desc": "",
-        "section": "preferences",
-        "key": "temperature_units",
-        "true": "auto",
-        "options": ["Fahrenheit", "Celcius"]
-    },
-    {
-        "type": "bool",
-        "title": "Show laptimes in dashboard view",
-        "desc": "",
-        "section": "preferences",
-        "key": "show_laptimes",
-        "true": "auto"
-    },
-    {
-        "type": "options",
         "title": "Startup screen",
         "desc": "",
         "section": "preferences",
         "key": "startup_screen",
         "true": "auto",
         "options": ["Home Page", "Dashboard", "Configuration", "Analysis"]
+    },
+    {
+        "type": "bool",
+        "title": "Send telemetry",
+        "desc": "App will send telemetry to race-capture.com using the connected RaceCapture device ID. NOTE: app will not send telemetry if RaceCapture's telemetry module is on.",
+        "section": "preferences",
+        "key": "send_telemetry",
+        "true": "auto"
     },
     {
 	"type": "string",
