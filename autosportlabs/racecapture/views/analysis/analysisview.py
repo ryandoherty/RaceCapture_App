@@ -83,7 +83,7 @@ class AnalysisView(Screen):
             Clock.schedule_once(lambda dt: self.refresh_session_list())
 
         dstore_path = self._settings.userPrefs.get_datastore_location()
-        Logger.info("AnalysisView: Datastore Path:", dstore_path)
+        Logger.info("AnalysisView: Datastore Path:" + str(dstore_path))
         t = Thread(target=_init_datastore, args=(dstore_path,))
         t.daemon = True
         t.start()
