@@ -28,7 +28,7 @@ class AnalysisView(Screen):
     INIT_DATASTORE_TIMEOUT = 10.0
     _settings = None
     _databus = None
-    _trackmanager = None
+    _track_manager = None
     _datastore = DataStore()
     _session_location_cache = {}
     _popup = None
@@ -39,7 +39,7 @@ class AnalysisView(Screen):
         self.register_event_type('on_tracks_updated')
         self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings')
-        self._trackmanager = kwargs.get('trackmanager')
+        self._track_manager = kwargs.get('track_manager')
         self.ids.sessions.bind(on_lap_selected=self.lap_selected)
         self.init_view()
 
@@ -115,6 +115,7 @@ class AnalysisView(Screen):
         mainchart = self.ids.mainchart
         mainchart.settings = self._settings
         mainchart.datastore = self._datastore
+        self.ids.analysismap.track_manager = self._track_manager
 
     def on_channel_selected(self, instance, value):
         pass
