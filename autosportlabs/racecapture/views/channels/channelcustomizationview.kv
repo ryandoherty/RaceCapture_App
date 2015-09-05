@@ -1,11 +1,13 @@
 <RangeLabel>:
-	font_size: dp(25)
+	font_size: sp(20)
 	
 <ChannelCustomizationView>:
     BoxLayout:
         size: root.size
         pos: root.pos
         orientation: 'vertical'
+        Widget:
+            size_hint_y: 0.1        
         BoxLayout:
         	size_hint_y: 0.4
         	orientation: 'horizontal'
@@ -15,16 +17,16 @@
         		text: 'Warn'
         		halign: 'right'
         	GridLayout:
-        		spacing: dp(10)
-        		size_hint_x: 0.70
+        		spacing: sp(20)
+        		size_hint_x: 0.75
         		cols: 2
         		orientation: 'vertical'
         		RangeLabel:
-        			size_hint_x: 0.25
+        			size_hint_x: 0.10
         			text: 'Low'
         			halign: 'right'
 	    		Slider:
-	    			size_hint_x: 0.75
+	    			size_hint_x: 0.90
 	    			id: warnLowSlider
         			on_value: root.on_warnLow(*args)
         		RangeLabel:
@@ -54,7 +56,7 @@
 				size_hint_x: 0.15
 				on_press: root.on_warn_color()
     	Widget:
-    		size_hint_y: 0.2
+    		size_hint_y: 0.1
 		BoxLayout:
 			size_hint_y: 0.4
 			orientation: 'horizontal'
@@ -64,16 +66,16 @@
         		text: 'Alert'
         		halign: 'right'
         	GridLayout:
-        		spacing: dp(10)
+        		spacing: dp(20)
         		size_hint_x: 0.75
         		cols: 2
         		orientation: 'vertical'
         		RangeLabel:
-        			size_hint_x: 0.25
+        			size_hint_x: 0.10
         			text: 'Low'
         			halign: 'right'
 	    		Slider:
-	    			size_hint_x: 0.75
+	    			size_hint_x: 0.90
 	    			id: alertLowSlider
 	    			on_value: root.on_alertLow(*args)
         		RangeLabel:

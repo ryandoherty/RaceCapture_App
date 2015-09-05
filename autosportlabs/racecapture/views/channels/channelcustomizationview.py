@@ -6,7 +6,7 @@ from kivy.metrics import dp
 from kivy.uix.popup import Popup
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
-from fieldlabel import FieldLabel
+from autosportlabs.uix.textwidget import TextWidget
 from kivy.uix.slider import Slider
 from utils import kvFind
 from autosportlabs.racecapture.views.color.colorpickerview import ColorBlock
@@ -15,7 +15,7 @@ from autosportlabs.racecapture.views.color.colorpickerview import ColorPickerVie
 
 Builder.load_file('autosportlabs/racecapture/views/channels/channelcustomizationview.kv')
 
-class RangeLabel(FieldLabel):
+class RangeLabel(TextWidget):
     pass
 
 class ChannelCustomizationView(FloatLayout):
