@@ -37,10 +37,10 @@ class LineChart(ChannelAnalysisWidget):
     def on_marker(self, marker_event):
         pass
 
-    def remove_channel(self, channel):
+    def remove_channel(self, channel, ref):
         remove = []
         for channel_plot in self._channel_plots.itervalues():
-            if channel_plot.channel == channel:
+            if channel_plot.channel == channel and str(ref) == str(channel_plot.sourceref):
                 remove.append(channel_plot)
         
         for channel_plot in remove:
