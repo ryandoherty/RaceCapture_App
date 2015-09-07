@@ -58,10 +58,15 @@ class TrackMap(Widget):
 
     def add_marker(self, key, color):
         self.marker_points[key] = MarkerPoint(color)
-    
+
+    def remove_marker(self, key):
+        if self.marker_points.get(key):
+            del self.marker_points[key]
+            self._draw_current_map()
+
     def get_marker(self, key):
         return self.marker_points.get(key)
-    
+
     def update_marker(self, key, geoPoint):
         marker_point = self.marker_points.get(key)
         if marker_point is not None:

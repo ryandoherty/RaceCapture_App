@@ -14,6 +14,12 @@ class AnalysisMap(AnalysisWidget):
             track = self.track_manager.findNearbyTrack(point)
             if track != None:
                 self.ids.track.initMap(track)
-                
+
+    def remove_reference_mark(self, source):
+        self.ids.track.remove_reference_mark(source)
+
+    def add_reference_mark(self, source, color):
+        self.ids.track.add_reference_mark(source, color)
+
     def update_reference_mark(self, source, point):
         self.ids.track.update_reference_mark(source, point)
