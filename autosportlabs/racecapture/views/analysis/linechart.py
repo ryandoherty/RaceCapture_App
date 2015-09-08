@@ -1,6 +1,8 @@
-from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget
+from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget, ChannelData
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
 from autosportlabs.uix.color.colorsequence import ColorSequence
+from autosportlabs.racecapture.datastore import Filter
+
 from installfix_garden_graph import Graph, LinePlot
 from kivy.app import Builder
 from kivy.core.window import Window
@@ -61,7 +63,7 @@ class LineChart(ChannelAnalysisWidget):
         distance_index = {}
         max_distance = chart.xmax
         sample_index = 0
-        for sample in channel_data.records:
+        for sample in channel_data.data:
             distance = sample[1]
             if distance > max_distance:
                 max_distance = distance 
@@ -78,6 +80,18 @@ class LineChart(ChannelAnalysisWidget):
         plot.points = points
         self._channel_plots[str(channel_plot)] = channel_plot
     
+    def query_new_channel(self, channel, lap_ref):
+        lap = lap_ref.lap
+        session = lap_ref.session
+        f = Filter().eq('LapCount', lap)
+        dataset = self.datastore.query(sessions=[session],
+                         channels=['Distance', channel], data_filter=f)
+
+        channel_meta = self.datastore.get_channel(channel)
+        records = dataset.fetch_records()
+        channel_data = ChannelData(data=records, channel=channel, min=channel_meta.min, max=channel_meta.max, source=lap_ref)
+        self.add_channel(channel_data)
+
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
             if hasattr(touch, 'button'):

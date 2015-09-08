@@ -1,36 +1,39 @@
 import kivy
-kivy.require('1.8.0')
+kivy.require('1.9.0')
 from kivy.logger import Logger
 from kivy.app import Builder
 from kivy.uix.anchorlayout import AnchorLayout
 from iconbutton import IconButton
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
 from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
-from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from kivy.uix.popup import Popup
+import traceback
+
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 
 class ChannelData(object):
-    records = None
+    data = None
     channel = None
     min = 0
     max = 0
     source = None
     
     def __init__(self, **kwargs):
-        self.records = kwargs.get('records', None)
+        self.data = kwargs.get('data', None)
         self.channel = kwargs.get('channel', None)
         self.min = kwargs.get('min', 0)
         self.max = kwargs.get('max', 0)
         self.source = kwargs.get('source', None)
     
 class AnalysisWidget(AnchorLayout):
-    settings = None
-    datastore = None
-    selected_laps = {}
+    """ The base analysis widget that can receive lap added / removed events
+    """
     def __init__(self, **kwargs):
         super(AnalysisWidget, self).__init__(**kwargs)
+        self.settings = None
+        self.datastore = None
+        self.selected_laps = {}
         self.settings = kwargs.get('settings')
         self.datastore = kwargs.get('datastore')
     
@@ -48,21 +51,23 @@ class AnalysisWidget(AnchorLayout):
             self.selected_laps[str(lap_ref)] = lap_ref
             self.on_lap_added(lap_ref)
         except Exception as e:
-            Logger.error("Error adding lap: " + str(e))
+            Logger.error("AnalysisWidget: Error adding lap: " + str(e))
     
     def remove_lap(self, lap_ref):
         try:
             self.on_lap_removed(lap_ref)
             del(self.selected_laps[str(lap_ref)])
         except Exception as e:
-            Logger.error("Error removing remove lap " + str(e))
-        
+            Logger.error("AnalysisWidget: Error removing remove lap " + str(e))
+
 class ChannelAnalysisWidget(AnalysisWidget):
-    _popup = None
-    _selected_channels = []
+    """A widget that can select it's own channels to display
+    """
     
     def __init__(self, **kwargs):
         super(ChannelAnalysisWidget, self).__init__(**kwargs)
+        self._popup = None
+        self._selected_channels = []
         self.register_event_type('on_channel_selected')
 
     def on_lap_added(self, lap_ref):
@@ -87,17 +92,12 @@ class ChannelAnalysisWidget(AnalysisWidget):
             self.query_new_channel(channel, lap_ref)
             
     def query_new_channel(self, channel, lap_ref):
-        lap = lap_ref.lap
-        session = lap_ref.session
-        f = Filter().eq('LapCount', lap)
-        dataset = self.datastore.query(sessions=[session],
-                         channels=['Distance', channel], data_filter=f)
+        pass
         
-        channel_meta = self.datastore.get_channel(channel)
-        records = dataset.fetch_records()
-        channel_data = ChannelData(records=records, channel=channel, min=channel_meta.min, max=channel_meta.max, source=lap_ref)
-        self.add_channel(channel_data)
-        
+    def _remove_channel_all_laps(self, channel):
+        for k,v in self.selected_laps.iteritems():
+            self.remove_channel(channel, k)
+
     def merge_selected_channels(self, updated_channels):
         current = self._selected_channels
         removed = [c for c in current if c not in updated_channels]
@@ -105,24 +105,23 @@ class ChannelAnalysisWidget(AnalysisWidget):
                 
         for c in removed:
             current.remove(c)
-            self.remove_channel(c)
+            self._remove_channel_all_laps(c)
 
         for c in added:
             current.append(c)
             self.query_new_channel_all_laps(c)
             
-    def channels_customized(self, instance,  updated_channels):
+    def _channels_customized(self, instance,  updated_channels):
         self._dismiss_popup()
         self.merge_selected_channels(updated_channels)
-        for channel in updated_channels:
-            self.dispatch('on_channel_selected', channel)
+        self.dispatch('on_channel_selected', updated_channels)
             
     def on_options(self, *args):
         self.showCustomizeDialog()
             
     def showCustomizeDialog(self):
         content = CustomizeChannelsView(settings=self.settings, datastore=self.datastore, current_channels=self._selected_channels)
-        content.bind(on_channels_customized=self.channels_customized)
+        content.bind(on_channels_customized=self._channels_customized)
 
         popup = Popup(title="Customize Channels", content=content, size_hint=(0.7, 0.7))
         popup.bind(on_dismiss=self.popup_dismissed)

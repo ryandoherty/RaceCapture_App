@@ -21,9 +21,9 @@
 	            AnalysisMap:
 	                id: analysismap
 	                size_hint_x: 0.75
-	            Label:
-	                size_hint_x: 0.25
-	                text: 'secondary chart'
+	            ChannelValuesView:
+                    id: channelvalues
+                    size_hint_x: 0.25
             LineChart:
             	id: mainchart
             	on_channel_selected: root.on_channel_selected(*args)

@@ -506,12 +506,13 @@ class RaceCaptureApp(App):
 class CrashHandler(ExceptionHandler):
     def handle_exception(self, exception_info):
         if type(exception_info) == KeyboardInterrupt:
-            Logger.info("Main: KeyboardInterrupt")
+            Logger.info("CrashHander: KeyboardInterrupt")
             sys.exit()
+        Logger.critical("CrashHandler: Caught exception in Kivy loop: " + str(exception_info))
+        Logger.critical(traceback.format_exc())
         if 'sentry_client' in globals():
             ident = sentry_client.captureException(value=exception_info)
             Logger.critical("CrashHandler: crash caught: Reference is %s" % ident)
-            traceback.print_exc()
         return ExceptionManager.PASS
 
 if __name__ == '__main__':

@@ -12,6 +12,7 @@ from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
+from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
 from autosportlabs.racecapture.views.analysis.addstreamview import AddStreamView
 from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser, LapNode
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent, SourceRef
@@ -21,6 +22,7 @@ from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.uix.color.colorsequence import ColorSequence
+import traceback
 
 ANALYSIS_VIEW_KV = 'autosportlabs/racecapture/views/analysis/analysisview.kv'
 
@@ -49,10 +51,12 @@ class AnalysisView(Screen):
         source_key = str(source_ref)
         if selected:
             self.ids.mainchart.add_lap(source_ref)
+            self.ids.channelvalues.add_lap(source_ref)
             self._add_location_cache(source_ref)
             self.ids.analysismap.add_reference_mark(source_key, self._color_sequence.get_next_color())
         else:
             self.ids.mainchart.remove_lap(source_ref)
+            self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
     
     def on_tracks_updated(self, track_manager):
@@ -119,17 +123,22 @@ class AnalysisView(Screen):
         mainchart = self.ids.mainchart
         mainchart.settings = self._settings
         mainchart.datastore = self._datastore
+        channelvalues = self.ids.channelvalues
+        channelvalues.datastore = self._datastore
+        channelvalues.settings = self._settings
         self.ids.analysismap.track_manager = self._track_manager
 
     def on_channel_selected(self, instance, value):
-        pass
+        self.ids.channelvalues.merge_selected_channels(value)
 
     def on_marker(self, instance, marker):
         source = marker.sourceref
-        cache = self._session_location_cache.get(str(source))
+        source_key = str(source)
+        cache = self._session_location_cache.get(source_key)
         if cache != None:
             point = cache[marker.data_index]
-            self.ids.analysismap.update_reference_mark(str(source), point)
+            self.ids.analysismap.update_reference_mark(source_key, point)
+            self.ids.channelvalues.update_reference_mark(source_key, marker.data_index)
                 
     def _add_location_cache(self, source_ref):
         session = source_ref.session

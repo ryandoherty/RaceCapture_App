@@ -52,7 +52,7 @@ class ChannelSelectorView(BoxLayout):
                 channels.append(channel.text)
             self.dispatch('on_channel_selected', channels)
         except Exception as e:
-            print('Error Selecting channel: ' + str(e))
+            Logger.error('ChannelSelectorView: Error Selecting channel: ' + str(e))
     
 class ChannelSelectView(FloatLayout):
     channel = None
