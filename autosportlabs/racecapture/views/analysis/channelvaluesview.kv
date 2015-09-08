@@ -1,1 +1,42 @@
+<ChannelValueView>:
+    orientation: 'horizontal'
+    FieldLabel:
+        size_hint_x: 0.2
+        id: session
+    FieldLabel:
+        size_hint_x: 0.1
+        id: lap
+    FieldLabel:
+        size_hint_x: 0.4
+        id: channel
+    FieldLabel:
+        size_hint_x: 0.3
+        id: value
+
 <ChannelValuesView>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            FieldLabel:
+                size_hint_x: 0.3
+                text: 'Lap'
+            FieldLabel:
+                size_hint_x: 0.4
+                text: 'Channel'
+            FieldLabel:
+                size_hint_x: 0.3
+                text: 'Value'
+        ScrollView:
+            id: scroller
+            size_hint_y: 0.9
+            do_scroll_x:False
+            do_scroll_y:True
+            GridLayout:
+                id: channel_values
+                row_default_height: root.height * 0.12
+                row_force_default: True
+                size_hint_y: None
+                height: max(self.minimum_height, scroller.height)
+                cols: 1

@@ -22,4 +22,4 @@ class AnalysisMap(AnalysisWidget):
         self.ids.track.add_reference_mark(source, color)
 
     def update_reference_mark(self, source, point):
-        self.ids.track.update_reference_mark(source, point)
+        self.ids.track.update_reference_mark(str(source), point)

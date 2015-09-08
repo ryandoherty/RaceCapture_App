@@ -133,12 +133,11 @@ class AnalysisView(Screen):
 
     def on_marker(self, instance, marker):
         source = marker.sourceref
-        source_key = str(source)
-        cache = self._session_location_cache.get(source_key)
+        cache = self._session_location_cache.get(str(source))
         if cache != None:
             point = cache[marker.data_index]
-            self.ids.analysismap.update_reference_mark(source_key, point)
-            self.ids.channelvalues.update_reference_mark(source_key, marker.data_index)
+            self.ids.analysismap.update_reference_mark(source, point)
+            self.ids.channelvalues.update_reference_mark(source, marker.data_index)
                 
     def _add_location_cache(self, source_ref):
         session = source_ref.session

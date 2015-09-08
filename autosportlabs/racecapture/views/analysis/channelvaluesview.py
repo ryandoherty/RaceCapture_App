@@ -2,6 +2,7 @@ import kivy
 kivy.require('1.9.0')
 from kivy.logger import Logger
 from kivy.app import Builder
+from kivy.uix.boxlayout import BoxLayout
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget, ChannelData
@@ -14,17 +15,76 @@ class ChannelStats(object):
         self.max = kwargs.get('max')
         self.avg = kwargs.get('avg')
     
+class ChannelValueView(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(ChannelValueView, self).__init__(**kwargs)
+        self.session_view = self.ids.session
+        self.lap_view = self.ids.lap
+        self.channel_view = self.ids.channel
+        self.value_view = self.ids.value
+
+    @property
+    def session(self):
+        return self.session_view.text
+
+    @session.setter
+    def session(self, value):
+        self.session_view.text = value
+
+    @property
+    def lap(self):
+        return self.lap_view.text
+
+    @lap.setter
+    def lap(self, value):
+        self.lap_view.text = value
+
+    @property
+    def channel(self):
+        return self.channel_view.text
+
+    @channel.setter
+    def channel(self, value):
+        self.channel_view.text = value
+
+    @property
+    def value(self):
+        return self.value_view.text
+
+    @value.setter
+    def value(self, value):
+        self.value_view.text = value
+
 class ChannelValuesView(ChannelAnalysisWidget):
     
     def __init__(self, **kwargs):
         super(ChannelValuesView, self).__init__(**kwargs)
         self.channel_stats={}
+        self._channel_stat_widgets={}
 
     def update_reference_mark(self, source, point):
         channel_data = self.channel_stats.get(str(source))
         for channel, channel_data in channel_data.iteritems():
             stats = channel_data.data
-            print(str(source) + ' ' + channel + ': ' + str(stats.values[point]) + ': ' + str(stats.min) + ' ' + str(stats.max) + ' ' + str(stats.avg))
+            key = str(source) + channel
+            widget = self._channel_stat_widgets.get(key)
+            widget.session = str(source.session)
+            widget.lap = str(source.lap)
+            widget.channel = channel
+            widget.value = str(stats.values[point])
+
+    def _refresh_channels(self):
+        channels_grid = self.ids.channel_values
+        channels_grid.clear_widgets()
+        self._channel_stat_widgets.clear()
+        for source_key, channels in self.channel_stats.iteritems():
+            for channel, channel_data in channels.iteritems():
+                view = ChannelValueView()
+                channels_grid.add_widget(view)
+                key = source_key + channel
+                print('refresh key ' + str(key))
+                self._channel_stat_widgets[key] = view
 
     def add_channel(self, channel_data):
         source_key = str(channel_data.source)
@@ -33,6 +93,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
             channels = {}
             self.channel_stats[source_key] = channels
         channels[channel_data.channel] = channel_data
+        self._refresh_channels()
     
     def remove_channel(self, channel, ref):
         print('remove channel ' + str(channel))
