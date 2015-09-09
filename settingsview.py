@@ -3,7 +3,7 @@ from valuefield import ValueField
 kivy.require('1.9.0')
 
 from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.switch import Switch
 from kivy.uix.button import Button
@@ -82,7 +82,7 @@ class SettingsTextField(ValueField):
     
     
     
-class SettingsView(BoxLayout):
+class SettingsView(RelativeLayout):
     help_text = StringProperty('')
     label_text = StringProperty('')
     control = None
@@ -131,7 +131,7 @@ class SettingsView(BoxLayout):
             control = kvFind(self, 'rcid', 'control')
             warn.size = (control.width, dp(50))
             warn.size_hint = (None, None)
-            self.get_root_window().add_widget(warn)
+            self.add_widget(warn)
             warn.center_below(control)
             self.warn_bubble = warn
 

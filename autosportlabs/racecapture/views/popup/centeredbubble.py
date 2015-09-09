@@ -34,7 +34,6 @@ class CenteredBubble(Bubble):
         bubble_height = self.size[1]
 
         pos = widget.center
-        pos = widget.to_window(*pos)
         x = pos[0]
         y = pos[1]
         half_width = bubble_width / 2
