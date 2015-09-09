@@ -3,6 +3,7 @@
 * Remove preferences for features not yet implemented
 * Prevent labels and values from wrapping
 * Improved scaling of color widget
+* Improved crash recovery and crash reporting
 
 ==1.3.8==
 * App now can send live telemetry to RaceCapture/Live
