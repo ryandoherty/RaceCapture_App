@@ -30,7 +30,7 @@ class ChannelValueView(BoxLayout):
 
     @session.setter
     def session(self, value):
-        self.session_view.text = value
+        self.session_view.text = str(value)
 
     @property
     def lap(self):
@@ -38,7 +38,7 @@ class ChannelValueView(BoxLayout):
 
     @lap.setter
     def lap(self, value):
-        self.lap_view.text = value
+        self.lap_view.text = str(value)
 
     @property
     def channel(self):
@@ -81,9 +81,11 @@ class ChannelValuesView(ChannelAnalysisWidget):
         for source_key, channels in self.channel_stats.iteritems():
             for channel, channel_data in channels.iteritems():
                 view = ChannelValueView()
+                view.channel = channel
+                view.lap = channel_data.source.lap
+                view.session = channel_data.source.session
                 channels_grid.add_widget(view)
                 key = source_key + channel
-                print('refresh key ' + str(key))
                 self._channel_stat_widgets[key] = view
 
     def add_channel(self, channel_data):
@@ -95,10 +97,16 @@ class ChannelValuesView(ChannelAnalysisWidget):
         channels[channel_data.channel] = channel_data
         self._refresh_channels()
     
-    def remove_channel(self, channel, ref):
-        print('remove channel ' + str(channel))
+    def refresh_view(self):
+        self._refresh_channels()
         
+    def remove_channel(self, channel, lap_ref):
+        source_key = str(lap_ref)
+        channels = self.channel_stats.get(source_key)
+        channels.pop(channel, None)
+
     def query_new_channel(self, channel, lap_ref):
+        print('channelvaluesview query ' + str(channel) + ' ' + str(lap_ref))
         lap = lap_ref.lap
         session = lap_ref.session
         f = Filter().eq('LapCount', lap)

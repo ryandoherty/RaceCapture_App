@@ -77,6 +77,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
     def on_lap_removed(self, lap_ref):
         for channel in self._selected_channels:
             self.remove_channel(channel, lap_ref)
+        self.refresh_view()
     
     def on_channel_selected(self, value):
         pass
@@ -90,13 +91,17 @@ class ChannelAnalysisWidget(AnalysisWidget):
     def query_new_channel_all_laps(self, channel):
         for lap_ref in self.selected_laps.itervalues():
             self.query_new_channel(channel, lap_ref)
-            
+
     def query_new_channel(self, channel, lap_ref):
         pass
         
+    def refresh_view(self):
+        pass
+
     def _remove_channel_all_laps(self, channel):
         for k,v in self.selected_laps.iteritems():
             self.remove_channel(channel, k)
+        self.refresh_view()
 
     def merge_selected_channels(self, updated_channels):
         current = self._selected_channels
