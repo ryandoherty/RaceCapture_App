@@ -4,15 +4,17 @@ from kivy.app import Builder
 from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 import re
-
-
-from settingsview import SettingsView, SettingsTextField, SettingsSwitch
-from autosportlabs.widgets.separator import HLineSeparator
-from valuefield import ValueField
-from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.uix.toast.kivytoast import toast
+from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble, WarnLabel
+from autosportlabs.widgets.separator import HLineSeparator
+from settingsview import SettingsView, SettingsTextField, SettingsSwitch
+from valuefield import ValueField
+from kivy.metrics import dp
+from utils import *
 
 TELEMETRY_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/telemetryconfigview.kv'
+WARN_DISMISS_TIMEOUT = 7.24
 
 class TelemetryConfigView(BaseConfigView):
     connectivityConfig = None
@@ -29,20 +31,26 @@ class TelemetryConfigView(BaseConfigView):
         bgStream = kvFind(self, 'rcid', 'bgStream')
         bgStream.bind(on_setting=self.on_bg_stream)
         bgStream.setControl(SettingsSwitch())
-        self.ids.device_id.ids.error.markup = True
         
     def on_device_id(self, instance, value):
         if self.connectivityConfig:
             value = strip_whitespace(value)
-            self.ids.device_id.ids.error.text = ''
             if len(value) > 0:
                 if self.validate_device_id(value):
-                    kvFind(self, 'rcid', 'deviceId').setValue(value)
+                    instance.setValue(value)
                     self.connectivityConfig.telemetryConfig.deviceId = value
                     self.connectivityConfig.stale = True
                     self.dispatch('on_modified')
                 else:
-                    self.ids.device_id.ids.error.text = '[color=#E50000]Id should contain only numbers and letters.[/color]'
+                    warn = CenteredBubble()
+                    warn.add_widget(WarnLabel(text=str('Id may contain only numbers and letters')))
+                    warn.auto_dismiss_timeout(WARN_DISMISS_TIMEOUT)
+                    warn.background_color = (1, 0, 0, 1.0)
+                    warn.size = (dp(300), dp(50))
+                    warn.size_hint = (None,None)
+                    self.get_root_window().add_widget(warn)
+                    warn.center_below(instance.control)
+
 
     def on_bg_stream(self, instance, value):
         if self.connectivityConfig:
