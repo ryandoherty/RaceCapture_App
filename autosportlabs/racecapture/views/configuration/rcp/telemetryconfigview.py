@@ -41,7 +41,7 @@ class TelemetryConfigView(BaseConfigView):
                     instance.clear_error()
                 else:
                     try:
-                        instance.set_error('only numbers and letters allowed')
+                        instance.set_error('Only numbers / letters allowed')
                     except Exception as e:
                         import traceback
                         traceback.print_exc()
