@@ -15,7 +15,7 @@ from kivy.app import Builder
 from utils import *
 from mappedspinner import MappedSpinner
 from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble, WarnLabel
-from kivy.metrics import dp
+from kivy.metrics import dp, sp
 
 from kivy.properties import StringProperty
 
@@ -125,7 +125,7 @@ class SettingsView(BoxLayout):
     def set_error(self, error):
         if self.warn_bubble is None:
             warn = CenteredBubble()
-            warn.add_widget(WarnLabel(text=str(error)))
+            warn.add_widget(WarnLabel(text=str(error), font_size=sp(12)))
             warn.background_color = (1, 0, 0, 1.0)
             warn.auto_dismiss_timeout(self.WARN_LONG_TIMEOUT)
             control = kvFind(self, 'rcid', 'control')
