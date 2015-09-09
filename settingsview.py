@@ -14,6 +14,8 @@ from helplabel import HelpLabel
 from kivy.app import Builder
 from utils import *
 from mappedspinner import MappedSpinner
+from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble, WarnLabel
+from kivy.metrics import dp
 
 from kivy.properties import StringProperty
 
@@ -85,11 +87,15 @@ class SettingsView(BoxLayout):
     label_text = StringProperty('')
     control = None
     rcid = StringProperty('')
+    WARN_SHORT_TIMEOUT = 0.25
+    WARN_LONG_TIMEOUT = 7.24
+
     def __init__(self, **kwargs):
         super(SettingsView, self).__init__(**kwargs)
         self.bind(help_text = self.on_help_text)
         self.bind(label_text = self.on_label_text)
         self.register_event_type('on_setting')     
+        self.warn_bubble = None
 
     def on_setting(self, *args):
         pass
@@ -116,8 +122,24 @@ class SettingsView(BoxLayout):
         if self.control:
             self.control.setValue(value)
     
+    def set_error(self, error):
+        if self.warn_bubble is None:
+            warn = CenteredBubble()
+            warn.add_widget(WarnLabel(text=str(error)))
+            warn.background_color = (1, 0, 0, 1.0)
+            warn.auto_dismiss_timeout(self.WARN_LONG_TIMEOUT)
+            control = kvFind(self, 'rcid', 'control')
+            warn.size = (control.width, dp(50))
+            warn.size_hint = (None, None)
+            self.get_root_window().add_widget(warn)
+            warn.center_below(control)
+            self.warn_bubble = warn
+
+    def clear_error(self):
+        if self.warn_bubble is not None:
+            self.warn_bubble.auto_dismiss_timeout(self.WARN_SHORT_TIMEOUT)
+            self.warn_bubble = None
         
-    
         
         
 

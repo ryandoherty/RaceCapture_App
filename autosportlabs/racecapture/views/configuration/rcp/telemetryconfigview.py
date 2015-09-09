@@ -6,15 +6,12 @@ from kivy.uix.boxlayout import BoxLayout
 import re
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.uix.toast.kivytoast import toast
-from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble, WarnLabel
 from autosportlabs.widgets.separator import HLineSeparator
 from settingsview import SettingsView, SettingsTextField, SettingsSwitch
 from valuefield import ValueField
-from kivy.metrics import dp
 from utils import *
 
 TELEMETRY_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/telemetryconfigview.kv'
-WARN_DISMISS_TIMEOUT = 7.24
 
 class TelemetryConfigView(BaseConfigView):
     connectivityConfig = None
@@ -41,15 +38,13 @@ class TelemetryConfigView(BaseConfigView):
                     self.connectivityConfig.telemetryConfig.deviceId = value
                     self.connectivityConfig.stale = True
                     self.dispatch('on_modified')
+                    instance.clear_error()
                 else:
-                    warn = CenteredBubble()
-                    warn.add_widget(WarnLabel(text=str('Id may contain only numbers and letters')))
-                    warn.auto_dismiss_timeout(WARN_DISMISS_TIMEOUT)
-                    warn.background_color = (1, 0, 0, 1.0)
-                    warn.size = (dp(300), dp(50))
-                    warn.size_hint = (None,None)
-                    self.get_root_window().add_widget(warn)
-                    warn.center_below(instance.control)
+                    try:
+                        instance.set_error('Id may contain only numbers and letters')
+                    except Exception as e:
+                        import traceback
+                        traceback.print_exc()
 
 
     def on_bg_stream(self, instance, value):
