@@ -4,13 +4,12 @@ from kivy.app import Builder
 from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 import re
-
-
-from settingsview import SettingsView, SettingsTextField, SettingsSwitch
+from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.uix.toast.kivytoast import toast
 from autosportlabs.widgets.separator import HLineSeparator
+from settingsview import SettingsView, SettingsTextField, SettingsSwitch
 from valuefield import ValueField
 from utils import *
-from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 
 TELEMETRY_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/telemetryconfigview.kv'
 
@@ -29,20 +28,24 @@ class TelemetryConfigView(BaseConfigView):
         bgStream = kvFind(self, 'rcid', 'bgStream')
         bgStream.bind(on_setting=self.on_bg_stream)
         bgStream.setControl(SettingsSwitch())
-        self.ids.device_id.ids.error.markup = True
         
     def on_device_id(self, instance, value):
         if self.connectivityConfig:
             value = strip_whitespace(value)
-            self.ids.device_id.ids.error.text = ''
             if len(value) > 0:
                 if self.validate_device_id(value):
-                    kvFind(self, 'rcid', 'deviceId').setValue(value)
+                    instance.setValue(value)
                     self.connectivityConfig.telemetryConfig.deviceId = value
                     self.connectivityConfig.stale = True
                     self.dispatch('on_modified')
+                    instance.clear_error()
                 else:
-                    self.ids.device_id.ids.error.text = '[color=#E50000]Id should contain only numbers and letters.[/color]'
+                    try:
+                        instance.set_error('Only numbers / letters allowed')
+                    except Exception as e:
+                        import traceback
+                        traceback.print_exc()
+
 
     def on_bg_stream(self, instance, value):
         if self.connectivityConfig:
