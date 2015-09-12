@@ -15,7 +15,7 @@ from channelnamespinner import ChannelNameSpinner
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMultiChannelConfigView, BaseChannelView
 from autosportlabs.racecapture.config.rcpconfig import *
 from autosportlabs.racecapture.views.util.alertview import alertPopup
-from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble
+from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble, WarnLabel
 from kivy.metrics import dp
 
 ANALOG_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/analogchannelsview.kv'
@@ -107,21 +107,6 @@ class AnalogChannel(BaseChannelView):
 class AnalogScaler(Graph):
     def __init__(self, **kwargs):
         super(AnalogScaler, self).__init__(**kwargs)
-
-Builder.load_string('''
-<WarnLabel>
-    canvas.before:
-        Color:
-            rgba: (1.0, 0, 0, 0.5)
-        Rectangle:
-            pos: self.pos
-            size: self.size
-            
-''')
-
-class WarnLabel(Label):
-    pass
-
 
 WARN_DISMISS_TIMEOUT = 3
 

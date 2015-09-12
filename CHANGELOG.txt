@@ -1,7 +1,12 @@
 ==1.3.9==
+* Default screen can be selected under preferences
+* Last selected dashboard is loaded on next startup
 * Ensure whitespace in telemetry device ID is stripped out
 * Remove preferences for features not yet implemented
 * Prevent labels and values from wrapping
+* Improved scaling of color widget
+* Improved crash recovery and crash reporting
+* Improved clarity of settings field in Config View
 
 ==1.3.8==
 * App now can send live telemetry to RaceCapture/Live

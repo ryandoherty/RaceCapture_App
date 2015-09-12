@@ -1,5 +1,20 @@
 from kivy.uix.bubble import Bubble, BubbleButton
 from kivy.clock import Clock
+from kivy.uix.label import Label
+from kivy.app import Builder
+
+Builder.load_string('''
+<WarnLabel>
+    canvas.before:
+        Color:
+            rgba: (1.0, 0, 0, 0.5)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+''')
+
+class WarnLabel(Label):
+    pass
 
 class BubblePos():
     x = 0
@@ -14,6 +29,25 @@ class BubblePos():
 
 class CenteredBubble(Bubble):
             
+    def center_below(self, widget):
+        bubble_width = self.size[0]
+        bubble_height = self.size[1]
+
+        pos = widget.center
+        x = pos[0]
+        y = pos[1]
+        half_width = bubble_width / 2
+        x = x - half_width
+        y = y - bubble_height - widget.height / 2
+
+        window = widget.get_root_window()
+        if x < 0: x = 0
+        if x > window.width: x = window.width - bubble_width
+        if y - bubble_height < 0: y = bubble_height
+        if y > window.height: y = window.height - bubble_height
+        self.x = x
+        self.y = y
+
     def center_on(self, widget):
         bubble_width = self.size[0]
         bubble_height = self.size[1]

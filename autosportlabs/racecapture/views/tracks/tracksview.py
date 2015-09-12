@@ -146,7 +146,7 @@ class TracksBrowser(BoxLayout):
     tracks_loading = False
     last_scroll_y = 1.0
     INITIAL_DISPLAY_LIMIT = 10
-    LAZY_DISPLAY_CHUNK_COUNT = 2
+    LAZY_DISPLAY_CHUNK_COUNT = 1
     LOOK_AHEAD_TRACKS = 10
     TRACK_HEIGHT_PADDING = dp(10)
     
