@@ -72,6 +72,8 @@ class RcpApi:
         self._enable_autodetect = Event()
         self._enable_autodetect.set()
 
+        self._disconnect_callback = kwargs.get('on_disconnect') if 'on_disconnect' in kwargs else None
+
     def enable_autorecover(self):
         Logger.info("RCPAPI: Enabling auto recover")
         self._enable_autodetect.set()
@@ -81,6 +83,9 @@ class RcpApi:
         self._enable_autodetect.clear()
         
     def recover_connection(self):
+        if self._disconnect_callback:
+            self._disconnect_callback()
+
         if self._enable_autodetect.is_set():
             Logger.info("RCPAPI: attempting to recover connection")
             self.run_auto_detect()
