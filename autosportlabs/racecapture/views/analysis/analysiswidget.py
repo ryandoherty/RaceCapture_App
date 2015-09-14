@@ -47,11 +47,8 @@ class AnalysisWidget(AnchorLayout):
         pass
         
     def add_lap(self, lap_ref):
-        try:
-            self.selected_laps[str(lap_ref)] = lap_ref
-            self.on_lap_added(lap_ref)
-        except Exception as e:
-            Logger.error("AnalysisWidget: Error adding lap: " + str(e))
+        self.selected_laps[str(lap_ref)] = lap_ref
+        self.on_lap_added(lap_ref)
     
     def remove_lap(self, lap_ref):
         try:

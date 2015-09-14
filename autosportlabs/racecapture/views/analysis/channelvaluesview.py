@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget, ChannelData
+from autosportlabs.racecapture.views.analysis.bargraphgauge import BarGraphGauge
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/channelvaluesview.kv')
 
@@ -51,11 +52,11 @@ class ChannelValueView(BoxLayout):
 
     @property
     def value(self):
-        return self.value_view.text
+        return self.value_view.value
 
     @value.setter
     def value(self, value):
-        self.value_view.text = value
+        self.value_view.value = float(value)
 
 class ChannelValuesView(ChannelAnalysisWidget):
     
