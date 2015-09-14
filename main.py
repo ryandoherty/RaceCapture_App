@@ -338,7 +338,7 @@ class RaceCaptureApp(App):
         preferences_view = PreferencesView(name='preferences', settings=self.settings, base_dir=self.base_dir)
         preferences_view.settings_view.bind(on_config_change=self._on_preferences_change)
         return preferences_view
-    2
+
     def build_homepage_view(self):
         homepage_view = HomePageView(name='home')
         homepage_view.bind(on_select_view = lambda instance, view_name: self.switchMainView(view_name))
