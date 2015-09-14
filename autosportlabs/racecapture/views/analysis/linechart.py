@@ -81,7 +81,6 @@ class LineChart(ChannelAnalysisWidget):
         self._channel_plots[str(channel_plot)] = channel_plot
     
     def query_new_channel(self, channel, lap_ref):
-        print('linechart query ' + str(channel) + ' ' + str(lap_ref))
         lap = lap_ref.lap
         session = lap_ref.session
         f = Filter().eq('LapCount', lap)

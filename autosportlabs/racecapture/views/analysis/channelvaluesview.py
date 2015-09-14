@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget, ChannelData
+
 Builder.load_file('autosportlabs/racecapture/views/analysis/channelvaluesview.kv')
 
 class ChannelStats(object):
@@ -61,13 +62,13 @@ class ChannelValuesView(ChannelAnalysisWidget):
     def __init__(self, **kwargs):
         super(ChannelValuesView, self).__init__(**kwargs)
         self.channel_stats={}
-        self._channel_stat_widgets={}
+        self._channel_stat_widgets = {}
 
     def update_reference_mark(self, source, point):
         channel_data = self.channel_stats.get(str(source))
         for channel, channel_data in channel_data.iteritems():
             stats = channel_data.data
-            key = str(source) + channel
+            key = channel + str(source)
             widget = self._channel_stat_widgets.get(key)
             widget.session = str(source.session)
             widget.lap = str(source.lap)
@@ -76,7 +77,6 @@ class ChannelValuesView(ChannelAnalysisWidget):
 
     def _refresh_channels(self):
         channels_grid = self.ids.channel_values
-        channels_grid.clear_widgets()
         self._channel_stat_widgets.clear()
         for source_key, channels in self.channel_stats.iteritems():
             for channel, channel_data in channels.iteritems():
@@ -84,9 +84,13 @@ class ChannelValuesView(ChannelAnalysisWidget):
                 view.channel = channel
                 view.lap = channel_data.source.lap
                 view.session = channel_data.source.session
-                channels_grid.add_widget(view)
-                key = source_key + channel
+                key = channel + source_key
                 self._channel_stat_widgets[key] = view
+                
+        channels_grid.clear_widgets()
+        for key in iter(sorted(self._channel_stat_widgets.iterkeys())):
+            channels_grid.add_widget(self._channel_stat_widgets[key])
+            
 
     def add_channel(self, channel_data):
         source_key = str(channel_data.source)
@@ -106,7 +110,6 @@ class ChannelValuesView(ChannelAnalysisWidget):
         channels.pop(channel, None)
 
     def query_new_channel(self, channel, lap_ref):
-        print('channelvaluesview query ' + str(channel) + ' ' + str(lap_ref))
         lap = lap_ref.lap
         session = lap_ref.session
         f = Filter().eq('LapCount', lap)
