@@ -46,7 +46,7 @@ if __name__ == '__main__':
     from autosportlabs.telemetry.telemetryconnection import TelemetryManager
     from toolbarview import ToolbarView
     if not is_mobile_platform():
-        kivy.config.Config.set ( 'input', 'mouse', 'mouse,disable_multitouch' )
+        kivy.config.Config.set ( 'input', 'mouse', 'mouse,multitouch_on_demand' )
 
     # If we have a Sentry config file, create a client to send crash reports to
     if os.path.isfile('sentry.cfg'):

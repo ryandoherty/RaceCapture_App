@@ -3,8 +3,10 @@
 
 <RaceTrackView>:
 	orientation: 'vertical'
-	TrackMap:
-		trackColor: ColorScheme.get_primary()
-		size_hint_x: 0.95
-		id: trackmap
+	Scatter:
+        TrackMap:
+            trackColor: ColorScheme.get_primary()
+            height: root.height
+            width: root.width
+            id: trackmap
 		
