@@ -8,7 +8,6 @@ from autosportlabs.racecapture.views.channels.channelselectview import ChannelSe
 from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from kivy.uix.popup import Popup
-import traceback
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 
