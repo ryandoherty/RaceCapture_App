@@ -3,7 +3,7 @@ from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
 from autosportlabs.uix.color.colorsequence import ColorSequence
 from autosportlabs.racecapture.datastore import Filter
 
-from installfix_garden_graph import Graph, LinePlot
+from installfix_garden_graph import Graph, LinePlot, SmoothLinePlot
 from kivy.app import Builder
 from kivy.core.window import Window
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
@@ -52,7 +52,7 @@ class LineChart(ChannelAnalysisWidget):
     
     def add_channel(self, channel_data):
         chart = self.ids.chart
-        plot = LinePlot(color=self._color_sequence.get_next_color(), line_width=1.25)
+        plot = SmoothLinePlot(color=self._color_sequence.get_next_color())
         channel_plot = ChannelPlot(plot, 
                                    channel_data.channel, 
                                    channel_data.min, 
