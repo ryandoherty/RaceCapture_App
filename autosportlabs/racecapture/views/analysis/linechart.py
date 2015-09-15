@@ -30,11 +30,32 @@ class ChannelPlot(object):
 class LineChart(ChannelAnalysisWidget):
     _channel_plots = {}
     _color_sequence = ColorSequence()
+    ZOOM_FACTOR = .1
     
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
-        Window.bind(mouse_pos=self.on_mouse_pos)
         self.register_event_type('on_marker')
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        Window.bind(on_motion=self.on_motion)
+        self.zoom_level = 1
+        self.max_distance = 0
+        self.current_distance = 0
+        self.current_offset = 0
+
+    def on_motion(self, instance, event, motion_event):
+        if self.collide_point(motion_event.x, motion_event.y):
+            chart = self.ids.chart
+            button = motion_event.button            
+            if button == 'scrollup':
+                self.current_distance += self.ZOOM_FACTOR if self.current_distance < self.max_distance else 0
+                self.current_offset -= self.ZOOM_FACTOR if self.current_offset > self.ZOOM_FACTOR else 0
+            else:
+                if button == 'scrolldown' and self.current_offset < self.current_distance:
+                    self.current_distance -= self.ZOOM_FACTOR if self.current_distance > self.ZOOM_FACTOR else 0
+                    self.current_offset += self.ZOOM_FACTOR if self.current_offset < self.max_distance else 0
+                
+            chart.xmax = self.current_distance
+            chart.xmin = self.current_offset    
     
     def on_marker(self, marker_event):
         pass
@@ -79,6 +100,8 @@ class LineChart(ChannelAnalysisWidget):
         chart.xmax = max_distance
         plot.points = points
         self._channel_plots[str(channel_plot)] = channel_plot
+        self.max_distance = max_distance
+        self.current_distance = max_distance
     
     def query_new_channel(self, channel, lap_ref):
         lap = lap_ref.lap
