@@ -7,6 +7,7 @@ from kivy.uix.scatter import Scatter
 from kivy.app import Builder
 from kivy.metrics import dp
 from kivy.graphics import Color, Line
+from kivy.core.window import Window
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.uix.track.trackmap import TrackMap
 from utils import *
@@ -15,9 +16,24 @@ Builder.load_file('autosportlabs/uix/track/racetrackview.kv')
         
 class RaceTrackView(BoxLayout):
 
+    SCROLL_FACTOR = 0.1
     def __init__(self, **kwargs):
         super(RaceTrackView, self).__init__(**kwargs)
+        Window.bind(on_motion=self.on_motion)
 
+    def on_motion(self, instance, event, motion_event):
+        scatter = self.ids.scatter
+        button = motion_event.button
+        scale = scatter.scale
+        if button == 'scrollup':
+            scale += self.SCROLL_FACTOR
+        else:
+            if button == 'scrolldown':
+                scale -= self.SCROLL_FACTOR
+        if scale < self.SCROLL_FACTOR:
+            scale = self.SCROLL_FACTOR
+        scatter.scale = scale
+        
     def loadTrack(self, track):
         self.initMap(track)
                 
