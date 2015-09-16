@@ -3,10 +3,30 @@ from autosportlabs.uix.track.racetrackview import RaceTrackView
 from kivy.properties import ObjectProperty
 from kivy.app import Builder
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+from kivy.core.window import Window
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 class AnalysisMap(AnalysisWidget):
+    SCROLL_FACTOR = 0.15
     track_manager = ObjectProperty(None)
+        
+    def __init__(self, **kwargs):
+        super(AnalysisMap, self).__init__(**kwargs)
+        Window.bind(on_motion=self.on_motion)
+
+    def on_motion(self, instance, event, motion_event):
+        if self.collide_point(motion_event.x, motion_event.y):
+            scatter = self.ids.scatter
+            button = motion_event.button
+            scale = scatter.scale
+            if button == 'scrollup':
+                scale += self.SCROLL_FACTOR
+            else:
+                if button == 'scrolldown':
+                    scale -= self.SCROLL_FACTOR
+            if scale < self.SCROLL_FACTOR:
+                scale = self.SCROLL_FACTOR
+            scatter.scale = scale
         
     def select_map(self, latitude, longitude):
         if self.track_manager:
