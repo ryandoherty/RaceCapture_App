@@ -52,12 +52,16 @@ class AnalysisView(Screen):
         if selected:
             self.ids.mainchart.add_lap(source_ref)
             self.ids.channelvalues.add_lap(source_ref)
-            self._add_location_cache(source_ref)
-            self.ids.analysismap.add_reference_mark(source_key, self._color_sequence.get_next_color())
+            map_path_color = self._color_sequence.get_next_color()
+            self.ids.analysismap.add_reference_mark(source_key, map_path_color)
+            cache = self._add_location_cache(source_ref)
+            self.ids.analysismap.add_map_path(source_key, cache, map_path_color)
+
         else:
             self.ids.mainchart.remove_lap(source_ref)
             self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
+            self.ids.analysismap.remove_map_path(source_key)
     
     def on_tracks_updated(self, track_manager):
         self.ids.analysismap.track_manager = track_manager
@@ -142,7 +146,8 @@ class AnalysisView(Screen):
     def _add_location_cache(self, source_ref):
         session = source_ref.session
         lap = source_ref.lap
-        cache = self._session_location_cache.get(str(source_ref))
+        source_key = str(source_ref)
+        cache = self._session_location_cache.get(source_key)
         if cache == None:
             self._sync_analysis_map(session)
             f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("LapCount", lap)
@@ -155,7 +160,8 @@ class AnalysisView(Screen):
                 lat = r[1]
                 lon = r[2]
                 cache.append(GeoPoint.fromPoint(lat, lon))
-            self._session_location_cache[str(source_ref)]=cache
+            self._session_location_cache[source_key]=cache
+        return cache
     
     def _sync_analysis_map(self, session):
         lat_avg, lon_avg = self._datastore.get_location_center([session])

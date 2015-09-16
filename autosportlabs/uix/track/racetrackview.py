@@ -34,5 +34,9 @@ class RaceTrackView(BoxLayout):
     def update_reference_mark(self, key, geo_point):
         trackmap = self.ids.trackmap
         trackmap.update_marker(key, geo_point)
-        
 
+    def add_map_path(self, key, path, color):
+        self.ids.trackmap.add_path(key, path, color)
+
+    def remove_map_path(self, key):
+        self.ids.trackmap.remove_path(key)

@@ -43,3 +43,9 @@ class AnalysisMap(AnalysisWidget):
 
     def update_reference_mark(self, source, point):
         self.ids.track.update_reference_mark(str(source), point)
+
+    def add_map_path(self, source_key, path, color):
+        self.ids.track.add_map_path(source_key, path, color)
+
+    def remove_map_path(self, source_key):
+        self.ids.track.remove_map_path(source_key)
