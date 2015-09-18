@@ -68,6 +68,23 @@ class ChannelValueView(BoxLayout):
     def color(self, value):
         self.value_view.color = [value[0], value[1], value[2], 0.5]
 
+    @property
+    def minval(self):
+        return self.value_view.minval
+
+    @minval.setter
+    def minval(self, value):
+        self.value_view.minval = value
+
+    @property
+    def maxval(self):
+        return self.value_view.maxval
+
+    @maxval.setter
+    def maxval(self, value):
+        self.value_view.maxval = value
+
+
 class ChannelValuesView(ChannelAnalysisWidget):
     color_sequence = ObjectProperty(None)
 
@@ -98,6 +115,8 @@ class ChannelValuesView(ChannelAnalysisWidget):
                 view.color = self.color_sequence.get_color(key)
                 view.lap = channel_data.source.lap
                 view.session = channel_data.source.session
+                view.minval = channel_data.min
+                view.maxval = channel_data.max
                 self._channel_stat_widgets[key] = view
                 
         channels_grid.clear_widgets()
