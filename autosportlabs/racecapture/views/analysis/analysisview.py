@@ -58,12 +58,14 @@ class AnalysisView(Screen):
             self.ids.analysismap.add_reference_mark(source_key, map_path_color)
             cache = self._add_location_cache(source_ref)
             self.ids.analysismap.add_map_path(source_key, cache, map_path_color)
+            self.ids.analysismap.add_heat_values('Speed', source_ref)
 
         else:
             self.ids.mainchart.remove_lap(source_ref)
             self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
             self.ids.analysismap.remove_map_path(source_key)
+            self.ids.analysismap.remove_heat_values(source_ref)
     
     def on_tracks_updated(self, track_manager):
         self.ids.analysismap.track_manager = track_manager
@@ -133,6 +135,7 @@ class AnalysisView(Screen):
         channelvalues.datastore = self._datastore
         channelvalues.settings = self._settings
         self.ids.analysismap.track_manager = self._track_manager
+        self.ids.analysismap.datastore = self._datastore
 
     def on_channel_selected(self, instance, value):
         self.ids.channelvalues.merge_selected_channels(value)

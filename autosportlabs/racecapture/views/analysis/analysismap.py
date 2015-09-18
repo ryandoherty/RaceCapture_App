@@ -4,12 +4,15 @@ from kivy.properties import ObjectProperty
 from kivy.app import Builder
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from kivy.core.window import Window
+from autosportlabs.racecapture.datastore import Filter
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
+
 class AnalysisMap(AnalysisWidget):
     SCROLL_FACTOR = 0.15
     track_manager = ObjectProperty(None)
-        
+    datastore = ObjectProperty(None)
+
     def __init__(self, **kwargs):
         super(AnalysisMap, self).__init__(**kwargs)
         Window.bind(on_motion=self.on_motion)
@@ -49,3 +52,21 @@ class AnalysisMap(AnalysisWidget):
 
     def remove_map_path(self, source_key):
         self.ids.track.remove_map_path(source_key)
+
+    def add_heat_values(self, channel, lap_ref):
+        lap = lap_ref.lap
+        session = lap_ref.session
+        f = Filter().eq('LapCount', lap)
+        dataset = self.datastore.query(sessions=[session], channels=[channel], data_filter=f)
+        records = dataset.fetch_records()
+
+        values = []
+        for record in records:
+            #pluck out just the channel value
+            values.append(record[1])
+
+        self.heat_values = values
+        self.ids.track.add_heat_values(str(lap_ref), values)
+
+    def remove_heat_values(self, lap_ref):
+        self.ids.track.remove_heat_values(str(lap_ref))

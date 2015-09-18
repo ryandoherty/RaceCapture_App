@@ -5,10 +5,9 @@ from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget
 from kivy.uix.scatter import Scatter
-from kivy.graphics import Rectangle
 from kivy.app import Builder
 from kivy.metrics import sp
-from kivy.graphics import Color, Line
+from kivy.graphics import Color, Line, Bezier, Rectangle
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from utils import *
 
@@ -35,6 +34,7 @@ class TrackMap(Widget):
     trackWidthScale = 0.01
     marker_width_scale = 0.02
     path_width_scale = 0.002
+    heat_width_scale = 0.005
     trackColor = (1.0, 1.0, 1.0, 0.5)
     MIN_PADDING = sp(1)
     offsetPoint = Point(0,0)
@@ -52,9 +52,11 @@ class TrackMap(Widget):
     #The map paths
     paths = {}
     scaled_paths = {}
+    heat_map_values = {}
     
     #markers for trackmap
     marker_points = {}
+    marker_locations = {}
     
     def set_trackColor(self, color):
         self.trackColor = color
@@ -86,6 +88,14 @@ class TrackMap(Widget):
         self.paths[key] = TrackPath(points, color)
         self.update_map()
 
+    def add_heat_values(self, key, heat_map_values):
+        self.heat_map_values[key] = heat_map_values
+        self._draw_current_map()
+
+    def remove_heat_values(self, key):
+        self.heat_map_values.pop(key, None)
+        self._draw_current_map()
+
     def remove_path(self, key):
         self.paths.pop(key, None)
         self.scaled_paths.pop(key, None)
@@ -95,26 +105,31 @@ class TrackMap(Widget):
         self.marker_points[key] = MarkerPoint(color)
 
     def remove_marker(self, key):
-        if self.marker_points.get(key):
-            del self.marker_points[key]
-            self._draw_current_map()
+        self.marker_points.pop(key, None)
+        self.marker_locations.pop(key, None)
+        self._draw_current_map()
 
     def get_marker(self, key):
         return self.marker_points.get(key)
 
     def update_marker(self, key, geoPoint):
         marker_point = self.marker_points.get(key)
-        if marker_point is not None:
+        if marker_point:
+            left = self.pos[0]
+            bottom = self.pos[1]
             point = self._offset_point(self._project_point(geoPoint))
             marker_point.x = point.x
             marker_point.y = point.y
-            self._draw_current_map()
+            scaledPoint = self._scale_point(marker_point, self.height, left, bottom)
+
+            marker_size = self.marker_width_scale * self.height
+            self.marker_locations[key].circle = (scaledPoint.x, scaledPoint.y, marker_size)
         
     def update_map(self, *args):
         
         paddingBothSides = self.MIN_PADDING * 2
         
-        width = self.size[0] 
+        width = self.size[0]
         height = self.size[1]
         
         left = self.pos[0]
@@ -141,7 +156,7 @@ class TrackMap(Widget):
         points = self.mapPoints
         scaled_map_points = []
         for point in points:
-            scaledPoint = self.scalePoint(point, self.height, left, bottom)
+            scaledPoint = self._scale_point(point, self.height, left, bottom)
             scaled_map_points.append(scaledPoint.x)
             scaled_map_points.append(scaledPoint.y)
         self.scaled_map_points = scaled_map_points
@@ -151,7 +166,7 @@ class TrackMap(Widget):
         for key, track_path in paths.iteritems():
             scaled_path_points = []
             for point in track_path.path:
-                scaled_path_point = self.scalePoint(point, self.height, left, bottom)
+                scaled_path_point = self._scale_point(point, self.height, left, bottom)
                 scaled_path_points.append(scaled_path_point.x)
                 scaled_path_points.append(scaled_path_point.y)
             scaled_paths[key] = scaled_path_points
@@ -161,24 +176,47 @@ class TrackMap(Widget):
 
     def _draw_current_map(self):
         left = self.pos[0]
-        bottom = self.pos[1]        
+        bottom = self.pos[1]
         self.canvas.clear()
+
         with self.canvas:
-            #draw the main track map
+
             Color(*self.trackColor)
             Line(points=self.scaled_map_points, width=sp(self.trackWidthScale * self.height), closed=True, joint='round')
-            marker_size = self.marker_width_scale * self.height
 
             #draw all of the traces
-            for key, path in self.scaled_paths.iteritems():
-                Color(*self.paths[key].color)
-                Line(points=path, width=sp(self.path_width_scale * self.height), closed=True)
+            for key, path_points in self.scaled_paths.iteritems():
+
+                heat_path = self.heat_map_values.get(key)
+                if heat_path:
+                    #draw heat map
+                    point_count = len(path_points)
+                    value_index = 0
+                    heat_value = 0
+                    try:
+                        for i in range(0, point_count - 2, 2):
+                            x1 = path_points[i]
+                            y1 = path_points[i + 1]
+                            x2 = path_points[i + 2]
+                            y2 = path_points[i + 3]
+                            heat_value = heat_path[value_index]
+                            heat_color = self._get_heat_map_color(heat_value / 100.0) #TODO get the channel meta min / max
+                            Color(*heat_color)
+                            Line(points=[x1, y1, x2, y2], width=sp(self.heat_width_scale * self.height), closed=False, joint='round')
+                            value_index+=1
+                    except IndexError: #if the number of heat values mismatch the heat map points, terminate early
+                        pass
+                else:
+                    #draw regular map
+                    Color(*self.paths[key].color)
+                    Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True)
 
             #draw the markers
-            for marker_point in self.marker_points.itervalues():
-                scaledPoint = self.scalePoint(marker_point, self.height, left, bottom)                
+            marker_size = self.marker_width_scale * self.height
+            for key, marker_point in self.marker_points.iteritems():
+                scaledPoint = self._scale_point(marker_point, self.height, left, bottom)
                 Color(*marker_point.color)
-                Line(circle=(scaledPoint.x, scaledPoint.y, marker_size), width=marker_size, closed=True)
+                self.marker_locations[key] = Line(circle=(scaledPoint.x, scaledPoint.y, marker_size), width=marker_size, closed=True)
 
          
     def setTrackPoints(self, geoPoints):
@@ -196,7 +234,7 @@ class TrackMap(Widget):
         point = Point(longitude, float(math.log(math.tan((math.pi / 4.0) + 0.5 * latitude))))
         return point;
 
-    def scalePoint(self, point, height, left, bottom):
+    def _scale_point(self, point, height, left, bottom):
         adjustedX = int((self.widthPadding + (point.x * self.globalRatio))) + left
         #need to invert the Y since 0,0 starts at top left
         adjustedY = int((self.heightPadding + (point.y * self.globalRatio))) + bottom
@@ -226,4 +264,26 @@ class TrackMap(Widget):
         self.maxXY = maxXY                
         self.mapPoints =  points        
         
+    def _get_heat_map_color(self, value):
+        colors = [[0,0,1,1], [0,1,0,1], [1,1,0,1], [1,0,0,1]]
+        num_colors = len(colors)
+
+        idx1 = 0
+        idx2 = 0
+        frac_between = 0.0
+
+        if value <= 0:
+            idx1 = idx2 = 0
+        elif value >= 1:
+            idx1 = idx2 = num_colors - 1
+        else:
+            value = value * (num_colors - 1)
+            idx1  = int(math.floor(value))
+            idx2  = idx1 + 1
+            frac_between = value - float(idx1)
+
+        red   = (colors[idx2][0] - colors[idx1][0]) * frac_between + colors[idx1][0];
+        green = (colors[idx2][1] - colors[idx1][1]) * frac_between + colors[idx1][1];
+        blue  = (colors[idx2][2] - colors[idx1][2]) * frac_between + colors[idx1][2];
         
+        return [red, green, blue, 1.0]

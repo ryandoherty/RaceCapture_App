@@ -40,3 +40,9 @@ class RaceTrackView(BoxLayout):
 
     def remove_map_path(self, key):
         self.ids.trackmap.remove_path(key)
+
+    def add_heat_values(self, key, heat_values):
+        self.ids.trackmap.add_heat_values(key, heat_values)
+
+    def remove_heat_values(self, key):
+        self.ids.trackmap.remove_heat_values(key)
