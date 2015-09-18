@@ -6,7 +6,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.stencilview import StencilView
 from fieldlabel import FieldLabel
-from kivy.properties import NumericProperty
+from kivy.properties import NumericProperty, ListProperty
 from kivy.app import Builder
 from kivy.graphics import Color, Rectangle
 from utils import *
@@ -18,6 +18,7 @@ class BarGraphGauge(AnchorLayout):
     minval = NumericProperty(0)
     maxval = NumericProperty(100)
     value = NumericProperty(0)
+    color = ListProperty([1, 1, 1, 0.5])
     
     def __init__(self, **kwargs):
         super(BarGraphGauge, self).__init__(**kwargs)        

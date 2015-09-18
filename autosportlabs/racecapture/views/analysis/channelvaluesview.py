@@ -1,8 +1,10 @@
 import kivy
 kivy.require('1.9.0')
 from kivy.logger import Logger
+from kivy.graphics import Color
 from kivy.app import Builder
 from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget, ChannelData
@@ -58,8 +60,17 @@ class ChannelValueView(BoxLayout):
     def value(self, value):
         self.value_view.value = float(value)
 
+    @property
+    def color(self):
+        return self.value_view.color
+
+    @color.setter
+    def color(self, value):
+        self.value_view.color = [value[0], value[1], value[2], 0.5]
+
 class ChannelValuesView(ChannelAnalysisWidget):
-    
+    color_sequence = ObjectProperty(None)
+
     def __init__(self, **kwargs):
         super(ChannelValuesView, self).__init__(**kwargs)
         self.channel_stats={}
@@ -81,11 +92,12 @@ class ChannelValuesView(ChannelAnalysisWidget):
         self._channel_stat_widgets.clear()
         for source_key, channels in self.channel_stats.iteritems():
             for channel, channel_data in channels.iteritems():
+                key = channel + source_key
                 view = ChannelValueView()
                 view.channel = channel
+                view.color = self.color_sequence.get_color(key)
                 view.lap = channel_data.source.lap
                 view.session = channel_data.source.session
-                key = channel + source_key
                 self._channel_stat_widgets[key] = view
                 
         channels_grid.clear_widgets()

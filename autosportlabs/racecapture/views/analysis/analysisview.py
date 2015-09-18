@@ -44,6 +44,8 @@ class AnalysisView(Screen):
         self._settings = kwargs.get('settings')
         self._track_manager = kwargs.get('track_manager')
         self.ids.sessions.bind(on_lap_selected=self.lap_selected)
+        self.ids.channelvalues.color_sequence = self._color_sequence
+        self.ids.mainchart.color_sequence = self._color_sequence
         self.init_view()
 
 
@@ -52,7 +54,7 @@ class AnalysisView(Screen):
         if selected:
             self.ids.mainchart.add_lap(source_ref)
             self.ids.channelvalues.add_lap(source_ref)
-            map_path_color = self._color_sequence.get_next_color()
+            map_path_color = self._color_sequence.get_color(source_key)
             self.ids.analysismap.add_reference_mark(source_key, map_path_color)
             cache = self._add_location_cache(source_ref)
             self.ids.analysismap.add_map_path(source_key, cache, map_path_color)

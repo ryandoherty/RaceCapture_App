@@ -6,6 +6,8 @@ from autosportlabs.racecapture.datastore import Filter
 from installfix_garden_graph import Graph, LinePlot, SmoothLinePlot
 from kivy.app import Builder
 from kivy.core.window import Window
+from kivy.properties import ObjectProperty
+
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 
 class ChannelPlot(object):
@@ -17,19 +19,20 @@ class ChannelPlot(object):
     sourceref = None
     distance_index = {}
     samples = 0
+
     def __init__(self, plot, channel, min_value, max_value, sourceref):
         self.plot = plot
         self.channel = channel
         self.min_value = min_value
         self.max_value = max_value
         self.sourceref = sourceref
-        
+
     def __str__(self):
         return "{}_{}".format(str(self.sourceref), self.channel) 
-    
+
 class LineChart(ChannelAnalysisWidget):
+    color_sequence = ObjectProperty(None)
     _channel_plots = {}
-    _color_sequence = ColorSequence()
     ZOOM_FACTOR = .1
     
     def __init__(self, **kwargs):
@@ -73,7 +76,8 @@ class LineChart(ChannelAnalysisWidget):
     
     def add_channel(self, channel_data):
         chart = self.ids.chart
-        plot = SmoothLinePlot(color=self._color_sequence.get_next_color())
+        key = channel_data.channel + str(channel_data.source)
+        plot = SmoothLinePlot(color=self.color_sequence.get_color(key))
         channel_plot = ChannelPlot(plot, 
                                    channel_data.channel, 
                                    channel_data.min, 
