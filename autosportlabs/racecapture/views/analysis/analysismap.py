@@ -36,22 +36,22 @@ class AnalysisMap(AnalysisWidget):
             point = GeoPoint.fromPoint(latitude, longitude)
             track = self.track_manager.findNearbyTrack(point)
             if track != None:
-                self.ids.track.initMap(track)
+                self.ids.track.setTrackPoints(track.mapPoints)
 
     def remove_reference_mark(self, source):
-        self.ids.track.remove_reference_mark(source)
+        self.ids.track.remove_marker(source)
 
     def add_reference_mark(self, source, color):
-        self.ids.track.add_reference_mark(source, color)
+        self.ids.track.add_marker(source, color)
 
     def update_reference_mark(self, source, point):
-        self.ids.track.update_reference_mark(str(source), point)
+        self.ids.track.update_marker(str(source), point)
 
     def add_map_path(self, source_key, path, color):
-        self.ids.track.add_map_path(source_key, path, color)
+        self.ids.track.add_path(source_key, path, color)
 
     def remove_map_path(self, source_key):
-        self.ids.track.remove_map_path(source_key)
+        self.ids.track.remove_path(source_key)
 
     def add_heat_values(self, channel, lap_ref):
         lap = lap_ref.lap

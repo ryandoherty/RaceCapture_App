@@ -7,6 +7,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.scatter import Scatter
 from kivy.app import Builder
 from kivy.metrics import sp
+from kivy.properties import ListProperty
 from kivy.graphics import Color, Line, Bezier, Rectangle
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from utils import *
@@ -31,11 +32,11 @@ class TrackPath(object):
         self.path = path
 
 class TrackMap(Widget):
+    trackColor = ListProperty([1.0, 1.0, 1.0, 0.5])
     trackWidthScale = 0.01
     marker_width_scale = 0.02
     path_width_scale = 0.002
     heat_width_scale = 0.005
-    trackColor = (1.0, 1.0, 1.0, 0.5)
     MIN_PADDING = sp(1)
     offsetPoint = Point(0,0)
     globalRatio = 0
@@ -58,14 +59,8 @@ class TrackMap(Widget):
     marker_points = {}
     marker_locations = {}
     
-    def set_trackColor(self, color):
-        self.trackColor = color
-        self.update_map()
-        
-    def get_trackColor(self):
-        return self.trackColor
-        
-    trackColor = property(get_trackColor, set_trackColor)
+    def on_trackColor(self, instance, value):
+        self._draw_current_map()
 
     def __init__(self, **kwargs):
         super(TrackMap, self).__init__(**kwargs)
