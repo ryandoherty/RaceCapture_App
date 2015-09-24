@@ -7,6 +7,7 @@
 * Improved scaling of color widget
 * Improved crash recovery and crash reporting
 * Improved clarity of settings field in Config View
+* Improved checkbox contrast for Android
 
 ==1.3.8==
 * App now can send live telemetry to RaceCapture/Live
