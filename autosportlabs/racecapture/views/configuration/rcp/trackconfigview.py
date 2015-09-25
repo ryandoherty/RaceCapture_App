@@ -8,6 +8,7 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.scrollview import ScrollView
+from kivy.logger import Logger
 from kivy.uix.popup import Popup
 from kivy.clock import Clock
 from kivy.app import Builder
@@ -233,8 +234,9 @@ class AutomaticTrackConfigScreen(Screen):
             for trackId in selectedTrackIds:
                 trackMap = self.track_manager.getTrackById(trackId)
                 if trackMap:
-                    startFinish = trackMap.startFinishPoint
+                    startFinish = trackMap.start_finish_point
                     if startFinish and startFinish.latitude and startFinish.longitude:
+                        Logger.info("TrackConfigView:  adding track " + str(trackMap))
                         track = Track.fromTrackMap(trackMap)
                         self.trackDb.tracks.append(track)
                     else:

@@ -22,5 +22,5 @@ class RaceTrackView(BoxLayout):
                 
     def initMap(self, track):
         trackmap = kvFind(self, 'rcid', 'trackmap1')  
-        trackmap.setTrackPoints(track.mapPoints)
+        trackmap.setTrackPoints(track.map_points)
 

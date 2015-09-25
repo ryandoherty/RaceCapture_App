@@ -10,6 +10,7 @@ from kivy.uix.textinput import TextInput
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
+from kivy.logger import Logger
 from kivy.core.window import Window
 import json
 import sets
@@ -70,7 +71,7 @@ class TrackItemView(BoxLayout):
         self.register_event_type('on_track_selected')
         
     def track_select(self, instance, value):
-        self.dispatch('on_track_selected', value, self.track.trackId)
+        self.dispatch('on_track_selected', value, self.track.track_id)
             
     def on_track_selected(self, selected, trackId):
         pass
@@ -98,11 +99,11 @@ class TrackInfoView(BoxLayout):
             lengthLabel.text = str(track.length) + ' mi.'
             
             flagImage = self.ids.flag
-            cc = track.countryCode
+            cc = track.country_code
             if cc:
                 cc = cc.lower()
                 try:
-                    flagImagePath = 'resource/flags/' + str(track.countryCode.lower()) + '.png'
+                    flagImagePath = 'resource/flags/' + str(track.country_code.lower()) + '.png'
                     flagImage.source = flagImagePath
                 except Exception as detail:
                     print('Error loading flag for country code: ' + str(detail))  
@@ -232,11 +233,12 @@ class TracksBrowser(BoxLayout):
         self.setViewDisabled(True)
         tracksUpdateView = TracksUpdateStatusView()
         self.showProgressPopup('Checking for updates', tracksUpdateView)
-        self.trackManager.updateAllTracks(tracksUpdateView.on_progress, self.on_update_check_success, self.on_update_check_error)
+        self.trackManager.refresh(tracksUpdateView.on_progress, self.on_update_check_success, self.on_update_check_error)
         
     def addNextTrack(self, index, keys):
         if index < self.load_limit:
             track = self.trackManager.tracks[keys[index]]
+
             trackView = TrackItemView(track=track)
             trackView.bind(on_track_selected=self.on_track_selected)
             trackView.size_hint_y = None
@@ -260,7 +262,7 @@ class TracksBrowser(BoxLayout):
     def initTracksList(self, track_ids = None):
         self.setViewDisabled(True)
         if track_ids == None:
-            track_ids = self.trackManager.getAllTrackIds()
+            track_ids = self.trackManager.track_ids
         track_count = len(track_ids)
         grid = self.ids.tracksgrid
         grid.clear_widgets()
@@ -273,6 +275,7 @@ class TracksBrowser(BoxLayout):
 
         self.dismissPopups()
         if track_count == 0:
+            Logger.info("TracksViews: no tracks")
             self.tracksGrid.add_widget(Label(text="No tracks found - try checking for updates"))
             self.setViewDisabled(False)            
             self.ids.namefilter.focus = True
