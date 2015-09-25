@@ -14,6 +14,8 @@ from utils import time_to_epoch
 
 
 class TrackMap:
+    """Very generic object wrapper around RCL's API endpoint for venues
+    """
 
     def __init__(self):
         self.map_points = []
@@ -36,6 +38,8 @@ class TrackMap:
 
     @property
     def short_id(self):
+        """We use a 'short' id for the track map based on the creation date to save memory in RCP's config
+        """
         short_id = 0
         if self.created is not None:
             try:
@@ -45,6 +49,8 @@ class TrackMap:
         return short_id
 
     def from_dict(self, track_dict):
+        """Populate this object's values with values from a dict, either from RCL's API or a file
+        """
 
         self.start_finish_point = GeoPoint.fromPointJson(track_dict.get('start_finish'))
         self.finish_point = GeoPoint.fromPointJson(track_dict.get('finish'))
@@ -72,6 +78,8 @@ class TrackMap:
             raise Warning("Could not parse trackMap: short_id is invalid")
     
     def to_dict(self):
+        """Create a dict for saving this object's data. Usually for saving to a file
+        """
         track_dict = {'sector_points': [], 'track_map_array': []}
 
         if self.start_finish_point:
@@ -98,6 +106,8 @@ class TrackMap:
 
 
 class TrackManager:
+    """Manages fetching tracks from RCL's API, figuring out if any tracks have been updated, saving and loading tracks
+    """
     RCP_VENUE_URL = 'https://race-capture.com/api/v1/venues'
     READ_RETRIES = 3
     RETRY_DELAY = 1.0
@@ -109,6 +119,8 @@ class TrackManager:
         self.set_tracks_user_dir(kwargs.get('user_dir', self.tracks_user_dir) + self.track_user_subdir)
         self.update_lock = Lock()
         self.regions = []
+
+        # Tracks are stored as key/object pairs to aid in finding a particular track quickly
         self.tracks = {}
         self.track_ids_in_region = []
         self.base_dir = kwargs.get('base_dir')
@@ -126,6 +138,8 @@ class TrackManager:
         self.load_tracks(progress_cb, success_cb, fail_cb)
         
     def load_regions(self):
+        """Regions are an array of lat/long points that make a bounding box. Usually around a country or continent
+        """
         del(self.regions[:])
         try:
             regions_json = json.load(open(os.path.join(self.base_dir, 'resource', 'settings', 'geo_regions.json')))
@@ -194,6 +208,8 @@ class TrackManager:
         return self.tracks.get(track_id)
     
     def load_json(self, uri):
+        """Semi-generic method for fetching JSON data
+        """
         retries = 0
         while retries < self.READ_RETRIES:
             try:
@@ -211,6 +227,8 @@ class TrackManager:
         raise Exception('Error reading json doc from: ' + uri)
 
     def download_all_tracks(self):
+        """Downloads all venues from RCL, then turns them into Track objects
+        """
         tracks = {}
         venues = self.fetch_venue_list(True)
 
@@ -222,6 +240,12 @@ class TrackManager:
         return tracks
 
     def fetch_venue_list(self, full_response=False):
+        """Fetches all venues from RCL's API and returns them as an array of dicts. RCL's API normally returns minimal
+        object information when listing multiple objects. The 'full_response' arg tells this function to expand
+        all objects to contain all their data. This allows us to quickly get basic information about tracks or pull
+        down everything if we have no tracks locally.
+        """
+
         total_venues = None
         next_uri = self.RCP_VENUE_URL + "?start=0&per_page=100"
 
@@ -275,6 +299,8 @@ class TrackManager:
             text_file.write(track_json_string)
     
     def load_current_tracks_worker(self, success_cb, fail_cb, progress_cb=None):
+        """Method for loading local tracks files in a separate thread
+        """
         try:
             self.update_lock.acquire()
             self.load_tracks(progress_cb)
@@ -286,6 +312,8 @@ class TrackManager:
             self.update_lock.release()
         
     def load_tracks(self, progress_cb=None, success_cb=None, fail_cb=None):
+        """Loads tracks from local files. If called with success and fail callbacks it sets up a separate thread
+        """
         if success_cb and fail_cb:
             t = Thread(target=self.load_current_tracks_worker, args=(success_cb, fail_cb, progress_cb))
             t.daemon = True
@@ -324,6 +352,8 @@ class TrackManager:
             self.track_ids_in_region.extend(self.track_ids)
                         
     def update_all_tracks_worker(self, success_cb, fail_cb, progress_cb=None):
+        """Method for updating all tracks in a separate thread
+        """
         try:
             self.update_lock.acquire()
             self.refresh(progress_cb)
@@ -335,6 +365,11 @@ class TrackManager:
             self.update_lock.release()
             
     def refresh(self, progress_cb=None, success_cb=None, fail_cb=None):
+        """Refreshes all tracks. If success and fail callbacks are provided, sets up a new thread.
+        If no tracks are saved locally, it will fetch all track data from RCL and save it.
+        If there are tracks saved locally, it will fetch a minimal amount of data from RCL and only download
+        all data for a track if the track has been updated
+        """
         if success_cb and fail_cb:
             t = Thread(target=self.update_all_tracks_worker, args=(success_cb, fail_cb, progress_cb))
             t.daemon = True
@@ -383,4 +418,6 @@ class TrackManager:
 
 
 class MissingKeyException(Exception):
+    """Exception for if a key is missing from a dict
+    """
     pass
