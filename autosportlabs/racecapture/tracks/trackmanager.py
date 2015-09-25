@@ -5,7 +5,6 @@ import errno
 import string
 import logging
 from threading import Thread, Lock
-from urlparse import urljoin, urlparse
 import urllib2
 import os
 import traceback
@@ -13,9 +12,10 @@ from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
 from kivy.logger import Logger
 from utils import time_to_epoch
 
+
 class TrackMap:
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         self.map_points = []
         self.sector_points = []
         self.name = ''
@@ -40,8 +40,8 @@ class TrackMap:
         if self.created is not None:
             try:
                 short_id = time_to_epoch(self.created)
-            except:
-                pass
+            except ValueError as error:
+                Logger.error("TrackManager: could not create short id: " + error.message)
         return short_id
 
     def from_dict(self, track_dict):
@@ -371,6 +371,7 @@ class TrackManager:
                                 progress_cb(count, track_count, updated_track.name)
                     else:
                         progress_cb(count, track_count)
+
 
 class MissingKeyException(Exception):
     pass

@@ -254,7 +254,6 @@ class TracksBrowser(BoxLayout):
     def refreshTrackList(self):
         region = self.ids.regions.text
         foundIds = self.trackManager.filter_tracks_by_region(region)
-        Logger.info("TracksView: found ids: " + str(foundIds))
         search = self.ids.namefilter.text
         if search != None and len(search) > 0:
             foundIds = self.trackManager.filter_tracks_by_name(search, foundIds)
