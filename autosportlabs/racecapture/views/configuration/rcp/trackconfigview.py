@@ -232,7 +232,7 @@ class AutomaticTrackConfigScreen(Screen):
         if self.trackDb:
             failures = False
             for trackId in selectedTrackIds:
-                trackMap = self.track_manager.getTrackById(trackId)
+                trackMap = self.track_manager.get_track_by_id(trackId)
                 if trackMap:
                     startFinish = trackMap.start_finish_point
                     if startFinish and startFinish.latitude and startFinish.longitude:
@@ -259,7 +259,7 @@ class AutomaticTrackConfigScreen(Screen):
         if self.track_manager and self.trackDb:
             matchedTracks = []
             for track in self.trackDb.tracks:
-                matchedTrack = self.track_manager.findTrackByShortId(track.trackId)
+                matchedTrack = self.track_manager.find_track_by_short_id(track.trackId)
                 if matchedTrack:
                     matchedTracks.append(matchedTrack)
                     

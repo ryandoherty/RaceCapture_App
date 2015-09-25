@@ -201,7 +201,7 @@ class TracksBrowser(BoxLayout):
             self.tracksUpdatePopup.dismiss()
          
     def loadAll(self, dt):
-        self.initTracksList(self.trackManager.getTrackIdsInRegion())
+        self.initTracksList(self.trackManager.get_track_ids_in_region())
                         
     def on_search_track_name(self, *args):
         if self.initialized:
@@ -253,15 +253,16 @@ class TracksBrowser(BoxLayout):
         
     def refreshTrackList(self):
         region = self.ids.regions.text
-        foundIds = self.trackManager.filterTracksByRegion(region)
+        foundIds = self.trackManager.filter_tracks_by_region(region)
+        Logger.info("TracksView: found ids: " + str(foundIds))
         search = self.ids.namefilter.text
         if search != None and len(search) > 0:
-            foundIds = self.trackManager.filterTracksByName(search, foundIds)
+            foundIds = self.trackManager.filter_tracks_by_name(search, foundIds)
         self.initTracksList(foundIds)
         
     def initTracksList(self, track_ids = None):
         self.setViewDisabled(True)
-        if track_ids == None:
+        if track_ids is None:
             track_ids = self.trackManager.track_ids
         track_count = len(track_ids)
         grid = self.ids.tracksgrid
