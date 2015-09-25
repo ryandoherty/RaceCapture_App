@@ -300,10 +300,18 @@ class TrackManager:
                 try:
                     json_data = open(self.tracks_user_dir + '/' + trackPath)
                     track_dict = json.load(json_data)
+                    resave = False
+
+                    # Backwards compatible-check for old format of track files
+                    if 'venue' in track_dict:
+                        track_dict = track_dict.get('venue')
+                        resave = True
 
                     if track_dict is not None:
                         track = TrackMap()
                         track.from_dict(track_dict)
+                        if resave:
+                            self.save_track(track)
 
                         self.tracks[track.track_id] = track
                         count += 1
