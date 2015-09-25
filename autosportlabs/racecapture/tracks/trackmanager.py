@@ -96,6 +96,7 @@ class TrackMap:
 
         return track_dict
 
+
 class TrackManager:
     RCP_VENUE_URL = 'https://race-capture.com/api/v1/venues'
     READ_RETRIES = 3
