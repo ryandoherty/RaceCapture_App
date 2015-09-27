@@ -400,7 +400,7 @@ class TrackManager:
                     venue_id = venue.get('id')
 
                     if self.tracks.get(venue_id) is None:
-                        Logger.info('TrackManager: new track detected ' + venue.name)
+                        Logger.info('TrackManager: new track detected ' + venue_id)
                         update = True
                     elif not self.tracks[venue_id].updated == venue['updated']:
                         Logger.info('TrackManager: existing map changed ' + venue_id)
@@ -409,7 +409,7 @@ class TrackManager:
                     if update:
                         updated_track = self.download_track(venue_id)
                         if updated_track is not None:
-                            self.save_track(updated_track, venue_id)
+                            self.save_track(updated_track)
                             self.tracks[venue_id] = updated_track
                             if progress_cb:
                                 progress_cb(count, track_count, updated_track.name)
