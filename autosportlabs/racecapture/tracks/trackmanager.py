@@ -370,7 +370,7 @@ class TrackManager:
         If there are tracks saved locally, it will fetch a minimal amount of data from RCL and only download
         all data for a track if the track has been updated
         """
-        progress_cb(message="Reading list of Tracks...")
+        progress_cb(message="Fetching list of Tracks...")
         if success_cb and fail_cb:
             t = Thread(target=self.update_all_tracks_worker, args=(success_cb, fail_cb, progress_cb))
             t.daemon = True
