@@ -344,7 +344,7 @@ class TrackManager:
                         self.tracks[track.track_id] = track
                         count += 1
                         if progress_cb:
-                            progress_cb(count, track_count, track.name)
+                            progress_cb(count=track.count, total=track_count, message=track.name)
                 except Exception as detail:
                     Logger.warning('TrackManager: failed to read track file ' + trackPath + ';\n' + str(detail))
 
@@ -370,6 +370,7 @@ class TrackManager:
         If there are tracks saved locally, it will fetch a minimal amount of data from RCL and only download
         all data for a track if the track has been updated
         """
+        progress_cb(message="Reading list of Tracks...")
         if success_cb and fail_cb:
             t = Thread(target=self.update_all_tracks_worker, args=(success_cb, fail_cb, progress_cb))
             t.daemon = True
@@ -384,7 +385,7 @@ class TrackManager:
                 for track_id, track in track_list.iteritems():
                     count += 1
                     if progress_cb:
-                        progress_cb(count, total, track.name)
+                        progress_cb(count=count, total=total, message=track.name)
                     self.save_track(track)
                     self.tracks[track_id] = track
             else:
@@ -412,9 +413,9 @@ class TrackManager:
                             self.save_track(updated_track)
                             self.tracks[venue_id] = updated_track
                             if progress_cb:
-                                progress_cb(count, track_count, updated_track.name)
+                                progress_cb(count=count, total=track_count, message=updated_track.name)
                     else:
-                        progress_cb(count, track_count)
+                        progress_cb(count=count, total=track_count)
 
 
 class MissingKeyException(Exception):
