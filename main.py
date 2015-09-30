@@ -395,10 +395,12 @@ class RaceCaptureApp(App):
         Clock.schedule_once(lambda dt: self.post_launch(), 1.0)
 
     def post_launch(self):
+        self._setup_toolbar()
         Clock.schedule_once(lambda dt: self.init_data())
         Clock.schedule_once(lambda dt: self.init_rc_comms())
         Clock.schedule_once(lambda dt: self.show_startup_view())
         self.check_first_time_setup()
+
         
     def check_first_time_setup(self):
         if self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'True':
@@ -448,7 +450,7 @@ class RaceCaptureApp(App):
             if not self._rc_api.comms.isOpen():
                 self._rc_api.run_auto_detect()
                 
-        self.showStatus("Could not detect RaceCapture/Pro", True)
+        self.showStatus("Connecting...", True)
         Clock.schedule_once(lambda dt: re_detect(), 1.0)
 
     def rc_detect_activity(self, info):
@@ -460,6 +462,11 @@ class RaceCaptureApp(App):
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')
+
+    def _setup_toolbar(self):
+        status_bar = self.root.ids.status_bar
+        status_bar.status_pump = self._status_pump
+        status_bar.track_manager = self.trackManager
 
     def setup_telemetry(self):
         host = self.getAppArg('telemetryhost')

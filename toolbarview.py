@@ -1,6 +1,7 @@
 import kivy
 kivy.require('1.9.0')
 from utils import *
+from kivy.properties import ObjectProperty
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.progressbar import ProgressBar
@@ -16,6 +17,9 @@ PROGRESS_COMPLETE_LINGER_DURATION = 5.0
 ACTIVITY_MESSAGE_LINGER_DURATION = 10.0
 
 class ToolbarView(BoxLayout):
+    status_pump = ObjectProperty(None)
+    track_manager = ObjectProperty(None)
+
     TELEMETRY_IDLE = 0
     TELEMETRY_ACTIVE = 1
     TELEMETRY_CONNECTING = 2
@@ -54,16 +58,24 @@ class ToolbarView(BoxLayout):
         self._activityDecay = Clock.create_trigger(self.on_activity_decay, ACTIVITY_MESSAGE_LINGER_DURATION)
         self._progressDecay = Clock.create_trigger(self.on_progress_decay, PROGRESS_COMPLETE_LINGER_DURATION)
         
+    def on_status_pump(self, instance, value):
+        value.add_listener(self.on_rc_status_updated)
+
+    def on_rc_status_updated(self, status_data):
+        self._update_track_status(status_data)
+
     def on_activity(self, msg):
         self.setActivityMessage(msg)
         self._activityDecay()
         
+    def set_state_message(self, msg):
+        self.ids.state.text = msg
+
     def setActivityMessage(self, msg):
-        activityLabel = kvFind(self, 'rcid', 'activity')
-        activityLabel.text = msg
+        self.ids.activity.text = msg
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
     def on_status(self, msg, isAlert):
-        statusLabel = kvFind(self, 'rcid', 'status')
+        statusLabel = self.ids.status
         statusLabel.text = msg
         if isAlert == True:
             statusLabel.color = self.alertStatusColor
@@ -72,7 +84,7 @@ class ToolbarView(BoxLayout):
             
     def update_progress(self, value):
         if not self.progressBar:
-            self.progressBar = kvFind(self, 'rcid', 'pbar')
+            self.progressBar = self.ids.pbar
         self.progressBar.value = value
         if value == 100:
             self._progressDecay()
@@ -97,7 +109,7 @@ class ToolbarView(BoxLayout):
         
     def on_rc_tx(self, value):
         if not self.rcTxStatus:
-            self.rcTxStatus = kvFind(self, 'rcid', 'rcTxStatus')            
+            self.rcTxStatus = self.ids.rcTxStatus
         self.rcTxStatus.color = self.txOnColor if value else self.txOffColor
         self._rcTxDecay()
     
@@ -106,15 +118,39 @@ class ToolbarView(BoxLayout):
         
     def on_rc_rx(self, value):
         if not self.rcRxStatus:
-            self.rcRxStatus = kvFind(self, 'rcid', 'rcRxStatus')    
+            self.rcRxStatus = self.ids.rcRxStatus
         self.rcRxStatus.color = self.rxOnColor if value else self.rxOffColor
-        self._rcRxDecay()        
+        self._rcRxDecay()
 
     def on_tele_status(self, status):
         if not self.teleStatus:
-            self.teleStatus = kvFind(self, 'rcid', 'teleStatus')
+            self.teleStatus = self.ids.teleStatus
         try:        
             self.teleStatus.color = self.telemetry_color[status]
         except:
             Logger.error("ToolbarView: Invalid telemetry status: " + str(status))
+
+    def _update_track_status(self, status_data):
+        try:
+            track_status = status_data['status']['track']
+            detection_status = track_status['status']
+            if detection_status == 0:
+                track_status_msg = 'Searching for Track'
+            elif detection_status == 1:
+                track_status_msg = 'User defined Track'
+            else:
+                if track_status['trackId'] != 0:
+                    track = self.track_manager.findTrackByShortId(track_status['trackId'])
+                    if track is None:
+                        track_status_msg = '(Unknown Track)'
+                    else:
+                        track_status_msg = track.name
+                        configuration_name = track.configuration
+                        if configuration_name and len(configuration_name):
+                            track_status_msg += ' (' + configuration_name + ')'
+                else:
+                    track_status_msg = 'No track detected'
+            self.set_state_message(track_status_msg)
+        except Exception as e:
+            Logger.warn("ToolbarView: Could not retrieve track detection status " + str(e))
 

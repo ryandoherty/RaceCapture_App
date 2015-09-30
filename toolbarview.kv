@@ -1,22 +1,28 @@
 <ToolbarView>:
     orientation: 'horizontal'
+    canvas.before:
+        Color:
+            rgba: [0.03, 0.03, 0.03, 1.0]
+        Rectangle:
+            pos: self.pos
+            size: self.size
     BoxLayout:
 		padding: self.height * 0.5, 0
 		spacing: 0
-    	size_hint_x: 0.1
+        size_hint_x: 0.11
     	orientation: 'horizontal'
 	    IconButton:
-		    background_color: [0.4, 0.05, 0.05, 1]
-	    	id: 'menu'
+            id: 'menu'
 	    	text: '\357\203\211'
 	    	on_release: root.mainMenu()
 	    	size_hint_x: None
 	    	width: self.height * 1
 	    	font_size: self.height
 	    Button:
-		    background_color: [0.4, 0.05, 0.05, 1]
+		    background_color: [0.0, 0.0, 0.0, 0.0]
 		    background_down: ''
 	    	text: 'Menu'
+            font_name: "resource/fonts/ASL_light.ttf"
 	    	size_hint_x: 0.0
 	    	width: self.height * 2.4
 	    	font_size: self.height * 0.8
@@ -25,44 +31,54 @@
 	BoxLayout:
 		orientation: 'horizontal'
 		padding: self.height * 0.4, 0
-		size_hint_x: 0.38
+		size_hint_x: 0.24
 		FieldLabel:
 			halign: 'left'
 			text: ''
-			rcid: 'activity'
+            id: activity
 			font_size: self.height * 0.6
+
+    BoxLayout:
+        orientation: 'horizontal'
+        padding: self.height * 0.4, 0
+        size_hint_x: 0.25
+        FieldLabel:
+            halign: 'center'
+            text: ''
+            id: state
+            font_size: self.height * 0.6
 
 	BoxLayout:
 		orientation: 'horizontal'
 		padding: self.height * 0.4, 0
-		size_hint_x: 0.32
+		size_hint_x: 0.25
 		FieldLabel:
 			halign: 'right'
 			text: ''
-			rcid: 'status'
+            id: status
 			font_size: self.height * 0.6
 		
 	BoxLayout:
 		orientation: 'horizontal'
-		size_hint_x: 0.2
+		size_hint_x: 0.15
 		spacing: self.height * 0.2
 	    ProgressBar:
 	    	size_hint_x: 0.5
-			rcid: 'pbar'
+			id: pbar
 	    IconButton:
-	    	rcid: 'teleStatus'
+            id: teleStatus
 	    	text: '\357\203\256'
 	    	size_hint_x: 0.125
 	    	color: [0.0, 1.0, 0.0, 0.2]    	
 	    	font_size: self.height * 0.7
 	    IconButton:
-	    	rcid: 'rcTxStatus'
+            id: rcTxStatus
 	    	text: '\357\200\231'
 	    	size_hint_x: 0.125
 	    	color: [0.0, 1.0, 0.0, 0.2]
 	    	font_size: self.height * 0.7   	
 	    IconButton:
-	    	rcid: 'rcRxStatus'
+            id: rcRxStatus
 	    	text: '\357\202\223'
 	    	size_hint_x: 0.125
 	    	color: [0.0, 0.8, 1.0, 0.2]

@@ -270,6 +270,10 @@ class StatusView(Screen):
                         track_name = 'Track not found'
                 else:
                     track_name = track.name
+                    configuration_name = track.configuration
+                    if configuration_name and len(configuration_name):
+                        track_name += ' (' + configuration_name + ')'
+
             else:
                 track_name = 'No track detected'
 
