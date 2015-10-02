@@ -669,14 +669,14 @@ class Track(object):
     @classmethod
     def fromTrackMap(cls, trackMap):
         t = Track()
-        t.trackId = trackMap.shortId
-        t.trackType = TRACK_TYPE_STAGE if trackMap.finishPoint else TRACK_TYPE_CIRCUIT
-        t.startLine = copy(trackMap.startFinishPoint)
-        t.finishLine = copy(trackMap.finishPoint)
+        t.trackId = trackMap.short_id
+        t.trackType = TRACK_TYPE_STAGE if trackMap.finish_point else TRACK_TYPE_CIRCUIT
+        t.startLine = copy(trackMap.start_finish_point)
+        t.finishLine = copy(trackMap.finish_point)
 
         maxSectorCount = CONFIG_SECTOR_COUNT_CIRCUIT if t.trackType == TRACK_TYPE_CIRCUIT else CONFIG_SECTOR_COUNT_STAGE
         sectorCount = 0
-        for point in trackMap.sectorPoints:
+        for point in trackMap.sector_points:
             sectorCount += 1
             if sectorCount > maxSectorCount: break
             t.sectors.append(copy(point))
