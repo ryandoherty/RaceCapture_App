@@ -2,7 +2,7 @@
     orientation: 'horizontal'
     canvas.before:
         Color:
-            rgba: [0.03, 0.03, 0.03, 1.0]
+            rgba: [0.1, 0.1, 0.1, 1.0]
         Rectangle:
             pos: self.pos
             size: self.size
@@ -21,11 +21,11 @@
 	    Button:
 		    background_color: [0.0, 0.0, 0.0, 0.0]
 		    background_down: ''
-	    	text: 'Menu'
+            text: '    '
             font_name: "resource/fonts/ASL_light.ttf"
 	    	size_hint_x: 0.0
 	    	width: self.height * 2.4
-	    	font_size: self.height * 0.8
+            font_size: self.height * 0.7
 	    	on_release: root.mainMenu()
 	    	
 	BoxLayout:
@@ -46,7 +46,7 @@
             halign: 'center'
             text: ''
             id: state
-            font_size: self.height * 0.6
+            font_size: self.height * 0.7
 
 	BoxLayout:
 		orientation: 'horizontal'
