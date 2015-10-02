@@ -261,7 +261,7 @@ class StatusView(Screen):
             track_name = 'User defined'
         else:
             if status['trackId'] != 0:
-                track = self.track_manager.findTrackByShortId(status['trackId'])
+                track = self.track_manager.find_track_by_short_id(status['trackId'])
 
                 if track is None:
                     if status['status'] == 1:
