@@ -34,5 +34,10 @@ class ColorScheme(object):
     def get_divider():
         return get_color_from_hex("B6B6B6")
     
+    @staticmethod
+    def get_dark_background():
+        return get_color_from_hex("202020")
+
+    
         
         

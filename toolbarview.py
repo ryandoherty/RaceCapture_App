@@ -9,7 +9,7 @@ from kivy.app import Builder
 from kivy.clock import Clock
 from iconbutton import IconButton
 from kivy.logger import Logger
-
+from autosportlabs.racecapture.theme.color import ColorScheme
 Builder.load_file('toolbarview.kv')
 
 TOOLBAR_LED_DURATION = 2.0
