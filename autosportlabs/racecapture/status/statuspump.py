@@ -38,9 +38,10 @@ class StatusPump(object):
         while True:
             self._rc_api.get_status()
             sleep(self.STATUS_QUERY_INTERVAL)
+
+    def _update_all_listeners(self, status):
+        for listener in self._listeners:
+            listener(status)
         
     def _on_status_updated(self, status):
-        Logger.trace('StatusPump: status updated')
-        for listener in self._listeners:
-            Clock.schedule_once(lambda dt: listener(status))
-        
+        Clock.schedule_once(lambda dt: self._update_all_listeners(status))
