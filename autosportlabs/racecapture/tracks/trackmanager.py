@@ -5,141 +5,127 @@ import errno
 import string
 import logging
 from threading import Thread, Lock
-from urlparse import urljoin, urlparse
 import urllib2
 import os
 import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
 from kivy.logger import Logger
-from utils import time_to_epoch        
-TRACK_DEFAULT_SEARCH_RADIUS_METERS = 2000
-TRACK_DEFAULT_SEARCH_BEARING_DEGREES = 360
+from utils import time_to_epoch
 
-class Venue:
-    venueId = None
-    uri = None
-    updatedAt = None
-    def __init__(self, **kwargs):
-        self.venueId = str(kwargs.get('venueId', self.venueId))
-        self.uri = str(kwargs.get('uri', self.uri))
-        self.updatedAt = str(kwargs.get('updatedAt', self.updatedAt))
-        
-    def fromJson(self, venueJson):
-        self.venueId = venueJson.get('id', self.venueId)
-        self.uri = venueJson.get('URI', self.uri)
-        self.updatedAt = venueJson.get('updated', self.updatedAt)
-        
+
 class TrackMap:
-    mapPoints = None
-    sectorPoints = None
-    name = ''
-    createdAt = None
-    updatedAt = None
-    length = 0
-    trackId = None
-    shortId = None
-    startFinishPoint = None
-    finishPoint = None
-    countryCode = None
-    configuration = None
-    def __init__(self, **kwargs):
-        self.mapPoints = []
-        self.sectorPoints = []
-        pass
-                    
-    def getCenterPoint(self):
-        if len(self.mapPoints) > 0:
-            return self.mapPoints[0]
+    """Very generic object wrapper around RCL's API endpoint for venues
+    """
+
+    def __init__(self):
+        self.map_points = []
+        self.sector_points = []
+        self.name = ''
+        self.created = None
+        self.updated = None
+        self.length = 0
+        self.track_id = None
+        self.start_finish_point = None
+        self.finish_point = None
+        self.country_code = None
+        self.configuration = None
+
+    @property
+    def centerpoint(self):
+        if len(self.map_points) > 0:
+            return self.map_points[0]
         return None
 
-    def _createShortId(self):
+    @property
+    def short_id(self):
+        """We use a 'short' id for the track map based on the creation date to save memory in RCP's config
+        """
         short_id = 0
-        if self.createdAt is not None:
+        if self.created is not None:
             try:
-                short_id = time_to_epoch(self.createdAt)
-            except:
-                pass
+                short_id = time_to_epoch(self.created)
+            except ValueError as error:
+                Logger.error("TrackManager: could not create short id: " + error.message)
         return short_id
-            
-    def fromJson(self, trackJson):
-        venueNode = trackJson.get('venue')
-        if (venueNode):
-            self.startFinishPoint = GeoPoint.fromPointJson(venueNode.get('start_finish'))
-            self.finishPoint = GeoPoint.fromPointJson(venueNode.get('finish'))
-            self.countryCode = venueNode.get('country_code', self.countryCode)
-            self.createdAt = venueNode.get('created', self.createdAt)
-            self.updatedAt = venueNode.get('updated', self.updatedAt)
-            self.name = venueNode.get('name', self.name)
-            self.configuration = venueNode.get('configuration', self.configuration)
-            self.length = venueNode.get('length', self.length)
-            self.trackId = venueNode.get('id', self.trackId)
-            self.shortId = self._createShortId()
-            
-            mapPointsNode = venueNode.get('track_map_array')
-            mapPoints = []
-            if mapPointsNode:
-                for point in mapPointsNode:
-                    mapPoints.append(GeoPoint.fromPoint(point[0], point[1]))
-            self.mapPoints = mapPoints
-                    
-            sectorNode = venueNode.get('sector_points')
-            sectorPoints = []
-            if sectorNode:
-                for point in sectorNode:
-                    sectorPoints.append(GeoPoint.fromPoint(point[0], point[1]))
-            self.sectorPoints = sectorPoints
-            if not self.shortId > 0:
-                raise Warning("Could not parse trackMap: shortId is invalid") 
-    
-    def toJson(self):
-        venueJson = {}
-        if self.startFinishPoint:
-            venueJson['start_finish'] = self.startFinishPoint.toJson()
-        if self.finishPoint:
-            venueJson['finish'] = self.finishPoint.toJson()
-        venueJson['country_code'] = self.countryCode
-        venueJson['created'] = self.createdAt
-        venueJson['updated'] = self.updatedAt
-        venueJson['name'] = self.name
-        venueJson['configuration'] = self.configuration
-        venueJson['length'] = self.length
-        venueJson['id'] = self.trackId
 
-        trackPoints = []
-        for point in self.mapPoints:
-            trackPoints.append([point.latitude, point.longitude])
-        venueJson['track_map_array'] = trackPoints
-        
-        sectorPoints = []
-        for point in self.sectorPoints:
-            sectorPoints.append([point.latitude, point.longitude])
-        venueJson['sector_points'] = sectorPoints
-        
-        return {'venue': venueJson}
-        
+    def from_dict(self, track_dict):
+        """Populate this object's values with values from a dict, either from RCL's API or a file
+        """
+
+        self.start_finish_point = GeoPoint.fromPointJson(track_dict.get('start_finish'))
+        self.finish_point = GeoPoint.fromPointJson(track_dict.get('finish'))
+        self.country_code = track_dict.get('country_code', self.country_code)
+        self.created = track_dict.get('created', self.created)
+        self.updated = track_dict.get('updated', self.updated)
+        self.name = track_dict.get('name', self.name)
+        self.configuration = track_dict.get('configuration', self.configuration)
+        self.length = track_dict.get('length', self.length)
+        self.track_id = track_dict.get('id')
+
+        map_points_array = track_dict.get('track_map_array')
+
+        if map_points_array:
+            for point in map_points_array:
+                self.map_points.append(GeoPoint.fromPoint(point[0], point[1]))
+
+        sector_array = track_dict.get('sector_points')
+
+        if sector_array:
+            for point in sector_array:
+                self.sector_points.append(GeoPoint.fromPoint(point[0], point[1]))
+
+        if not self.short_id > 0:
+            raise Warning("Could not parse trackMap: short_id is invalid")
+    
+    def to_dict(self):
+        """Create a dict for saving this object's data. Usually for saving to a file
+        """
+        track_dict = {'sector_points': [], 'track_map_array': []}
+
+        if self.start_finish_point:
+            track_dict['start_finish'] = self.start_finish_point.toJson()
+
+        if self.finish_point:
+            track_dict['finish'] = self.finish_point.toJson()
+
+        track_dict['country_code'] = self.country_code
+        track_dict['created'] = self.created
+        track_dict['updated'] = self.updated
+        track_dict['name'] = self.name
+        track_dict['configuration'] = self.configuration
+        track_dict['length'] = self.length
+        track_dict['id'] = self.track_id
+
+        for point in self.map_points:
+            track_dict['track_map_array'].append([point.latitude, point.longitude])
+
+        for point in self.sector_points:
+            track_dict['sector_points'].append([point.latitude, point.longitude])
+
+        return track_dict
+
+
 class TrackManager:
-    updateLock = None
-    tracks_user_dir = '.'
-    track_user_subdir = '/venues'
-    on_progress = lambda self, value: value
-    rcp_venue_url = 'https://race-capture.com/api/v1/venues'
-    readRetries = 3
-    retryDelay = 1.0
-    trackList = None
-    tracks = None
-    regions = None
-    trackIdsInRegion = None
-    base_dir = None
+    """Manages fetching tracks from RCL's API, figuring out if any tracks have been updated, saving and loading tracks
+    """
+    RCP_VENUE_URL = 'https://race-capture.com/api/v1/venues'
+    READ_RETRIES = 3
+    RETRY_DELAY = 1.0
+
     def __init__(self, **kwargs):
-        self.setTracksUserDir(kwargs.get('user_dir', self.tracks_user_dir) + self.track_user_subdir)
-        self.updateLock = Lock()
+        self.on_progress = lambda self, value: value
+        self.tracks_user_dir = '.'
+        self.track_user_subdir = '/venues'
+        self.set_tracks_user_dir(kwargs.get('user_dir', self.tracks_user_dir) + self.track_user_subdir)
+        self.update_lock = Lock()
         self.regions = []
-        self.trackList = {}
+
+        # Tracks are stored as key/object pairs to aid in finding a particular track quickly
         self.tracks = {}
-        self.trackIdsInRegion = []
+        self.track_ids_in_region = []
         self.base_dir = kwargs.get('base_dir')
         
-    def setTracksUserDir(self, path):
+    def set_tracks_user_dir(self, path):
         try:
             os.makedirs(path)
         except OSError as exception:
@@ -147,237 +133,292 @@ class TrackManager:
                 raise
         self.tracks_user_dir = path
         
-    def init(self, progressCallback, winCallback, failCallback):
-        self.loadRegions()
-        self.loadCurrentTracks(progressCallback, winCallback, failCallback)
+    def init(self, progress_cb, success_cb, fail_cb):
+        self.load_regions()
+        self.load_tracks(progress_cb, success_cb, fail_cb)
         
-    def loadRegions(self):
+    def load_regions(self):
+        """Regions are an array of lat/long points that make a bounding box. Usually around a country or continent
+        """
         del(self.regions[:])
         try:
-            regionsJson = json.load(open(os.path.join(self.base_dir, 'resource', 'settings', 'geo_regions.json')))
-            regionsNode = regionsJson.get('regions')
-            if regionsNode:
-                for regionNode in regionsNode: 
+            regions_json = json.load(open(os.path.join(self.base_dir, 'resource', 'settings', 'geo_regions.json')))
+            regions_node = regions_json.get('regions')
+            if regions_node:
+                for region_node in regions_node:
                     region = Region()
-                    region.fromJson(regionNode)
+                    region.fromJson(region_node)
                     self.regions.append(region)
         except Exception as detail:
             Logger.warning('TrackManager: Error loading regions data ' + traceback.format_exc())
-    
-    def getAllTrackIds(self):
+
+    @property
+    def track_ids(self):
         return self.tracks.keys()
     
-    def getTrackIdsInRegion(self):
-        return self.trackIdsInRegion
-
-    def findTrackByShortId(self, id):
+    def get_track_ids_in_region(self):
+        return self.track_ids_in_region
+        
+    def find_track_by_short_id(self, id):
         for track in self.tracks.itervalues():
-            if id == track.shortId:
+            if id == track.short_id:
                 return track
         return None
         
-    def findNearbyTrack(self, point, searchRadius = TRACK_DEFAULT_SEARCH_RADIUS_METERS, searchBearing = TRACK_DEFAULT_SEARCH_BEARING_DEGREES):
-        radius = point.metersToDegrees(searchRadius, searchBearing)
-        for trackId in self.tracks.keys():
-            track = self.tracks[trackId]
-            trackCenter = track.getCenterPoint()
-            if trackCenter and trackCenter.withinCircle(point, radius):
+    def find_nearby_track(self, point, searchRadius):
+        for track_id in self.tracks.keys():
+            track = self.tracks[track_id]
+            track_center = track.centerpoint
+            if track_center and track_center.withinCircle(point, searchRadius):
                 return track
         return None
         
-    def filterTracksByName(self, name, trackIds=None):
-        if trackIds == None:
-            trackIds = self.tracks.keys()
-        filteredTrackIds = []
-        for trackId in trackIds:
-            trackName = self.tracks[trackId].name
-            if string.lower(name.strip()) in string.lower(trackName.strip()):
-                filteredTrackIds.append(trackId)
-        return filteredTrackIds
+    def filter_tracks_by_name(self, name, track_ids=None):
+        if track_ids is None:
+            track_ids = self.tracks.keys()
+        filtered_track_ids = []
+
+        for track_id in track_ids:
+            track_name = self.tracks[track_id].name
+            if string.lower(name.strip()) in string.lower(track_name.strip()):
+                filtered_track_ids.append(track_id)
+
+        return filtered_track_ids
                 
-    def filterTracksByRegion(self, regionName):
-        allTrackIds = self.tracks.keys()
-        trackIdsInRegion = self.trackIdsInRegion
-        del trackIdsInRegion[:]
+    def filter_tracks_by_region(self, region_name):
+        track_ids_in_region = self.track_ids_in_region
+        del track_ids_in_region[:]
         
-        if regionName == None:
-            trackIdsInRegion.extend(allTrackIds)
+        if region_name is None:
+            track_ids_in_region.extend(self.track_ids)
         else:
             for region in self.regions:
-                if region.name == regionName:
+                if region.name == region_name:
                     if len(region.points) > 0:
-                        for trackId in allTrackIds:
-                            track = self.tracks[trackId]
-                            if region.withinRegion(track.getCenterPoint()):
-                                trackIdsInRegion.append(trackId)
+                        for track_id in self.track_ids:
+                            track = self.tracks[track_id]
+                            if region.withinRegion(track.centerpoint):
+                                track_ids_in_region.append(track_id)
                     else:
-                        trackIdsInRegion.extend(allTrackIds)
+                        track_ids_in_region.extend(self.track_ids)
                     break
-        return trackIdsInRegion
+        return track_ids_in_region
 
-    def getTrackById(self, trackId):
-        return self.tracks.get(trackId)
+    def get_track_by_id(self, track_id):
+        return self.tracks.get(track_id)
     
-    def loadJson(self, uri):
+    def load_json(self, uri):
+        """Semi-generic method for fetching JSON data
+        """
         retries = 0
-        while retries < self.readRetries:
+        while retries < self.READ_RETRIES:
             try:
                 opener = urllib2.build_opener()
                 opener.addheaders = [('Accept', 'application/json')]
-                jsonStr = opener.open(uri).read()
-                j = json.loads(jsonStr)
+                response = opener.open(uri).read()
+                j = json.loads(response)
                 return j
             except Exception as detail:
                 Logger.warning('TrackManager: Failed to read: from {} : {}'.format(uri, traceback.format_exc()))
-                if retries < self.readRetries:
-                    Logger.warning('TrackManager: retrying in ' + str(self.retryDelay) + ' seconds...')
+                if retries < self.READ_RETRIES:
+                    Logger.warning('TrackManager: retrying in ' + str(self.RETRY_DELAY) + ' seconds...')
                     retries += 1
-                    time.sleep(self.retryDelay)
-        raise Exception('Error reading json doc from: ' + uri)    
-                
-    def downloadTrackList(self):
-        start = 0
-        totalVenues = None
-        nextUri = self.rcp_venue_url + '?start=' + str(start)
-        trackList = {}
-        while nextUri:
-            venuesDocJson = self.loadJson(nextUri)
+                    time.sleep(self.RETRY_DELAY)
+        raise Exception('Error reading json doc from: ' + uri)
+
+    def download_all_tracks(self):
+        """Downloads all venues from RCL, then turns them into Track objects
+        """
+        tracks = {}
+        venues = self.fetch_venue_list(True)
+
+        for venue in venues:
+                track = TrackMap()
+                track.from_dict(venue)
+                tracks[track.track_id] = track
+
+        return tracks
+
+    def fetch_venue_list(self, full_response=False):
+        """Fetches all venues from RCL's API and returns them as an array of dicts. RCL's API normally returns minimal
+        object information when listing multiple objects. The 'full_response' arg tells this function to expand
+        all objects to contain all their data. This allows us to quickly get basic information about tracks or pull
+        down everything if we have no tracks locally.
+        """
+
+        total_venues = None
+        next_uri = self.RCP_VENUE_URL + "?start=0&per_page=100"
+
+        if full_response:
+            next_uri += '&expand=1'
+
+        venues_list = []
+
+        while next_uri:
+            response = self.load_json(next_uri)
             try:
-                if totalVenues == None:
-                    totalVenues = int(venuesDocJson.get('total', None))
-                    if totalVenues == None:
-                        raise Exception('Malformed venue list JSON: could not get total venue count')
-                venuesListJson = venuesDocJson.get('venues', None)
-                if venuesListJson == None:
-                    raise Exception('Malformed venue list JSON: could not get venue list')
-                for venueJson in venuesListJson:
-                    venue = Venue()
-                    venue.fromJson(venueJson)
-                    trackList[venue.venueId] = venue
-                                
-                nextUri = venuesDocJson.get('nextURI')
-            except Exception as detail:
-                Logger.error('TrackManager: Malformed venue JSON from url ' + nextUri + '; json =  ' + str(venueJson) + ' ' + str(detail))
+                if total_venues is None:
+                    total_venues = int(response.get('total', None))
+                    if total_venues is None:
+                        raise MissingKeyException('Venue list JSON: could not get total venue count')
+
+                venues = response.get('venues', None)
+
+                if venues is None:
+                    raise MissingKeyException('Venue list JSON: could not get venue list')
+
+                venues_list += venues
+                next_uri = response.get('nextURI')
+
+            except MissingKeyException as detail:
+                Logger.error('TrackManager: Malformed venue JSON from url ' + nextUri + '; json =  ' + str(response) +
+                             ' ' + str(detail))
                 
-        retrievedVenueCount = len(trackList)
-        Logger.info('TrackManager: fetched list of ' + str(retrievedVenueCount) + ' tracks')                 
-        if (not totalVenues == retrievedVenueCount):
-            Logger.warning('TrackManager: track list count does not reflect downloaded track list size ' + str(totalVenues) + '/' + str(retrievedVenueCount))
-        return trackList
-        
-    def downloadTrack(self, venueId):
-        trackUrl = self.rcp_venue_url + '/' + venueId
-        trackJson = self.loadJson(trackUrl)
-        trackMap = TrackMap()
+        Logger.info('TrackManager: fetched list of ' + str(len(venues_list)) + ' tracks')
+
+        if not total_venues == len(venues_list):
+            Logger.warning('TrackManager: track list count does not reflect downloaded track list size ' + str(total_venues) + '/' + str(len(venues_list)))
+
+        return venues_list
+
+    def download_track(self, track_id):
+        track_url = self.RCP_VENUE_URL + '/' + track_id
+        response = self.load_json(track_url)
+        track_map = TrackMap()
         try:
-            trackMap.fromJson(trackJson)
-            return copy.deepcopy(trackMap)
+            track_json = response.get('venue')
+            track_map.from_dict(track_json)
+            return copy.deepcopy(track_map)
         except Warning:
             return None
         
-    def saveTrack(self, trackMap, trackId):
-        path = self.tracks_user_dir + '/' + trackId + '.json'
-        trackJsonString = json.dumps(trackMap.toJson(), sort_keys=True, indent=2, separators=(',', ': '))
+    def save_track(self, track):
+        path = self.tracks_user_dir + '/' + track.track_id + '.json'
+        track_json_string = json.dumps(track.to_dict(), sort_keys=True, indent=2, separators=(',', ': '))
         with open(path, 'w') as text_file:
-            text_file.write(trackJsonString)
+            text_file.write(track_json_string)
     
-    def loadCurrentTracksWorker(self, winCallback, failCallback, progressCallback=None):
+    def load_current_tracks_worker(self, success_cb, fail_cb, progress_cb=None):
+        """Method for loading local tracks files in a separate thread
+        """
         try:
-            self.updateLock.acquire()
-            self.loadCurrentTracks(progressCallback)
-            winCallback()
+            self.update_lock.acquire()
+            self.load_tracks(progress_cb)
+            success_cb()
         except Exception as detail:
-            logging.exception('')            
-            failCallback(detail)
+            logging.exception('')
+            fail_cb(detail)
         finally:
-            self.updateLock.release()
+            self.update_lock.release()
         
-    def loadCurrentTracks(self, progressCallback=None, winCallback=None, failCallback=None):
-        if winCallback and failCallback:
-            t = Thread(target=self.loadCurrentTracksWorker, args=(winCallback, failCallback, progressCallback))
-            t.daemon=True
+    def load_tracks(self, progress_cb=None, success_cb=None, fail_cb=None):
+        """Loads tracks from local files. If called with success and fail callbacks it sets up a separate thread
+        """
+        if success_cb and fail_cb:
+            t = Thread(target=self.load_current_tracks_worker, args=(success_cb, fail_cb, progress_cb))
+            t.daemon = True
             t.start()
         else:
-            existingTracksFilenames = os.listdir(self.tracks_user_dir)
+            track_file_names = os.listdir(self.tracks_user_dir)
             self.tracks.clear()
-            self.trackList.clear()
-            trackCount = len(existingTracksFilenames)
+            track_count = len(track_file_names)
             count = 0
-            for trackPath in existingTracksFilenames:
+
+            for trackPath in track_file_names:
                 try:
                     json_data = open(self.tracks_user_dir + '/' + trackPath)
-                    trackJson = json.load(json_data)
-                    trackMap = TrackMap()
-                    trackMap.fromJson(trackJson)
-                    venueNode = trackJson['venue']
-                    if venueNode:
-                        venue = Venue()
-                        venue.fromJson(venueNode)
-                        self.tracks[venue.venueId] = trackMap
-                    count += 1
-                    if progressCallback:
-                        progressCallback(count, trackCount, trackMap.name)
+                    track_dict = json.load(json_data)
+                    resave = False
+
+                    # Backwards compatible-check for old format of track files
+                    if 'venue' in track_dict:
+                        track_dict = track_dict.get('venue')
+                        resave = True
+
+                    if track_dict is not None:
+                        track = TrackMap()
+                        track.from_dict(track_dict)
+                        if resave:
+                            self.save_track(track)
+
+                        self.tracks[track.track_id] = track
+                        count += 1
+                        if progress_cb:
+                            progress_cb(count=track.count, total=track_count, message=track.name)
                 except Exception as detail:
                     Logger.warning('TrackManager: failed to read track file ' + trackPath + ';\n' + str(detail))
-            del self.trackIdsInRegion[:]
-            self.trackIdsInRegion.extend(self.tracks.keys())
+
+            del self.track_ids_in_region[:]
+            self.track_ids_in_region.extend(self.track_ids)
                         
-    def updateAllTracksWorker(self, winCallback, failCallback, progressCallback=None):
+    def update_all_tracks_worker(self, success_cb, fail_cb, progress_cb=None):
+        """Method for updating all tracks in a separate thread
+        """
         try:
-            self.updateLock.acquire()
-            self.updateAllTracks(progressCallback)
-            winCallback()
+            self.update_lock.acquire()
+            self.refresh(progress_cb)
+            success_cb()
         except Exception as detail:
-            logging.exception('')            
-            failCallback(detail)
+            logging.exception('')
+            fail_cb(detail)
         finally:
-            self.updateLock.release()
+            self.update_lock.release()
             
-    def updateAllTracks(self, progressCallback=None, winCallback=None, failCallback=None):
-        if winCallback and failCallback:
-            t = Thread(target=self.updateAllTracksWorker, args=(winCallback, failCallback, progressCallback))
-            t.daemon=True
+    def refresh(self, progress_cb=None, success_cb=None, fail_cb=None):
+        """Refreshes all tracks. If success and fail callbacks are provided, sets up a new thread.
+        If no tracks are saved locally, it will fetch all track data from RCL and save it.
+        If there are tracks saved locally, it will fetch a minimal amount of data from RCL and only download
+        all data for a track if the track has been updated
+        """
+        progress_cb(message="Fetching list of Tracks...")
+        if success_cb and fail_cb:
+            t = Thread(target=self.update_all_tracks_worker, args=(success_cb, fail_cb, progress_cb))
+            t.daemon = True
             t.start()
         else:
-            updatedTrackList = self.downloadTrackList()
-            
-            currentTracks = self.tracks
-            updatedIds = updatedTrackList.keys()
-            updatedCount = len(updatedIds)
-            count = 0
-            for trackId in updatedIds:
-                updateTrack = False
-                count += 1
-                if currentTracks.get(trackId) == None:
-                    Logger.info('TrackManager: new track detected ' + trackId)
-                    updateTrack = True
-                elif not currentTracks[trackId].updatedAt == updatedTrackList[trackId].updatedAt:
-                    Logger.info('TrackManager: existing map changed ' + trackId)
-                    updateTrack = True
-                if updateTrack:
-                    updatedTrackMap = self.downloadTrack(trackId)
-                    if updatedTrackMap is not None:
-                        self.saveTrack(updatedTrackMap, trackId)
-                        if progressCallback:
-                            progressCallback(count, updatedCount, updatedTrackMap.name)
-                else:
-                    progressCallback(count, updatedCount)
-            self.loadCurrentTracks(None)
-                
-        
-        
-                    
-            
-        
-            
-        
-        
-            
-            
-        
-        
-        
-        
-    
-    
-    
+            if len(self.tracks) == 0:
+                Logger.info("TrackManager: No tracks found locally, fetching all tracks")
+                track_list = self.download_all_tracks()
+                count = 0
+                total = len(track_list)
+
+                for track_id, track in track_list.iteritems():
+                    count += 1
+                    if progress_cb:
+                        progress_cb(count=count, total=total, message=track.name)
+                    self.save_track(track)
+                    self.tracks[track_id] = track
+            else:
+                Logger.info("TrackManager: refreshing tracks")
+                venues = self.fetch_venue_list()
+
+                track_count = len(venues)
+                count = 0
+
+                for venue in venues:
+                    update = False
+                    count += 1
+                    venue_id = venue.get('id')
+
+                    if self.tracks.get(venue_id) is None:
+                        Logger.info('TrackManager: new track detected ' + venue_id)
+                        update = True
+                    elif not self.tracks[venue_id].updated == venue['updated']:
+                        Logger.info('TrackManager: existing map changed ' + venue_id)
+                        update = True
+
+                    if update:
+                        updated_track = self.download_track(venue_id)
+                        if updated_track is not None:
+                            self.save_track(updated_track)
+                            self.tracks[venue_id] = updated_track
+                            if progress_cb:
+                                progress_cb(count=count, total=track_count, message=updated_track.name)
+                    else:
+                        progress_cb(count=count, total=track_count)
+
+
+class MissingKeyException(Exception):
+    """Exception for if a key is missing from a dict
+    """
+    pass

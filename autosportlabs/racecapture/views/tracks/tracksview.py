@@ -10,6 +10,7 @@ from kivy.uix.textinput import TextInput
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
+from kivy.logger import Logger
 from kivy.core.window import Window
 import json
 import sets
@@ -48,8 +49,9 @@ class TracksUpdateStatusView(BoxLayout):
     def _update_message(self, message):
         self.messageView.text = message
         
-    def on_progress(self, count, total, message = None):
-        progress_percent = (float(count) / float(total) * 100)
+    def on_progress(self, count=None, total=None, message=None):
+        if count and total:
+            progress_percent = (float(count) / float(total) * 100)
         Clock.schedule_once(lambda dt: self._update_progress(progress_percent))
         if message:
             Clock.schedule_once(lambda dt: self._update_message(message))
@@ -70,7 +72,7 @@ class TrackItemView(BoxLayout):
         self.register_event_type('on_track_selected')
         
     def track_select(self, instance, value):
-        self.dispatch('on_track_selected', value, self.track.trackId)
+        self.dispatch('on_track_selected', value, self.track.track_id)
             
     def on_track_selected(self, selected, trackId):
         pass
@@ -98,12 +100,12 @@ class TrackInfoView(BoxLayout):
             lengthLabel.text = str(track.length) + ' mi.'
             
             flagImage = self.ids.flag
-            cc = track.countryCode
+            cc = track.country_code
             if cc:
                 cc = cc.lower()
                 try:
-                    flagImagePath = 'resource/flags/' + str(track.countryCode.lower()) + '.png'
-                    flagImage.sourceref = flagImagePath
+                    flagImagePath = 'resource/flags/' + str(track.country_code.lower()) + '.png'
+                    flagImage.source = flagImagePath
                 except Exception as detail:
                     print('Error loading flag for country code: ' + str(detail))  
             self.track = track
@@ -200,7 +202,7 @@ class TracksBrowser(BoxLayout):
             self.tracksUpdatePopup.dismiss()
          
     def loadAll(self, dt):
-        self.initTracksList(self.trackManager.getTrackIdsInRegion())
+        self.initTracksList(self.trackManager.get_track_ids_in_region())
                         
     def on_search_track_name(self, *args):
         if self.initialized:
@@ -232,11 +234,12 @@ class TracksBrowser(BoxLayout):
         self.setViewDisabled(True)
         tracksUpdateView = TracksUpdateStatusView()
         self.showProgressPopup('Checking for updates', tracksUpdateView)
-        self.trackManager.updateAllTracks(tracksUpdateView.on_progress, self.on_update_check_success, self.on_update_check_error)
+        self.trackManager.refresh(tracksUpdateView.on_progress, self.on_update_check_success, self.on_update_check_error)
         
     def addNextTrack(self, index, keys):
         if index < self.load_limit:
             track = self.trackManager.tracks[keys[index]]
+
             trackView = TrackItemView(track=track)
             trackView.bind(on_track_selected=self.on_track_selected)
             trackView.size_hint_y = None
@@ -251,16 +254,16 @@ class TracksBrowser(BoxLayout):
         
     def refreshTrackList(self):
         region = self.ids.regions.text
-        foundIds = self.trackManager.filterTracksByRegion(region)
+        foundIds = self.trackManager.filter_tracks_by_region(region)
         search = self.ids.namefilter.text
         if search != None and len(search) > 0:
-            foundIds = self.trackManager.filterTracksByName(search, foundIds)
+            foundIds = self.trackManager.filter_tracks_by_name(search, foundIds)
         self.initTracksList(foundIds)
         
     def initTracksList(self, track_ids = None):
         self.setViewDisabled(True)
-        if track_ids == None:
-            track_ids = self.trackManager.getAllTrackIds()
+        if track_ids is None:
+            track_ids = self.trackManager.track_ids
         track_count = len(track_ids)
         grid = self.ids.tracksgrid
         grid.clear_widgets()
@@ -273,6 +276,7 @@ class TracksBrowser(BoxLayout):
 
         self.dismissPopups()
         if track_count == 0:
+            Logger.info("TracksViews: no tracks")
             self.tracksGrid.add_widget(Label(text="No tracks found - try checking for updates"))
             self.setViewDisabled(False)            
             self.ids.namefilter.focus = True

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.3.9"
+__version__ = "1.3.10"
 import sys
 import os
 
@@ -79,9 +79,6 @@ class RaceCaptureApp(App):
     #Central RCP configuration object
     rc_config  = RcpConfig()
 
-    #RaceCapture serial I/O
-    _rc_api = RcpApi()
-
     #dataBus provides an eventing / polling mechanism to parts of the system that care
     _databus = None
 
@@ -124,6 +121,9 @@ class RaceCaptureApp(App):
             self.base_dir = sys._MEIPASS
         else:
             self.base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        #RaceCapture serial I/O
+        self._rc_api = RcpApi(on_disconnect=self._on_rcp_disconnect)
 
         #self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)
@@ -338,7 +338,7 @@ class RaceCaptureApp(App):
         preferences_view = PreferencesView(name='preferences', settings=self.settings, base_dir=self.base_dir)
         preferences_view.settings_view.bind(on_config_change=self._on_preferences_change)
         return preferences_view
-    
+
     def build_homepage_view(self):
         homepage_view = HomePageView(name='home')
         homepage_view.bind(on_select_view = lambda instance, view_name: self.switchMainView(view_name))
@@ -426,7 +426,11 @@ class RaceCaptureApp(App):
         if version.is_compatible_version():
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
             self.dataBusPump.startDataPump(self._databus, self._rc_api)
-            self._status_pump.start(self._rc_api)        
+            self._status_pump.start(self._rc_api)
+
+            if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:
+                self._telemetry_connection.telemetry_enabled = True
+
             if self.rc_config.loaded == False:
                 Clock.schedule_once(lambda dt: self.on_read_config(self))
             else:
@@ -449,6 +453,10 @@ class RaceCaptureApp(App):
 
     def rc_detect_activity(self, info):
         self.showActivity('Searching {}'.format(info))
+
+    def _on_rcp_disconnect(self):
+        if self._telemetry_connection.telemetry_enabled:
+            self._telemetry_connection.telemetry_enabled = False
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')
