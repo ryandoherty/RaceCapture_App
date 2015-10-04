@@ -12,7 +12,7 @@ from kivy.graphics import Color, Rectangle
 from utils import *
 from random import random as r
 
-Builder.load_file('autosportlabs/racecapture/views/analysis/bargraphgauge.kv')
+Builder.load_file('autosportlabs/uix/gauge/bargraphgauge.kv')
         
 class BarGraphGauge(AnchorLayout):    
     minval = NumericProperty(0)

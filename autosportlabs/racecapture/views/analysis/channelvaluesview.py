@@ -8,7 +8,7 @@ from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget, ChannelData
-from autosportlabs.racecapture.views.analysis.bargraphgauge import BarGraphGauge
+from autosportlabs.uix.gauge.bargraphgauge import BarGraphGauge
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/channelvaluesview.kv')
 
