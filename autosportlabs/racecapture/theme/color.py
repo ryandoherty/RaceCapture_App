@@ -3,6 +3,10 @@ from utils import get_color_from_hex
 class ColorScheme(object):
     
     @staticmethod
+    def get_alert():
+        return get_color_from_hex("FFCC00")
+
+    @staticmethod
     def get_primary():
         return get_color_from_hex("F44336")
 

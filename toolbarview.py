@@ -69,8 +69,8 @@ class ToolbarView(BoxLayout):
     txOnColor = [0.0, 1.0, 0.0, 1.0]
     rxOnColor = [0.0, 0.8, 1.0, 1.0]
 
-    normalStatusColor = [1.0, 1.0, 1.0, 1.0]
-    alertStatusColor = [1.0, 0.64, 0.0, 1.0]
+    normalStatusColor = ColorScheme.get_light_primary_text()
+    alertStatusColor = ColorScheme.get_alert()
     
     teleStatus = None
     rcTxStatus = None
@@ -113,7 +113,6 @@ class ToolbarView(BoxLayout):
         statusLabel = self.ids.prog_status
         statusLabel.text = msg
         self.current_status = msg
-        print('current status ' + str(msg))
         if isAlert == True:
             statusLabel.text_color = self.alertStatusColor
         else:
