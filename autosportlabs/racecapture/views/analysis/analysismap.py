@@ -37,9 +37,9 @@ class AnalysisMap(AnalysisWidget):
     def select_map(self, latitude, longitude):
         if self.track_manager:
             point = GeoPoint.fromPoint(latitude, longitude)
-            track = self.track_manager.findNearbyTrack(point)
+            track = self.track_manager.find_nearby_track(point)
             if track != None:
-                self.ids.track.setTrackPoints(track.mapPoints)
+                self.ids.track.setTrackPoints(track.map_points)
 
     def remove_reference_mark(self, source):
         self.ids.track.remove_marker(source)
