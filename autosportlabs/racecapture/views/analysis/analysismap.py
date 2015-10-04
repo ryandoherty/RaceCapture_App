@@ -20,16 +20,19 @@ class AnalysisMap(AnalysisWidget):
     def on_motion(self, instance, event, motion_event):
         if self.collide_point(motion_event.x, motion_event.y):
             scatter = self.ids.scatter
-            button = motion_event.button
-            scale = scatter.scale
-            if button == 'scrollup':
-                scale += self.SCROLL_FACTOR
-            else:
-                if button == 'scrolldown':
-                    scale -= self.SCROLL_FACTOR
-            if scale < self.SCROLL_FACTOR:
-                scale = self.SCROLL_FACTOR
-            scatter.scale = scale
+            try:
+                button = motion_event.button
+                scale = scatter.scale
+                if button == 'scrollup':
+                    scale += self.SCROLL_FACTOR
+                else:
+                    if button == 'scrolldown':
+                        scale -= self.SCROLL_FACTOR
+                if scale < self.SCROLL_FACTOR:
+                    scale = self.SCROLL_FACTOR
+                scatter.scale = scale
+            except:
+                pass #no scrollwheel support
         
     def select_map(self, latitude, longitude):
         if self.track_manager:

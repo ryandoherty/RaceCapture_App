@@ -48,17 +48,20 @@ class LineChart(ChannelAnalysisWidget):
     def on_motion(self, instance, event, motion_event):
         if self.collide_point(motion_event.x, motion_event.y):
             chart = self.ids.chart
-            button = motion_event.button            
-            if button == 'scrollup':
-                self.current_distance += self.ZOOM_FACTOR if self.current_distance < self.max_distance else 0
-                self.current_offset -= self.ZOOM_FACTOR if self.current_offset > self.ZOOM_FACTOR else 0
-            else:
-                if button == 'scrolldown' and self.current_offset < self.current_distance:
-                    self.current_distance -= self.ZOOM_FACTOR if self.current_distance > self.ZOOM_FACTOR else 0
-                    self.current_offset += self.ZOOM_FACTOR if self.current_offset < self.max_distance else 0
-                
-            chart.xmax = self.current_distance
-            chart.xmin = self.current_offset    
+            try:
+                button = motion_event.button
+                if button == 'scrollup':
+                    self.current_distance += self.ZOOM_FACTOR if self.current_distance < self.max_distance else 0
+                    self.current_offset -= self.ZOOM_FACTOR if self.current_offset > self.ZOOM_FACTOR else 0
+                else:
+                    if button == 'scrolldown' and self.current_offset < self.current_distance:
+                        self.current_distance -= self.ZOOM_FACTOR if self.current_distance > self.ZOOM_FACTOR else 0
+                        self.current_offset += self.ZOOM_FACTOR if self.current_offset < self.max_distance else 0
+
+                chart.xmax = self.current_distance
+                chart.xmin = self.current_offset
+            except:
+                pass #no scrollwheel support
     
     def on_marker(self, marker_event):
         pass
