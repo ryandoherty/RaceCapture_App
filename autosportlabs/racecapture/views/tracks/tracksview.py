@@ -52,7 +52,7 @@ class TracksUpdateStatusView(BoxLayout):
     def on_progress(self, count=None, total=None, message=None):
         if count and total:
             progress_percent = (float(count) / float(total) * 100)
-        Clock.schedule_once(lambda dt: self._update_progress(progress_percent))
+            Clock.schedule_once(lambda dt: self._update_progress(progress_percent))
         if message:
             Clock.schedule_once(lambda dt: self._update_message(message))
     
