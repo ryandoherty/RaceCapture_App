@@ -15,8 +15,8 @@ from autosportlabs.racecapture.theme.color import ColorScheme
 Builder.load_file('toolbarview.kv')
 
 TOOLBAR_LED_DURATION = 2.0
-PROGRESS_COMPLETE_LINGER_DURATION = 5.0
-ACTIVITY_MESSAGE_LINGER_DURATION = 5.5
+PROGRESS_COMPLETE_LINGER_DURATION = 7.0
+ACTIVITY_MESSAGE_LINGER_DURATION = 7.5
 
 class ToolbarItem(BoxLayout):
     pass
