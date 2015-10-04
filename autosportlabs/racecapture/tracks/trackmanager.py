@@ -271,7 +271,7 @@ class TrackManager:
                 next_uri = response.get('nextURI')
 
             except MissingKeyException as detail:
-                Logger.error('TrackManager: Malformed venue JSON from url ' + nextUri + '; json =  ' + str(response) +
+                Logger.error('TrackManager: Malformed venue JSON from url ' + next_uri + '; json =  ' + str(response) +
                              ' ' + str(detail))
                 
         Logger.info('TrackManager: fetched list of ' + str(len(venues_list)) + ' tracks')
