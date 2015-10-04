@@ -18,12 +18,15 @@ TOOLBAR_LED_DURATION = 2.0
 PROGRESS_COMPLETE_LINGER_DURATION = 5.0
 ACTIVITY_MESSAGE_LINGER_DURATION = 5.5
 
+class ToolbarItem(BoxLayout):
+    pass
+
 class ProgressFieldLabel(AnchorLayout):
     minval = NumericProperty(0)
     maxval = NumericProperty(100)
     value = NumericProperty(0)
-    color = ListProperty([0, 1, 0, 0.5])
-    text_color = ListProperty([1, 1, 1, 1])
+    color = ColorScheme.get_accent()
+    text_color = ColorScheme.get_light_primary_text()
     text = StringProperty('')
 
     def __init__(self, **kwargs):
