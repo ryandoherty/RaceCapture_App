@@ -583,9 +583,9 @@ class NavigationDrawer(StencilView):
         if self.separator_image:
             return self.separator_image
         if self._main_above:
-            return 'navigationdrawer_gradient_rtol.png'
+            return 'installfix_garden_navigationdrawer/navigationdrawer_gradient_rtol.png'
         else:
-            return 'navigationdrawer_gradient_ltor.png'
+            return 'installfix_garden_navigationdrawer/navigationdrawer_gradient_ltor.png'
 
 if __name__ == '__main__':
     from kivy.base import runTouchApp

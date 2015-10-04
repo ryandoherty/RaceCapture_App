@@ -1,71 +1,88 @@
+<ProgressFieldLabel>:
+    RelativeLayout:
+        StencilView:
+            size_hint: (None, 1.0)
+            id: stencil
+            width: 0
+            canvas.after:
+                Color:
+                    rgba: root.color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+    FieldLabel:
+        id: value
+        halign: 'center'
+        color: root.text_color
+        font_size: self.height * 0.6
+
+<ToolbarItem>:
+    canvas.before:
+        Color:
+            rgba: ColorScheme.get_dark_background()
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
 <ToolbarView>:
     orientation: 'horizontal'
-    BoxLayout:
+    spacing: sp(2)
+    ToolbarItem:
 		padding: self.height * 0.5, 0
-		spacing: 0
-    	size_hint_x: 0.1
+        size_hint_x: 0.10
     	orientation: 'horizontal'
 	    IconButton:
-		    background_color: [0.4, 0.05, 0.05, 1]
-	    	id: 'menu'
+            id: 'menu'
 	    	text: '\357\203\211'
 	    	on_release: root.mainMenu()
 	    	size_hint_x: None
 	    	width: self.height * 1
 	    	font_size: self.height
 	    Button:
-		    background_color: [0.4, 0.05, 0.05, 1]
+		    background_color: [0.0, 0.0, 0.0, 0.0]
 		    background_down: ''
-	    	text: 'Menu'
+            text: '    '
+            font_name: "resource/fonts/ASL_light.ttf"
 	    	size_hint_x: 0.0
 	    	width: self.height * 2.4
-	    	font_size: self.height * 0.8
+            font_size: self.height * 0.7
 	    	on_release: root.mainMenu()
 	    	
-	BoxLayout:
-		orientation: 'horizontal'
-		padding: self.height * 0.4, 0
-		size_hint_x: 0.38
-		FieldLabel:
-			halign: 'left'
-			text: ''
-			rcid: 'activity'
-			font_size: self.height * 0.6
+    ToolbarItem:
+        orientation: 'horizontal'
+        padding: self.height * 0.4, 0
+        size_hint_x: 0.50
+        FieldLabel:
+            halign: 'center'
+            text: ''
+            id: state
+            font_size: self.height * 0.7
 
-	BoxLayout:
+	ToolbarItem:
 		orientation: 'horizontal'
 		padding: self.height * 0.4, 0
-		size_hint_x: 0.32
-		FieldLabel:
-			halign: 'right'
+		size_hint_x: 0.3
+		ProgressFieldLabel:
 			text: ''
-			rcid: 'status'
-			font_size: self.height * 0.6
+            id: prog_status
 		
-	BoxLayout:
+	ToolbarItem:
 		orientation: 'horizontal'
-		size_hint_x: 0.2
-		spacing: self.height * 0.2
-	    ProgressBar:
-	    	size_hint_x: 0.5
-			rcid: 'pbar'
+		size_hint_x: 0.1
 	    IconButton:
-	    	rcid: 'teleStatus'
+            id: teleStatus
 	    	text: '\357\203\256'
-	    	size_hint_x: 0.125
 	    	color: [0.0, 1.0, 0.0, 0.2]    	
-	    	font_size: self.height * 0.7
+            font_size: self.height * 0.8
 	    IconButton:
-	    	rcid: 'rcTxStatus'
+            id: rcTxStatus
 	    	text: '\357\200\231'
-	    	size_hint_x: 0.125
 	    	color: [0.0, 1.0, 0.0, 0.2]
-	    	font_size: self.height * 0.7   	
+            font_size: self.height * 0.8
 	    IconButton:
-	    	rcid: 'rcRxStatus'
+            id: rcRxStatus
 	    	text: '\357\202\223'
-	    	size_hint_x: 0.125
 	    	color: [0.0, 0.8, 1.0, 0.2]
-	    	font_size: self.height * 0.7   	
+            font_size: self.height * 0.8
 	    	
 	    	

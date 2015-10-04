@@ -312,7 +312,7 @@ class TelemetryConnection(asynchat.async_chat):
             self.connect((self.host, self.port))
         except:
             Logger.info("TelemetryConnection: exception connecting")
-            self._update_status("error", "Error connecting to RaceCapture/Live", self.STATUS_DISCONNECTED)
+            self._update_status("error", "RaceCapture/Live: Error connecting", self.STATUS_DISCONNECTED)
 
         # This starts the loop around the socket connection polling
         # 'timeout' is how long the select() or poll() functions will wait for data,
@@ -323,7 +323,7 @@ class TelemetryConnection(asynchat.async_chat):
     def handle_connect(self):
         Logger.info("TelemetryConnection: got connect")
         if not self._connected:
-            self._update_status("ok", "Connected to RaceCapture/Live", self.STATUS_CONNECTED)
+            self._update_status("ok", "RaceCapture/Live connected", self.STATUS_CONNECTED)
             self._connected = True
             self._connecting = False
             self._send_auth()
@@ -331,7 +331,7 @@ class TelemetryConnection(asynchat.async_chat):
     def handle_expt(self):
         # Something really bad happened if we're here
         Logger.error("TelemetryConnection: handle_expt, closing connection")
-        self._update_status("error", "Unknown error, disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
+        self._update_status("error", "RaceCapture/Live: unknown error", self.STATUS_DISCONNECTED)
         self.end()
 
     def handle_close(self):
@@ -340,7 +340,7 @@ class TelemetryConnection(asynchat.async_chat):
         self._connecting = False
         self.authorized = False
         Logger.info("TelemetryConnection: got disconnect")
-        self._update_status("ok", "Disconnected from RaceCapture/Live", self.STATUS_DISCONNECTED)
+        self._update_status("ok", "RaceCapture/Live disconnected", self.STATUS_DISCONNECTED)
 
     # When the socket is open, not necessarily usable
     def handle_accept(self):
@@ -413,7 +413,7 @@ class TelemetryConnection(asynchat.async_chat):
     def _handle_msg(self, msg_object):
         if "status" in msg_object:
             if msg_object["status"] == "ok" and not self.authorized:
-                self._update_status("ok", "Authorized with RaceCapture/Live",
+                self._update_status("ok", "RaceCapture/Live authorized",
                                     self.STATUS_AUTHORIZED)
                 Logger.info("TelemetryConnection: authorized to RaceCapture/Live")
                 self.authorized = True
@@ -424,7 +424,7 @@ class TelemetryConnection(asynchat.async_chat):
             elif not self.authorized:
                 # We failed, abort
                 Logger.info("TelemetryConnection: failed to authorize, closing")
-                self._update_status("error", "Failed to authorize with RaceCapture/Live",
+                self._update_status("error", "RaceCapture/Live: Auth failed",
                                     self.ERROR_AUTHENTICATING)
                 self.end()
         else:

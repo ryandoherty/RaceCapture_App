@@ -3,6 +3,10 @@ from utils import get_color_from_hex
 class ColorScheme(object):
     
     @staticmethod
+    def get_alert():
+        return get_color_from_hex("FFCC00")
+
+    @staticmethod
     def get_primary():
         return get_color_from_hex("F44336")
 
@@ -33,6 +37,11 @@ class ColorScheme(object):
     @staticmethod
     def get_divider():
         return get_color_from_hex("B6B6B6")
+    
+    @staticmethod
+    def get_dark_background():
+        return get_color_from_hex("202020")
+
     
         
         

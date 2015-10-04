@@ -3,7 +3,7 @@ kivy.require('1.9.0')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from kivy.properties import StringProperty, ListProperty, BooleanProperty
-
+from autosportlabs.racecapture.theme.color import ColorScheme
 from fieldlabel import FieldLabel
 from utils import kvFind
 import mainfonts
