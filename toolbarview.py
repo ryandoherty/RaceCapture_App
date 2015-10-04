@@ -1,20 +1,54 @@
 import kivy
 kivy.require('1.9.0')
 from utils import *
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, NumericProperty, ListProperty, StringProperty
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.progressbar import ProgressBar
 from kivy.app import Builder
 from kivy.clock import Clock
 from iconbutton import IconButton
 from kivy.logger import Logger
+from fieldlabel import FieldLabel
 from autosportlabs.racecapture.theme.color import ColorScheme
 Builder.load_file('toolbarview.kv')
 
 TOOLBAR_LED_DURATION = 2.0
 PROGRESS_COMPLETE_LINGER_DURATION = 5.0
-ACTIVITY_MESSAGE_LINGER_DURATION = 10.0
+ACTIVITY_MESSAGE_LINGER_DURATION = 5.5
+
+class ProgressFieldLabel(AnchorLayout):
+    minval = NumericProperty(0)
+    maxval = NumericProperty(100)
+    value = NumericProperty(0)
+    color = ListProperty([0, 1, 0, 0.5])
+    text_color = ListProperty([1, 1, 1, 1])
+    text = StringProperty('')
+
+    def __init__(self, **kwargs):
+        super(ProgressFieldLabel, self).__init__(**kwargs)
+
+    def on_minval(self, instance, value):
+        self._refresh_value()
+
+    def on_maxval(self, instance, value):
+        self._refresh_value()
+
+    def on_value(self, instance, value):
+        self._refresh_value()
+
+    def on_text(self, instance, value):
+        self.ids.value.text = str(value)
+
+    def _refresh_value(self):
+        stencil = self.ids.stencil
+        value = self.value
+        minval = self.minval
+        maxval = self.maxval
+        pct = ((value - minval) / (maxval - minval))
+        width = self.width * pct
+        stencil.width = width
 
 class ToolbarView(BoxLayout):
     status_pump = ObjectProperty(None)
@@ -35,16 +69,16 @@ class ToolbarView(BoxLayout):
     txOnColor = [0.0, 1.0, 0.0, 1.0]
     rxOnColor = [0.0, 0.8, 1.0, 1.0]
 
-    normalStatusColor = [0.8, 0.8, 0.8, 1.0]
+    normalStatusColor = [1.0, 1.0, 1.0, 1.0]
     alertStatusColor = [1.0, 0.64, 0.0, 1.0]
     
-    progressBar = None
     teleStatus = None
     rcTxStatus = None
     rcRxStatus = None
 
     def __init__(self, **kwargs):
         super(ToolbarView, self).__init__(**kwargs)
+        self.current_status = ''
         self.register_event_type('on_main_menu')
         self.register_event_type('on_progress')
         self.register_event_type('on_rc_tx')
@@ -72,20 +106,21 @@ class ToolbarView(BoxLayout):
         self.ids.state.text = msg
 
     def setActivityMessage(self, msg):
-        self.ids.activity.text = msg
+        prog_status = self.ids.prog_status
+        prog_status.text = msg
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
     def on_status(self, msg, isAlert):
-        statusLabel = self.ids.status
+        statusLabel = self.ids.prog_status
         statusLabel.text = msg
+        self.current_status = msg
+        print('current status ' + str(msg))
         if isAlert == True:
-            statusLabel.color = self.alertStatusColor
+            statusLabel.text_color = self.alertStatusColor
         else:
-            statusLabel.color = self.normalStatusColor
+            statusLabel.text_color = self.normalStatusColor
             
     def update_progress(self, value):
-        if not self.progressBar:
-            self.progressBar = self.ids.pbar
-        self.progressBar.value = value
+        self.ids.prog_status.value = value
         if value == 100:
             self._progressDecay()
         
@@ -100,9 +135,10 @@ class ToolbarView(BoxLayout):
     
     def on_progress_decay(self, dt):
         self.update_progress(0)
+        self.ids.prog_status.text = self.current_status
         
     def on_activity_decay(self, dt):
-        self.setActivityMessage('')
+        self.setActivityMessage(self.current_status)
 
     def on_rc_tx_decay(self, dt):
         self.on_rc_tx(False)

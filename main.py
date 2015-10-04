@@ -226,7 +226,6 @@ class RaceCaptureApp(App):
         self.dataBusPump.meta_is_stale()
         for listener in self.config_listeners:
             Clock.schedule_once(lambda dt, inner_listener=listener: inner_listener.dispatch('on_config_written', self.rc_config))
-        Clock.schedule_once(lambda dt: self.showActivity(''), 5.0)
 
     def on_write_config_error(self, detail):
         alertPopup('Error Writing', 'Could not write configuration:\n\n' + str(detail))
@@ -244,7 +243,6 @@ class RaceCaptureApp(App):
         for listener in self.config_listeners:
             Clock.schedule_once(lambda dt, inner_listener=listener: inner_listener.dispatch('on_config_updated', self.rc_config))
         self.rc_config.stale = False
-        self.showActivity('')
 
     def on_read_config_error(self, detail):
         alertPopup('Error Reading', 'Could not read configuration:\n\n' + str(detail))
