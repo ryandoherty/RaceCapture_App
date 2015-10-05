@@ -658,6 +658,15 @@
             "max": 1000
         },
         {
+            "nm": "CurrentLap",
+            "ut": "Count",
+            "sys": 1,
+            "type": 5,
+            "prec": 0,
+            "min": 0,
+            "max": 1000
+        },
+        {
             "nm": "Analog1",
             "ut": "",
             "sys": 1,
