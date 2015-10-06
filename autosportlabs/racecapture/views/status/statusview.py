@@ -332,7 +332,7 @@ class ApplicationLogView(BoxLayout):
     def copy_app_log(self):
         try:
             recent_log = ''
-            for record in LoggerHistory.history:
+            for record in reversed(LoggerHistory.history):
                 recent_log += record.msg + '\r\n'
             paste_clipboard(recent_log)
             toast('Application log copied to clipboard')
