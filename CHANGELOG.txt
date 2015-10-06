@@ -1,6 +1,7 @@
 ==1.3.12==
 * Big Number View properly sets channel name between tachometer view 
   and laptime view in dashboard mode.
+* Add ability to access application log from system status page
 
 ==1.3.11==
 * Bumped version to satisfy Google play store.
