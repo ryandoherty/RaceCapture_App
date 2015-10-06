@@ -451,8 +451,18 @@ Tries to find the first appropriate generic text clipboard and pastes to that.
 '''
 def paste_clipboard(text):
     clipboard_types = Clipboard.get_types()
+    
     for cb_type in clipboard_types:
         if str(cb_type).lower().strip().startswith('text'):
             Clipboard.put(text, cb_type)
             return
+        
+    #on some platforms (windows) it may show up like this:
+    #['t', 'e', 'x', 't', '/', 'p', 'l', 'a', 'i', 'n']
+    #Not kidding.
+    combined_hack = ''.join(clipboard_types).lower().strip() 
+    if combined_hack.startswith('text'):
+            Clipboard.put(text, combined_hack)
+            return
+        
     raise Exception('Could not find plain text clipboard in ' + str(clipboard_types))
