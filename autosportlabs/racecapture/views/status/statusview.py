@@ -10,8 +10,7 @@ from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from datetime import timedelta
 from utils import *
 from fieldlabel import FieldLabel
-from kivy.logger import LoggerHistory
-from kivy.core.clipboard import Clipboard
+from kivy.logger import LoggerHistory, Logger
 from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.uix.toast.kivytoast import toast
 
@@ -55,7 +54,7 @@ class StatusView(Screen):
 
     #Used for building the left side menu
     _menu_keys = {
-        "applog": "Application",
+        "app": "Application",
         "system": "RaceCapture",
         "GPS": "GPS",
         "cell": "Cellular",
@@ -136,31 +135,27 @@ class StatusView(Screen):
         self._build_core_menu()
         
     def _build_core_menu(self):
-        app_status_node = LinkedTreeViewLabel(text='Application')
-        app_status_node.id = 'applog'
-        self._menu_node.add_node(app_status_node)
+        #build application status node
+        self._append_menu_node('Application', 'app')
+
+        #select the first node in the tree.
+        self._menu_node.select_node(self._menu_node.root.nodes[0])
         
     def _build_menu(self):
         if self._menu_built:
             return
 
-        default_node = None
-
         for item in self.status.iterkeys():
             text = self._menu_keys[item] if item in self._menu_keys else item
-
-            label = LinkedTreeViewLabel(text=text)
-
-            label.id = item
-            label.color_selected = self.menu_select_color
-            node = self._menu_node.add_node(label)
-
-            default_node = node if not default_node else default_node
+            self._append_menu_node(text, item)
 
         self._menu_built = True
 
-        if default_node:
-            self._menu_node.select_node(default_node)
+    def _append_menu_node(self, text, item):
+        label = LinkedTreeViewLabel(text=text)
+        label.id = item
+        label.color_selected = self.menu_select_color
+        return self._menu_node.add_node(label)
 
     def _on_menu_select(self, instance, value):
         self._selected_item = value.id
@@ -195,7 +190,7 @@ class StatusView(Screen):
         for item, value in status.iteritems():
             self._add_item(item, value)
 
-    def render_applog(self):
+    def render_app(self):
         label_widget = StatusTitle(text='Application Log')
         self.ids.status_grid.add_widget(label_widget)
         self.ids.status_grid.add_widget(ApplicationLogView())        
@@ -335,9 +330,12 @@ class StatusView(Screen):
 class ApplicationLogView(BoxLayout):
     
     def copy_app_log(self):
-        recent_log = ''
-        for record in LoggerHistory.history:
-            recent_log += record.msg + '\r\n'
-        print(str(Clipboard.get_types()))
-        Clipboard.put(recent_log, 'text/plain;charset=utf-8')
-        toast('Application log copied to clipboard')
+        try:
+            recent_log = ''
+            for record in LoggerHistory.history:
+                recent_log += record.msg + '\r\n'
+            paste_clipboard(recent_log)
+            toast('Application log copied to clipboard')
+        except Exception as e:
+            Logger.error("ApplicationLogView: Error copying app log to clipboard: " + str(e))
+            toast('Unable to copy to clipboard\n' + str(e), True)

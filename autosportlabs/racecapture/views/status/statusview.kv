@@ -50,8 +50,14 @@
 
 <ApplicationLogView>:
     orientation: 'horizontal'
-    FieldLabel:
-        text: 'Copy application log'
-    Button:
-        text: 'Copy'
-        on_release: root.copy_app_log()
+    padding: (0, sp(5))
+    BoxLayout:
+        size_hint_x: (.35)
+    LabelIconButton:
+        size_hint_x: (.3)
+        title_font_size: self.height * 0.5
+        title: 'Copy'
+        icon: u'\uf0c5'
+        on_press: root.copy_app_log()
+    BoxLayout:
+        size_hint_x: (.35)
