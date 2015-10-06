@@ -465,7 +465,7 @@ def paste_clipboard(text):
     #Not kidding.
     combined_hack = ''.join(clipboard_types).lower().strip() 
     if combined_hack.startswith('text'):
-            Clipboard.put(text, combined_hack)
-            return
+        Clipboard.put(text, combined_hack)
+        return
         
     raise Exception('Could not find plain text clipboard in ' + str(clipboard_types))
