@@ -47,3 +47,11 @@
                     size_hint_y: None
                     height: max(self.minimum_height, scroller.height)                                      
                     cols: 2
+
+<ApplicationLogView>:
+    orientation: 'horizontal'
+    FieldLabel:
+        text: 'Copy application log'
+    Button:
+        text: 'Copy'
+        on_release: root.copy_app_log()
