@@ -5,7 +5,6 @@ from kivy.logger import Logger
 from kivy.uix.boxlayout import BoxLayout
 import re
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
-from autosportlabs.uix.toast.kivytoast import toast
 from autosportlabs.widgets.separator import HLineSeparator
 from settingsview import SettingsView, SettingsTextField, SettingsSwitch
 from valuefield import ValueField

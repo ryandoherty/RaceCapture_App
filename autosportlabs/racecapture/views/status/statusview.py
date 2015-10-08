@@ -10,11 +10,14 @@ from kivy.properties import ObjectProperty, StringProperty, NumericProperty
 from datetime import timedelta
 from utils import *
 from fieldlabel import FieldLabel
+from kivy.logger import LoggerHistory, Logger
+from autosportlabs.racecapture.theme.color import ColorScheme
+from autosportlabs.uix.toast.kivytoast import toast
 
 STATUS_KV_FILE = 'autosportlabs/racecapture/views/status/statusview.kv'
 
-RAW_STATUS_BGCOLOR_1 = [0  , 0  , 0  , 1.0]
-RAW_STATUS_BGCOLOR_2 = [0.10, 0.10, 0.10, 1.0]
+RAW_STATUS_BGCOLOR_1 = ColorScheme.get_background()
+RAW_STATUS_BGCOLOR_2 = ColorScheme.get_dark_background()
 
 class StatusLabel(FieldLabel):
     backgroundColor = ObjectProperty(RAW_STATUS_BGCOLOR_1)
@@ -51,11 +54,12 @@ class StatusView(Screen):
 
     #Used for building the left side menu
     _menu_keys = {
-        "system": "System Status",
+        "app": "Application",
+        "system": "RaceCapture",
         "GPS": "GPS",
         "cell": "Cellular",
         "bt": "Bluetooth",
-        "logging": "Logging",
+        "logging": "Logger",
         "track": "Track",
         "telemetry": "Telemetry"
     }
@@ -118,7 +122,7 @@ class StatusView(Screen):
     }
 
     _menu_node = None
-    menu_select_color = [1.0,0,0,0.6]
+    menu_select_color = ColorScheme.get_primary()
 
     def __init__(self, track_manager, status_pump, **kwargs):
         Builder.load_file(STATUS_KV_FILE)
@@ -128,29 +132,30 @@ class StatusView(Screen):
         self._menu_node = self.ids.menu
         self._menu_node.bind(selected_node=self._on_menu_select)
         status_pump.add_listener(self.status_updated)
+        self._build_core_menu()
+        
+    def _build_core_menu(self):
+        #build application status node
+        self._append_menu_node('Application', 'app')
+
+        #select the first node in the tree.
+        self._menu_node.select_node(self._menu_node.root.nodes[0])
         
     def _build_menu(self):
         if self._menu_built:
             return
 
-        default_node = None
-
-        for item, config in self.status.iteritems():
+        for item in self.status.iterkeys():
             text = self._menu_keys[item] if item in self._menu_keys else item
-
-            label = LinkedTreeViewLabel(text=text)
-
-            label.id = item
-            label.color_selected = self.menu_select_color
-            node = self._menu_node.add_node(label)
-
-            if item == 'system':
-                default_node = node
+            self._append_menu_node(text, item)
 
         self._menu_built = True
 
-        if default_node:
-            self._menu_node.select_node(default_node)
+    def _append_menu_node(self, text, item):
+        label = LinkedTreeViewLabel(text=text)
+        label.id = item
+        label.color_selected = self.menu_select_color
+        return self._menu_node.add_node(label)
 
     def _on_menu_select(self, instance, value):
         self._selected_item = value.id
@@ -185,6 +190,11 @@ class StatusView(Screen):
         for item, value in status.iteritems():
             self._add_item(item, value)
 
+    def render_app(self):
+        label_widget = StatusTitle(text='Application Log')
+        self.ids.status_grid.add_widget(label_widget)
+        self.ids.status_grid.add_widget(ApplicationLogView())        
+        
     def render_system(self):
         version = '.'.join(
             [
@@ -317,3 +327,15 @@ class StatusView(Screen):
     def on_tracks_updated(self, track_manager):
         pass
 
+class ApplicationLogView(BoxLayout):
+    
+    def copy_app_log(self):
+        try:
+            recent_log = ''
+            for record in reversed(LoggerHistory.history):
+                recent_log += record.msg + '\r\n'
+            paste_clipboard(recent_log)
+            toast('Application log copied to clipboard')
+        except Exception as e:
+            Logger.error("ApplicationLogView: Error copying app log to clipboard: " + str(e))
+            toast('Unable to copy to clipboard\n' + str(e), True)

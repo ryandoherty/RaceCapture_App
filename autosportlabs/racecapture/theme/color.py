@@ -41,6 +41,10 @@ class ColorScheme(object):
     @staticmethod
     def get_dark_background():
         return get_color_from_hex("202020")
+    
+    @staticmethod
+    def get_background():
+        return get_color_from_hex("000000")
 
     
         

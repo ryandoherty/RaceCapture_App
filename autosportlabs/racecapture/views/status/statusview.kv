@@ -47,3 +47,17 @@
                     size_hint_y: None
                     height: max(self.minimum_height, scroller.height)                                      
                     cols: 2
+
+<ApplicationLogView>:
+    orientation: 'horizontal'
+    padding: (0, sp(5))
+    BoxLayout:
+        size_hint_x: (.35)
+    LabelIconButton:
+        size_hint_x: (.3)
+        title_font_size: self.height * 0.5
+        title: 'Copy'
+        icon: u'\uf0c5'
+        on_press: root.copy_app_log()
+    BoxLayout:
+        size_hint_x: (.35)
