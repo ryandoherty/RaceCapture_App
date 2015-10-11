@@ -1,5 +1,6 @@
 ==1.3.13==
-* Clean up behind the scenes errors in gauge and track manager
+* Clean up behind the scenes errors in gauge view, track manager and serial data API
+* Fixed error reading script / RaceCapture log (Android)
 
 ==1.3.12==
 * Big Number View properly sets channel name between tachometer view 

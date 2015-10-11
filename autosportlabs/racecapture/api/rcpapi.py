@@ -156,7 +156,8 @@ class RcpApi:
             try:
                 msg = comms.read_message()
                 if msg:
-                    
+                    #clean incoming string, and drop illegal characters
+                    msg = unicode(msg, errors='ignore')
                     Logger.trace('RCPAPI: msg_rx_worker Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict = False)
                     self.on_rx(True)
