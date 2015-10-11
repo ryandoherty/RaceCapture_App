@@ -1,6 +1,7 @@
 import json
 from copy import copy
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+from kivy.logger import Logger
 
 RCP_COMPATIBLE_MAJOR_VERSION = 2
 RCP_MINIMUM_MINOR_VERSION = 8
@@ -104,14 +105,14 @@ class ScalingMap(object):
         try:
             return self.scaled[mapBin]
         except IndexError:
-            print('Index error getting scaled value')
+            Logger.error('ScalingMap: Index error getting scaled value')
             return 0
     
     def setScaled(self, mapBin, value):
         try:
             self.scaled[mapBin] = float(value)
         except IndexError:
-            print('Index error setting bin')
+            Logger.error('ScalingMap: Index error setting bin')
             
 ANALOG_SCALING_MODE_RAW     = 0
 ANALOG_SCALING_MODE_LINEAR  = 1
@@ -1139,7 +1140,7 @@ class RcpConfig(object):
                 if trackDbJson:
                     self.trackDb.fromJson(trackDbJson)
                                         
-                print('RCP config version ' + str(self.versionConfig.major) + '.' + str(self.versionConfig.minor) + '.' + str(self.versionConfig.bugfix) + ' Loaded')
+                Logger.info('RcpConfig: Config version ' + str(self.versionConfig.major) + '.' + str(self.versionConfig.minor) + '.' + str(self.versionConfig.bugfix) + ' Loaded')
                 self.loaded = True
     
     def fromJsonString(self, rcpJsonString):

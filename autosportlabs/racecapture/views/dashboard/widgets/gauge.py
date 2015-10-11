@@ -139,7 +139,7 @@ class SingleChannelGauge(Gauge):
                 self._update_channel_binding()
                 self._update_channel_ranges()
         except Exception as e:
-            Logger.error('Gauge: Error setting channel {} {}'.format(value, str(e)))
+            Logger.error('Gauge: Error setting channel {}: {}'.format(self.channel, str(e)))
         
     def on_settings(self, instance, value):
         #Do I have an id so I can track my settings?

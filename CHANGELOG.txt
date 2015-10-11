@@ -1,3 +1,14 @@
+==1.3.13==
+* Clean up behind the scenes errors in gauge and track manager
+
+==1.3.12==
+* Big Number View properly sets channel name between tachometer view 
+  and laptime view in dashboard mode.
+* Add ability to access application log from system status page
+
+==1.3.11==
+* Bumped version to satisfy Google play store.
+
 ==1.3.10==
 * Improved performance for trackmap updates
 * Added race track status to top menu bar

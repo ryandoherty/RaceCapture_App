@@ -160,9 +160,10 @@ class TrackManager:
     def get_track_ids_in_region(self):
         return self.track_ids_in_region
         
-    def find_track_by_short_id(self, id):
-        for track in self.tracks.itervalues():
-            if id == track.short_id:
+    def find_track_by_short_id(self, short_id):
+        for track_id in self.tracks.keys():
+            track = self.tracks.get(track_id)
+            if track and short_id == track.short_id:
                 return track
         return None
         
