@@ -28,6 +28,8 @@ class ChannelData(object):
 class AnalysisWidget(AnchorLayout):
     """ The base analysis widget that can receive lap added / removed events
     """
+    options_enabled = BooleanProperty(True)
+    
     def __init__(self, **kwargs):
         super(AnalysisWidget, self).__init__(**kwargs)
         self.settings = None
@@ -36,6 +38,10 @@ class AnalysisWidget(AnchorLayout):
         self.settings = kwargs.get('settings')
         self.datastore = kwargs.get('datastore')
     
+    def on_options_enabled(self, instance, value):
+        if value == False:
+            self.remove_widget(self.ids.options_button)
+
     def on_options(self, *args):
         pass
 
@@ -58,9 +64,7 @@ class AnalysisWidget(AnchorLayout):
 
 class ChannelAnalysisWidget(AnalysisWidget):
     """A widget that can select it's own channels to display
-    """
-    options_enabled = BooleanProperty(True)
-    
+    """    
     def __init__(self, **kwargs):
         super(ChannelAnalysisWidget, self).__init__(**kwargs)
         self._popup = None
@@ -75,10 +79,6 @@ class ChannelAnalysisWidget(AnalysisWidget):
         for channel in self._selected_channels:
             self.remove_channel(channel, lap_ref)
         self.refresh_view()
-
-    def on_options_enabled(self, instance, value):
-        if value == False:
-            self.remove_widget(self.ids.options_button)
 
     def on_channel_selected(self, value):
         pass
