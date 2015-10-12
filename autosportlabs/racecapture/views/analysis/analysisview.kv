@@ -8,6 +8,12 @@
                 id: analysismap
                 size_hint_x: 0.85
             BoxLayout:
+                canvas.before:
+                    Color:
+                        rgba: 0.0, 0.0, 0.0, 0.8
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
                 size_hint_x: 0.15
                 orientation: 'vertical'
                 SessionBrowser:
