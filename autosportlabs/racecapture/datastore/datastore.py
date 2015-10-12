@@ -4,7 +4,6 @@ import logging
 import os, os.path
 import time
 import datetime
-from requests import sessions
 
 def unix_time(dt):
     epoch = datetime.datetime.utcfromtimestamp(0)

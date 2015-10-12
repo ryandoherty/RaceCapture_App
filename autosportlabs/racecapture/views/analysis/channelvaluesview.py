@@ -116,7 +116,6 @@ class ChannelValuesView(ChannelAnalysisWidget):
                 view.lap = channel_data.source.lap
                 session_id = channel_data.source.session
                 session = self.datastore.get_session_by_id(session_id, self.sessions)
-                print('foooo ' + str(session))
                 view.session = session.name
                 view.minval = channel_data.min
                 view.maxval = channel_data.max
