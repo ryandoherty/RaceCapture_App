@@ -45,6 +45,22 @@ class LineChart(ChannelAnalysisWidget):
         self.current_distance = 0
         self.current_offset = 0
 
+    def on_touch_down(self, touch):
+        if self.collide_point(touch.x, touch.y):
+            if hasattr(touch, 'button'):
+                button = touch.button
+                scroll_dir = 0
+                if touch.is_mouse_scrolling:
+                    if 'down' in button or 'left' in button:
+                        scroll_dir = 1
+                    if 'up' in button or 'right' in button:
+                        scroll_dir = -1
+            super(LineChart, self).on_touch_down(touch)
+            return True
+        else:
+            super(LineChart, self).on_touch_down(touch)
+            return False
+
     def on_motion(self, instance, event, motion_event):
         if self.collide_point(motion_event.x, motion_event.y):
             chart = self.ids.chart
@@ -121,20 +137,6 @@ class LineChart(ChannelAnalysisWidget):
         records = dataset.fetch_records()
         channel_data = ChannelData(data=records, channel=channel, min=channel_meta.min, max=channel_meta.max, source=lap_ref)
         self.add_channel(channel_data)
-
-    def on_touch_down(self, touch):
-        if self.collide_point(touch.x, touch.y):
-            if hasattr(touch, 'button'):
-                button = touch.button
-                scroll_dir = 0
-                if touch.is_mouse_scrolling:
-                    if 'down' in button or 'left' in button:
-                        scroll_dir = 1
-                    if 'up' in button or 'right' in button:
-                        scroll_dir = -1
-        super(LineChart, self).on_touch_down(touch)
-        return False
-        
         
     def dispatch_marker(self, x, y):
         mouse_x = x - self.pos[0]

@@ -25,10 +25,13 @@ class ChannelData(object):
         self.max = kwargs.get('max', 0)
         self.source = kwargs.get('source', None)
     
+class OptionsButton(AnchorLayout):
+    pass
+
 class AnalysisWidget(AnchorLayout):
     """ The base analysis widget that can receive lap added / removed events
     """
-    options_enabled = BooleanProperty(True)
+    options_enabled = BooleanProperty(None)
     
     def __init__(self, **kwargs):
         super(AnalysisWidget, self).__init__(**kwargs)
@@ -41,6 +44,10 @@ class AnalysisWidget(AnchorLayout):
     def on_options_enabled(self, instance, value):
         if value == False:
             self.remove_widget(self.ids.options_button)
+        else:
+            options = self.ids.options_button
+            self.remove_widget(options)
+            self.add_widget(options)
 
     def on_options(self, *args):
         pass
