@@ -1,4 +1,11 @@
 <ChannelValueView>:
+    canvas.before:
+        Color:
+            rgba: 0.05, 0.05, 0.05, 0.5
+        Rectangle:
+            pos: self.pos
+            size: self.size            
+
     orientation: 'horizontal'
     FieldLabel:
         size_hint_x: 0.2
@@ -14,23 +21,10 @@
         id: value
 
 <ChannelValuesView>:
+    options_enabled: False
     BoxLayout:
-        orientation: 'vertical'
-        BoxLayout:
-            size_hint_y: 0.1
-            orientation: 'horizontal'
-            FieldLabel:
-                size_hint_x: 0.3
-                text: 'Lap'
-            FieldLabel:
-                size_hint_x: 0.4
-                text: 'Channel'
-            FieldLabel:
-                size_hint_x: 0.3
-                text: 'Value'
         ScrollView:
             id: scroller
-            size_hint_y: 0.9
             do_scroll_x:False
             do_scroll_y:True
             GridLayout:

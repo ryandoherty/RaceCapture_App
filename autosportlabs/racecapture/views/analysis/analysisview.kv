@@ -1,30 +1,37 @@
 <AnalysisView>:
-	BoxLayout:
-		orientation: 'horizontal'
-		BoxLayout:
-			size_hint_x: 0.15
-			orientation: 'vertical'
-			SessionBrowser:
-				size_hint_y: 0.9
-				id: sessions
-	        IconButton:
-	        	size_hint_y: 0.1
-	            id: 'read'
-	            font_size: root.height * 0.1
-	            text: u'\uf0fe'
-	            on_release: root.on_add_stream()
-	    BoxLayout:
-	        size_hint_x: 0.85
-	        orientation: 'vertical'
-	        BoxLayout:
-	            orientation: 'horizontal'
-	            AnalysisMap:
-	                id: analysismap
-	                size_hint_x: 0.75
-	            ChannelValuesView:
-                    id: channelvalues
+    BoxLayout:
+        orientation: 'vertical'
+    	BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'horizontal'
+            AnalysisMap:
+                id: analysismap
+                size_hint_x: 0.85
+            BoxLayout:
+                size_hint_x: 0.15
+                orientation: 'vertical'
+                SessionBrowser:
+                    size_hint_y: 0.9
+                    id: sessions
+                IconButton:
+                    size_hint_y: 0.1
+                    id: 'read'
+                    font_size: root.height * 0.1
+                    text: u'\uf0fe'
+                    on_release: root.on_add_stream()
+    		
+        AnchorLayout:
+            size_hint_y: 0.5            
+            AnchorLayout:
+                LineChart:
+                    id: mainchart
+                    on_channel_selected: root.on_channel_selected(*args)
+                    on_marker: root.on_marker(*args)
+            AnchorLayout:
+                anchor_x: 'right'
+                anchor_y: 'top'
+                ChannelValuesView:
                     size_hint_x: 0.25
-            LineChart:
-            	id: mainchart
-            	on_channel_selected: root.on_channel_selected(*args)
-            	on_marker: root.on_marker(*args)
+                    #size_hint_y: None
+                    id: channelvalues
+            	

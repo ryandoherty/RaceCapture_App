@@ -8,7 +8,7 @@ from autosportlabs.racecapture.views.channels.channelselectview import ChannelSe
 from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from kivy.uix.popup import Popup
-
+from kivy.properties import BooleanProperty
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 
 class ChannelData(object):
@@ -59,6 +59,7 @@ class AnalysisWidget(AnchorLayout):
 class ChannelAnalysisWidget(AnalysisWidget):
     """A widget that can select it's own channels to display
     """
+    options_enabled = BooleanProperty(True)
     
     def __init__(self, **kwargs):
         super(ChannelAnalysisWidget, self).__init__(**kwargs)
@@ -74,7 +75,11 @@ class ChannelAnalysisWidget(AnalysisWidget):
         for channel in self._selected_channels:
             self.remove_channel(channel, lap_ref)
         self.refresh_view()
-    
+
+    def on_options_enabled(self, instance, value):
+        if value == False:
+            self.remove_widget(self.ids.options_button)
+
     def on_channel_selected(self, value):
         pass
     
