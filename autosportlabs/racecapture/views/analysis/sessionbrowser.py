@@ -6,46 +6,19 @@ from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.togglebutton import ToggleButton
 from kivy.metrics import sp
-from autosportlabs.racecapture.views.util.viewutils import format_laptime
-from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
-from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.adapters.listadapter import ListAdapter
 from kivy.logger import Logger
+from autosportlabs.racecapture.views.util.viewutils import format_laptime
+from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
+from autosportlabs.racecapture.theme.color import ColorScheme
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessionbrowser.kv')
 
-class LapNode(BoxLayout):
-    lap = 0
-    session = 0
-    def __init__(self, **kwargs):
-        super(LapNode, self).__init__(**kwargs)
-        self.register_event_type('on_lap_selected')
-        lap = int(kwargs.get('lap'))
-        session = int(kwargs.get('session'))
-        laptime = kwargs.get('laptime')
-        self.ids.lap.text = str(lap)
-        self.ids.laptime.text = format_laptime(laptime)
-        self.lap = lap
-        self.session = session
-        
-    def on_lap_selected(self, *args):
-        pass
-    
-    def lap_selected(self, instance, value):
-        self.dispatch('on_lap_selected', SourceRef(self.lap, self.session), value)
-        
-class SessionNode(BoxLayout):
-    def __init__(self, **kwargs):
-        super(SessionNode, self).__init__(**kwargs)
-        name = kwargs.get('name', '(unnamed)')
-        notes = kwargs.get('notes', '')
-        self.ids.name.text = self.notes = str(name)
-        self.notes = str(notes)
-
 class LapItemButton(ToggleButton):
-    background_color_normal = ListProperty([1, 1, 1, 0])
-    background_color_down = ListProperty([1, 1, 1, 0.5])
+    background_color_normal = ColorScheme.get_dark_background()
+    background_color_down = ColorScheme.get_primary()
 
     def __init__(self, session, lap, laptime, **kwargs):
         super(LapItemButton, self).__init__(**kwargs)
@@ -71,7 +44,7 @@ class Session(BoxLayout):
         pass
 
     def append_lap(self, session, lap, laptime):
-        text = str(lap) + ' ' + str(laptime)
+        text = str(int(lap)) + ' :: ' + str(laptime)
         lapitem = LapItemButton(session=session, text=text, lap=lap, laptime=laptime)
         self.ids.lap_list.add_widget(lapitem)
         return lapitem

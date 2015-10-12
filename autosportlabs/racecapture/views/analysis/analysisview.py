@@ -14,7 +14,7 @@ from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
 from autosportlabs.racecapture.views.analysis.addstreamview import AddStreamView
-from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser, LapNode
+from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent, SourceRef
 from autosportlabs.racecapture.views.analysis.linechart import LineChart
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
