@@ -8,7 +8,7 @@ from autosportlabs.racecapture.views.channels.channelselectview import ChannelSe
 from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from kivy.uix.popup import Popup
-from kivy.properties import BooleanProperty
+from kivy.properties import BooleanProperty, ObjectProperty
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 
 class ChannelData(object):
@@ -71,13 +71,18 @@ class AnalysisWidget(AnchorLayout):
 
 class ChannelAnalysisWidget(AnalysisWidget):
     """A widget that can select it's own channels to display
-    """    
+    """
+    sessions = ObjectProperty(None)
+    
     def __init__(self, **kwargs):
         super(ChannelAnalysisWidget, self).__init__(**kwargs)
         self._popup = None
         self._selected_channels = []
         self.register_event_type('on_channel_selected')
 
+    def on_sessions(self, instance, value):
+        self.refresh_view()
+        
     def on_lap_added(self, lap_ref):
         for channel in self._selected_channels:
             self.query_new_channel(channel, lap_ref)

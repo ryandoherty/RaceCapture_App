@@ -11,10 +11,11 @@
     BoxLayout:
         size_hint_y: 0.1
         orientation: 'horizontal'
-        FieldLabel:
-            text: 'X'
-        FieldLabel:
-            text: 'Y'
+        IconButton: #Edit button
+            text: u'\uf044'
+        IconButton: #Delete button
+            text: u'\uf00d'
+            color: ColorScheme.get_primary()
     BoxLayout:
         size_hint_y: 0.9
         orientation: 'vertical'

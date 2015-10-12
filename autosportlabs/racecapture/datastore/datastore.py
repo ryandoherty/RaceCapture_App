@@ -4,6 +4,7 @@ import logging
 import os, os.path
 import time
 import datetime
+from requests import sessions
 
 def unix_time(dt):
     epoch = datetime.datetime.utcfromtimestamp(0)
@@ -824,6 +825,11 @@ class DataStore(object):
         
         return DataSet(c, smoothing_map)
     
+    def get_session_by_id(self, ses_id, sessions=None):
+        sessions = self.get_sessions() if not sessions else sessions
+        session = next((x for x in sessions if x.ses_id == ses_id), None)
+        return session
+        
     def get_sessions(self):
         c = self._conn.cursor()
 

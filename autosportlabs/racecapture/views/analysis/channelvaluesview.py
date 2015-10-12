@@ -42,7 +42,7 @@ class ChannelValueView(BoxLayout):
 
     @lap.setter
     def lap(self, value):
-        self.lap_view.text = str(value)
+        self.lap_view.text = str(int(value))
 
     @property
     def channel(self):
@@ -99,9 +99,9 @@ class ChannelValuesView(ChannelAnalysisWidget):
             stats = channel_data.data
             key = channel + str(source)
             widget = self._channel_stat_widgets.get(key)
-            widget.session = str(source.session)
-            widget.lap = str(source.lap)
-            widget.channel = channel
+            #widget.session = str(source.session)
+            #widget.lap = str(source.lap)
+            #widget.channel = channel
             widget.value = str(stats.values[point])
 
     def _refresh_channels(self):
@@ -114,7 +114,10 @@ class ChannelValuesView(ChannelAnalysisWidget):
                 view.channel = channel
                 view.color = self.color_sequence.get_color(key)
                 view.lap = channel_data.source.lap
-                view.session = channel_data.source.session
+                session_id = channel_data.source.session
+                session = self.datastore.get_session_by_id(session_id, self.sessions)
+                print('foooo ' + str(session))
+                view.session = session.name
                 view.minval = channel_data.min
                 view.maxval = channel_data.max
                 self._channel_stat_widgets[key] = view
@@ -122,7 +125,6 @@ class ChannelValuesView(ChannelAnalysisWidget):
         channels_grid.clear_widgets()
         for key in iter(sorted(self._channel_stat_widgets.iterkeys())):
             channels_grid.add_widget(self._channel_stat_widgets[key])
-            
 
     def add_channel(self, channel_data):
         source_key = str(channel_data.source)

@@ -10,6 +10,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
+from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
@@ -35,6 +36,7 @@ class AnalysisView(Screen):
     _session_location_cache = {}
     _popup = None
     _color_sequence = ColorSequence()
+    sessions = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         Builder.load_file(ANALYSIS_VIEW_KV)
@@ -49,6 +51,9 @@ class AnalysisView(Screen):
         self.init_view()
 
 
+    def on_sessions(self, instance, value):
+        self.ids.channelvalues.sessions = value
+        
     def lap_selected(self, instance, source_ref, selected):
         source_key = str(source_ref)
         if selected:
@@ -123,6 +128,7 @@ class AnalysisView(Screen):
                     lapcount = r[1]
                     laptime = r[2]
                     sessions_view.append_lap(session, lapcount, laptime)
+            self.sessions = sessions
         except Exception as e:
             Logger.error("AnalysisView: unable to fetch laps: " + str(e))
             traceback.print_exc()
