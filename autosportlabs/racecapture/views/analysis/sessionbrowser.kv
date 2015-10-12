@@ -1,35 +1,27 @@
-<SessionNode>:
-	orientation: 'horizontal'
-	Label:
-		id: name
-		
-<LapNode>:
-	orientation: 'horizontal'
-	FieldLabel:
-		id: lap
-		size_hint_x: 0.2
-		halign: 'left'
-	FieldLabel:
-		id: laptime
-		size_hint_x: 0.6
-	CheckBox:
-        id: selected
-        size_hint_x: 0.2
-        on_active: root.lap_selected(*args)
-		
+<LapItemButton>:
+#    background_color: [.50, 0, 0, .5]
+    #background_down: ''
+    font_size: dp(15)
+    font_name: 'resource/fonts/ASL_light.ttf'
+ #   color: [1.0, 1.0, 1.0, 0.8]
+  #  deselected_color: [0.3, 0.3, 0.3, 1.0]
+
+<Session>:
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: 0.1
+        orientation: 'horizontal'
+        FieldLabel:
+            text: 'X'
+        FieldLabel:
+            text: 'Y'
+    BoxLayout:
+        size_hint_y: 0.9
+        orientation: 'vertical'
+        id: lap_list
+
 <SessionBrowser>:
 	orientation: 'vertical'
-    ScrollView:
-        id: scroller
-        do_scroll_x:False
-        do_scroll_y:True
-        TreeView:
-            size_hint_y: 0.5
-            height: dp(300)
-            id: sessions
-            hide_root: True
-            indent_level: -(root.width * 0.1)
-            height: max(self.minimum_height, scroller.height)                                      
 	
 	
 	

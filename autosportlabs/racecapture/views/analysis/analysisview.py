@@ -111,7 +111,7 @@ class AnalysisView(Screen):
             sessions_view = self.ids.sessions
             sessions_view.clear_sessions()
             for session in sessions:
-                session_node = sessions_view.append_session(name=session.name, notes=session.notes)
+                session = sessions_view.append_session(ses_id=session.ses_id, name=session.name, notes=session.notes)
                 
                 dataset = self._datastore.query(sessions=[session.ses_id],
                                         channels=['LapCount', 'LapTime'],
@@ -122,9 +122,10 @@ class AnalysisView(Screen):
                 for r in records:
                     lapcount = r[1]
                     laptime = r[2]
-                    sessions_view.append_lap(session_node, session.ses_id, lapcount, laptime)
+                    sessions_view.append_lap(session, lapcount, laptime)
         except Exception as e:
             Logger.error("AnalysisView: unable to fetch laps: " + str(e))
+            traceback.print_exc()
         
     def init_view(self):
         self.init_datastore()
