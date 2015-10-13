@@ -11,7 +11,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
-from autosportlabs.racecapture.datastore import DataStore, Filter
+from autosportlabs.racecapture.datastore import Filter
+from autosportlabs.racecapture.views.analysis.analysisdata import CachingAnalysisDatastore
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
 from autosportlabs.racecapture.views.analysis.addstreamview import AddStreamView
@@ -23,33 +24,33 @@ from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.uix.color.colorsequence import ColorSequence
+
 import traceback
 
 ANALYSIS_VIEW_KV = 'autosportlabs/racecapture/views/analysis/analysisview.kv'
-
+  
 class AnalysisView(Screen):
     INIT_DATASTORE_TIMEOUT = 10.0
     _settings = None
     _databus = None
     _track_manager = None
-    _datastore = DataStore()
-    _session_location_cache = {}
+    _datastore = CachingAnalysisDatastore()
     _popup = None
     _color_sequence = ColorSequence()
     sessions = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         Builder.load_file(ANALYSIS_VIEW_KV)
+        self._session_location_cache = {}
         super(AnalysisView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
         self._databus = kwargs.get('dataBus')
-        self._settings = kwargs.get('settings')
+        self._settings = kwargs.get('settings') 
         self._track_manager = kwargs.get('track_manager')
         self.ids.sessions.bind(on_lap_selected=self.lap_selected)
         self.ids.channelvalues.color_sequence = self._color_sequence
         self.ids.mainchart.color_sequence = self._color_sequence
         self.init_view()
-
 
     def on_sessions(self, instance, value):
         self.ids.channelvalues.sessions = value
@@ -154,7 +155,7 @@ class AnalysisView(Screen):
             point = cache[marker.data_index]
             self.ids.analysismap.update_reference_mark(source, point)
             self.ids.channelvalues.update_reference_mark(source, marker.data_index)
-                
+                      
     def _add_location_cache(self, source_ref):
         session = source_ref.session
         lap = source_ref.lap

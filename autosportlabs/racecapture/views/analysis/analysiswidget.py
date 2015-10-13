@@ -10,20 +10,6 @@ from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from kivy.uix.popup import Popup
 from kivy.properties import BooleanProperty, ObjectProperty
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
-
-class ChannelData(object):
-    data = None
-    channel = None
-    min = 0
-    max = 0
-    source = None
-    
-    def __init__(self, **kwargs):
-        self.data = kwargs.get('data', None)
-        self.channel = kwargs.get('channel', None)
-        self.min = kwargs.get('min', 0)
-        self.max = kwargs.get('max', 0)
-        self.source = kwargs.get('source', None)
     
 class OptionsButton(AnchorLayout):
     pass

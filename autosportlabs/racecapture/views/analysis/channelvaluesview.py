@@ -7,17 +7,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
-from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget, ChannelData
+from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget
 from autosportlabs.uix.gauge.bargraphgauge import BarGraphGauge
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/channelvaluesview.kv')
-
-class ChannelStats(object):
-    def __init__(self, **kwargs):
-        self.values = kwargs.get('values')
-        self.min = kwargs.get('min')
-        self.max = kwargs.get('max')
-        self.avg = kwargs.get('avg')
     
 class ChannelValueView(BoxLayout):
 
@@ -143,24 +136,8 @@ class ChannelValuesView(ChannelAnalysisWidget):
         channels.pop(channel, None)
 
     def query_new_channel(self, channel, lap_ref):
-        lap = lap_ref.lap
-        session = lap_ref.session
-        f = Filter().eq('LapCount', lap)
-        dataset = self.datastore.query(sessions=[session], channels=[channel], data_filter=f)
-        
-        channel_meta = self.datastore.get_channel(channel)
-        records = dataset.fetch_records()
-        channel_min = self.datastore.get_channel_min(channel)
-        channel_max = self.datastore.get_channel_max(channel)
-        channel_avg = self.datastore.get_channel_average(channel)
-        
-        values = []
-        for record in records:
-            #pluck out just the channel value
-            values.append(record[1])
-            
-        stats = ChannelStats(values=values, min=channel_min, max=channel_max, avg=channel_avg)
-        channel_data = ChannelData(data=stats, channel=channel, min=channel_meta.min, max=channel_meta.max, source=lap_ref)
-        self.add_channel(channel_data)
+        channel_data = self.datastore.get_channel_data(lap_ref, [channel])
+        self.add_channel(channel_data[channel])
+
                 
                 

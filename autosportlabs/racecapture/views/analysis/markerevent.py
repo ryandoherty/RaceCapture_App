@@ -5,8 +5,8 @@ class SourceRef(object):
     lap = 0
     session = 0
     def __init__(self, lap, session):
-        self.lap = lap
-        self.session = session
+        self.lap = int(lap)
+        self.session = (session)
    
     def __str__(self):
         return "{}_{}".format(self.lap, self.session)
