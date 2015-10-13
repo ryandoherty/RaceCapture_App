@@ -19,7 +19,7 @@ class AnalysisMap(AnalysisWidget):
         Window.bind(on_motion=self.on_motion)
 
     def on_motion(self, instance, event, motion_event):
-        if self.collide_point(motion_event.x, motion_event.y):
+        if motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
             scatter = self.ids.scatter
             try:
                 button = motion_event.button

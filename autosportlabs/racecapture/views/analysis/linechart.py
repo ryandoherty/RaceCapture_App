@@ -63,7 +63,7 @@ class LineChart(ChannelAnalysisWidget):
             return False
 
     def on_motion(self, instance, event, motion_event):
-        if self.collide_point(motion_event.x, motion_event.y):
+        if motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
             chart = self.ids.chart
             try:
                 button = motion_event.button
