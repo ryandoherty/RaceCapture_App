@@ -149,7 +149,7 @@ class AnalysisView(Screen):
 
     def on_marker(self, instance, marker):
         source = marker.sourceref
-        cache = self._session_location_cache.get(str(source))
+        cache = self._datastore.get_location_data(source)
         if cache != None:
             point = cache[marker.data_index]
             self.ids.analysismap.update_reference_mark(source, point)

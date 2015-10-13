@@ -229,6 +229,7 @@ class DatalogChannel(object):
         return self.name
 
 class DataStore(object):
+    EXTRA_INDEX_CHANNELS = ["LapCount"]    
     val_filters = ['lt', 'gt', 'eq', 'lt_eq', 'gt_eq']
     def __init__(self):
         self._channels = []
@@ -305,12 +306,14 @@ class DataStore(object):
         self._conn.execute("""CREATE TABLE datapoint
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
         sample_id INTEGER NOT NULL)""")
+        
+        self._conn.execute("""CREATE INDEX datapoint_sample_id_index_id on datapoint(sample_id)""")
 
         self._conn.execute("""CREATE TABLE sample
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id INTEGER NOT NULL)""")
-
-        self._conn.execute("""CREATE INDEX sample_index_id on sample(id)""")
+        self._conn.execute("""CREATE INDEX sample_id_index_id on sample(id)""")
+        self._conn.execute("""CREATE INDEX sample_session_id_index_id on sample(session_id)""")
 
         self._conn.execute("""CREATE TABLE channel
         (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
@@ -325,8 +328,18 @@ class DataStore(object):
 
         self._conn.commit()
 
+    
+    def _add_extra_indexes(self, channels):
+        extra_indexes = []
+        for c in channels:
+            c = str(c)
+            if c in self.EXTRA_INDEX_CHANNELS:
+                extra_indexes.append(c)
+        
+        for index_channel in extra_indexes:
+            self._conn.execute("""CREATE INDEX {}_index_id on datapoint({})""".format(index_channel, index_channel))
+        
     def _extend_datalog_channels(self, channels):
-        #print "Adding channels: ", channel_names
         for channel in channels:
             #Extend the datapoint table to include the channel as a
             #new field
@@ -337,6 +350,7 @@ class DataStore(object):
             self._conn.execute("""INSERT INTO channel (name, units, min_value, max_value, smoothing)
             VALUES (?,?,?,?,?)""", (channel.name, channel.units, channel.min, channel.max, 1))
 
+        self._add_extra_indexes(channels)
         self._conn.commit()
 
     def _parse_datalog_headers(self, header):

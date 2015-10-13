@@ -66,11 +66,11 @@ class CachingAnalysisDatastore(DataStore):
         return channel_data
         
     def get_location_data(self, source_ref):
-        session = source_ref.session
-        lap = source_ref.lap
         source_key = str(source_ref)
         cache = self._session_location_cache.get(source_key)
         if cache == None:
+            session = source_ref.session
+            lap = source_ref.lap
             f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("LapCount", lap)
             dataset = self.query(sessions = [session], 
                                             channels = ["Latitude", "Longitude"], 
