@@ -1,5 +1,5 @@
 from autosportlabs.racecapture.datastore import DataStore, Filter
-
+from autosportlabs.racecapture.geo.geopoint import GeoPoint
 
 class ChannelStats(object):
     def __init__(self, **kwargs):
@@ -26,6 +26,7 @@ class CachingAnalysisDatastore(DataStore):
     
     def __init__(self, **kwargs):
         self._channel_data_cache = {}
+        self._session_location_cache = {}        
         super(CachingAnalysisDatastore, self).__init__(**kwargs)
 
     def _query_channel_data(self, source_ref, channel):
@@ -63,4 +64,24 @@ class CachingAnalysisDatastore(DataStore):
                 channel_data[channel] = channel_d
                 
         return channel_data
-#TODO
+        
+    def get_location_data(self, source_ref):
+        session = source_ref.session
+        lap = source_ref.lap
+        source_key = str(source_ref)
+        cache = self._session_location_cache.get(source_key)
+        if cache == None:
+            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("LapCount", lap)
+            dataset = self.query(sessions = [session], 
+                                            channels = ["Latitude", "Longitude"], 
+                                            data_filter = f)
+            records = dataset.fetch_records()
+            cache = []
+            for r in records:
+                lat = r[1]
+                lon = r[2]
+                cache.append(GeoPoint.fromPoint(lat, lon))
+            self._session_location_cache[source_key]=cache
+        return cache
+        
+        

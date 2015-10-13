@@ -22,7 +22,6 @@ from autosportlabs.racecapture.views.analysis.linechart import LineChart
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
-from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.uix.color.colorsequence import ColorSequence
 
 import traceback
@@ -34,15 +33,14 @@ class AnalysisView(Screen):
     _settings = None
     _databus = None
     _track_manager = None
-    _datastore = CachingAnalysisDatastore()
     _popup = None
     _color_sequence = ColorSequence()
     sessions = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         Builder.load_file(ANALYSIS_VIEW_KV)
-        self._session_location_cache = {}
         super(AnalysisView, self).__init__(**kwargs)
+        self._datastore = CachingAnalysisDatastore()
         self.register_event_type('on_tracks_updated')
         self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings') 
@@ -62,7 +60,8 @@ class AnalysisView(Screen):
             self.ids.channelvalues.add_lap(source_ref)
             map_path_color = self._color_sequence.get_color(source_key)
             self.ids.analysismap.add_reference_mark(source_key, map_path_color)
-            cache = self._add_location_cache(source_ref)
+            cache = self._datastore.get_location_data(source_ref)
+            self._sync_analysis_map(source_ref.session)
             self.ids.analysismap.add_map_path(source_key, cache, map_path_color)
             #self.ids.analysismap.add_heat_values('TPS', source_ref)
 
@@ -155,30 +154,12 @@ class AnalysisView(Screen):
             point = cache[marker.data_index]
             self.ids.analysismap.update_reference_mark(source, point)
             self.ids.channelvalues.update_reference_mark(source, marker.data_index)
-                      
-    def _add_location_cache(self, source_ref):
-        session = source_ref.session
-        lap = source_ref.lap
-        source_key = str(source_ref)
-        cache = self._session_location_cache.get(source_key)
-        if cache == None:
-            self._sync_analysis_map(session)
-            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("LapCount", lap)
-            dataset = self._datastore.query(sessions = [session], 
-                                            channels = ["Latitude", "Longitude"], 
-                                            data_filter = f)
-            records = dataset.fetch_records()
-            cache = []
-            for r in records:
-                lat = r[1]
-                lon = r[2]
-                cache.append(GeoPoint.fromPoint(lat, lon))
-            self._session_location_cache[source_key]=cache
-        return cache
-    
+                          
     def _sync_analysis_map(self, session):
-        lat_avg, lon_avg = self._datastore.get_location_center([session])
-        self.ids.analysismap.select_map(lat_avg, lon_avg)
+        analysis_map = self.ids.analysismap
+        if not analysis_map.track:
+            lat_avg, lon_avg = self._datastore.get_location_center([session])
+            analysis_map.select_map(lat_avg, lon_avg)
 
     def popup_dismissed(self, *args):
         self._popup = None

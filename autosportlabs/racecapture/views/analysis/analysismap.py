@@ -15,6 +15,7 @@ class AnalysisMap(AnalysisWidget):
 
     def __init__(self, **kwargs):
         super(AnalysisMap, self).__init__(**kwargs)
+        self.track = None
         Window.bind(on_motion=self.on_motion)
 
     def on_motion(self, instance, event, motion_event):
@@ -40,6 +41,7 @@ class AnalysisMap(AnalysisWidget):
             track = self.track_manager.find_nearby_track(point)
             if track != None:
                 self.ids.track.setTrackPoints(track.map_points)
+                self.track = track
 
     def remove_reference_mark(self, source):
         self.ids.track.remove_marker(source)
