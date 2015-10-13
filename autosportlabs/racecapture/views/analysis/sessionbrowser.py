@@ -39,6 +39,7 @@ class Session(BoxLayout):
         self.ses_id = ses_id
         self.name = name
         self.notes = notes
+        self.lap_count = 0
 
     def on_select(self, value):
         pass
@@ -47,22 +48,45 @@ class Session(BoxLayout):
         text = str(int(lap)) + ' :: ' + str(laptime)
         lapitem = LapItemButton(session=session, text=text, lap=lap, laptime=laptime)
         self.ids.lap_list.add_widget(lapitem)
+        self.lap_count += 1
         return lapitem
 
+class SessionAccordionItem(AccordionItem):
+    def __init__(self, **kwargs):
+        self.session_widget = None
+        super(SessionAccordionItem, self).__init__(**kwargs)
+        self.register_event_type('on_collapsed')
+    
+    def on_collapsed(self, value):
+        pass
+            
+    def on_collapse(self, instance, value):
+        super(SessionAccordionItem, self).on_collapse(instance, value)
+        self.dispatch('on_collapsed', value) 
+    
 class SessionBrowser(BoxLayout):
+    ITEM_HEIGHT = sp(50)
+    SESSION_TITLE_HEIGHT = sp(20)
+    
     def __init__(self, **kwargs):
         super(SessionBrowser, self).__init__(**kwargs)
         self.register_event_type('on_lap_selected')
         accordion = Accordion(orientation='vertical', size_hint=(1.0, None))
-        accordion.height = 400
         sv = ScrollContainer(size_hint=(1.0, 1.0), do_scroll_x=False)
         sv.add_widget(accordion)
         self._accordion = accordion
         self.add_widget(sv)
-    
+            
+    def on_session_collapsed(self, instance, value):
+        if value == False:
+            session_count = len(self._accordion.children)
+            self._accordion.height = (self.ITEM_HEIGHT * instance.session_widget.lap_count) + (session_count * self.SESSION_TITLE_HEIGHT)
+        
     def append_session(self, ses_id, name, notes):
         session = Session(ses_id=ses_id, name=name, notes=notes)
-        item = AccordionItem(title=name)
+        item = SessionAccordionItem(title=name)
+        item.session_widget = session
+        item.bind(on_collapsed=self.on_session_collapsed)
         item.add_widget(session)
         self._accordion.add_widget(item)
         return session
@@ -79,5 +103,5 @@ class SessionBrowser(BoxLayout):
         self.dispatch('on_lap_selected', SourceRef(instance.lap, instance.session), selected)
         
     def clear_sessions(self):
-        pass
+        self._accordion.clear_widgets()
 
