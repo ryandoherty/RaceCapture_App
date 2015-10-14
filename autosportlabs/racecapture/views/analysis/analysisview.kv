@@ -2,6 +2,8 @@
     BoxLayout:
         orientation: 'vertical'
     	BoxLayout:
+            padding: (sp(10), sp(10), sp(10), sp(5))
+            spacing: sp(10)       
             size_hint_y: 0.5
             orientation: 'horizontal'
             AnalysisMap:
@@ -10,7 +12,7 @@
             BoxLayout:
                 canvas.before:
                     Color:
-                        rgba: 0.0, 0.0, 0.0, 0.8
+                        rgba: 0.02, 0.02, 0.02, 0.5
                     Rectangle:
                         pos: self.pos
                         size: self.size
@@ -27,6 +29,8 @@
                     on_release: root.on_add_stream()
     		
         AnchorLayout:
+            spacing: sp(10)       
+            padding: (sp(10), sp(5), sp(10), sp(10))
             size_hint_y: 0.5            
             AnchorLayout:
                 LineChart:
