@@ -9,10 +9,15 @@ from kivy.metrics import sp
 from kivy.uix.accordion import Accordion, AccordionItem
 from kivy.adapters.listadapter import ListAdapter
 from kivy.logger import Logger
+from kivy.clock import Clock
+from kivy.properties import ObjectProperty
+from autosportlabs.racecapture.datastore import Filter
 from autosportlabs.racecapture.views.util.viewutils import format_laptime
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from autosportlabs.racecapture.theme.color import ColorScheme
+from autosportlabs.racecapture.views.util.alertview import confirmPopup, alertPopup
+import traceback
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessionbrowser.kv')
 
@@ -40,16 +45,26 @@ class Session(BoxLayout):
         self.name = name
         self.notes = notes
         self.lap_count = 0
-
-    def on_select(self, value):
-        pass
-
+        self.register_event_type('on_delete_session')
+    
     def append_lap(self, session, lap, laptime):
         text = str(int(lap)) + ' :: ' + str(laptime)
         lapitem = LapItemButton(session=session, text=text, lap=lap, laptime=laptime)
         self.ids.lap_list.add_widget(lapitem)
         self.lap_count += 1
         return lapitem
+    
+    def on_delete_session(self, value):
+        pass
+    
+    def prompt_delete_session(self):
+        def _on_answer(instance, answer):
+            if answer:
+                self.dispatch('on_delete_session', self.ses_id)
+            popup.dismiss()
+            
+        popup = confirmPopup('Confirm', 'Delete Session {}?'.format(self.name), _on_answer)
+
 
 class SessionAccordionItem(AccordionItem):
     def __init__(self, **kwargs):
@@ -67,6 +82,7 @@ class SessionAccordionItem(AccordionItem):
 class SessionBrowser(BoxLayout):
     ITEM_HEIGHT = sp(50)
     SESSION_TITLE_HEIGHT = sp(20)
+    datastore = ObjectProperty(None)
     
     def __init__(self, **kwargs):
         super(SessionBrowser, self).__init__(**kwargs)
@@ -76,7 +92,32 @@ class SessionBrowser(BoxLayout):
         sv.add_widget(accordion)
         self._accordion = accordion
         self.add_widget(sv)
-            
+    
+    def on_datastore(self, instance, value):
+        Clock.schedule_once(lambda dt: self.refresh_session_list())
+        
+    def refresh_session_list(self):
+        try:
+            self.clear_sessions()
+            sessions = self.datastore.get_sessions()
+            f = Filter().gt('LapCount', 0)
+            for session in sessions:
+                session = self.append_session(ses_id=session.ses_id, name=session.name, notes=session.notes)
+                
+                dataset = self.datastore.query(sessions=[session.ses_id],
+                                        channels=['LapCount', 'LapTime'],
+                                        data_filter=f,
+                                        distinct_records=True)
+        
+                records = dataset.fetch_records()
+                for r in records:
+                    lapcount = r[1]
+                    laptime = r[2]
+                    self.append_lap(session, lapcount, laptime)
+            self.sessions = sessions
+        except Exception as e:
+            Logger.error('AnalysisView: unable to fetch laps: {}\n\{}'.format(e, traceback.format_exc()))            
+        
     def on_session_collapsed(self, instance, value):
         if value == False:
             session_count = len(self._accordion.children)
@@ -87,9 +128,19 @@ class SessionBrowser(BoxLayout):
         item = SessionAccordionItem(title=name)
         item.session_widget = session
         item.bind(on_collapsed=self.on_session_collapsed)
+        session.bind(on_delete_session=self.delete_session)
         item.add_widget(session)
         self._accordion.add_widget(item)
         return session
+        
+    def delete_session(self, instance, id):
+        try:
+            self.datastore.delete_session(id)
+            Logger.info('SessionBrowser: Session {} deleted'.format(id))
+            self.refresh_session_list()
+        except Exception as e:
+            alertPopup('Error', 'There was an error deleting the session:\n{}'.format(e))
+            Logger.error('SessionBrowser: Error deleting session: {}\n\{}'.format(e, traceback.format_exc()))
         
     def append_lap(self, session, lap, laptime):
         lapitem = session.append_lap(session.ses_id, lap, laptime)
@@ -104,4 +155,6 @@ class SessionBrowser(BoxLayout):
         
     def clear_sessions(self):
         self._accordion.clear_widgets()
+        
+        
 

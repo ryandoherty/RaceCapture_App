@@ -11,7 +11,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
-from autosportlabs.racecapture.datastore import Filter
 from autosportlabs.racecapture.views.analysis.analysisdata import CachingAnalysisDatastore
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
@@ -45,7 +44,7 @@ class AnalysisView(Screen):
         self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings') 
         self._track_manager = kwargs.get('track_manager')
-        self.ids.sessions.bind(on_lap_selected=self.lap_selected)
+        self.ids.sessions_view.bind(on_lap_selected=self.lap_selected)
         self.ids.channelvalues.color_sequence = self._color_sequence
         self.ids.mainchart.color_sequence = self._color_sequence
         self.init_view()
@@ -83,7 +82,7 @@ class AnalysisView(Screen):
                 
     def on_stream_connected(self, *args):
         self._dismiss_popup()
-        self.refresh_session_list()
+        self.ids.sessions_view.refresh_session_list()
         
     def show_add_stream_dialog(self):
         content = AddStreamView(settings=self._settings, datastore=self._datastore)
@@ -101,38 +100,14 @@ class AnalysisView(Screen):
             else:
                 Logger.info('AnalysisView: creating datastore...')
                 self._datastore.new(dstore_path)
-            Clock.schedule_once(lambda dt: self.refresh_session_list())
+            self.ids.sessions_view.datastore = self._datastore
 
         dstore_path = self._settings.userPrefs.get_datastore_location()
         Logger.info("AnalysisView: Datastore Path:" + str(dstore_path))
         t = Thread(target=_init_datastore, args=(dstore_path,))
         t.daemon = True
         t.start()
-        
-    def refresh_session_list(self):
-        try:
-            sessions = self._datastore.get_sessions()
-            f = Filter().gt('LapCount', 0)
-            sessions_view = self.ids.sessions
-            sessions_view.clear_sessions()
-            for session in sessions:
-                session = sessions_view.append_session(ses_id=session.ses_id, name=session.name, notes=session.notes)
                 
-                dataset = self._datastore.query(sessions=[session.ses_id],
-                                        channels=['LapCount', 'LapTime'],
-                                        data_filter=f,
-                                        distinct_records=True)
-        
-                records = dataset.fetch_records()
-                for r in records:
-                    lapcount = r[1]
-                    laptime = r[2]
-                    sessions_view.append_lap(session, lapcount, laptime)
-            self.sessions = sessions
-        except Exception as e:
-            Logger.error("AnalysisView: unable to fetch laps: " + str(e))
-            traceback.print_exc()
-        
     def init_view(self):
         self.init_datastore()
         mainchart = self.ids.mainchart

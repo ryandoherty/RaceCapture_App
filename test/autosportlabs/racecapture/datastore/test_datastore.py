@@ -290,3 +290,8 @@ class DataStoreTest(unittest.TestCase):
         self.assertIsNotNone(lat)
         self.assertIsNotNone(lon)
         
+    #HACK - ensure this runs last because.. deleting
+    def test_zzz_delete_session(self):
+        self.ds.delete_session(1)
+        sessions = self.ds.get_sessions()
+        self.assertEqual(len(sessions), 0)

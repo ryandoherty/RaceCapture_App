@@ -602,6 +602,12 @@ class DataStore(object):
                 progress_cb(percent_complete)
             yield ds_to_yield
 
+    def delete_session(self, ses_id):
+        self._conn.execute("""DELETE FROM datapoint WHERE sample_id in (select id from sample where session_id = ?)""", (ses_id,))
+        self._conn.execute("""DELETE FROM sample WHERE session_id=?""",(ses_id,))
+        self._conn.execute("""DELETE FROM session where id=?""",(ses_id,))
+        self._conn.commit()
+        
     def _create_session(self, name, notes=''):
         """
         Creates a new session entry in the sessions table and returns it's ID

@@ -16,6 +16,7 @@
         IconButton: #Delete button
             text: u'\uf00d'
             color: ColorScheme.get_primary()
+            on_press: root.prompt_delete_session()
     BoxLayout:
         size_hint_y: 0.9
         orientation: 'vertical'
