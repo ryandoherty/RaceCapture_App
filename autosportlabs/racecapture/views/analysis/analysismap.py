@@ -1,11 +1,12 @@
-from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidget
-from autosportlabs.uix.track.racetrackview import RaceTrackView
 from kivy.properties import ObjectProperty
 from kivy.app import Builder
-from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from kivy.core.window import Window
+from kivy.clock import Clock
+from kivy.graphics.transformation import Matrix
+from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidget
+from autosportlabs.uix.track.racetrackview import RaceTrackView
+from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.racecapture.datastore import Filter
-
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 
 class AnalysisMap(AnalysisWidget):
@@ -18,6 +19,18 @@ class AnalysisMap(AnalysisWidget):
         self.track = None
         Window.bind(on_motion=self.on_motion)
 
+    def on_size(self, width, height):
+        print('on resize')
+                
+    def on_center_map(self):    
+        scatter = self.ids.scatter
+        scatter.scale = 1
+        scatter.rotation = 0
+        scatter.transform = Matrix().translate(self.pos[0], self.pos[1], 0)
+    
+    def on_options(self):
+        print('on options')
+        
     def on_motion(self, instance, event, motion_event):
         if motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
             scatter = self.ids.scatter

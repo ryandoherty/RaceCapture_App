@@ -1,4 +1,5 @@
 <AnalysisMap>:
+    options_enabled: True
     canvas.before:
         Color:
             rgba: ColorScheme.get_dark_background_translucent()
@@ -7,8 +8,19 @@
             size: self.size
     Scatter:
         id: scatter
+        auto_bring_to_front: False
         TrackMap:
             id: track
             height: root.height
             width: root.width
+    AnchorLayout:
+        id: options_button
+        anchor_x: 'left'
+        anchor_y: 'top'
+        AnchorLayout:
+            size_hint: (0.2, 0.1)
+            IconButton:
+                id: options
+                text: u'\uf096'
+                on_press: root.on_center_map()
 
