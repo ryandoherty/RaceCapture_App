@@ -22,6 +22,7 @@ from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.uix.color.colorsequence import ColorSequence
+from autosportlabs.racecapture.theme.color import ColorScheme
 
 import traceback
 
