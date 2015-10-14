@@ -2,6 +2,7 @@ import kivy
 kivy.require('1.9.0')
 from kivy.logger import Logger
 from kivy.app import Builder
+from kivy.clock import Clock
 from kivy.uix.anchorlayout import AnchorLayout
 from iconbutton import IconButton
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectView
@@ -26,7 +27,14 @@ class AnalysisWidget(AnchorLayout):
         self.selected_laps = {}
         self.settings = kwargs.get('settings')
         self.datastore = kwargs.get('datastore')
+        Clock.schedule_once(lambda dt: self.add_option_buttons())
+        
+    def add_option_buttons(self):
+        pass
     
+    def append_option_button(self, button):
+        self.ids.options_bar.add_widget(button)
+        
     def on_options_enabled(self, instance, value):
         if value == False:
             self.remove_widget(self.ids.options_button)

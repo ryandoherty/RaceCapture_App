@@ -7,6 +7,8 @@ from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidg
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.racecapture.datastore import Filter
+from iconbutton import IconButton
+
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 
 class AnalysisMap(AnalysisWidget):
@@ -18,16 +20,16 @@ class AnalysisMap(AnalysisWidget):
         super(AnalysisMap, self).__init__(**kwargs)
         self.track = None
         Window.bind(on_motion=self.on_motion)
-
-    def on_size(self, width, height):
-        print('on resize')
                 
-    def on_center_map(self):    
+    def on_center_map(self, *args):    
         scatter = self.ids.scatter
         scatter.scale = 1
         scatter.rotation = 0
         scatter.transform = Matrix().translate(self.pos[0], self.pos[1], 0)
-    
+
+    def add_option_buttons(self):
+        self.append_option_button(IconButton(text=u'\uf096', on_press=self.on_center_map))
+                    
     def on_options(self):
         print('on options')
         
