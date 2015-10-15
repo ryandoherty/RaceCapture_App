@@ -17,6 +17,7 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from iconbutton import IconButton
+from fieldlabel import FieldLabel
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/addstreamview.kv')
 
@@ -117,10 +118,11 @@ class FileConnectView(BaseStreamConnectView):
 class LogImportWidget(BoxLayout):
     datastore = ObjectProperty(None)
     settings = ObjectProperty(None)
-    
+
     def __init__(self, **kwargs):
         super(LogImportWidget, self).__init__(**kwargs)
         self.register_event_type('on_import_complete')
+        self._log_path = None
 
     def on_import_complete(self, *args):
         pass
@@ -130,10 +132,10 @@ class LogImportWidget(BoxLayout):
         self.datastore_select = None
 
     def set_dstore_path(self, instance):
-        filename = os.path.join(instance.path, instance.filename)
+        filename = os.path.join(instance.path, instance.filename)        
         if not filename.endswith('.sq3'):
             filename = filename + '.sq3'
-        self.ids['dstore_path'].text = filename
+        self.ids.dstore_path.text = filename
         self.datastore_select.dismiss()
 
     def select_dstore(self):
@@ -150,8 +152,11 @@ class LogImportWidget(BoxLayout):
 
     def set_log_path(self, instance):
         path = instance.selection[0]
-        self.ids['log_path'].text = path
-        self.ids['session_name'].text = os.path.basename(path) 
+        self._log_path = path
+        base_name = os.path.basename(path)
+        session_name, file_extension = os.path.splitext(base_name)
+        self.ids.log_path.text = base_name
+        self.ids.session_name.text =  session_name
         
         self._log_select.dismiss()
         self.set_import_file_path(instance.path)
@@ -176,18 +181,18 @@ class LogImportWidget(BoxLayout):
         Clock.schedule_once(lambda dt: self.dispatch('on_import_complete'))
 
     def _update_progress(self, percent_complete=0):
-        if self.ids['current_status'].text != "Loading log records":
-            self.ids['current_status'].text = "Loading log records"
-        self.ids['log_load_progress'].value = int(percent_complete)
+        if self.ids.current_status.text != "Loading log records":
+            self.ids.current_status.text = "Loading log records"
+        self.ids.log_load_progress.value = int(percent_complete)
 
     def load_log(self):
-        logpath = self.ids['log_path'].text
-        session_name = self.ids['session_name'].text
-        session_notes = self.ids['session_notes'].text
+        logpath = self._log_path
+        session_name = self.ids.session_name.text.strip()
+        session_notes = self.ids.session_notes.text.strip()
         
         dstore_path = self.settings.userPrefs.get_datastore_location()
 
-        if logpath == '':
+        if not logpath:
             alertPopup("No Log Specified",
                       "Please select a log file to import")
             return
@@ -206,13 +211,13 @@ class LogImportWidget(BoxLayout):
             else:
                 self.datastore.new(dstore_path)
 
-        print "loading log", self.ids['log_path'].text
+        print "loading log", self.ids.log_path.text
 
         if session_name == '':
             alertPopup("No session name specified", "Please specify a name for this session")
             return
 
-        self.ids['current_status'].text = "Initializing Datastore"
+        self.ids.current_status.text = "Initializing Datastore"
 
         t = Thread(target=self._loader_thread, args=(logpath, session_name, session_notes))
         t.daemon = True

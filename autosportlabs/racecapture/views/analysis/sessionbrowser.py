@@ -57,6 +57,9 @@ class Session(BoxLayout):
     def on_delete_session(self, value):
         pass
     
+    def edit_session(self):
+        print('edit session')
+        
     def prompt_delete_session(self):
         def _on_answer(instance, answer):
             if answer:
