@@ -214,8 +214,8 @@ class LogImportWidget(BoxLayout):
 
         print "loading log", self.ids.log_path.text
 
-        if session_name == '':
-            alertPopup("No session name specified", "Please specify a name for this session")
+        if not session_name or len(session_name) == 0:
+            alertPopup('Error', 'A session name must be specified')
             return
 
         self.ids.current_status.text = "Initializing Datastore"

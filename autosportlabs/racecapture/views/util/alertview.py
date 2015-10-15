@@ -7,6 +7,7 @@ from kivy.metrics import dp
 from kivy.app import Builder
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.clock import Clock
+from iconbutton import IconButton
 
 __all__ = ('alertPopup, confirmPopup, okPopup, editor_popup')
 
@@ -20,11 +21,12 @@ Builder.load_string('''
         size_hint_y: None
         height: '44sp'
         spacing: '5sp'
-        Button:
-            text: 'Ok'
-            on_release: root.dispatch('on_answer', True)
-        Button:
-            text: 'Cancel'
+        IconButton:
+            text: u'\uf00c'
+            on_press: root.dispatch('on_answer', True)
+        IconButton:
+            text: u'\uf00d'
+            color: ColorScheme.get_primary()            
             on_release: root.dispatch('on_answer', False)
             
 <OkPopup>:
@@ -36,9 +38,9 @@ Builder.load_string('''
         size_hint_y: None
         height: '44sp'
         spacing: '5sp'
-        Button:
-            text: 'Ok'
-            on_release: root.dispatch('on_ok')
+        IconButton:
+            text: u'\uf00c'
+            on_press: root.dispatch('on_answer', True)
             
             
 <EditorPopup>:
@@ -51,11 +53,12 @@ Builder.load_string('''
         size_hint_y: None
         height: '44sp'
         spacing: '5sp'
-        Button:
-            text: 'Ok'
-            on_release: root.dispatch('on_answer', True)
-        Button:
-            text: 'Cancel'
+        IconButton:
+            text: u'\uf00c'
+            on_press: root.dispatch('on_answer', True)
+        IconButton:
+            text: u'\uf00d'
+            color: ColorScheme.get_primary()            
             on_release: root.dispatch('on_answer', False)
             
 ''')
