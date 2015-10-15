@@ -13,6 +13,7 @@ from kivy.uix.screenmanager import Screen
 from utils import kvFind
 from kivy.adapters.listadapter import ListAdapter
 from autosportlabs.uix.button.featurebutton import FeatureButton
+from autosportlabs.uix.textwidget import FieldInput
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
