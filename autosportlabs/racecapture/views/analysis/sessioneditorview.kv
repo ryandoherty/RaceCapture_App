@@ -1,0 +1,32 @@
+#:kivy 1.8
+<SessionEditorView>:
+    BoxLayout:
+        spacing: dp(10)
+        padding: (sp(5), sp(5), sp(5), sp(5))
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: sp(5)            
+            size_hint_y: 0.7
+            
+            BoxLayout:
+                size_hint_y: 0.15
+                orientation: 'horizontal'
+                FieldLabel: 
+                    text: 'Session Name'
+                FieldInput:
+                    id: session_name
+                    
+            BoxLayout:
+                size_hint_y: 0.85
+                orientation: 'vertical'
+                spacing: sp(5)
+                FieldLabel:
+                    size_hint_y: 0.1
+                    size_hint_x: 1.0
+                    text: 'Log book'
+                TextInput:
+                    id: session_notes
+                    size_hint_y: 0.9
+
+

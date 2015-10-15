@@ -857,3 +857,9 @@ class DataStore(object):
             sessions.append(Session(ses_id=row[0], name=row[1], notes=row[2], date=row[3]))
         
         return sessions
+    
+    def update_session(self, session):
+        print(session.ses_id)
+        self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.ses_id ,))
+        self._conn.commit()
+        

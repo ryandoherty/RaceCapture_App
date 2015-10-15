@@ -16,7 +16,8 @@ from autosportlabs.racecapture.views.util.viewutils import format_laptime
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from autosportlabs.racecapture.theme.color import ColorScheme
-from autosportlabs.racecapture.views.util.alertview import confirmPopup, alertPopup
+from autosportlabs.racecapture.views.analysis.sessioneditorview import SessionEditorView
+from autosportlabs.racecapture.views.util.alertview import confirmPopup, alertPopup, editor_popup
 import traceback
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessionbrowser.kv')
@@ -46,6 +47,7 @@ class Session(BoxLayout):
         self.notes = notes
         self.lap_count = 0
         self.register_event_type('on_delete_session')
+        self.register_event_type('on_edit_session')
     
     def append_lap(self, session, lap, laptime):
         text = str(int(lap)) + ' :: ' + str(laptime)
@@ -56,9 +58,12 @@ class Session(BoxLayout):
     
     def on_delete_session(self, value):
         pass
-    
+
+    def on_edit_session(self, value):
+        pass
+        
     def edit_session(self):
-        print('edit session')
+        self.dispatch('on_edit_session', self.ses_id)
         
     def prompt_delete_session(self):
         def _on_answer(instance, answer):
@@ -132,10 +137,30 @@ class SessionBrowser(BoxLayout):
         item.session_widget = session
         item.bind(on_collapsed=self.on_session_collapsed)
         session.bind(on_delete_session=self.delete_session)
+        session.bind(on_edit_session=self.edit_session)
         item.add_widget(session)
         self._accordion.add_widget(item)
         return session
         
+    def edit_session(self, instance, ses_id):
+        def _on_answer(instance, answer):
+            if answer:
+                session_name = session_editor.session_name
+                if not session_name or len(session_name) == 0:
+                    alertPopup('Error', 'A session name must be specified')
+                    return
+                session.name = session_editor.session_name
+                session.notes = session_editor.session_notes
+                self.datastore.update_session(session)
+                self.refresh_session_list()
+            popup.dismiss()
+        
+        session = self.datastore.get_session_by_id(ses_id, self.sessions)
+        session_editor = SessionEditorView()
+        session_editor.session_name = session.name
+        session_editor.session_notes = session.notes
+        popup = editor_popup('Edit Session', session_editor, _on_answer)
+    
     def delete_session(self, instance, id):
         try:
             self.datastore.delete_session(id)
