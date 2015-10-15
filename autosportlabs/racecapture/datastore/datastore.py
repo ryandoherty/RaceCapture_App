@@ -859,7 +859,6 @@ class DataStore(object):
         return sessions
     
     def update_session(self, session):
-        print(session.ses_id)
         self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.ses_id ,))
         self._conn.commit()
         

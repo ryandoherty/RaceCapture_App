@@ -97,6 +97,7 @@ class SessionBrowser(BoxLayout):
         self.register_event_type('on_lap_selected')
         accordion = Accordion(orientation='vertical', size_hint=(1.0, None))
         sv = ScrollContainer(size_hint=(1.0, 1.0), do_scroll_x=False)
+        self._selected_laps = {}
         sv.add_widget(accordion)
         self._accordion = accordion
         self.add_widget(sv)
@@ -111,7 +112,6 @@ class SessionBrowser(BoxLayout):
             f = Filter().gt('LapCount', 0)
             for session in sessions:
                 session = self.append_session(ses_id=session.ses_id, name=session.name, notes=session.notes)
-                
                 dataset = self.datastore.query(sessions=[session.ses_id],
                                         channels=['LapCount', 'LapTime'],
                                         data_filter=f,
@@ -119,7 +119,7 @@ class SessionBrowser(BoxLayout):
         
                 records = dataset.fetch_records()
                 for r in records:
-                    lapcount = r[1]
+                    lapcount = int(r[1])
                     laptime = r[2]
                     self.append_lap(session, lapcount, laptime)
             self.sessions = sessions
@@ -172,6 +172,9 @@ class SessionBrowser(BoxLayout):
         
     def append_lap(self, session, lap, laptime):
         lapitem = session.append_lap(session.ses_id, lap, laptime)
+        source_key = str(SourceRef(lap, session.ses_id))
+        if self._selected_laps.get(source_key):
+            lapitem.state = 'down'
         lapitem.bind(on_press=self.lap_selected)
 
     def on_lap_selected(self, *args):
@@ -179,7 +182,13 @@ class SessionBrowser(BoxLayout):
     
     def lap_selected(self, instance):
         selected = instance.state == 'down'
-        self.dispatch('on_lap_selected', SourceRef(instance.lap, instance.session), selected)
+        source_ref = SourceRef(instance.lap, instance.session)
+        self.dispatch('on_lap_selected', source_ref, selected)
+        source_key = str(source_ref)
+        if selected:
+            self._selected_laps[source_key] = instance
+        else:
+            self._selected_laps.pop(source_key, None)
         
     def clear_sessions(self):
         self._accordion.clear_widgets()
