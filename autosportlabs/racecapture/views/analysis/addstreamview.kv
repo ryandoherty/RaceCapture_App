@@ -17,29 +17,32 @@
 		    name: 'file_connect'
         
 <AddStreamSelectView>:
-	GridLayout:
-		size_hint_y: 0.9
-		padding: [self.height * 0.25, self.height * 0.25]
-		spacing: self.height * 0.25
-		rows: 1
-		cols: 3
-		FeatureButton:
-			icon: u'\uf0ed'
-			title: 'Cloud'
-			on_press: root.connect_cloud_stream()
-		FeatureButton:
-			icon: u'\uf1eb'
-			title: 'Wireless'
-			on_press: root.connect_wireless_stream()				
-		FeatureButton:
-			icon: u'\uf07c'
-			title: 'Import'
-			on_press: root.connect_file_stream()	
-	FieldLabel:
-		size_hint_y: 0.1
-		font_size: root.height * 0.1
-		font_name: 'resource/fonts/ASL_regular.ttf'
-		text: 'choose a stream to connect'
+    BoxLayout:
+        orientation: 'vertical'
+    	GridLayout:
+    		size_hint_y: 0.8
+    		padding: [self.height * 0.1, self.height * 0.15]
+    		spacing: self.height * 0.1
+    		rows: 1
+    		cols: 3
+    		DisabledFeatureButton:
+    			icon: u'\uf0ed'
+    			title: 'Cloud'
+    			on_press: root.connect_cloud_stream()
+    		DisabledFeatureButton:
+    			icon: u'\uf1eb'
+    			title: 'Wireless'
+    			on_press: root.connect_wireless_stream()				
+    		FeatureButton:
+    			icon: u'\uf07c'
+    			title: 'Import'
+    			on_press: root.connect_file_stream()	
+    	FieldLabel:
+    		size_hint_y: 0.2
+    		font_size: root.height * 0.1
+    		font_name: 'resource/fonts/ASL_regular.ttf'
+    		halign: 'center'
+    		text: 'choose a stream to connect'
 		
 <FileConnectView>:
     BoxLayout:
