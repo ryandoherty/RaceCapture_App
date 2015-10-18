@@ -127,7 +127,10 @@ class AnalysisView(Screen):
         source = marker.sourceref
         cache = self._datastore.get_location_data(source)
         if cache != None:
-            point = cache[marker.data_index]
+            try:
+                point = cache[marker.data_index]
+            except IndexError:
+                point = cache[len(cache) - 1]
             self.ids.analysismap.update_reference_mark(source, point)
             self.ids.channelvalues.update_reference_mark(source, marker.data_index)
                           

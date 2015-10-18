@@ -34,7 +34,7 @@ class ChannelPlot(object):
 class LineChart(ChannelAnalysisWidget):
     color_sequence = ObjectProperty(None)
     _channel_plots = {}
-    ZOOM_FACTOR = .1
+    ZOOM_SCALING = .02
     
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
@@ -45,6 +45,7 @@ class LineChart(ChannelAnalysisWidget):
         self.max_distance = 0
         self.current_distance = 0
         self.current_offset = 0
+        self.marker_pct = 0
 
     def on_touch_down(self, touch):
         if self.collide_point(touch.x, touch.y):
@@ -67,14 +68,23 @@ class LineChart(ChannelAnalysisWidget):
             chart = self.ids.chart
             try:
                 button = motion_event.button
+                zoom = self.marker_pct
+                zoom_right = 1 / zoom
+                zoom_left = 1 / (1 - zoom)
+                zoom_left = zoom_left * self.ZOOM_SCALING
+                zoom_right = zoom_right * self.ZOOM_SCALING
+
                 if button == 'scrollup':
-                    self.current_distance += self.ZOOM_FACTOR if self.current_distance < self.max_distance else 0
-                    self.current_offset -= self.ZOOM_FACTOR if self.current_offset > self.ZOOM_FACTOR else 0
+                    self.current_distance += zoom_right
+                    self.current_offset -= zoom_left
                 else:
                     if button == 'scrolldown' and self.current_offset < self.current_distance:
-                        self.current_distance -= self.ZOOM_FACTOR if self.current_distance > self.ZOOM_FACTOR else 0
-                        self.current_offset += self.ZOOM_FACTOR if self.current_offset < self.max_distance else 0
+                        self.current_distance -= zoom_right
+                        self.current_offset += zoom_left
 
+                self.current_distance = self.max_distance if self.current_distance > self.max_distance else self.current_distance
+                self.current_offset = 0 if self.current_offset < 0 else self.current_offset
+                
                 chart.xmax = self.current_distance
                 chart.xmin = self.current_offset
             except:
@@ -82,6 +92,28 @@ class LineChart(ChannelAnalysisWidget):
     
     def on_marker(self, marker_event):
         pass
+
+    def dispatch_marker(self, x, y):
+        mouse_x = x - self.pos[0]
+        width = self.size[0]
+        pct = mouse_x / width
+        self.marker_pct = pct
+        data_index = self.current_offset + (pct * (self.current_distance - self.current_offset))
+        for channel_plot in self._channel_plots.itervalues():
+            index = (data_index / self.max_distance) * channel_plot.samples
+            marker = MarkerEvent(int(index), channel_plot.sourceref)
+            self.dispatch('on_marker', marker)
+        
+    def on_touch_move(self, touch):
+        if not self.collide_point(touch.x, touch.y):
+            return False
+        self.dispatch_marker(touch.x, touch.y)
+        
+    def on_mouse_pos(self, x, pos):
+        if not self.collide_point(pos[0], pos[1]):
+            return False
+        
+        self.dispatch_marker(pos[0], pos[1])
 
     def remove_channel(self, channel, ref):
         remove = []
@@ -148,23 +180,3 @@ class LineChart(ChannelAnalysisWidget):
         channel_data = ChannelData(data=records, channel=channel, min=channel_meta.min, max=channel_meta.max, source=lap_ref)
         self.add_channel(channel_data)
         
-    def dispatch_marker(self, x, y):
-        mouse_x = x - self.pos[0]
-        width = self.size[0]
-        pct = mouse_x / width
-        
-        for channel_plot in self._channel_plots.itervalues():
-            data_index = int(channel_plot.samples * pct)
-            marker = MarkerEvent(data_index, channel_plot.sourceref)
-            self.dispatch('on_marker', marker)
-        
-    def on_touch_move(self, touch):
-        if not self.collide_point(touch.x, touch.y):
-            return False
-        self.dispatch_marker(touch.x, touch.y)
-        
-    def on_mouse_pos(self, x, pos):
-        if not self.collide_point(pos[0], pos[1]):
-            return False
-        
-        self.dispatch_marker(pos[0], pos[1])

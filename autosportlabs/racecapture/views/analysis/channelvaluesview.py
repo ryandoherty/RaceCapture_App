@@ -95,7 +95,13 @@ class ChannelValuesView(ChannelAnalysisWidget):
             #widget.session = str(source.session)
             #widget.lap = str(source.lap)
             #widget.channel = channel
-            widget.value = str(stats.values[point])
+            values = stats.values
+            try:
+                value = str(values[point])
+            except IndexError:
+                value = values[len(values) - 1]
+            widget.value = value 
+                
 
     def _refresh_channels(self):
         channels_grid = self.ids.channel_values
