@@ -35,12 +35,20 @@ class LineChart(ChannelAnalysisWidget):
     color_sequence = ObjectProperty(None)
     _channel_plots = {}
     ZOOM_SCALING = .02
+    TOUCH_ZOOM_SCALING = 0.001
     
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
         self.register_event_type('on_marker')
         Window.bind(mouse_pos=self.on_mouse_pos)
         Window.bind(on_motion=self.on_motion)
+        
+        self._touches = []
+        self._last_touch_pos = {}
+        self._touch_distance = 0
+        self._touch_offset = 0
+        self._touch_distance = 0
+
         self.zoom_level = 1
         self.max_distance = 0
         self.current_distance = 0
@@ -48,6 +56,18 @@ class LineChart(ChannelAnalysisWidget):
         self.marker_pct = 0
 
     def on_touch_down(self, touch):
+        
+        touch.grab(self)
+        print('grab')
+        if len(self._touches) == 1:
+            self._touch_distance = self._touches[0].distance(touch)
+            self._touch_offset = self.current_offset
+            self._touch_distance = self.current_distance
+            
+        self._touches.append(touch)
+        
+        self._last_touch_pos[touch] = touch.pos
+                
         if self.collide_point(touch.x, touch.y):
             if hasattr(touch, 'button'):
                 button = touch.button
@@ -63,10 +83,25 @@ class LineChart(ChannelAnalysisWidget):
             super(LineChart, self).on_touch_down(touch)
             return False
 
+    def on_touch_up(self, touch):   
+        x, y = touch.x, touch.y
+
+        # remove it from our saved touches
+        if touch in self._touches and touch.grab_state:
+            print('ungrab')
+            touch.ungrab(self)
+            del self._last_touch_pos[touch]
+            self._touches.remove(touch)
+
+        # stop propagating if its within our bounds
+        if self.collide_point(x, y):
+            return True
+        
     def on_motion(self, instance, event, motion_event):
         if motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
             chart = self.ids.chart
             try:
+                
                 button = motion_event.button
                 zoom = self.marker_pct
                 zoom_right = 1 / zoom
@@ -104,12 +139,45 @@ class LineChart(ChannelAnalysisWidget):
             marker = MarkerEvent(int(index), channel_plot.sourceref)
             self.dispatch('on_marker', marker)
         
-    def on_touch_move(self, touch):
-        if not self.collide_point(touch.x, touch.y):
-            return False
-        self.dispatch_marker(touch.x, touch.y)
         
+    def on_touch_move(self, touch):
+        x, y = touch.x, touch.y
+        
+        if self.collide_point(x, y):
+            touches = len(self._touches)
+            if touches == 1:
+                #regular dragging / updating marker
+                self.dispatch_marker(x, y)
+            elif touches == 2:
+                #handle pinch zoom
+                touch1 = self._touches[0]
+                touch2 = self._touches[1]
+                distance = touch1.distance(touch2)
+                delta = distance - self._touch_distance
+                delta = delta * self.TOUCH_ZOOM_SCALING
+                
+                #zoom around a dynamic center between two touch points
+                touch_center_x = touch1.x + ((touch2.x - touch1.x) / 2)
+                width = self.size[0]
+                pct = touch_center_x / width
+                zoom_right = 1 / pct
+                zoom_left = 1 / (1 - pct)
+                zoom_left = zoom_left * delta
+                zoom_right = zoom_right * delta
+
+                self.current_distance = self._touch_distance - zoom_right
+                self.current_offset = self._touch_offset + zoom_left
+                self.current_distance = self.max_distance if self.current_distance > self.max_distance else self.current_distance
+                self.current_offset = 0 if self.current_offset < 0 else self.current_offset
+                
+                chart = self.ids.chart
+                chart.xmax = self.current_distance
+                chart.xmin = self.current_offset
+            return True
+                        
     def on_mouse_pos(self, x, pos):
+        if len(self._touches) > 1:
+            return False
         if not self.collide_point(pos[0], pos[1]):
             return False
         
@@ -167,16 +235,4 @@ class LineChart(ChannelAnalysisWidget):
     def query_new_channel(self, channel, source_ref):
         channel_data = self.datastore.get_channel_data(source_ref, ['Distance', channel])
         self.add_channel(channel, channel_data)        
-        
-    def query_new_channel2(self, channel, lap_ref):
-        lap = lap_ref.lap
-        session = lap_ref.session
-        f = Filter().eq('LapCount', lap)
-        dataset = self.datastore.query(sessions=[session],
-                         channels=['Distance', channel], data_filter=f)
 
-        channel_meta = self.datastore.get_channel(channel)
-        records = dataset.fetch_records()
-        channel_data = ChannelData(data=records, channel=channel, min=channel_meta.min, max=channel_meta.max, source=lap_ref)
-        self.add_channel(channel_data)
-        
