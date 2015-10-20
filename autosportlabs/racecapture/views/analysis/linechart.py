@@ -34,8 +34,8 @@ class ChannelPlot(object):
 class LineChart(ChannelAnalysisWidget):
     color_sequence = ObjectProperty(None)
     _channel_plots = {}
-    ZOOM_SCALING = .02
-    TOUCH_ZOOM_SCALING = 0.001
+    ZOOM_SCALING = 0.02
+    TOUCH_ZOOM_SCALING = 0.000001
     
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
@@ -44,8 +44,7 @@ class LineChart(ChannelAnalysisWidget):
         Window.bind(on_motion=self.on_motion)
         
         self._touches = []
-        self._last_touch_pos = {}
-        self._touch_distance = 0
+        self._initial_touch_distance = 0
         self._touch_offset = 0
         self._touch_distance = 0
 
@@ -56,27 +55,16 @@ class LineChart(ChannelAnalysisWidget):
         self.marker_pct = 0
 
     def on_touch_down(self, touch):
-        
-        touch.grab(self)
-        print('grab')
-        if len(self._touches) == 1:
-            self._touch_distance = self._touches[0].distance(touch)
-            self._touch_offset = self.current_offset
-            self._touch_distance = self.current_distance
-            
-        self._touches.append(touch)
-        
-        self._last_touch_pos[touch] = touch.pos
+        x, y = touch.x, touch.y
+        if self.collide_point(x, y):
+            touch.grab(self)
+            if len(self._touches) == 1:
+                self._initial_touch_distance = self._touches[0].distance(touch)
+                self._touch_offset = self.current_offset
+                self._touch_distance = self.current_distance
                 
-        if self.collide_point(touch.x, touch.y):
-            if hasattr(touch, 'button'):
-                button = touch.button
-                scroll_dir = 0
-                if touch.is_mouse_scrolling:
-                    if 'down' in button or 'left' in button:
-                        scroll_dir = 1
-                    if 'up' in button or 'right' in button:
-                        scroll_dir = -1
+            self._touches.append(touch)
+                    
             super(LineChart, self).on_touch_down(touch)
             return True
         else:
@@ -87,10 +75,8 @@ class LineChart(ChannelAnalysisWidget):
         x, y = touch.x, touch.y
 
         # remove it from our saved touches
-        if touch in self._touches and touch.grab_state:
-            print('ungrab')
+        if touch in self._touches: # and touch.grab_state:
             touch.ungrab(self)
-            del self._last_touch_pos[touch]
             self._touches.remove(touch)
 
         # stop propagating if its within our bounds
@@ -153,8 +139,8 @@ class LineChart(ChannelAnalysisWidget):
                 touch1 = self._touches[0]
                 touch2 = self._touches[1]
                 distance = touch1.distance(touch2)
-                delta = distance - self._touch_distance
-                delta = delta * self.TOUCH_ZOOM_SCALING
+                delta = distance - self._initial_touch_distance
+                delta = delta * (float(self.size[0]) * self.TOUCH_ZOOM_SCALING ) 
                 
                 #zoom around a dynamic center between two touch points
                 touch_center_x = touch1.x + ((touch2.x - touch1.x) / 2)
@@ -167,9 +153,13 @@ class LineChart(ChannelAnalysisWidget):
 
                 self.current_distance = self._touch_distance - zoom_right
                 self.current_offset = self._touch_offset + zoom_left
-                self.current_distance = self.max_distance if self.current_distance > self.max_distance else self.current_distance
-                self.current_offset = 0 if self.current_offset < 0 else self.current_offset
                 
+                #Rail the zooming
+                self.current_distance = self.max_distance if self.current_distance > self.max_distance else self.current_distance
+                self.current_distance = self.current_offset + self.TOUCH_ZOOM_SCALING if self.current_distance < self.current_offset else self.current_distance
+                self.current_offset = 0 if self.current_offset < 0 else self.current_offset
+                self.current_offset = self.current_distance + self.TOUCH_ZOOM_SCALING if self.current_offset > self.current_distance else self.current_offset
+
                 chart = self.ids.chart
                 chart.xmax = self.current_distance
                 chart.xmin = self.current_offset
