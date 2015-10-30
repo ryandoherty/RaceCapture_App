@@ -19,6 +19,8 @@ class AnalysisMap(AnalysisWidget):
     def __init__(self, **kwargs):
         super(AnalysisMap, self).__init__(**kwargs)
         self.track = None
+        self.heat_enabed = False
+        self.sources = []
         Window.bind(on_motion=self.on_motion)
                 
     def on_center_map(self, *args):    
@@ -30,8 +32,16 @@ class AnalysisMap(AnalysisWidget):
     def add_option_buttons(self):
         self.append_option_button(IconButton(text=u'\uf096', on_press=self.on_center_map))
                     
+    
     def on_options(self):
-        print('on options')
+        if self.heat_enabed:
+            for key in self.sources:
+                self.remove_heat_values(key)
+            self.heat_enabed = False
+        else:
+            for key in self.sources:
+                self.add_heat_values('TPS', key)
+            self.heat_enabed = True
         
     def on_motion(self, instance, event, motion_event):
         if motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
@@ -68,10 +78,12 @@ class AnalysisMap(AnalysisWidget):
         self.ids.track.update_marker(str(source), point)
 
     def add_map_path(self, source_key, path, color):
-        self.ids.track.add_path(source_key, path, color)
+        self.sources.append(source_key)
+        self.ids.track.add_path(str(source_key), path, color)
 
     def remove_map_path(self, source_key):
-        self.ids.track.remove_path(source_key)
+        self.ids.track.remove_path(str(source_key))
+        self.sources.remove(source_key)
 
     def add_heat_values(self, channel, lap_ref):
         lap = lap_ref.lap

@@ -62,8 +62,8 @@ class AnalysisView(Screen):
             self.ids.analysismap.add_reference_mark(source_key, map_path_color)
             cache = self._datastore.get_location_data(source_ref)
             self._sync_analysis_map(source_ref.session)
-            self.ids.analysismap.add_map_path(source_key, cache, map_path_color)
-            #self.ids.analysismap.add_heat_values('TPS', source_ref)
+            self.ids.analysismap.add_map_path(source_ref, cache, map_path_color)
+          #  self.ids.analysismap.add_heat_values('TPS', source_ref)
 
         else:
             self.ids.mainchart.remove_lap(source_ref)
