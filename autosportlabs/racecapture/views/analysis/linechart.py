@@ -120,6 +120,7 @@ class LineChart(ChannelAnalysisWidget):
         pct = mouse_x / width
         self.marker_pct = pct
         data_index = self.current_offset + (pct * (self.current_distance - self.current_offset))
+        self.ids.chart.marker_x = data_index
         for channel_plot in self._channel_plots.itervalues():
             index = (data_index / self.max_distance) * channel_plot.samples
             marker = MarkerEvent(int(index), channel_plot.sourceref)

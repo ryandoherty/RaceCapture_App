@@ -61,7 +61,7 @@ from kivy.properties import NumericProperty, BooleanProperty,\
     BoundedNumericProperty, StringProperty, ListProperty, ObjectProperty,\
     DictProperty, AliasProperty
 from kivy.clock import Clock
-from kivy.graphics import Mesh, Color, Rectangle
+from kivy.graphics import Mesh, Color, Rectangle, Line
 from kivy.graphics import Fbo
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
@@ -123,6 +123,15 @@ class Graph(Widget):
     _ticks_majory = ListProperty([])
     _ticks_minory = ListProperty([])
 
+    #manages the marker position on the graph
+    marker_x = NumericProperty(None)
+    '''Position of the marker, in units of % of X axis
+    '''
+
+    marker_color = ListProperty([1, 1, 1 ,0.5])
+    '''Color of marker; defauts to white, 50% alpha
+    '''
+
     tick_color = ListProperty([.25, .25, .25, 1])
     '''Color of the grid/ticks, default to 1/4. grey.
     '''
@@ -144,6 +153,8 @@ class Graph(Widget):
 
         with self.canvas:
             self._fbo = Fbo(size=self.size)
+            self._marker_color = Color(self.marker_color)
+            self._marker = Line()
 
         with self._fbo:
             self._background_color = Color(*self.background_color)
@@ -192,6 +203,14 @@ class Graph(Widget):
         super(Graph, self).remove_widget(widget)
         if widget is self._plot_area:
             self.canvas = canvas
+
+    def on_marker_x(self, instance, value):
+        xmin = self.xmin
+        xmax = self.xmax
+        pct = (value - xmin) / (xmax - xmin)
+        x = self.width * pct
+        px, py = self.pos
+        self._marker.points = [px + x, py, px + x, py + self.height]
 
     def _get_ticks(self, major, minor, log, s_min, s_max):
         if major and s_max > s_min:
@@ -1020,7 +1039,7 @@ class LinePlot(Plot):
         super(LinePlot, self).__init__(**kwargs)
     
     def create_drawings(self):
-        from kivy.graphics import Line, RenderContext
+        from kivy.graphics import RenderContext
 
         self._grc = RenderContext(
                 use_parent_modelview=True,
