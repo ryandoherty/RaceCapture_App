@@ -207,6 +207,8 @@ class Graph(Widget):
     def on_marker_x(self, instance, value):
         xmin = self.xmin
         xmax = self.xmax
+        if xmax <= xmin:
+            return
         pct = (value - xmin) / (xmax - xmin)
         x = self.width * pct
         px, py = self.pos

@@ -8,6 +8,8 @@ from installfix_garden_graph import Graph, LinePlot, SmoothLinePlot
 from kivy.app import Builder
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
+from collections import OrderedDict
+import bisect
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 
@@ -122,7 +124,8 @@ class LineChart(ChannelAnalysisWidget):
         data_index = self.current_offset + (pct * (self.current_distance - self.current_offset))
         self.ids.chart.marker_x = data_index
         for channel_plot in self._channel_plots.itervalues():
-            index = (data_index / self.max_distance) * channel_plot.samples
+            value_index = bisect.bisect_right(channel_plot.distance_index.keys(), data_index)
+            index = channel_plot.distance_index.values()[value_index]
             marker = MarkerEvent(int(index), channel_plot.sourceref)
             self.dispatch('on_marker', marker)
         
@@ -199,7 +202,7 @@ class LineChart(ChannelAnalysisWidget):
                                    channel_data_values.source)
         chart.add_plot(plot)
         points = []
-        distance_index = {}
+        distance_index = OrderedDict()
         max_distance = chart.xmax
         sample_index = 0
         distance_data = distance_data_values.data.values
