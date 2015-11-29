@@ -499,9 +499,11 @@ class Graph(Widget):
         xlog = self.xlog
         xmin = self.xmin
         xmax = self.xmax
-        ymin = self.ymin
-        ymax = self.ymax
+        chart_ymin = self.ymin
+        chart_ymax = self.ymax
         for plot in self.plots:
+            ymin = plot.ymin if plot.ymin else chart_ymin
+            ymax = plot.ymax if plot.ymax else chart_ymax
             plot._update(xlog, xmin, xmax, ylog, ymin, ymax, size)
 
     def _update_colors(self, *args):
@@ -876,6 +878,9 @@ class Plot(EventDispatcher):
         self.ask_draw = Clock.create_trigger(self.draw)
         self.bind(params=self.ask_draw, points=self.ask_draw)
         self._drawings = self.create_drawings()
+        #plot specific y axis min/max
+        self.ymin = None
+        self.ymax = None
 
     # this function is called by graph whenever any of the parameters
     # change. The plot should be recalculated then.

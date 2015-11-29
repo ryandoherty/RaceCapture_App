@@ -214,8 +214,8 @@ class LineChart(ChannelAnalysisWidget):
         
         channel_plot.distance_index = distance_index
         channel_plot.samples = sample_index            
-        chart.ymin = channel_data_values.min
-        chart.ymax = channel_data_values.max
+        plot.ymin = channel_data_values.min
+        plot.ymax = channel_data_values.max
         chart.xmin = 0
         chart.xmax = max_distance
         plot.points = points
