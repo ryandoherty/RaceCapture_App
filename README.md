@@ -142,3 +142,6 @@ The script will create the .App file and .dmg for distribution.
 1. install / launch the app using ./launch_apk.sh
 1. Console / debug output will appear on screen as app is downloaded, installed and run
 
+## Getting help
+* Email the developer mailing list: https://groups.google.com/forum/#!forum/autosportlabs-developers
+* File an issue: https://github.com/autosportlabs/RaceCapture_App/issues
