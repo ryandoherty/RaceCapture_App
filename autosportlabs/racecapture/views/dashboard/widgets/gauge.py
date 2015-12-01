@@ -18,6 +18,7 @@ from autosportlabs.racecapture.views.channels.channelselectview import ChannelSe
 from autosportlabs.racecapture.views.channels.channelcustomizationview import ChannelCustomizationView
 from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble
 from autosportlabs.racecapture.data.channels import *
+from autosportlabs.racecapture.views.util.viewutils import format_laptime
 
 DEFAULT_NORMAL_COLOR  = [1.0, 1.0 , 1.0, 1.0]
 
@@ -156,7 +157,7 @@ class SingleChannelGauge(Gauge):
         view = self.valueView
         if view:
             view.color = self.normal_color
-        
+
     def refresh_value(self, value):
         view = self.valueView
         if view:
@@ -168,23 +169,10 @@ class SingleChannelGauge(Gauge):
 
     def sensor_formatter(self, value):
         return "" if value is None else self.sensor_format.format(value)
-        
-    def laptime_formatter(self, value):
-        fmt = 0
-        if not value:
-            fmt =  NULL_LAP_TIME
-        else:
-            int_min_value = int(value)
-            fraction_min_view = 60.0 * (value - float(int_min_value))
-            if value == 0:
-                fmt = NULL_LAP_TIME
-            else:
-                fmt = '{}:{}'.format(int_min_value,'{0:06.3f}'.format(fraction_min_view))
-        return fmt
-        
+
     def update_value_format(self):
         if self.type == CHANNEL_TYPE_TIME:
-            self.value_formatter = self.laptime_formatter
+            self.value_formatter = format_laptime
         else:
             self.sensor_format = '{:.' + str(self.precision) + 'f}'
             self.value_formatter = self.sensor_formatter

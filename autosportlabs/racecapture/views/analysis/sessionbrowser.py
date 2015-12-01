@@ -18,6 +18,7 @@ from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.racecapture.views.analysis.sessioneditorview import SessionEditorView
 from autosportlabs.racecapture.views.util.alertview import confirmPopup, alertPopup, editor_popup
+from autosportlabs.racecapture.views.util.viewutils import format_laptime
 import traceback
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessionbrowser.kv')
@@ -50,7 +51,7 @@ class Session(BoxLayout):
         self.register_event_type('on_edit_session')
     
     def append_lap(self, session, lap, laptime):
-        text = str(int(lap)) + ' :: ' + str(laptime)
+        text = '{} :: {}'.format(int(lap), format_laptime(laptime))
         lapitem = LapItemButton(session=session, text=text, lap=lap, laptime=laptime)
         self.ids.lap_list.add_widget(lapitem)
         self.lap_count += 1

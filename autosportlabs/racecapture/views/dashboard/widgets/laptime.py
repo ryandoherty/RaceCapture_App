@@ -10,6 +10,7 @@ from fieldlabel import FieldLabel
 from kivy.properties import BoundedNumericProperty, StringProperty, ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge, SingleChannelGauge
 from autosportlabs.racecapture.views.util.viewutils import format_laptime
+
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/laptime.kv')
 
 MIN_LAP_TIME=0
@@ -131,14 +132,6 @@ class CurrentLaptime(Gauge):
             if value == '':
                 view.text = ''
             else:
-                if value == None:
-                    view.text = self.NULL_LAP_TIME
-                else:
-                    intMinuteValue = int(value)
-                    fractionMinuteValue = 60.0 * (value - float(intMinuteValue))
-                    if value == MIN_LAP_TIME:
-                        view.text = self.NULL_LAP_TIME
-                    else:
-                        view.text = '{}:{}'.format(intMinuteValue,'{0:06.3f}'.format(fractionMinuteValue))
+                view.text = format_laptime(value)
 
         
