@@ -65,7 +65,7 @@ class DashboardView(Screen):
         screenMgr.add_widget(gaugeView)
         screenMgr.add_widget(tachView)
         screenMgr.add_widget(laptimeView) 
-        #screenMgr.add_widget(comboView) #TODO add support later
+        screenMgr.add_widget(comboView)
         screenMgr.add_widget(rawChannelView)
 
         gauges = list(kvFindClass(self, DigitalGauge))
