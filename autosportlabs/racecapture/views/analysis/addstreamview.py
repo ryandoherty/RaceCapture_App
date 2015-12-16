@@ -172,7 +172,7 @@ class LogImportWidget(BoxLayout):
         ok_cb = self.close_log_select
         content = LoadDialog(ok=self.set_log_path,
                              cancel=self.close_log_select,
-                             filters=['*' + '.log'],
+                             filters=['*' + '.LOG','*' + '.log'],
                              user_path=self.get_import_file_path())
         self._log_select = Popup(title="Select Log", content=content, size_hint=(0.9, 0.9))
         self._log_select.open()
