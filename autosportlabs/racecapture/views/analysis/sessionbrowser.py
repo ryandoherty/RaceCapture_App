@@ -89,8 +89,8 @@ class SessionAccordionItem(AccordionItem):
         self.dispatch('on_collapsed', value) 
     
 class SessionBrowser(BoxLayout):
-    ITEM_HEIGHT = sp(50)
-    SESSION_TITLE_HEIGHT = sp(20)
+    ITEM_HEIGHT = sp(40)
+    SESSION_TITLE_HEIGHT = sp(44)
     datastore = ObjectProperty(None)
     
     def __init__(self, **kwargs):
@@ -130,7 +130,10 @@ class SessionBrowser(BoxLayout):
     def on_session_collapsed(self, instance, value):
         if value == False:
             session_count = len(self._accordion.children)
-            self._accordion.height = (self.ITEM_HEIGHT * instance.session_widget.lap_count) + (session_count * self.SESSION_TITLE_HEIGHT)
+            lap_count = instance.session_widget.lap_count
+            session_items_height = (lap_count * self.ITEM_HEIGHT)
+            session_titles_height = (session_count * self.SESSION_TITLE_HEIGHT)
+            self._accordion.height = session_items_height + session_titles_height
         
     def append_session(self, ses_id, name, notes):
         session = Session(ses_id=ses_id, name=name, notes=notes)

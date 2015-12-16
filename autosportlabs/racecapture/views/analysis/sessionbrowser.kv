@@ -6,8 +6,9 @@
 <Session>:
     orientation: 'vertical'
     BoxLayout:
-        size_hint_y: 0.1
         orientation: 'horizontal'
+        height: sp(40)
+        size_hint_y: None
         IconButton: #Edit button
             text: u'\uf044'
             on_press: root.edit_session()
@@ -16,7 +17,6 @@
             color: ColorScheme.get_primary()
             on_press: root.prompt_delete_session()
     BoxLayout:
-        size_hint_y: 0.9
         orientation: 'vertical'
         id: lap_list
 
