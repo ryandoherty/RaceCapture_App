@@ -13,7 +13,7 @@ package.domain = com.autosportlabs
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,ttf,json,svg,cfg
+source.include_exts = py,png,jpg,kv,atlas,ttf,json,svg,cfg,obj,mtl,glsl
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
