@@ -56,10 +56,11 @@ class ImuView(Widget):
     def update_glsl(self, *largs):
         asp = self.width / float(self.height)
         asp = asp*0.3
+        asp = 0.8
         proj = Matrix()
         mat = Matrix()
         mat = mat.look_at(0.0, 0.6, self.camera_translate[2], 0, 0, 0, 0, 1, 0)
-        proj = proj.view_clip(-asp, asp, -0.5, .5, 1, 100, 1)
+        proj = proj.view_clip(-asp, asp, -0.6, .6, 1, 100, 1)
         
         self.canvas['projection_mat'] = proj
         self.canvas['modelview_mat'] = mat
@@ -71,7 +72,7 @@ class ImuView(Widget):
         self.roty = Rotate(0, 1, 0, 0)
         self.rotz = Rotate(0, 0, 0, 1)
         
-#        self.scale = Scale(0.1)
+        #self.scale = Scale(0.75)
         m = self.scene.objects.values()[0]
         UpdateNormalMatrix()
         print('diffuse color ' + str(m.diffuse_color))
