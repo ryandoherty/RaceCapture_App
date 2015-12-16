@@ -853,7 +853,7 @@ class DataStore(object):
         c = self._conn.cursor()
 
         sessions = []
-        for row in c.execute('SELECT id, name, notes, date FROM session ORDER BY date ASC;'):
+        for row in c.execute('SELECT id, name, notes, date FROM session ORDER BY name COLLATE NOCASE ASC;'):
             sessions.append(Session(ses_id=row[0], name=row[1], notes=row[2], date=row[3]))
         
         return sessions
