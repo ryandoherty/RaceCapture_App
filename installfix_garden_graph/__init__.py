@@ -317,8 +317,8 @@ class Graph(Widget):
         padding = self.padding
         x_next = padding + x
         y_next = padding + y
-        xextent = width + x
-        yextent = height + y
+        xextent = width + x - padding
+        yextent = height + y - padding
         ymin = self.ymin
         ymax = self.ymax
         xmin = self.xmin
