@@ -7,6 +7,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.togglebutton import ToggleButton
 from kivy.metrics import sp
 from kivy.uix.accordion import Accordion, AccordionItem
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.adapters.listadapter import ListAdapter
 from kivy.logger import Logger
 from kivy.clock import Clock
@@ -19,10 +20,14 @@ from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.racecapture.views.analysis.sessioneditorview import SessionEditorView
 from autosportlabs.racecapture.views.util.alertview import confirmPopup, alertPopup, editor_popup
 from autosportlabs.racecapture.views.util.viewutils import format_laptime
+from fieldlabel import FieldLabel
 import traceback
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessionbrowser.kv')
 
+class NoSessionsAlert(FieldLabel):
+    pass
+    
 class LapItemButton(ToggleButton):
     background_color_normal = ColorScheme.get_dark_background()
     background_color_down = ColorScheme.get_primary()
@@ -88,7 +93,7 @@ class SessionAccordionItem(AccordionItem):
         super(SessionAccordionItem, self).on_collapse(instance, value)
         self.dispatch('on_collapsed', value) 
     
-class SessionBrowser(BoxLayout):
+class SessionBrowser(AnchorLayout):
     ITEM_HEIGHT = sp(40)
     SESSION_TITLE_HEIGHT = sp(44)
     datastore = ObjectProperty(None)
@@ -111,6 +116,7 @@ class SessionBrowser(BoxLayout):
             self.clear_sessions()
             sessions = self.datastore.get_sessions()
             f = Filter().gt('LapCount', 0)
+            session = None
             for session in sessions:
                 session = self.append_session(ses_id=session.ses_id, name=session.name, notes=session.notes)
                 dataset = self.datastore.query(sessions=[session.ses_id],
@@ -124,6 +130,8 @@ class SessionBrowser(BoxLayout):
                     laptime = r[2]
                     self.append_lap(session, lapcount, laptime)
             self.sessions = sessions
+            self.ids.session_alert.text = '' if session else 'No Sessions'
+                
         except Exception as e:
             Logger.error('AnalysisView: unable to fetch laps: {}\n\{}'.format(e, traceback.format_exc()))            
         
