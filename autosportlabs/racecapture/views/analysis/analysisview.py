@@ -48,6 +48,7 @@ class AnalysisView(Screen):
         self.ids.sessions_view.bind(on_lap_selected=self.lap_selected)
         self.ids.channelvalues.color_sequence = self._color_sequence
         self.ids.mainchart.color_sequence = self._color_sequence
+        self.stream_connecting = False
         self.init_view()
 
     def on_sessions(self, instance, value):
@@ -75,6 +76,26 @@ class AnalysisView(Screen):
     def on_tracks_updated(self, track_manager):
         self.ids.analysismap.track_manager = track_manager
 
+    def on_channel_selected(self, instance, value):
+        self.ids.channelvalues.merge_selected_channels(value)
+
+    def on_marker(self, instance, marker):
+        source = marker.sourceref
+        cache = self._datastore.get_location_data(source)
+        if cache != None:
+            try:
+                point = cache[marker.data_index]
+            except IndexError:
+                point = cache[len(cache) - 1]
+            self.ids.analysismap.update_reference_mark(source, point)
+            self.ids.channelvalues.update_reference_mark(source, marker.data_index)
+                          
+    def _sync_analysis_map(self, session):
+        analysis_map = self.ids.analysismap
+        if not analysis_map.track:
+            lat_avg, lon_avg = self._datastore.get_location_center([session])
+            analysis_map.select_map(lat_avg, lon_avg)
+
     def open_datastore(self):
         pass
 
@@ -82,13 +103,19 @@ class AnalysisView(Screen):
         self.show_add_stream_dialog()
                 
     def on_stream_connected(self, *args):
+        self.stream_connecting = False
         self._dismiss_popup()
         self.ids.sessions_view.refresh_session_list()
         
+    def on_stream_connecting(self, *args):
+        self.stream_connecting = True
+        
     def show_add_stream_dialog(self):
+        self.stream_connecting = False
         content = AddStreamView(settings=self._settings, datastore=self._datastore)
-        content.bind(on_stream_connected=self.on_stream_connected)
-
+        content.bind(on_connect_stream_start=self.on_stream_connecting)
+        content.bind(on_connect_stream_complete=self.on_stream_connected)
+        
         popup = Popup(title="Add Telemetry Stream", content=content, size_hint=(0.7, 0.7))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
@@ -120,27 +147,9 @@ class AnalysisView(Screen):
         self.ids.analysismap.track_manager = self._track_manager
         self.ids.analysismap.datastore = self._datastore
 
-    def on_channel_selected(self, instance, value):
-        self.ids.channelvalues.merge_selected_channels(value)
-
-    def on_marker(self, instance, marker):
-        source = marker.sourceref
-        cache = self._datastore.get_location_data(source)
-        if cache != None:
-            try:
-                point = cache[marker.data_index]
-            except IndexError:
-                point = cache[len(cache) - 1]
-            self.ids.analysismap.update_reference_mark(source, point)
-            self.ids.channelvalues.update_reference_mark(source, marker.data_index)
-                          
-    def _sync_analysis_map(self, session):
-        analysis_map = self.ids.analysismap
-        if not analysis_map.track:
-            lat_avg, lon_avg = self._datastore.get_location_center([session])
-            analysis_map.select_map(lat_avg, lon_avg)
-
     def popup_dismissed(self, *args):
+        if self.stream_connecting:
+            return True
         self._popup = None
         
     def _dismiss_popup(self, *args):

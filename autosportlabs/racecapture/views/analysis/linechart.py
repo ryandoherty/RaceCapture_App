@@ -195,6 +195,7 @@ class LineChart(ChannelAnalysisWidget):
         
         key = channel_data_values.channel + str(channel_data_values.source)
         plot = SmoothLinePlot(color=self.color_sequence.get_color(key))
+        print('add channel {} {} '.format(channel_data_values.min, channel_data_values.max))
         channel_plot = ChannelPlot(plot, 
                                    channel_data_values.channel, 
                                    channel_data_values.min, 

@@ -44,14 +44,22 @@ class AddStreamView(BoxLayout):
         file_connect_view.settings = settings
         file_connect_view.datastore = datastore
         file_connect_view.bind(on_connect_stream_complete=self.connect_stream_complete)
+        file_connect_view.bind(on_connect_stream_start=self.connect_stream_start)
         
-        self.register_event_type('on_stream_connected')
+        self.register_event_type('on_connect_stream_start')
+        self.register_event_type('on_connect_stream_complete')
         
-    def on_stream_connected(self, *args):
+    def on_connect_stream_start(self, *args):
         pass
         
+    def on_connect_stream_complete(self, *args):
+        pass
+    
+    def connect_stream_start(self, *args):
+        self.dispatch('on_connect_stream_start')
+        
     def connect_stream_complete(self, *args):
-        self.dispatch('on_stream_connected')
+        self.dispatch('on_connect_stream_complete')
         
     def on_connect_file_stream(self, *args):
         self.ids.screens.current = 'file_connect'        
@@ -93,10 +101,14 @@ class BaseStreamConnectView(Screen):
     def __init__(self, **kwargs):
         super(BaseStreamConnectView, self).__init__(**kwargs)
         self.register_event_type('on_connect_stream_complete')
+        self.register_event_type('on_connect_stream_start')
         
     def on_connect_stream_complete(self, *args):
         pass
     
+    def on_connect_stream_start(self, *args):
+        pass
+
 class CloudConnectView(BaseStreamConnectView):
     pass
 
@@ -110,9 +122,13 @@ class FileConnectView(BaseStreamConnectView):
     def on_enter(self):
         log_import_view = self.ids.log_import
         log_import_view.bind(on_import_complete=self.import_complete)
+        log_import_view.bind(on_import_start=self.import_start)
         log_import_view.datastore = self.datastore
         log_import_view.settings = self.settings
-                
+            
+    def import_start(self, *args):
+        self.dispatch('on_connect_stream_start')
+        
     def import_complete(self, *args):
         self.dispatch('on_connect_stream_complete')
 
@@ -123,8 +139,12 @@ class LogImportWidget(BoxLayout):
     def __init__(self, **kwargs):
         super(LogImportWidget, self).__init__(**kwargs)
         self.register_event_type('on_import_complete')
+        self.register_event_type('on_import_start')
         self._log_path = None
 
+    def on_import_start(self, *args):
+        pass
+    
     def on_import_complete(self, *args):
         pass
     
@@ -178,6 +198,7 @@ class LogImportWidget(BoxLayout):
         self._log_select.open()
 
     def _loader_thread(self, logpath, session_name, session_notes):
+        Clock.schedule_once(lambda dt: self.dispatch('on_import_start'))
         self.datastore.import_datalog(logpath, session_name, session_notes, self._update_progress)
         Clock.schedule_once(lambda dt: self.dispatch('on_import_complete'))
 
