@@ -18,6 +18,7 @@ class AnalysisMap(AnalysisWidget):
 
     def __init__(self, **kwargs):
         super(AnalysisMap, self).__init__(**kwargs)
+        self.got_mouse = False
         self.track = None
         self.heat_enabed = False
         self.sources = []
@@ -31,7 +32,6 @@ class AnalysisMap(AnalysisWidget):
 
     def add_option_buttons(self):
         self.append_option_button(IconButton(text=u'\uf096', on_press=self.on_center_map))
-                    
     
     def on_options(self):
         if self.heat_enabed:
@@ -42,9 +42,15 @@ class AnalysisMap(AnalysisWidget):
             for key in self.sources:
                 self.add_heat_values('TPS', key)
             self.heat_enabed = True
+   
+    def on_touch_down(self, touch):
+        self.got_mouse = True
+
+    def on_touch_up(self, touch):
+        self.got_mouse = False   
         
     def on_motion(self, instance, event, motion_event):
-        if motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
+        if self.got_mouse and motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
             scatter = self.ids.scatter
             try:
                 button = motion_event.button

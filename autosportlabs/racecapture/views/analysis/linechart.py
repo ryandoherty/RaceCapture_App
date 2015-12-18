@@ -45,6 +45,7 @@ class LineChart(ChannelAnalysisWidget):
         Window.bind(mouse_pos=self.on_mouse_pos)
         Window.bind(on_motion=self.on_motion)
         
+        self.got_mouse = False
         self._touches = []
         self._initial_touch_distance = 0
         self._touch_offset = 0
@@ -59,6 +60,7 @@ class LineChart(ChannelAnalysisWidget):
     def on_touch_down(self, touch):
         x, y = touch.x, touch.y
         if self.collide_point(x, y):
+            self.got_mouse = True
             touch.grab(self)
             if len(self._touches) == 1:
                 self._initial_touch_distance = self._touches[0].distance(touch)
@@ -73,7 +75,8 @@ class LineChart(ChannelAnalysisWidget):
             super(LineChart, self).on_touch_down(touch)
             return False
 
-    def on_touch_up(self, touch):   
+    def on_touch_up(self, touch):
+        self.got_mouse = False   
         x, y = touch.x, touch.y
 
         # remove it from our saved touches
@@ -86,7 +89,7 @@ class LineChart(ChannelAnalysisWidget):
             return True
         
     def on_motion(self, instance, event, motion_event):
-        if motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
+        if self.got_mouse and motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
             chart = self.ids.chart
             try:
                 
