@@ -70,7 +70,7 @@ class AnalysisView(Screen):
             self.ids.mainchart.remove_lap(source_ref)
             self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
-            self.ids.analysismap.remove_map_path(source_key)
+            self.ids.analysismap.remove_map_path(source_ref)
             self.ids.analysismap.remove_heat_values(source_ref)
     
     def on_tracks_updated(self, track_manager):
@@ -106,6 +106,10 @@ class AnalysisView(Screen):
         self.stream_connecting = False
         self._dismiss_popup()
         self.ids.sessions_view.refresh_session_list()
+        self.check_load_sample_lap()
+    
+    def check_load_sample_lap(self):
+        self.ids.sessions_view.select_lap(1, 1, True)
         
     def on_stream_connecting(self, *args):
         self.stream_connecting = True

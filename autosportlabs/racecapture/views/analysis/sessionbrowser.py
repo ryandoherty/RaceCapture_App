@@ -103,7 +103,8 @@ class SessionBrowser(AnchorLayout):
         self.register_event_type('on_lap_selected')
         accordion = Accordion(orientation='vertical', size_hint=(1.0, None))
         sv = ScrollContainer(size_hint=(1.0, 1.0), do_scroll_x=False)
-        self._selected_laps = {}
+        self.selected_laps = {}
+        self.current_laps = {}
         sv.add_widget(accordion)
         self._accordion = accordion
         self.add_widget(sv)
@@ -185,25 +186,35 @@ class SessionBrowser(AnchorLayout):
     def append_lap(self, session, lap, laptime):
         lapitem = session.append_lap(session.ses_id, lap, laptime)
         source_key = str(SourceRef(lap, session.ses_id))
-        if self._selected_laps.get(source_key):
+        if self.selected_laps.get(source_key):
             lapitem.state = 'down'
         lapitem.bind(on_press=self.lap_selected)
+        self.current_laps[source_key] = lapitem
 
     def on_lap_selected(self, *args):
         pass
     
     def lap_selected(self, instance):
+        self._select_lap(instance)
+    
+    def _select_lap(self, instance):
         selected = instance.state == 'down'
         source_ref = SourceRef(instance.lap, instance.session)
         self.dispatch('on_lap_selected', source_ref, selected)
         source_key = str(source_ref)
         if selected:
-            self._selected_laps[source_key] = instance
+            self.selected_laps[source_key] = instance
         else:
-            self._selected_laps.pop(source_key, None)
-        
+            self.selected_laps.pop(source_key, None)
+            
     def clear_sessions(self):
+        self.current_laps = {}
         self._accordion.clear_widgets()
         
+    def select_lap(self, session, lap, selected):
+        source_ref = SourceRef(lap, session)
+        source_key = str(source_ref)
+        lap_instance = self.current_laps.get(source_key)
+        lap_instance.state = 'down' if selected else 'normal'
+        self._select_lap(lap_instance)
         
-
