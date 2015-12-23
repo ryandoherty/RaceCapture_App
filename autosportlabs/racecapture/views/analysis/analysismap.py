@@ -21,7 +21,7 @@ class AnalysisMap(AnalysisWidget):
         self.got_mouse = False
         self.track = None
         self.heat_enabed = False
-        self.sources = []
+        self.sources = {}
         Window.bind(on_motion=self.on_motion)
                 
     def on_center_map(self, *args):    
@@ -84,12 +84,12 @@ class AnalysisMap(AnalysisWidget):
         self.ids.track.update_marker(str(source), point)
 
     def add_map_path(self, source_key, path, color):
-        self.sources.append(source_key)
+        self.sources[str(source_key)] = source_key
         self.ids.track.add_path(str(source_key), path, color)
 
     def remove_map_path(self, source_key):
         self.ids.track.remove_path(str(source_key))
-        self.sources.remove(source_key)
+        self.sources.pop(str(source_key), None)
 
     def add_heat_values(self, channel, lap_ref):
         lap = lap_ref.lap
