@@ -4,6 +4,7 @@ import logging
 import os, os.path
 import time
 import datetime
+from kivy.logger import Logger
 
 def unix_time(dt):
     epoch = datetime.datetime.utcfromtimestamp(0)
@@ -397,7 +398,7 @@ class DataStore(object):
         #print "Last datapoint ID =", dp_id
         return dl_id
 
-    def _insert_record(self, record, channels, session_id):
+    def _insert_record(self, record, channels, session_id, warnings = None):
         """
         Takes a record of interpolated+extrapolated channels and their header metadata
         and inserts it into the database
@@ -469,7 +470,7 @@ class DataStore(object):
         return extrap_list
 
 
-    def _desparsified_data_generator(self, data_file, progress_cb=None):
+    def _desparsified_data_generator(self, data_file, warnings=None, progress_cb=None):
         """
         Takes a racecapture pro CSV file and removes sparsity from the dataset.
         This function yields samples that have been extrapolated from the
@@ -537,13 +538,22 @@ class DataStore(object):
             # work_list being an empty list), we need to create all of
             # our 'plinko slots' for each channel in both the work and
             # yield lists
-            if len(work_list) == 0:
+            work_list_len = len(work_list)
+            channels_len = len(channels)
+            if work_list_len == 0:
                 work_list = [[] for x in channels]
                 yield_list = [[] for x in channels]
+            
+            if channels_len != work_list_len:
+                warn_msg = 'Unexpected channel count in line. Expected {}, got {}'.format(work_list_len, channels_len)
+                if warnings:
+                    warnings.append((line, warn_msg))
+                Logger.warn("DataStore: {}".format(warn_msg))
+                continue
 
             # Down to business, first, we stuff each channel's sample
             # into the work list
-            for c in range(len(channels)):
+            for c in range(channels_len):
                 work_list[c].append(channels[c])
 
             # At this point, we need to walk through each channel
@@ -624,18 +634,17 @@ class DataStore(object):
         print "Created session with ID: ", ses_id
         return ses_id
 
-    def _handle_data(self, data_file, headers, session_id, progress_cb=None):
+    def _handle_data(self, data_file, headers, session_id, warnings=None, progress_cb=None):
         """
         takes a raw dataset in the form of a CSV file and inserts the data
         into the sqlite database
         """
 
         #Create the generator for the desparsified data
-        newdata_gen = self._desparsified_data_generator(data_file, progress_cb)
+        newdata_gen = self._desparsified_data_generator(data_file, warnings=warnings, progress_cb=progress_cb)
 
         for record in newdata_gen:
-            self._insert_record(record, headers, session_id)
-            #print record
+            self._insert_record(record, headers, session_id, warnings=warnings)
 
         self._conn.commit()
 
@@ -748,6 +757,8 @@ class DataStore(object):
 
     @timing
     def import_datalog(self, path, name, notes='', progress_cb=None):
+        
+        warnings = []
         if not self._isopen:
             raise Exception("Datastore is not open")
 
@@ -763,7 +774,7 @@ class DataStore(object):
         #Create an event to be tagged to these records
         ses_id = self._create_session(name, notes)
 
-        self._handle_data(dl, headers, ses_id, progress_cb)
+        self._handle_data(dl, headers, ses_id, warnings, progress_cb)
 
     def query(self, sessions=[], channels=[], data_filter=None, distinct_records=False):
         #Build our select statement
