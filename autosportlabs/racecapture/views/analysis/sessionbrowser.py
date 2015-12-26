@@ -95,7 +95,7 @@ class SessionAccordionItem(AccordionItem):
     
 class SessionBrowser(AnchorLayout):
     ITEM_HEIGHT = sp(40)
-    SESSION_TITLE_HEIGHT = sp(44)
+    SESSION_TITLE_HEIGHT = sp(45)
     datastore = ObjectProperty(None)
     
     def __init__(self, **kwargs):
@@ -142,7 +142,8 @@ class SessionBrowser(AnchorLayout):
             lap_count = instance.session_widget.lap_count
             session_items_height = (lap_count * self.ITEM_HEIGHT)
             session_titles_height = (session_count * self.SESSION_TITLE_HEIGHT)
-            self._accordion.height = session_items_height + session_titles_height
+            accordion_height = session_items_height + session_titles_height
+            self._accordion.height = accordion_height
         
     def append_session(self, ses_id, name, notes):
         session = Session(ses_id=ses_id, name=name, notes=notes)
@@ -215,6 +216,7 @@ class SessionBrowser(AnchorLayout):
         source_ref = SourceRef(lap, session)
         source_key = str(source_ref)
         lap_instance = self.current_laps.get(source_key)
-        lap_instance.state = 'down' if selected else 'normal'
-        self._select_lap(lap_instance)
+        if lap_instance: 
+            lap_instance.state = 'down' if selected else 'normal'
+            self._select_lap(lap_instance)
         
