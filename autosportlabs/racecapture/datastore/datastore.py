@@ -544,8 +544,8 @@ class DataStore(object):
                 work_list = [[] for x in channels]
                 yield_list = [[] for x in channels]
             
-            if channels_len != work_list_len:
-                warn_msg = 'Unexpected channel count in line. Expected {}, got {}'.format(work_list_len, channels_len)
+            if channels_len > work_list_len:
+                warn_msg = 'Unexpected channel count in line {}. Expected {}, got {}'.format(current_line, work_list_len, channels_len)
                 if warnings:
                     warnings.append((line, warn_msg))
                 Logger.warn("DataStore: {}".format(warn_msg))
