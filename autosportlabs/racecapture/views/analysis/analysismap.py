@@ -45,9 +45,11 @@ class AnalysisMap(AnalysisWidget):
    
     def on_touch_down(self, touch):
         self.got_mouse = True
+        return super(AnalysisMap, self).on_touch_down(touch)
 
     def on_touch_up(self, touch):
-        self.got_mouse = False   
+        self.got_mouse = False
+        return super(AnalysisMap, self).on_touch_up(touch)
         
     def on_motion(self, instance, event, motion_event):
         if self.got_mouse and motion_event.x > 0 and motion_event.y > 0 and self.collide_point(motion_event.x, motion_event.y):
