@@ -33,39 +33,46 @@ class TrackPath(object):
 
 class TrackMap(Widget):
     trackColor = ListProperty([1.0, 1.0, 1.0, 0.5])
-    trackWidthScale = 0.01
-    marker_width_scale = 0.02
-    path_width_scale = 0.002
-    heat_width_scale = 0.005
     MIN_PADDING = sp(1)
-    offsetPoint = Point(0,0)
-    globalRatio = 0
-    heightPadding = 0
-    widthPadding = 0
-    
-    minXY = Point(-1, -1)
-    maxXY = Point(-1, -1)
-
-    #The trackmap
-    mapPoints = []
-    scaled_map_points = []
-
-    #The map paths
-    paths = {}
-    scaled_paths = {}
-    heat_map_values = {}
-    
-    #markers for trackmap
-    marker_points = {}
-    marker_locations = {}
-    
-    def on_trackColor(self, instance, value):
-        self._draw_current_map()
+    DEFAULT_TRACK_WIDTH_SCALE = 0.01
+    DEFAULT_MARKER_WIDTH_SCALE = 0.02
+    DEFAULT_PATH_WIDTH_SCALE = 0.002
+    DEFAULT_HEAT_WIDTH_SCALE = 0.005  
 
     def __init__(self, **kwargs):
         super(TrackMap, self).__init__(**kwargs)
         self.bind(pos=self.update_map)
         self.bind(size=self.update_map)
+
+        self.trackWidthScale = self.DEFAULT_TRACK_WIDTH_SCALE
+        self.marker_width_scale = self.DEFAULT_MARKER_WIDTH_SCALE
+        self.path_width_scale = self.DEFAULT_PATH_WIDTH_SCALE
+        self.heat_width_scale = self.DEFAULT_HEAT_WIDTH_SCALE
+        
+        self.offsetPoint = Point(0,0)
+        self.globalRatio = 0
+        self.heightPadding = 0
+        self.widthPadding = 0
+        
+        self.minXY = Point(-1, -1)
+        self.maxXY = Point(-1, -1)
+    
+        #The trackmap
+        self.mapPoints = []
+        self.scaled_map_points = []
+    
+        #The map paths
+        self.paths = {}
+        self.scaled_paths = {}
+        self.heat_map_values = {}
+        
+        #markers for trackmap
+        self.marker_points = {}
+        self.marker_locations = {}
+
+    
+    def on_trackColor(self, instance, value):
+        self._draw_current_map()
 
     def add_path(self, key, path, color):
         points = []
