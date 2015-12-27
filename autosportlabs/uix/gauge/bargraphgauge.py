@@ -37,7 +37,8 @@ class BarGraphGauge(AnchorLayout):
         value = self.value
         minval = self.minval
         maxval = self.maxval
-        pct = ((value - minval) / (maxval - minval))
+        channel_range = (maxval - minval)
+        pct = 0 if channel_range == 0 else ((value - minval) / channel_range) 
         width = self.width * pct
         stencil.width = width
         self.ids.value.text = str(value)
