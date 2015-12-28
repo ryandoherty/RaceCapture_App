@@ -19,7 +19,7 @@ def timing(f):
         time1 = time.time()
         ret = f(*args)
         time2 = time.time()
-        print '%s function took %0.3f ms' % (f.func_name, (time2-time1)*1000.0)
+        Logger.info('Timing: {} function took {} ms'.format(f.func_name, (time2-time1)*1000.0))
         return ret
     return wrap
 
@@ -631,7 +631,7 @@ class DataStore(object):
         self._conn.commit()
         ses_id = self._get_last_table_id('session')
 
-        print "Created session with ID: ", ses_id
+        Logger.info('DataStore: Created session with ID: {}'.format(ses_id))
         return ses_id
 
     def _handle_data(self, data_file, headers, session_id, warnings=None, progress_cb=None):

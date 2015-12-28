@@ -2,6 +2,7 @@ from kivy.event import EventDispatcher
 from kivy.properties import NumericProperty, ListProperty
 from kivy.clock import Clock
 from kivy.config import ConfigParser
+from ConfigParser import NoOptionError
 from kivy.logger import Logger
 import json
 import os
@@ -83,6 +84,7 @@ class UserPrefs(EventDispatcher):
             prefs_file.write(data)
 
     def set_config_defaults(self):
+        self.config.adddefaultsection('help')
         self.config.adddefaultsection('preferences')
         self.config.setdefault('preferences', 'distance_units', 'miles')
         self.config.setdefault('preferences', 'temperature_units', 'Fahrenheit')
@@ -96,9 +98,10 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'first_time_setup', True)
         self.config.setdefault('preferences', 'send_telemetry', False)
         self.config.setdefault('preferences', 'last_dash_screen', 'gaugeView')
+        self.config.setdefault('preferences', 'global_help', True)
 
     def load(self):
-        print("the data dir " + self.data_dir)
+        Logger.info('UserPrefs: Data Dir is: {}'.format(self.data_dir))
         self.config = ConfigParser()
         self.config.read(os.path.join(self.data_dir, 'preferences.ini'))
         self.set_config_defaults()
@@ -121,8 +124,14 @@ class UserPrefs(EventDispatcher):
         except Exception:
             pass
         
-    def get_pref(self, section, option):
-        return self.config.get(section, option)
+    def get_pref(self, section, option, default=None):
+        try:
+            return self.config.get(section, option)
+        except NoOptionError:
+            if default:
+                return default
+            else:
+                raise
     
     def set_pref(self, section, option, value):
         self.config.set(section, option, value)

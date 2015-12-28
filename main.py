@@ -44,6 +44,7 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
     from autosportlabs.telemetry.telemetryconnection import TelemetryManager
+    from autosportlabs.help.helpmanager import HelpInfo
     from toolbarview import ToolbarView
     if not is_mobile_platform():
         kivy.config.Config.set ( 'input', 'mouse', 'mouse,multitouch_on_demand' )
@@ -129,7 +130,8 @@ class RaceCaptureApp(App):
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
         self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
-        self.settings.runtimeChannels.data_bus = self._databus        
+        self.settings.runtimeChannels.data_bus = self._databus
+        HelpInfo.settings = self.settings
 
         Window.bind(on_keyboard=self._on_keyboard)
         self.register_event_type('on_tracks_updated')

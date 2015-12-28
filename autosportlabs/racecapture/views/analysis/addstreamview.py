@@ -3,6 +3,7 @@ from threading import Thread
 import kivy
 kivy.require('1.8.0')
 from kivy.app import Builder
+from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
 from kivy.uix.popup import Popup
@@ -233,7 +234,7 @@ class LogImportWidget(BoxLayout):
             else:
                 self.datastore.new(dstore_path)
 
-        print "loading log", self.ids.log_path.text
+        Logger.info("LogImportWidget: loading log: {}".format(self.ids.log_path.text))
 
         if not session_name or len(session_name) == 0:
             alertPopup('Error', 'A session name must be specified')

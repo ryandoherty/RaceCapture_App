@@ -23,12 +23,13 @@ from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.uix.color.colorsequence import ColorSequence
 from autosportlabs.racecapture.theme.color import ColorScheme
-
+from autosportlabs.help.helpmanager import HelpInfo
 import traceback
 
 ANALYSIS_VIEW_KV = 'autosportlabs/racecapture/views/analysis/analysisview.kv'
   
 class AnalysisView(Screen):
+    SUGGESTED_CHART_CHANNELS = ['Speed']
     INIT_DATASTORE_TIMEOUT = 10.0
     _settings = None
     _databus = None
@@ -118,7 +119,9 @@ class AnalysisView(Screen):
                     best_lap_id = best_lap[1]
                     Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
                     sessions_view.select_lap(new_session_id, best_lap_id, True)
-                    self.ids.mainchart.select_channels(['Speed'])
+                    main_chart = self.ids.mainchart
+                    main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
+                    HelpInfo.help_popup('suggested_lap', main_chart)
                 else:
                     Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
         except Exception as e:
