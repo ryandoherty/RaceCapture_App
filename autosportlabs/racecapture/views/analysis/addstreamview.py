@@ -58,8 +58,8 @@ class AddStreamView(BoxLayout):
     def connect_stream_start(self, *args):
         self.dispatch('on_connect_stream_start')
         
-    def connect_stream_complete(self, *args):
-        self.dispatch('on_connect_stream_complete')
+    def connect_stream_complete(self, instance, session_id):
+        self.dispatch('on_connect_stream_complete', session_id)
         
     def on_connect_file_stream(self, *args):
         self.ids.screens.current = 'file_connect'        
@@ -129,8 +129,8 @@ class FileConnectView(BaseStreamConnectView):
     def import_start(self, *args):
         self.dispatch('on_connect_stream_start')
         
-    def import_complete(self, *args):
-        self.dispatch('on_connect_stream_complete')
+    def import_complete(self, instance, session_id):
+        self.dispatch('on_connect_stream_complete', session_id)
 
 class LogImportWidget(BoxLayout):
     datastore = ObjectProperty(None)
@@ -145,7 +145,7 @@ class LogImportWidget(BoxLayout):
     def on_import_start(self, *args):
         pass
     
-    def on_import_complete(self, *args):
+    def on_import_complete(self, session_id):
         pass
     
     def close_dstore_select(self, *args):
@@ -199,8 +199,8 @@ class LogImportWidget(BoxLayout):
 
     def _loader_thread(self, logpath, session_name, session_notes):
         Clock.schedule_once(lambda dt: self.dispatch('on_import_start'))
-        self.datastore.import_datalog(logpath, session_name, session_notes, self._update_progress)
-        Clock.schedule_once(lambda dt: self.dispatch('on_import_complete'))
+        session_id = self.datastore.import_datalog(logpath, session_name, session_notes, self._update_progress)
+        Clock.schedule_once(lambda dt: self.dispatch('on_import_complete', session_id))
 
     def _update_progress(self, percent_complete=0):
         if self.ids.current_status.text != "Loading log records":

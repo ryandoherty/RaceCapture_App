@@ -102,14 +102,26 @@ class AnalysisView(Screen):
     def on_add_stream(self, *args):
         self.show_add_stream_dialog()
                 
-    def on_stream_connected(self, *args):
+    def on_stream_connected(self, instance, new_session_id):
         self.stream_connecting = False
         self._dismiss_popup()
         self.ids.sessions_view.refresh_session_list()
-        self.check_load_sample_lap()
+        self.check_load_suggested_lap(new_session_id)
     
-    def check_load_sample_lap(self):
-        self.ids.sessions_view.select_lap(1, 1, True)
+    #The following selects a best lap if there are no other laps currently selected
+    def check_load_suggested_lap(self, new_session_id):
+        sessions_view = self.ids.sessions_view
+        try:
+            if len(sessions_view.selected_laps) == 0:
+                best_lap = self._datastore.get_channel_min('LapTime', [new_session_id], ['LapCount'])
+                if best_lap:
+                    best_lap_id = best_lap[1]
+                    Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
+                    sessions_view.select_lap(new_session_id, best_lap_id, True)
+                else:
+                    Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
+        except Exception as e:
+            Logger.error('AnalysisView: Failed to select an example lap {} : {}'.format(e, traceback.format_exc()))
         
     def on_stream_connecting(self, *args):
         self.stream_connecting = True

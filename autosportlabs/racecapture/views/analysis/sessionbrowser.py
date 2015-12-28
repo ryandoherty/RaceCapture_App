@@ -127,9 +127,9 @@ class SessionBrowser(AnchorLayout):
         
                 records = dataset.fetch_records()
                 for r in records:
-                    lapcount = int(r[1])
+                    lap_id = int(r[1])
                     laptime = r[2]
-                    self.append_lap(session, lapcount, laptime)
+                    self.append_lap(session, lap_id, laptime)
             self.sessions = sessions
             self.ids.session_alert.text = '' if session else 'No Sessions'
                 
@@ -212,8 +212,8 @@ class SessionBrowser(AnchorLayout):
         self.current_laps = {}
         self._accordion.clear_widgets()
         
-    def select_lap(self, session, lap, selected):
-        source_ref = SourceRef(lap, session)
+    def select_lap(self, session_id, lap_id, selected):
+        source_ref = SourceRef(lap_id, session_id)
         source_key = str(source_ref)
         lap_instance = self.current_laps.get(source_key)
         if lap_instance: 

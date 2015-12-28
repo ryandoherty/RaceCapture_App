@@ -144,8 +144,8 @@ class DataStoreTest(unittest.TestCase):
         self.assertEqual(rpm_max, 6246.0)
         
         #with extra channels
-        rpm_min = self.ds.get_channel_min('RPM', ['LapCount'])
-        rpm_max = self.ds.get_channel_max('RPM', ['LapCount'])
+        rpm_min = self.ds.get_channel_min('RPM', extra_channels=['LapCount'])
+        rpm_max = self.ds.get_channel_max('RPM', extra_channels=['LapCount'])
 
         self.assertEqual(rpm_min[0], 498.0)
         self.assertEqual(rpm_max[0], 6246.0)

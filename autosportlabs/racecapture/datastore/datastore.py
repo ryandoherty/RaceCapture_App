@@ -697,22 +697,22 @@ class DataStore(object):
                 sql += ',{}'.format(channel)
         return sql
 
-    def _get_channel_aggregate(self, aggregate, channel, extra_channels=None, sessions=None, exclude_zero=True):
+    def _get_channel_aggregate(self, aggregate, channel, sessions=None, extra_channels=None, exclude_zero=True):
         c = self._conn.cursor()
 
         base_sql = "SELECT {}({}) {} from datapoint {} {};".format(aggregate, channel,
                                                                  self._extra_channels(extra_channels),
                                                                  self._session_select_clause(sessions),
-                                                                 'where {} > 0'.format(channel) if exclude_zero else '')        
+                                                                 '{} {} > 0'.format('AND' if sessions else 'WHERE', channel) if exclude_zero else '')
         c.execute(base_sql)
         res = c.fetchone()
         return None if res == None else res if extra_channels else res[0]
                 
-    def get_channel_max(self, channel, extra_channels=None, sessions=None):
-        return self._get_channel_aggregate('MAX', channel, extra_channels, sessions)
+    def get_channel_max(self, channel, sessions=None, extra_channels=None):
+        return self._get_channel_aggregate('MAX', channel, sessions=sessions, extra_channels=extra_channels)
 
-    def get_channel_min(self, channel, extra_channels=None, sessions=None, exclude_zero=True):
-        return self._get_channel_aggregate('MIN', channel, extra_channels, sessions)
+    def get_channel_min(self, channel, sessions=None, extra_channels=None, exclude_zero=True):
+        return self._get_channel_aggregate('MIN', channel, sessions=sessions, extra_channels=extra_channels)
 
     def set_channel_smoothing(self, channel, smoothing):
         """
@@ -771,6 +771,7 @@ class DataStore(object):
         ses_id = self._create_session(name, notes)
 
         self._handle_data(dl, headers, ses_id, warnings, progress_cb)
+        return ses_id
 
     def query(self, sessions=[], channels=[], data_filter=None, distinct_records=False):
         #Build our select statement
