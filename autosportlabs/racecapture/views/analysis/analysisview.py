@@ -118,6 +118,7 @@ class AnalysisView(Screen):
                     best_lap_id = best_lap[1]
                     Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
                     sessions_view.select_lap(new_session_id, best_lap_id, True)
+                    self.ids.mainchart.select_channels(['Speed'])
                 else:
                     Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
         except Exception as e:
