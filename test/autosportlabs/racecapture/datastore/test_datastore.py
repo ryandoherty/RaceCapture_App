@@ -119,20 +119,20 @@ class DataStoreTest(unittest.TestCase):
          
     def test_channel_average_by_session(self):
         #session exists
-        lat_avg = self.ds.get_channel_average("Latitude", [1])
-        lon_avg = self.ds.get_channel_average("Longitude", [1])
+        lat_avg = self.ds.get_channel_average("Latitude", sessions=[1])
+        lon_avg = self.ds.get_channel_average("Longitude", sessions=[1])
         self.assertEqual(47.256164, round(lat_avg, 6))
         self.assertEqual(-123.191297, round(lon_avg, 6))
         
         #session does not exist
-        lat_avg = self.ds.get_channel_average("Latitude", [2])
-        lon_avg = self.ds.get_channel_average("Longitude", [2])
+        lat_avg = self.ds.get_channel_average("Latitude", sessions=[2])
+        lon_avg = self.ds.get_channel_average("Longitude", sessions=[2])
         self.assertEqual(None, lat_avg)
         self.assertEqual(None, lon_avg)
 
         #include an existing and not existing session
-        lat_avg = self.ds.get_channel_average("Latitude", [1,2])
-        lon_avg = self.ds.get_channel_average("Longitude", [1,2])
+        lat_avg = self.ds.get_channel_average("Latitude", sessions=[1,2])
+        lon_avg = self.ds.get_channel_average("Longitude", sessions=[1,2])
         self.assertEqual(47.256164, round(lat_avg, 6))
         self.assertEqual(-123.191297, round(lon_avg, 6))
         
@@ -142,6 +142,16 @@ class DataStoreTest(unittest.TestCase):
 
         self.assertEqual(rpm_min, 498.0)
         self.assertEqual(rpm_max, 6246.0)
+        
+        #with extra channels
+        rpm_min = self.ds.get_channel_min('RPM', ['LapCount'])
+        rpm_max = self.ds.get_channel_max('RPM', ['LapCount'])
+
+        self.assertEqual(rpm_min[0], 498.0)
+        self.assertEqual(rpm_max[0], 6246.0)
+        self.assertEqual(rpm_min[1], 37)
+        self.assertEqual(rpm_max[1], 12)
+        
 
     def test_interpolation(self):
         dset = [1., 1., 1., 1., 5.]

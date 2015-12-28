@@ -670,53 +670,49 @@ class DataStore(object):
             lat_average =  res[0]
             lon_average =  res[1]
         return (lat_average, lon_average)
+                
+    def _session_select_clause(self, sessions=None):
+        sql = ''
+        if type(sessions) == list and len(sessions) > 0:
+            sql += " JOIN sample ON datapoint.sample_id=sample.id WHERE "            
+            ses_filters = []
+            for s in sessions:
+                ses_filters.append('sample.session_id = {}'.format(s))
+            sql += '     OR '.join(ses_filters)
+        return sql
         
     def get_channel_average(self, channel, sessions=None):
         c = self._conn.cursor()
 
-        base_sql = "SELECT AVG({}) from datapoint".format(channel)
-        
-        if type(sessions) == list and len(sessions) > 0:
-            base_sql += " JOIN sample ON datapoint.sample_id=sample.id WHERE "            
-            ses_filters = []
-            for s in sessions:
-                ses_filters.append('sample.session_id = {}'.format(s))
-            base_sql += '     OR '.join(ses_filters)
-        base_sql += ';'
-
+        base_sql = "SELECT AVG({}) from datapoint {};".format(channel, self._session_select_clause(sessions))
         c.execute(base_sql)
         res = c.fetchone()
-
         average = None if res == None else res[0]
         return average
         
-    def get_channel_max(self, channel):
+    def _extra_channels(self, extra_channels=None):
+        sql = ''
+        if type(extra_channels) == list:
+            for channel in extra_channels:
+                sql += ',{}'.format(channel)
+        return sql
+
+    def _get_channel_aggregate(self, aggregate, channel, extra_channels=None, sessions=None, exclude_zero=True):
         c = self._conn.cursor()
 
-        base_sql = "SELECT {} from datapoint ORDER BY {} DESC LIMIT 1;".format(channel, channel)
+        base_sql = "SELECT {}({}) {} from datapoint {} {};".format(aggregate, channel,
+                                                                 self._extra_channels(extra_channels),
+                                                                 self._session_select_clause(sessions),
+                                                                 'where {} > 0'.format(channel) if exclude_zero else '')        
         c.execute(base_sql)
-
         res = c.fetchone()
+        return None if res == None else res if extra_channels else res[0]
+                
+    def get_channel_max(self, channel, extra_channels=None, sessions=None):
+        return self._get_channel_aggregate('MAX', channel, extra_channels, sessions)
 
-        if res == None:
-            chan_max = None
-        else:
-            chan_max = res[0]
-        return chan_max
-
-    def get_channel_min(self, channel):
-        c = self._conn.cursor()
-
-        base_sql = "SELECT {} from datapoint ORDER BY {} ASC LIMIT 1;".format(channel, channel)
-        c.execute(base_sql)
-
-        res = c.fetchone()
-
-        if res == None:
-            chan_min = None
-        else:
-            chan_min = res[0]
-        return chan_min
+    def get_channel_min(self, channel, extra_channels=None, sessions=None, exclude_zero=True):
+        return self._get_channel_aggregate('MIN', channel, extra_channels, sessions)
 
     def set_channel_smoothing(self, channel, smoothing):
         """
