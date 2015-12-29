@@ -38,7 +38,7 @@ class AnalysisMap(AnalysisWidget):
         scatter.transform = Matrix().translate(self.pos[0], self.pos[1], 0)
 
     def add_option_buttons(self):
-        self.append_option_button(IconButton(text=u'\uf096', on_press=self.on_center_map))
+        self.append_option_button(IconButton(text=u'\uf0b2', on_press=self.on_center_map))
     
     def on_options(self, *args):
         self.show_customize_dialog()
