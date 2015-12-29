@@ -35,12 +35,12 @@ class AnalysisMap(AnalysisWidget):
     
     def on_options(self):
         if self.heat_enabed:
-            for key in self.sources:
-                self.remove_heat_values(key)
+            for source in self.sources.itervalues():
+                self.remove_heat_values(source)
             self.heat_enabed = False
         else:
-            for key in self.sources:
-                self.add_heat_values('TPS', key)
+            for source in self.sources.itervalues():
+                self.add_heat_values('TPS', source)
             self.heat_enabed = True
    
     def on_touch_down(self, touch):
