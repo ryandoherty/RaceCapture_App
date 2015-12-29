@@ -43,6 +43,9 @@ class AnalysisMap(AnalysisWidget):
     def on_options(self, *args):
         self.show_customize_dialog()
 
+    def _customized(self, instance):
+        print('customized!' + str(instance))
+        
     def show_customize_dialog(self):
         
         current_track_id = None if self.track == None else self.track.track_id 
@@ -51,19 +54,10 @@ class AnalysisMap(AnalysisWidget):
                                    track_manager=self.track_manager, 
                                    current_heat_channel = self.current_heat_channel,
                                    current_track_id = current_track_id)
-        
-        popup = Popup(title="Customize Trackmap", content=content, size_hint=(0.7, 0.7))
-        popup.bind(on_dismiss=self.popup_dismissed)
+        popup = Popup(title="Customize Track Map", content=content, size_hint=(0.7, 0.7))
+        content.bind(on_customized=self._customized)
+        content.bind(on_close=lambda *args:popup.dismiss())  
         popup.open()
-        self._popup = popup
-    
-    def popup_dismissed(self, *args):
-        self._popup = None
-        
-    def _dismiss_popup(self, *args):
-        if self._popup:
-            self._popup.dismiss()
-            self._popup = None
                 
     def on_optionsx(self):
         if self.heat_enabed:
@@ -213,6 +207,8 @@ class CustomizeMapView(BoxLayout):
         super(CustomizeMapView, self).__init__(**kwargs)
         self._current_heatmap_channel = kwargs.get('current_heatmap_channel')
         self._current_track_id = kwargs.get('current_track_id')
+        self.register_event_type('on_customized')
+        self.register_event_type('on_close')
         
         screen_manager = self.ids.screens
         screen_manager.transition = SwapTransition()
@@ -236,6 +232,19 @@ class CustomizeMapView(BoxLayout):
         trackmap_option = TrackmapButton()
         self.ids.options.add_widget(trackmap_option)
         trackmap_option.bind(on_press=lambda x: self.on_option('track'))
+        
+    def on_customized(self):
+        pass
+    
+    def on_close(self):
+        pass
+    
+    def confirm(self):
+        self.dispatch('on_customized')
+        self.dispatch('on_close')
+    
+    def cancel(self):
+        self.dispatch('on_close')
         
     def on_modified(self, instance):
         self.ids.confirm.disabled = False
