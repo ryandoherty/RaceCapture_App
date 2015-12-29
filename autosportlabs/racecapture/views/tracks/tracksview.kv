@@ -82,6 +82,17 @@
                         size_hint_x: 0.4
                         id: length
         
+<SingleTrackItemView>:
+    group: 'track'
+    TrackInfoView:
+        canvas.before:
+            Color:
+                rgba: root.selected_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        id: trackinfo
+
 <TrackItemView>:
     BoxLayout:
         orientation: 'horizontal'
@@ -94,11 +105,12 @@
 
 <TracksBrowser>:
     orientation: 'vertical'
-    spacing: dp(10)
+    spacing: dp(5)
     BoxLayout:
         height: dp(30)
         size_hint_y: None
         padding: (dp(20), dp(2))
+        spacing: sp(10)
         orientation: 'horizontal'
         Label:
             size_hint_x: 0.1
@@ -141,14 +153,17 @@
         size_hint_y: None
         padding: (dp(20), dp(2))
         orientation: 'horizontal'
-        CheckBox:
-            size_hint_x: 0.05
-            id: selectall
-            on_active: root.selectAll(*args)
-        FieldLabel:
-            size_hint_x: 0.25
-            text: 'Select All'
-            halign: 'left'
+        BoxLayout:
+            orientation: 'horizontal'
+            id: selectall_option
+            CheckBox:
+                size_hint_x: 0.05
+                id: selectall
+                on_active: root.selectAll(*args)
+            FieldLabel:
+                size_hint_x: 0.25
+                text: 'Select All'
+                halign: 'left'
         Label:
             size_hint_x: 0.53
 

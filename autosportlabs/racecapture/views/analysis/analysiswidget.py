@@ -132,9 +132,9 @@ class ChannelAnalysisWidget(AnalysisWidget):
         self.select_channels(updated_channels)
             
     def on_options(self, *args):
-        self.showCustomizeDialog()
+        self.show_customize_dialog()
             
-    def showCustomizeDialog(self):
+    def show_customize_dialog(self):
         content = CustomizeChannelsView(settings=self.settings, datastore=self.datastore, current_channels=self._selected_channels)
         content.bind(on_channels_customized=self._channels_customized)
 

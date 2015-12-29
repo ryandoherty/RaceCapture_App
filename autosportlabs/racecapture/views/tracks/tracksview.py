@@ -1,6 +1,8 @@
 import kivy
+from autosportlabs.racecapture.theme.color import ColorScheme
+from kivy.uix.behaviors import ToggleButtonBehavior
 kivy.require('1.9.0')
-from kivy.properties import NumericProperty, ObjectProperty
+from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
 from kivy.uix.label import Label
@@ -59,26 +61,37 @@ class TracksUpdateStatusView(BoxLayout):
     def on_message(self, message):
         self.messageView.text = message
 
-class TrackItemView(BoxLayout):
+
+
+class BaseTrackItemView(BoxLayout):
     track = None
     trackInfoView = None
     def __init__(self, **kwargs):
-        super(TrackItemView, self).__init__(**kwargs)
+        super(BaseTrackItemView, self).__init__(**kwargs)
         track = kwargs.get('track', None)
         trackInfoView = self.ids.trackinfo
         trackInfoView.setTrack(track)
         self.track = track
         self.trackInfoView = trackInfoView
         self.register_event_type('on_track_selected')
-        
-    def track_select(self, instance, value):
-        self.dispatch('on_track_selected', value, self.track.track_id)
-            
+
     def on_track_selected(self, selected, trackId):
         pass
+        
+class TrackItemView(BaseTrackItemView):
+    def track_select(self, instance, value):
+        self.dispatch('on_track_selected', value, self.track.track_id)
     
     def setSelected(self, selected):
         self.ids.active = selected
+
+class SingleTrackItemView(ToggleButtonBehavior, BaseTrackItemView):
+    selected_color = ListProperty(ColorScheme.get_dark_background())
+
+    def on_state(self, instance, value):
+        selected = value == 'down'
+        self.selected_color = ColorScheme.get_medium_background() if selected else ColorScheme.get_dark_background() 
+        self.dispatch('on_track_selected', selected, self.track.track_id)
         
 class TrackInfoView(BoxLayout):
     track = None
@@ -138,6 +151,7 @@ class TracksView(Screen):
         self.ids.browser.on_update_check()
         
 class TracksBrowser(BoxLayout):
+    multi_select = BooleanProperty(True)
     trackmap = None
     trackHeight = NumericProperty(dp(200))
     trackManager = None
@@ -157,6 +171,9 @@ class TracksBrowser(BoxLayout):
         self.register_event_type('on_track_selected')
         self.selectedTrackIds = set()
         
+    def on_track_selected(self, value):
+        pass
+    
     def on_scroll(self, instance, value):
         scroll_y = self.ids.scrltracks.scroll_y
         last_scroll_y = self.last_scroll_y
@@ -180,6 +197,11 @@ class TracksBrowser(BoxLayout):
                 self.addNextTrack(current_index, self.current_track_ids)
             Clock.schedule_once(lambda dt: self.lazy_load_more_maybe(),1.0)
          
+    def on_multi_select(self, instance, value):
+        if value == False:
+            selectall = self.ids.selectall_option
+            selectall.parent.remove_widget(selectall)
+            
     def set_trackmanager(self, track_manager):
         self.trackManager = track_manager
            
@@ -240,8 +262,8 @@ class TracksBrowser(BoxLayout):
         if index < self.load_limit:
             track = self.trackManager.tracks[keys[index]]
 
-            trackView = TrackItemView(track=track)
-            trackView.bind(on_track_selected=self.on_track_selected)
+            trackView = TrackItemView(track=track) if self.multi_select == True else SingleTrackItemView(track=track)
+            trackView.bind(on_track_selected=self.track_selected)
             trackView.size_hint_y = None
             trackView.height = self.trackHeight
             self.tracksGrid.add_widget(trackView)
@@ -297,11 +319,12 @@ class TracksBrowser(BoxLayout):
             values.append(name)
         regionsSpinner.values = values
         
-    def on_track_selected(self, instance, selected, trackId):
+    def track_selected(self, instance, selected, trackId):
         if selected:
             self.selectedTrackIds.add(trackId)
         else:
             self.selectedTrackIds.discard(trackId)
+        self.dispatch('on_track_selected', self.selectedTrackIds)
             
     def selectAll(self, instance, value):
         if self.tracksGrid:
