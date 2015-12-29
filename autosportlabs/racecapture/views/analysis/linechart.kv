@@ -2,11 +2,10 @@
     options_enabled: True
     canvas.before:
         Color:
-            rgba: 0.02, 0.02, 0.02, 0.8
+            rgba: ColorScheme.get_dark_background_translucent()
         Rectangle:
             pos: self.pos
             size: self.size
-
 	Graph:
         border_color: 0, 0, 0, 0
 		id: chart
