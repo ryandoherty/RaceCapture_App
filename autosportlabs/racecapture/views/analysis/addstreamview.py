@@ -208,6 +208,12 @@ class LogImportWidget(BoxLayout):
             self.ids.current_status.text = "Loading log records"
         self.ids.log_load_progress.value = int(percent_complete)
 
+    def _set_form_disabled(self, disabled):
+        self.ids.browse_button.disabled = disabled
+        self.ids.session_name.disabled = disabled
+        self.ids.import_button.disabled = disabled
+        self.ids.session_notes.disabled = disabled
+
     def load_log(self):
         logpath = self._log_path
         session_name = self.ids.session_name.text.strip()
@@ -242,6 +248,7 @@ class LogImportWidget(BoxLayout):
 
         self.ids.current_status.text = "Initializing Datastore"
 
+        self._set_form_disabled(True)
         t = Thread(target=self._loader_thread, args=(logpath, session_name, session_notes))
         t.daemon = True
         t.start()
