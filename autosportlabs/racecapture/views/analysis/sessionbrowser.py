@@ -62,6 +62,9 @@ class Session(BoxLayout):
         self.lap_count += 1
         return lapitem
     
+    def append_label(self, message):
+        self.ids.lap_list.add_widget(FieldLabel(text=message, halign='center'))
+        
     def on_delete_session(self, value):
         pass
 
@@ -126,10 +129,15 @@ class SessionBrowser(AnchorLayout):
                                         distinct_records=True)
         
                 records = dataset.fetch_records()
+                lap_count = 0
                 for r in records:
                     lap_id = int(r[1])
                     laptime = r[2]
                     self.append_lap(session, lap_id, laptime)
+                    lap_count += 1
+                if lap_count == 0:
+                    session.append_label('No Laps')
+
             self.sessions = sessions
             self.ids.session_alert.text = '' if session else 'No Sessions'
                 
@@ -139,7 +147,8 @@ class SessionBrowser(AnchorLayout):
     def on_session_collapsed(self, instance, value):
         if value == False:
             session_count = len(self._accordion.children)
-            lap_count = instance.session_widget.lap_count
+            #minimum space needed in case there are no laps in the session, plus the session toolbar
+            lap_count = max(instance.session_widget.lap_count, 1) + 1
             session_items_height = (lap_count * self.ITEM_HEIGHT)
             session_titles_height = (session_count * self.SESSION_TITLE_HEIGHT)
             accordion_height = session_items_height + session_titles_height
