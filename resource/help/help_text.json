@@ -2,5 +2,9 @@
     "suggested_lap": {
         "title": "Ready to review data!",
         "text": "We've selected the best lap and a suggested channel to get you started.\n\nTo add more, touch the gear icon for a list of available channels."
+    },
+    "beta_analysis_welcome":{
+        "title": "Beta Analysis",
+        "text": "To get started, import a log file using the (+) icon to the right. You can also download some example logfiles from our support forums.\n\nBETA feature: prepare for significant improvements, which may require re-importing your data."    
     }
 }

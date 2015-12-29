@@ -59,7 +59,7 @@ class CenteredBubble(Bubble):
         half_width = bubble_width / 2
         half_height = bubble_height / 2
         x = x - half_width
-        y = y + half_height
+        y = y - half_height
 
         window = widget.get_root_window()
         if x < 0: x = 0

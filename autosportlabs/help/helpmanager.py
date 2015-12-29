@@ -82,7 +82,7 @@ class HelpInfo(BoxLayout):
         return helptext
         
     @staticmethod
-    def help_popup(key, widget):
+    def help_popup(key, widget, arrow_pos='bottom_mid'):
         try:
             settings = HelpInfo.settings
             show_help = settings.userPrefs.get_pref('help', key, True)
@@ -90,6 +90,7 @@ class HelpInfo(BoxLayout):
                 helptext = HelpInfo.get_helptext(key)
                 if helptext:
                     help_popup = HelpBubble()
+                    help_popup.arrow_pos = arrow_pos
                     content = HelpInfo(key)
                     content.title_text = helptext['title']
                     content.help_text = helptext['text']

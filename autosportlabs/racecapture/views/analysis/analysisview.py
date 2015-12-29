@@ -166,6 +166,8 @@ class AnalysisView(Screen):
         channelvalues.settings = self._settings
         self.ids.analysismap.track_manager = self._track_manager
         self.ids.analysismap.datastore = self._datastore
+        Clock.schedule_once(lambda dt: HelpInfo.help_popup('beta_analysis_welcome', self, arrow_pos='right_mid'), 0.5)
+
 
     def popup_dismissed(self, *args):
         if self.stream_connecting:
