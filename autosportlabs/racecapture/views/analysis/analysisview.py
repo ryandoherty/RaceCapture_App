@@ -121,7 +121,7 @@ class AnalysisView(Screen):
                     sessions_view.select_lap(new_session_id, best_lap_id, True)
                     main_chart = self.ids.mainchart
                     main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
-                    HelpInfo.help_popup('suggested_lap', main_chart)
+                    HelpInfo.help_popup('suggested_lap', main_chart, arrow_pos='left_mid')
                 else:
                     Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
         except Exception as e:
