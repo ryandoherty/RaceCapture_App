@@ -25,6 +25,16 @@ class ChannelSelectorView(BoxLayout):
         self.register_event_type('on_channel_selected')
         self.multi_select = kwargs.get('multi_select', self.multi_select)
     
+    def select_channel(self, channels):
+        if channels:
+            index = 0
+            list_adapter = self.ids.channelList.adapter
+            for item in self.ids.channelList.adapter.data:
+                if item['text'] in channels:
+                    view = list_adapter.get_view(index)
+                    view.trigger_action(duration=0)
+                index += 1
+        
     def on_channels(self, instance, value):    
         data = []
         channel_list = self.ids.channelList
