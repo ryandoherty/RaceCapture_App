@@ -22,12 +22,12 @@ class AnalysisMap(AnalysisWidget):
     def __init__(self, **kwargs):
         super(AnalysisMap, self).__init__(**kwargs)
         #Main settings
-        self.current_heat_channel = None
         self.track = None
 
         #State settings
         self.got_mouse = False
-        self.heat_enabed = False
+        self.heatmap_channel = None
+        
         self.sources = {}
         Window.bind(on_motion=self.on_motion)
                 
@@ -42,32 +42,35 @@ class AnalysisMap(AnalysisWidget):
     
     def on_options(self, *args):
         self.show_customize_dialog()
+            
+    def _set_heat_map(self, heatmap_channel):
+        for source in self.sources.itervalues():
+            if heatmap_channel:
+                self.add_heat_values(heatmap_channel, source)
+            else:
+                self.remove_heat_values(source)
+        self.heatmap_channel = heatmap_channel
 
-    def _customized(self, instance):
-        print('customized!' + str(instance))
+    def _update_trackmap(self, values):
+        track = self.track_manager.get_track_by_id(values.track_id)
+        if track != None:
+            self.ids.track.setTrackPoints(track.map_points)
+            self.track = track
+        
+    def _customized(self, instance, values):
+        self._update_trackmap(values)
+        self._set_heat_map(values.heatmap_channel)
         
     def show_customize_dialog(self):
         
         current_track_id = None if self.track == None else self.track.track_id 
-        content = CustomizeMapView(settings=self.settings, 
-                                   datastore=self.datastore, 
-                                   track_manager=self.track_manager, 
-                                   current_heat_channel = self.current_heat_channel,
-                                   current_track_id = current_track_id)
+        content = CustomizeMapView(params=CustomizeParams(settings=self.settings, datastore=self.datastore, track_manager=self.track_manager),
+                                   values=CustomizeValues(heatmap_channel=self.heatmap_channel, track_id=current_track_id)
+                                   )
         popup = Popup(title="Customize Track Map", content=content, size_hint=(0.7, 0.7))
         content.bind(on_customized=self._customized)
         content.bind(on_close=lambda *args:popup.dismiss())  
         popup.open()
-                
-    def on_optionsx(self):
-        if self.heat_enabed:
-            for source in self.sources.itervalues():
-                self.remove_heat_values(source)
-            self.heat_enabed = False
-        else:
-            for source in self.sources.itervalues():
-                self.add_heat_values('TPS', source)
-            self.heat_enabed = True
    
     def on_touch_down(self, touch):
         self.got_mouse = True
@@ -114,6 +117,8 @@ class AnalysisMap(AnalysisWidget):
     def add_map_path(self, source_key, path, color):
         self.sources[str(source_key)] = source_key
         self.ids.track.add_path(str(source_key), path, color)
+        if self.heatmap_channel:
+            self.add_heat_values(self.heatmap_channel, source_key)
 
     def remove_map_path(self, source_key):
         self.ids.track.remove_path(str(source_key))
@@ -137,13 +142,23 @@ class AnalysisMap(AnalysisWidget):
     def remove_heat_values(self, lap_ref):
         self.ids.track.remove_heat_values(str(lap_ref))   
     
-class BaseCustomizeMapView(Screen):
+class CustomizeParams(object):
     def __init__(self, settings, datastore, track_manager, **kwargs):
-        super(BaseCustomizeMapView, self).__init__(**kwargs)
-        self.initialized = False
         self.settings = settings
         self.datastore = datastore
         self.track_manager = track_manager
+
+class CustomizeValues(object):
+    def __init__(self, heatmap_channel, track_id, **kwargs):
+        self.heatmap_channel = heatmap_channel
+        self.track_id = track_id
+    
+class BaseCustomizeMapView(Screen):
+    def __init__(self, params, values, **kwargs):
+        super(BaseCustomizeMapView, self).__init__(**kwargs)
+        self.initialized = False
+        self.params = params
+        self.values = values
         self.register_event_type('on_modified')
         
     def on_modified(self):
@@ -157,20 +172,19 @@ class TrackmapButton(LabelIconButton):
 
 class CustomizeHeatmapView(BaseCustomizeMapView):
     available_channels = ListProperty()
-    heatmap_channel = StringProperty(None)
     
-    def __init__(self, settings, datastore, track_manager, **kwargs):
-        super(CustomizeHeatmapView, self).__init__(settings, datastore, track_manager, **kwargs)
-        self.heatmap_channel = kwargs.get('current_heatmap_channel')
+    def __init__(self, params, values, **kwargs):
+        super(CustomizeHeatmapView, self).__init__(params, values, **kwargs)
         self.ids.heatmap_channel.bind(on_channel_selected=self.channel_selected)
     
     def on_enter(self):
         if self.initialized == False:
             channels = self._get_available_channel_names()
             self.available_channels = channels
+            self.ids.heatmap_channel.select_channel(self.values.heatmap_channel)
             
     def _get_available_channel_names(self):
-        available_channels = self.datastore.channel_list
+        available_channels = self.params.datastore.channel_list
         return [str(c) for c in available_channels]
         
     def on_available_channels(self, instance, value):
@@ -178,45 +192,44 @@ class CustomizeHeatmapView(BaseCustomizeMapView):
         
     def channel_selected(self, instance, value):
         value = None if len(value) == 0 else value[0]
-        modified = self.heatmap_channel != value
+        modified = self.values.heatmap_channel != value
+        self.values.heatmap_channel = value
         if modified:
             self.dispatch('on_modified')
         
     def channel_cleared(self, *args):
-        modified = self.heatmap_channel == None
-        self.heatmap_channel = None
+        modified = self.values.heatmap_channel == None
+        self.values.heatmap_channel = None
         if modified:
             self.dispatch('on_modified')
         
 class CustomizeTrackView(BaseCustomizeMapView):
     track_id = StringProperty(None, allownone=True)
-    def __init__(self, settings, datastore, track_manager, **kwargs):
-        super(CustomizeTrackView, self).__init__(settings, datastore, track_manager, **kwargs)
-        self.track = kwargs.get('current_track_id')
-        self.ids.track_browser.set_trackmanager(track_manager)
+    def __init__(self, params, values, **kwargs):
+        super(CustomizeTrackView, self).__init__(params, values, **kwargs)
+        self.ids.track_browser.set_trackmanager(self.params.track_manager)
         self.ids.track_browser.bind(on_track_selected=self.track_selected)
         self.ids.track_browser.init_view()
         
     def track_selected(self, instance, value):
         if type(value) is set:
-            self.track_id = None if len(value) == 0 else next(iter(value))
+            self.values.track_id = None if len(value) == 0 else next(iter(value))
         self.dispatch('on_modified')
 
 class CustomizeMapView(BoxLayout):
-    def __init__(self, settings, datastore, track_manager, **kwargs):
+    def __init__(self, params, values, **kwargs):
         super(CustomizeMapView, self).__init__(**kwargs)
-        self._current_heatmap_channel = kwargs.get('current_heatmap_channel')
-        self._current_track_id = kwargs.get('current_track_id')
+        self.values = values
         self.register_event_type('on_customized')
         self.register_event_type('on_close')
         
         screen_manager = self.ids.screens
         screen_manager.transition = SwapTransition()
         
-        customize_heatmap_view = CustomizeHeatmapView(name='heat', settings=settings, datastore=datastore, track_manager=track_manager, current_heatmap_channel=self._current_heatmap_channel)
+        customize_heatmap_view = CustomizeHeatmapView(name='heat', params=params, values=values)
         customize_heatmap_view.bind(on_modified=self.on_modified)
                 
-        customize_track_view = CustomizeTrackView(name='track', settings=settings, datastore=datastore, track_manager=track_manager, current_track_id=self._current_track_id)
+        customize_track_view = CustomizeTrackView(name='track', params=params, values=values)
         customize_track_view.bind(on_modified=self.on_modified)
         
         self.customize_heatmap_view = customize_heatmap_view
@@ -233,14 +246,14 @@ class CustomizeMapView(BoxLayout):
         self.ids.options.add_widget(trackmap_option)
         trackmap_option.bind(on_press=lambda x: self.on_option('track'))
         
-    def on_customized(self):
+    def on_customized(self, values):
         pass
     
     def on_close(self):
         pass
     
     def confirm(self):
-        self.dispatch('on_customized')
+        self.dispatch('on_customized', self.values)
         self.dispatch('on_close')
     
     def cancel(self):
