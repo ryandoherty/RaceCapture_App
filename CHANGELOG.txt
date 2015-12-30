@@ -1,3 +1,6 @@
+==1.4.0==
+* Analysis Beta available
+
 ==1.3.13==
 * Clean up behind the scenes errors in gauge view, track manager and serial data API
 * Fixed error reading script / RaceCapture log (Android)
