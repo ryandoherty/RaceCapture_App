@@ -106,9 +106,3 @@ class HelpInfo(BoxLayout):
     def on_ok(self):
         HelpInfo.settings.userPrefs.set_pref('help', self._key, False)
         self.parent.parent.dismiss()
-        
-    
-    
-    
-    
-    
