@@ -64,7 +64,7 @@ class AnalysisWidget(AnchorLayout):
             Logger.error("AnalysisWidget: Error removing remove lap " + str(e))
 
 class ChannelAnalysisWidget(AnalysisWidget):
-    """A widget that can select it's own channels to display
+    """A widget that can select its own channels to display
     """
     sessions = ObjectProperty(None)
     

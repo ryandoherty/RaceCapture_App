@@ -92,9 +92,6 @@ class ChannelValuesView(ChannelAnalysisWidget):
             stats = channel_data.data
             key = channel + str(source)
             widget = self._channel_stat_widgets.get(key)
-            #widget.session = str(source.session)
-            #widget.lap = str(source.lap)
-            #widget.channel = channel
             values = stats.values
             try:
                 value = str(values[point])

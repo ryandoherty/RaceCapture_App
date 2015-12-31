@@ -175,7 +175,7 @@ class TrackManager:
             if trackCenter and trackCenter.withinCircle(point, radius):
                 return track
         return None
-                    
+
     def filter_tracks_by_name(self, name, track_ids=None):
         if track_ids is None:
             track_ids = self.tracks.keys()

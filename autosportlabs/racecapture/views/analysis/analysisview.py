@@ -27,7 +27,7 @@ from autosportlabs.help.helpmanager import HelpInfo
 import traceback
 
 ANALYSIS_VIEW_KV = 'autosportlabs/racecapture/views/analysis/analysisview.kv'
-  
+
 class AnalysisView(Screen):
     SUGGESTED_CHART_CHANNELS = ['Speed']
     INIT_DATASTORE_TIMEOUT = 10.0
@@ -65,7 +65,6 @@ class AnalysisView(Screen):
             cache = self._datastore.get_location_data(source_ref)
             self._sync_analysis_map(source_ref.session)
             self.ids.analysismap.add_map_path(source_ref, cache, map_path_color)
-          #  self.ids.analysismap.add_heat_values('TPS', source_ref)
 
         else:
             self.ids.mainchart.remove_lap(source_ref)
