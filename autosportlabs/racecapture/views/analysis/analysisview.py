@@ -111,20 +111,17 @@ class AnalysisView(Screen):
     #The following selects a best lap if there are no other laps currently selected
     def check_load_suggested_lap(self, new_session_id):
         sessions_view = self.ids.sessions_view
-        try:
-            if len(sessions_view.selected_laps) == 0:
-                best_lap = self._datastore.get_channel_min('LapTime', [new_session_id], ['LapCount'])
-                if best_lap:
-                    best_lap_id = best_lap[1]
-                    Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
-                    sessions_view.select_lap(new_session_id, best_lap_id, True)
-                    main_chart = self.ids.mainchart
-                    main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
-                    HelpInfo.help_popup('suggested_lap', main_chart, arrow_pos='left_mid')
-                else:
-                    Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
-        except Exception as e:
-            Logger.error('AnalysisView: Failed to select an example lap {} : {}'.format(e, traceback.format_exc()))
+        if len(sessions_view.selected_laps) == 0:
+            best_lap = self._datastore.get_channel_min('LapTime', [new_session_id], ['LapCount'])
+            if best_lap:
+                best_lap_id = best_lap[1]
+                Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
+                sessions_view.select_lap(new_session_id, best_lap_id, True)
+                main_chart = self.ids.mainchart
+                main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
+                HelpInfo.help_popup('suggested_lap', main_chart, arrow_pos='left_mid')
+            else:
+                Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
         
     def on_stream_connecting(self, *args):
         self.stream_connecting = True
