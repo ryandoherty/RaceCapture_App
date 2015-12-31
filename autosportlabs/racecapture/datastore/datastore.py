@@ -814,7 +814,7 @@ class DataStore(object):
         #Add our joins
         sel_st += 'JOIN datapoint ON datapoint.sample_id=sample.id\n'
 
-        if not data_filter == None:
+        if data_filter is not None:
             #Add our filter
             sel_st += 'WHERE '
             if not 'Filter' in type(data_filter).__name__:
