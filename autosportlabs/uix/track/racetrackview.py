@@ -16,7 +16,7 @@ Builder.load_file('autosportlabs/uix/track/racetrackview.kv')
 class RaceTrackView(BoxLayout):
     def __init__(self, **kwargs):
         super(RaceTrackView, self).__init__(**kwargs)
-        
+
     def loadTrack(self, track):
         self.initMap(track)
                 
