@@ -72,7 +72,8 @@ class UserPrefs(EventDispatcher):
         self._prefs_dict["gauge_settings"][gauge_id] = channel
         self._schedule_save()
 
-    def get_datastore_location(self):
+    @property
+    def datastore_location(self):
         return self.config.get('preferences', 'dstore_path')
 
     def get_gauge_config(self, gauge_id):

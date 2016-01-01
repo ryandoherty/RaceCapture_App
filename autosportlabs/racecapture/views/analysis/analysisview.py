@@ -146,7 +146,7 @@ class AnalysisView(Screen):
                 self._datastore.new(dstore_path)
             self.ids.sessions_view.datastore = self._datastore
 
-        dstore_path = self._settings.userPrefs.get_datastore_location()
+        dstore_path = self._settings.userPrefs.datastore_location
         Logger.info("AnalysisView: Datastore Path:" + str(dstore_path))
         t = Thread(target=_init_datastore, args=(dstore_path,))
         t.daemon = True

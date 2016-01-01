@@ -219,7 +219,7 @@ class LogImportWidget(BoxLayout):
         session_name = self.ids.session_name.text.strip()
         session_notes = self.ids.session_notes.text.strip()
         
-        dstore_path = self.settings.userPrefs.get_datastore_location()
+        dstore_path = self.settings.userPrefs.datastore_location
 
         if not logpath:
             alertPopup("No Log Specified",
