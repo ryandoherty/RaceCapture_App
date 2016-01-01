@@ -16,10 +16,10 @@ def format_laptime(time):
     if time == None:
         return NULL_LAP_TIME
 
-    intMinuteValue = int(time)
-    fractionMinuteValue = 60.0 * (time - float(intMinuteValue))
+    int_minute_value = int(time)
+    fraction_minute_value = 60.0 * (time - float(int_minute_value))
     if time == MIN_LAP_TIME:
         return NULL_LAP_TIME
     else:
-        return '{}:{}'.format(intMinuteValue,'{0:06.3f}'.format(fractionMinuteValue))
+        return '{}:{}'.format(int_minute_value,'{0:06.3f}'.format(fraction_minute_value))
     
