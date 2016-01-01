@@ -51,15 +51,17 @@ class Session(BoxLayout):
         self.ses_id = ses_id
         self.name = name
         self.notes = notes
-        self.lap_count = 0
         self.register_event_type('on_delete_session')
         self.register_event_type('on_edit_session')
     
+    @property
+    def item_count(self):
+        return len(self.ids.lap_list.children)
+
     def append_lap(self, session, lap, laptime):
         text = '{} :: {}'.format(int(lap), format_laptime(laptime))
         lapitem = LapItemButton(session=session, text=text, lap=lap, laptime=laptime)
         self.ids.lap_list.add_widget(lapitem)
-        self.lap_count += 1
         return lapitem
     
     def append_label(self, message):
@@ -148,8 +150,8 @@ class SessionBrowser(AnchorLayout):
         if value == False:
             session_count = len(self._accordion.children)
             #minimum space needed in case there are no laps in the session, plus the session toolbar
-            lap_count = max(instance.session_widget.lap_count, 1) + 1
-            session_items_height = (lap_count * self.ITEM_HEIGHT)
+            item_count = max(instance.session_widget.item_count, 1) + 1
+            session_items_height = (item_count * self.ITEM_HEIGHT)
             session_titles_height = (session_count * self.SESSION_TITLE_HEIGHT)
             accordion_height = session_items_height + session_titles_height
             self._accordion.height = accordion_height
