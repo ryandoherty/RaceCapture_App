@@ -56,13 +56,10 @@ class ChannelSelectorView(BoxLayout):
         pass
     
     def on_select(self, value):
-        try:
-            channels = []
-            for channel in value.selection:
-                channels.append(channel.text)
-            self.dispatch('on_channel_selected', channels)
-        except Exception as e:
-            Logger.error('ChannelSelectorView: Error Selecting channel: ' + str(e))
+        channels = []
+        for channel in value.selection:
+            channels.append(channel.text)
+        self.dispatch('on_channel_selected', channels)
     
 class ChannelSelectView(FloatLayout):
     channel = None
