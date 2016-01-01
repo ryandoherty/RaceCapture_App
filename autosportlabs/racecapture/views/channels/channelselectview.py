@@ -19,9 +19,9 @@ class ChannelItemButton(ListItemButton):
 
 class ChannelSelectorView(BoxLayout):
     channels = ListProperty()
-    multi_select = False
     def __init__(self, **kwargs):
         super(ChannelSelectorView, self).__init__(**kwargs)
+        self.multi_select = False
         self.register_event_type('on_channel_selected')
         self.multi_select = kwargs.get('multi_select', self.multi_select)
     
