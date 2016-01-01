@@ -32,7 +32,7 @@ class TrackPath(object):
         self.path = path
 
 class TrackMap(Widget):
-    trackColor = ListProperty([1.0, 1.0, 1.0, 0.5])
+    track_color = ListProperty([1.0, 1.0, 1.0, 0.5])
     MIN_PADDING = sp(1)
     DEFAULT_TRACK_WIDTH_SCALE = 0.01
     DEFAULT_MARKER_WIDTH_SCALE = 0.02
@@ -44,31 +44,31 @@ class TrackMap(Widget):
         self.bind(pos=self.update_map)
         self.bind(size=self.update_map)
 
-        self.trackWidthScale = self.DEFAULT_TRACK_WIDTH_SCALE
+        self.track_width_scale = self.DEFAULT_TRACK_WIDTH_SCALE
         self.marker_width_scale = self.DEFAULT_MARKER_WIDTH_SCALE
         self.path_width_scale = self.DEFAULT_PATH_WIDTH_SCALE
         self.heat_width_scale = self.DEFAULT_HEAT_WIDTH_SCALE
         
-        self.offsetPoint = Point(0,0)
-        self.globalRatio = 0
-        self.heightPadding = 0
-        self.widthPadding = 0
+        self._offset_point = Point(0,0)
+        self._global_ratio = 0
+        self._height_padding = 0
+        self._width_padding = 0
         
-        self.minXY = Point(-1, -1)
-        self.maxXY = Point(-1, -1)
+        self._min_XY = Point(-1, -1)
+        self._max_XY = Point(-1, -1)
     
         #The trackmap
-        self.mapPoints = []
-        self.scaled_map_points = []
+        self._map_points = []
+        self._scaled_map_points = []
     
-        #The map paths
-        self.paths = {}
-        self.scaled_paths = {}
-        self.heat_map_values = {}
+        #The map _paths
+        self._paths = {}
+        self._scaled_paths = {}
+        self._heat_map_values = {}
         
         #markers for trackmap
-        self.marker_points = {}
-        self.marker_locations = {}
+        self._marker_points = {}
+        self._marker_locations = {}
 
     
     def on_trackColor(self, instance, value):
@@ -80,56 +80,56 @@ class TrackMap(Widget):
             point = self._project_point(geo_point)
             points.append(point);
 
-        min_x = self.minXY.x
-        min_y = self.minXY.y
+        min_x = self._min_XY.x
+        min_y = self._min_XY.y
 
         for point in points:
             point.x = point.x - min_x
             point.y = point.y - min_y
 
-        self.paths[key] = TrackPath(points, color)
+        self._paths[key] = TrackPath(points, color)
         self.update_map()
 
     def add_heat_values(self, key, heat_map_values):
-        self.heat_map_values[key] = heat_map_values
+        self._heat_map_values[key] = heat_map_values
         self._draw_current_map()
 
     def remove_heat_values(self, key):
-        self.heat_map_values.pop(key, None)
+        self._heat_map_values.pop(key, None)
         self._draw_current_map()
 
     def remove_path(self, key):
-        self.paths.pop(key, None)
-        self.scaled_paths.pop(key, None)
+        self._paths.pop(key, None)
+        self._scaled_paths.pop(key, None)
         self._draw_current_map()
 
     def add_marker(self, key, color):
-        self.marker_points[key] = MarkerPoint(color)
+        self._marker_points[key] = MarkerPoint(color)
 
     def remove_marker(self, key):
-        self.marker_points.pop(key, None)
-        self.marker_locations.pop(key, None)
+        self._marker_points.pop(key, None)
+        self._marker_locations.pop(key, None)
         self._draw_current_map()
 
     def get_marker(self, key):
-        return self.marker_points.get(key)
+        return self._marker_points.get(key)
 
     def update_marker(self, key, geoPoint):
-        marker_point = self.marker_points.get(key)
+        marker_point = self._marker_points.get(key)
         if marker_point:
             left = self.pos[0]
             bottom = self.pos[1]
             point = self._offset_point(self._project_point(geoPoint))
             marker_point.x = point.x
             marker_point.y = point.y
-            scaledPoint = self._scale_point(marker_point, self.height, left, bottom)
+            scaled_point = self._scale_point(marker_point, self.height, left, bottom)
 
             marker_size = self.marker_width_scale * self.height
-            self.marker_locations[key].circle = (scaledPoint.x, scaledPoint.y, marker_size)
+            self._marker_locations[key].circle = (scaled_point.x, scaled_point.y, marker_size)
         
     def update_map(self, *args):
         
-        paddingBothSides = self.MIN_PADDING * 2
+        padding_both_sides = self.MIN_PADDING * 2
         
         width = self.size[0]
         height = self.size[1]
@@ -138,32 +138,32 @@ class TrackMap(Widget):
         bottom = self.pos[1]
         
         # the actual drawing space for the map on the image
-        mapWidth = width - paddingBothSides;
-        mapHeight = height - paddingBothSides;
+        map_width = width - padding_both_sides;
+        map_height = height - padding_both_sides;
 
         #determine the width and height ratio because we need to magnify the map to fit into the given image dimension
-        mapWidthRatio = float(mapWidth) / float(self.maxXY.x)
-        mapHeightRatio = float(mapHeight) / float(self.maxXY.y)
+        map_width_ratio = float(map_width) / float(self._max_XY.x)
+        map_height_ratio = float(map_height) / float(self._max_XY.y)
 
         # using different ratios for width and height will cause the map to be stretched. So, we have to determine
         # the global ratio that will perfectly fit into the given image dimension
-        self.globalRatio = min(mapWidthRatio, mapHeightRatio);
+        self._global_ratio = min(map_width_ratio, map_height_ratio)
 
         #now we need to readjust the padding to ensure the map is always drawn on the center of the given image dimension
-        self.heightPadding = (height - (self.globalRatio * self.maxXY.y)) / 2.0
-        self.widthPadding = (width - (self.globalRatio * self.maxXY.x)) / 2.0
-        self.offsetPoint = self.minXY;
+        self._height_padding = (height - (self._global_ratio * self._max_XY.y)) / 2.0
+        self._width_padding = (width - (self._global_ratio * self._max_XY.x)) / 2.0
+        self._offset_point = self._min_XY
         
         #track outline
-        points = self.mapPoints
+        points = self._map_points
         scaled_map_points = []
         for point in points:
-            scaledPoint = self._scale_point(point, self.height, left, bottom)
-            scaled_map_points.append(scaledPoint.x)
-            scaled_map_points.append(scaledPoint.y)
-        self.scaled_map_points = scaled_map_points
+            scaled_point = self._scale_point(point, self.height, left, bottom)
+            scaled_map_points.append(scaled_point.x)
+            scaled_map_points.append(scaled_point.y)
+        self._scaled_map_points = scaled_map_points
 
-        paths = self.paths
+        paths = self._paths
         scaled_paths = {}
         for key, track_path in paths.iteritems():
             scaled_path_points = []
@@ -173,7 +173,7 @@ class TrackMap(Widget):
                 scaled_path_points.append(scaled_path_point.y)
             scaled_paths[key] = scaled_path_points
 
-        self.scaled_paths = scaled_paths
+        self._scaled_paths = scaled_paths
         self._draw_current_map()
 
     def _draw_current_map(self):
@@ -183,13 +183,13 @@ class TrackMap(Widget):
 
         with self.canvas:
 
-            Color(*self.trackColor)
-            Line(points=self.scaled_map_points, width=sp(self.trackWidthScale * self.height), closed=True, joint='round')
+            Color(*self.track_color)
+            Line(points=self._scaled_map_points, width=sp(self.track_width_scale * self.height), closed=True, joint='round')
 
             #draw all of the traces
-            for key, path_points in self.scaled_paths.iteritems():
+            for key, path_points in self._scaled_paths.iteritems():
 
-                heat_path = self.heat_map_values.get(key)
+                heat_path = self._heat_map_values.get(key)
                 if heat_path:
                     #draw heat map
                     point_count = len(path_points)
@@ -210,61 +210,61 @@ class TrackMap(Widget):
                         pass
                 else:
                     #draw regular map
-                    Color(*self.paths[key].color)
+                    Color(*self._paths[key].color)
                     Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True)
 
             #draw the markers
             marker_size = self.marker_width_scale * self.height
-            for key, marker_point in self.marker_points.iteritems():
-                scaledPoint = self._scale_point(marker_point, self.height, left, bottom)
+            for key, marker_point in self._marker_points.iteritems():
+                scaled_point = self._scale_point(marker_point, self.height, left, bottom)
                 Color(*marker_point.color)
-                self.marker_locations[key] = Line(circle=(scaledPoint.x, scaledPoint.y, marker_size), width=marker_size, closed=True)
+                self._marker_locations[key] = Line(circle=(scaled_point.x, scaled_point.y, marker_size), width=marker_size, closed=True)
 
          
     def setTrackPoints(self, geoPoints):
-        self.genMapPoints(geoPoints)
+        self.gen_map_points(geoPoints)
         self.update_map()
         
     def _offset_point(self, point):
-        point.x = point.x - self.minXY.x
-        point.y = point.y - self.minXY.y
+        point.x = point.x - self._min_XY.x
+        point.y = point.y - self._min_XY.y
         return point
         
-    def _project_point(self, geoPoint):
-        latitude = geoPoint.latitude * float(math.pi / 180.0)
-        longitude = geoPoint.longitude * float(math.pi / 180.0)
+    def _project_point(self, geo_point):
+        latitude = geo_point.latitude * float(math.pi / 180.0)
+        longitude = geo_point.longitude * float(math.pi / 180.0)
         point = Point(longitude, float(math.log(math.tan((math.pi / 4.0) + 0.5 * latitude))))
         return point;
 
     def _scale_point(self, point, height, left, bottom):
-        adjustedX = int((self.widthPadding + (point.x * self.globalRatio))) + left
+        adjusted_X = int((self._width_padding + (point.x * self._global_ratio))) + left
         #need to invert the Y since 0,0 starts at top left
-        adjustedY = int((self.heightPadding + (point.y * self.globalRatio))) + bottom
-        return Point(adjustedX, adjustedY)
+        adjusted_Y = int((self._height_padding + (point.y * self._global_ratio))) + bottom
+        return Point(adjusted_X, adjusted_Y)
 
-    def genMapPoints(self, geoPoints):
+    def gen_map_points(self, geo_points):
         points = []
         
         # min and max coordinates, used in the computation below
-        minXY = Point(-1, -1)
-        maxXY = Point(-1, -1)
+        min_XY = Point(-1, -1)
+        max_XY = Point(-1, -1)
         
-        for geoPoint in geoPoints:
-            point = self._project_point(geoPoint)
-            minXY.x = point.x if minXY.x == -1 else min(minXY.x, point.x)
-            minXY.y = point.y if minXY.y == -1 else min(minXY.y, point.y)
+        for geo_point in geo_points:
+            point = self._project_point(geo_point)
+            min_XY.x = point.x if min_XY.x == -1 else min(min_XY.x, point.x)
+            min_XY.y = point.y if min_XY.y == -1 else min(min_XY.y, point.y)
             points.append(point);
         
         # now, we need to keep track the max X and Y values
         for point in points:
-            point.x = point.x - minXY.x
-            point.y = point.y - minXY.y
-            maxXY.x = point.x if maxXY.x == -1 else max(maxXY.x, point.x)
-            maxXY.y = point.y if maxXY.y == -1 else max(maxXY.y, point.y);
+            point.x = point.x - min_XY.x
+            point.y = point.y - min_XY.y
+            max_XY.x = point.x if max_XY.x == -1 else max(max_XY.x, point.x)
+            max_XY.y = point.y if max_XY.y == -1 else max(max_XY.y, point.y);
                 
-        self.minXY = minXY
-        self.maxXY = maxXY                
-        self.mapPoints =  points        
+        self._min_XY = min_XY
+        self._max_XY = max_XY
+        self._map_points =  points
         
     def _get_heat_map_color(self, value):
         colors = [[0,0,1,1], [0,1,0,1], [1,1,0,1], [1,0,0,1]]
