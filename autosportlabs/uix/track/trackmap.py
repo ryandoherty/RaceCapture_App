@@ -119,7 +119,7 @@ class TrackMap(Widget):
         if marker_point:
             left = self.pos[0]
             bottom = self.pos[1]
-            point = self._offset_point(self._project_point(geoPoint))
+            point = self._offset_track_point(self._project_point(geoPoint))
             marker_point.x = point.x
             marker_point.y = point.y
             scaled_point = self._scale_point(marker_point, self.height, left, bottom)
@@ -225,7 +225,7 @@ class TrackMap(Widget):
         self.gen_map_points(geoPoints)
         self.update_map()
         
-    def _offset_point(self, point):
+    def _offset_track_point(self, point):
         point.x = point.x - self._min_XY.x
         point.y = point.y - self._min_XY.y
         return point
