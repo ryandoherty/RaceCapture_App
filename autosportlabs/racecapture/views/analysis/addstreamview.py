@@ -201,11 +201,6 @@ class LogImportWidget(BoxLayout):
         
         dstore_path = self.settings.userPrefs.datastore_location
 
-        if not logpath:
-            alertPopup("No Log Specified",
-                      "Please select a log file to import")
-            return
-
         if not os.path.isfile(logpath):
             alertPopup("Invalid log specified",
                       "Unable to find specified log file: {}. \nAre you sure it exists?".format(logpath))
