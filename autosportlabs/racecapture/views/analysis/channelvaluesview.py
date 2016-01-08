@@ -83,7 +83,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
 
     def __init__(self, **kwargs):
         super(ChannelValuesView, self).__init__(**kwargs)
-        self.channel_stats={}
+        self.channel_stats = {}
         self._channel_stat_widgets = {}
 
     def update_reference_mark(self, source, point):
