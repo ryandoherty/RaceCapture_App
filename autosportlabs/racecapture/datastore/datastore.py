@@ -6,6 +6,9 @@ import time
 import datetime
 from kivy.logger import Logger
 
+class DatastoreException(Exception):
+    pass
+
 def unix_time(dt):
     epoch = datetime.datetime.utcfromtimestamp(0)
     delta = dt - epoch
@@ -44,7 +47,7 @@ def _interp_dpoints(start, finish, sample_skip):
 def _smooth_dataset(dset, smoothing_rate):
     #Throw an error if we got a bad smoothing rate
     if not smoothing_rate or smoothing_rate < 2:
-        raise Exception("Invalid smoothing rate")
+        raise DatastoreException("Invalid smoothing rate")
 
     #This is the dataset that we'll be returning
     new_dset = []
@@ -288,7 +291,7 @@ class DataStore(object):
     def get_channel(self, name): 
         channel =  [c for c in self._channels if name in c.name]
         if not len(channel):
-            raise Exception("Unknown channel: {}".format(name))
+            raise DatastoreException("Unknown channel: {}".format(name))
         return channel[0]
         
     def _create_tables(self):
@@ -374,7 +377,7 @@ class DataStore(object):
             print '-'*60
             traceback.print_exc(file=sys.stdout)
             print '-'*60
-            raise Exception("Unable to import datalog, bad metadata")
+            raise DatastoreException("Unable to import datalog, bad metadata")
 
         return channels
 
@@ -719,7 +722,7 @@ class DataStore(object):
             smoothing = 1
 
         if not channel in [x.name for x in self._channels]:
-            raise Exception("Unknown channel: {}".format(channel))
+            raise DatastoreException("Unknown channel: {}".format(channel))
 
         self._conn.execute("""UPDATE channel
         SET smoothing={}
@@ -728,7 +731,7 @@ class DataStore(object):
 
     def get_channel_smoothing(self, channel):
         if not channel in [x.name for x in self._channels]:
-            raise Exception("Unknown channel: {}".format(channel))
+            raise DatastoreException("Unknown channel: {}".format(channel))
 
         c = self._conn.cursor()
 
@@ -738,7 +741,7 @@ class DataStore(object):
         res = c.fetchone()
 
         if res == None:
-            raise Exception("Unable to retrieve smoothing for channel: {}".format(channel))
+            raise DatastoreException("Unable to retrieve smoothing for channel: {}".format(channel))
         else:
             return res[0]
 
@@ -747,12 +750,12 @@ class DataStore(object):
         
         warnings = []
         if not self._isopen:
-            raise Exception("Datastore is not open")
+            raise DatastoreException("Datastore is not open")
 
         try:
             dl = open(path, 'rb')
         except:
-            raise Exception("Unable to open file")
+            raise DatastoreException("Unable to open file")
 
         header = dl.readline()
 
@@ -776,7 +779,7 @@ class DataStore(object):
 
         #make sure that the sessions list exists
         if type(sessions) != list or len(sessions) == 0:
-            raise Exception("Must provide a list of sessions to query!")
+            raise DatastoreException("Must provide a list of sessions to query!")
 
         #If there are no channels, or if a '*' is passed, select all
         #of the channels
@@ -785,7 +788,7 @@ class DataStore(object):
 
         for ch in channels:
             if not ch in [x.name for x in self._channels]:
-                raise Exception("Unable to complete query. Unknown channel: {}".format(ch))
+                raise DatastoreException("Unable to complete query. Unknown channel: {}".format(ch))
             chanst = str(ch)
             tbl_prefix = 'datapoint.'
             alias = ' as {}'.format(chanst)
