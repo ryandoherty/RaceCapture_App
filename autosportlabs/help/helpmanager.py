@@ -89,15 +89,12 @@ class HelpInfo(BoxLayout):
             if show_help == True:
                 helptext = HelpInfo.get_helptext(key)
                 if helptext:
-                    help_popup = HelpBubble()
-                    help_popup.arrow_pos = arrow_pos
-                    content = HelpInfo(key)
-                    content.title_text = helptext['title']
-                    content.help_text = helptext['text']
+                    content = HelpInfo(key, title_text=helptext['title'], help_text=helptext['text'])
+                    help_popup = HelpBubble(arrow_pos = arrow_pos,
+                                            size=HelpInfo.HELP_POPUP_SIZE,
+                                            size_hint = (None,None))
                     help_popup.add_widget(content)
                     help_popup.auto_dismiss_timeout(HelpInfo.HELP_POPUP_TIMEOUT)
-                    help_popup.size = HelpInfo.HELP_POPUP_SIZE
-                    help_popup.size_hint = (None,None)
                     widget.get_root_window().add_widget(help_popup)
                     help_popup.center_on(widget)
         except Exception as e:
