@@ -13,7 +13,7 @@ Dependencies:
   * NavigationDrawer (via kivy-garden)
   * ModernMenu (via kivy-garden)
   * asl_f4_loader (in dependencies folder)
-  * ihexpy (manual install from https://github.com/Jeff-Ciesielski/ihexpy )
+  * ihexpy (manual install from https://github.com/autosportlabs/ihexpy )
 
 ## dev installation (OS X)
 
