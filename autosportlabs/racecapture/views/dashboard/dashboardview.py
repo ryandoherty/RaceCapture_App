@@ -39,28 +39,28 @@ class DashboardView(Screen):
         pass
         
     def initGlobalGauges(self):
-        dataBus = self._databus
+        databus = self._databus
         settings = self._settings
  
         activeGauges = list(kvFindClass(self, Gauge))
         
         for gauge in activeGauges:
             gauge.settings = settings
-            gauge.data_bus = dataBus
+            gauge.data_bus = databus
          
     def init_view(self):
         screenMgr = kvFind(self, 'rcid', 'screens')
         
-        dataBus = self._databus
+        databus = self._databus
         settings = self._settings
         
         self.initGlobalGauges()
         
-        gaugeView = GaugeView(name='gaugeView', dataBus=dataBus, settings=settings)
-        tachView = TachometerView(name='tachView', dataBus=dataBus, settings=settings)
-        laptimeView = LaptimeView(name='laptimeView', dataBus=dataBus, settings=settings)
-        comboView = ComboView(name='comboView', dataBus=dataBus, settings=settings)  
-        rawChannelView = RawChannelView(name='rawchannelView', dataBus=dataBus, settings=settings)
+        gaugeView = GaugeView(name='gaugeView', databus=databus, settings=settings)
+        tachView = TachometerView(name='tachView', databus=databus, settings=settings)
+        laptimeView = LaptimeView(name='laptimeView', databus=databus, settings=settings)
+        comboView = ComboView(name='comboView', databus=databus, settings=settings)
+        rawChannelView = RawChannelView(name='rawchannelView', databus=databus, settings=settings)
         
         screenMgr.add_widget(gaugeView)
         screenMgr.add_widget(tachView)
@@ -72,7 +72,7 @@ class DashboardView(Screen):
 
         for gauge in gauges:
             gauge.settings = self._settings
-            gauge.data_bus = dataBus
+            gauge.data_bus = databus
 
         self._gaugeView = gaugeView
         self._tachView = tachView
@@ -80,7 +80,7 @@ class DashboardView(Screen):
         self._laptimeView = laptimeView
         self._comboView = comboView
         self._screen_mgr = screenMgr
-        dataBus.start_update()
+        databus.start_update()
         Clock.schedule_once(lambda dt: self._show_last_view())
 
     def on_nav_left(self):

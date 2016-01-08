@@ -13,11 +13,11 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/comboview.kv')
 
 class ComboView(Screen):
 
-    def __init__(self, **kwargs):
+    def __init__(self, databus, settings, **kwargs):
         super(ComboView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
-        self._databus = kwargs.get('dataBus')
-        self._settings = kwargs.get('settings')
+        self._databus = databus
+        self._settings = settings
         self.init_view()
 
     def init_view(self):

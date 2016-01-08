@@ -17,10 +17,10 @@ class GaugeView(Screen):
     _databus = None
     _settings = None
      
-    def __init__(self, **kwargs):
+    def __init__(self, databus, settings, **kwargs):
         super(GaugeView, self).__init__(**kwargs)
-        self._databus = kwargs.get('dataBus')
-        self._settings = kwargs.get('settings')
+        self._databus = databus
+        self._settings = settings
         self.initScreen()
 
     def pct(self, p):
