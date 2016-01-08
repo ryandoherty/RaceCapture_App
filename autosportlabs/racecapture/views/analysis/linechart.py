@@ -127,10 +127,13 @@ class LineChart(ChannelAnalysisWidget):
         data_index = self.current_offset + (pct * (self.current_distance - self.current_offset))
         self.ids.chart.marker_x = data_index
         for channel_plot in self._channel_plots.itervalues():
-            value_index = bisect.bisect_right(channel_plot.distance_index.keys(), data_index)
-            index = channel_plot.distance_index.values()[value_index]
-            marker = MarkerEvent(int(index), channel_plot.sourceref)
-            self.dispatch('on_marker', marker)
+            try:
+                value_index = bisect.bisect_right(channel_plot.distance_index.keys(), data_index)
+                index = channel_plot.distance_index.values()[value_index]
+                marker = MarkerEvent(int(index), channel_plot.sourceref)
+                self.dispatch('on_marker', marker)
+            except IndexError:
+                pass #don't update marker for values that don't exist.
         
         
     def on_touch_move(self, touch):
