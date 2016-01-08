@@ -12,7 +12,7 @@ from kivy.adapters.listadapter import ListAdapter
 from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
-from autosportlabs.racecapture.datastore import Filter
+from autosportlabs.racecapture.datastore import DatastoreException, Filter
 from autosportlabs.racecapture.views.util.viewutils import format_laptime
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
@@ -191,7 +191,7 @@ class SessionBrowser(AnchorLayout):
             self.datastore.delete_session(id)
             Logger.info('SessionBrowser: Session {} deleted'.format(id))
             self.refresh_session_list()
-        except Exception as e:
+        except DatastoreException as e:
             alertPopup('Error', 'There was an error deleting the session:\n{}'.format(e))
             Logger.error('SessionBrowser: Error deleting session: {}\n\{}'.format(e, traceback.format_exc()))
         
