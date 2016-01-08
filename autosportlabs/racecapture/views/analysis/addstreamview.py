@@ -24,10 +24,8 @@ from fieldlabel import FieldLabel
 Builder.load_file('autosportlabs/racecapture/views/analysis/addstreamview.kv')
 
 class AddStreamView(BoxLayout):
-    def __init__(self, **kwargs):
+    def __init__(self, settings, datastore, **kwargs):
         super(AddStreamView, self).__init__(**kwargs)
-        settings = kwargs.get('settings')
-        datastore = kwargs.get('datastore')
         stream_select_view = self.ids.streamSelectScreen
         stream_select_view.bind(on_connect_cloud=self.on_connect_cloud_stream)
         stream_select_view.bind(on_connect_wireless=self.on_connect_wireless_stream)
