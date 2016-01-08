@@ -130,8 +130,8 @@ class DataSet(object):
         return zip(*zlist)
 
 class Session(object):
-    def __init__(self, ses_id, name, notes = '', date = None):
-        self.ses_id = ses_id
+    def __init__(self, session_id, name, notes = '', date = None):
+        self.session_id = session_id
         self.name = name
         self.notes = notes
         self.date = date
@@ -612,10 +612,10 @@ class DataStore(object):
                 progress_cb(percent_complete)
             yield ds_to_yield
 
-    def delete_session(self, ses_id):
-        self._conn.execute("""DELETE FROM datapoint WHERE sample_id in (select id from sample where session_id = ?)""", (ses_id,))
-        self._conn.execute("""DELETE FROM sample WHERE session_id=?""",(ses_id,))
-        self._conn.execute("""DELETE FROM session where id=?""",(ses_id,))
+    def delete_session(self, session_id):
+        self._conn.execute("""DELETE FROM datapoint WHERE sample_id in (select id from sample where session_id = ?)""", (session_id,))
+        self._conn.execute("""DELETE FROM sample WHERE session_id=?""",(session_id,))
+        self._conn.execute("""DELETE FROM session where id=?""",(session_id,))
         self._conn.commit()
         
     def _create_session(self, name, notes=''):
@@ -629,10 +629,10 @@ class DataStore(object):
         VALUES (?, ?, ?)""", (name, notes, current_time))
 
         self._conn.commit()
-        ses_id = self._get_last_table_id('session')
+        session_id = self._get_last_table_id('session')
 
-        Logger.info('DataStore: Created session with ID: {}'.format(ses_id))
-        return ses_id
+        Logger.info('DataStore: Created session with ID: {}'.format(session_id))
+        return session_id
 
     def _handle_data(self, data_file, headers, session_id, warnings=None, progress_cb=None):
         """
@@ -768,10 +768,10 @@ class DataStore(object):
         headers = self._parse_datalog_headers(header)
 
         #Create an event to be tagged to these records
-        ses_id = self._create_session(name, notes)
+        session_id = self._create_session(name, notes)
 
-        self._handle_data(dl, headers, ses_id, warnings, progress_cb)
-        return ses_id
+        self._handle_data(dl, headers, session_id, warnings, progress_cb)
+        return session_id
 
     def query(self, sessions=[], channels=[], data_filter=None, distinct_records=False):
         #Build our select statement
@@ -852,9 +852,9 @@ class DataStore(object):
         
         return DataSet(c, smoothing_map)
     
-    def get_session_by_id(self, ses_id, sessions=None):
+    def get_session_by_id(self, session_id, sessions=None):
         sessions = self.get_sessions() if not sessions else sessions
-        session = next((x for x in sessions if x.ses_id == ses_id), None)
+        session = next((x for x in sessions if x.session_id == session_id), None)
         return session
         
     def get_sessions(self):
@@ -862,11 +862,11 @@ class DataStore(object):
 
         sessions = []
         for row in c.execute('SELECT id, name, notes, date FROM session ORDER BY name COLLATE NOCASE ASC;'):
-            sessions.append(Session(ses_id=row[0], name=row[1], notes=row[2], date=row[3]))
+            sessions.append(Session(session_id=row[0], name=row[1], notes=row[2], date=row[3]))
         
         return sessions
     
     def update_session(self, session):
-        self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.ses_id ,))
+        self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.session_id ,))
         self._conn.commit()
         

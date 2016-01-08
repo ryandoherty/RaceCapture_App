@@ -291,7 +291,7 @@ class DataStoreTest(unittest.TestCase):
         self.assertEqual(len(sessions), 1)
         session = sessions[0]
         self.assertEqual(session.name, 'rc_adj')
-        self.assertEqual(session.ses_id, 1)
+        self.assertEqual(session.session_id, 1)
         self.assertEqual(session.notes, 'the notes')
         self.assertIsNotNone(session.date)
         

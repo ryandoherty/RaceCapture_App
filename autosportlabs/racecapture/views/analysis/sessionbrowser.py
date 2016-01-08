@@ -46,9 +46,9 @@ class LapItemButton(ToggleButton):
 
 class Session(BoxLayout):
     data_items = ListProperty()
-    def __init__(self, ses_id, name, notes, **kwargs):
+    def __init__(self, session_id, name, notes, **kwargs):
         super(Session, self).__init__(**kwargs)
-        self.ses_id = ses_id
+        self.session_id = session_id
         self.name = name
         self.notes = notes
         self.register_event_type('on_delete_session')
@@ -74,12 +74,12 @@ class Session(BoxLayout):
         pass
         
     def edit_session(self):
-        self.dispatch('on_edit_session', self.ses_id)
+        self.dispatch('on_edit_session', self.session_id)
         
     def prompt_delete_session(self):
         def _on_answer(instance, answer):
             if answer:
-                self.dispatch('on_delete_session', self.ses_id)
+                self.dispatch('on_delete_session', self.session_id)
             popup.dismiss()
             
         popup = confirmPopup('Confirm', 'Delete Session {}?'.format(self.name), _on_answer)
@@ -124,8 +124,8 @@ class SessionBrowser(AnchorLayout):
             f = Filter().gt('LapCount', 0)
             session = None
             for session in sessions:
-                session = self.append_session(ses_id=session.ses_id, name=session.name, notes=session.notes)
-                dataset = self.datastore.query(sessions=[session.ses_id],
+                session = self.append_session(session_id=session.session_id, name=session.name, notes=session.notes)
+                dataset = self.datastore.query(sessions=[session.session_id],
                                         channels=['LapCount', 'LapTime'],
                                         data_filter=f,
                                         distinct_records=True)
@@ -156,8 +156,8 @@ class SessionBrowser(AnchorLayout):
             accordion_height = session_items_height + session_titles_height
             self._accordion.height = accordion_height
         
-    def append_session(self, ses_id, name, notes):
-        session = Session(ses_id=ses_id, name=name, notes=notes)
+    def append_session(self, session_id, name, notes):
+        session = Session(session_id=session_id, name=name, notes=notes)
         item = SessionAccordionItem(title=name)
         item.session_widget = session
         item.bind(on_collapsed=self.on_session_collapsed)
@@ -167,7 +167,7 @@ class SessionBrowser(AnchorLayout):
         self._accordion.add_widget(item)
         return session
         
-    def edit_session(self, instance, ses_id):
+    def edit_session(self, instance, session_id):
         def _on_answer(instance, answer):
             if answer:
                 session_name = session_editor.session_name
@@ -180,7 +180,7 @@ class SessionBrowser(AnchorLayout):
                 self.refresh_session_list()
             popup.dismiss()
         
-        session = self.datastore.get_session_by_id(ses_id, self.sessions)
+        session = self.datastore.get_session_by_id(session_id, self.sessions)
         session_editor = SessionEditorView()
         session_editor.session_name = session.name
         session_editor.session_notes = session.notes
@@ -196,8 +196,8 @@ class SessionBrowser(AnchorLayout):
             Logger.error('SessionBrowser: Error deleting session: {}\n\{}'.format(e, traceback.format_exc()))
         
     def append_lap(self, session, lap, laptime):
-        lapitem = session.append_lap(session.ses_id, lap, laptime)
-        source_key = str(SourceRef(lap, session.ses_id))
+        lapitem = session.append_lap(session.session_id, lap, laptime)
+        source_key = str(SourceRef(lap, session.session_id))
         if self.selected_laps.get(source_key):
             lapitem.state = 'down'
         lapitem.bind(on_press=self.lap_selected)
