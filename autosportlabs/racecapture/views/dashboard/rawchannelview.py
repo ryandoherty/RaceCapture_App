@@ -27,7 +27,7 @@ class RawGauge(DigitalGauge):
         super(RawGauge  , self).__init__(**kwargs)
         self.normal_color =  RAW_NORMAL_COLOR
         
-    def updateColors(self):
+    def update_colors(self):
         color = self.select_alert_color()
         self.valueView.color = color
         

@@ -27,7 +27,7 @@ class Laptime(SingleChannelGauge):
         view = self.valueView
         if view:
             view.text = format_laptime(value)
-        self.updateColors()
+        self.update_colors()
         
     def on_normal_color(self, instance, value):
         self.valueView.color = value

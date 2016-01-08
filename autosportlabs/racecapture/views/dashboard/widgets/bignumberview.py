@@ -53,7 +53,7 @@ class BigNumberView(CustomizableGauge):
     def on_value_color(self, instance, value):
         self.valueView.color = value
                 
-    def updateColors(self):
+    def update_colors(self):
         self.backgroundView.rect_color = self.select_alert_color()
 
     def on_channel(self, instance, value):

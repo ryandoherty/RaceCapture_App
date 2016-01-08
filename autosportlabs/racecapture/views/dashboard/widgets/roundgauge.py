@@ -103,9 +103,9 @@ class RoundGauge(CustomizableGauge):
         return super(RoundGauge, self).on_channel(instance, value)
     
     
-    def updateColors(self):
+    def update_colors(self):
         self.ids.svg_gauge.color = self.select_alert_color()
-        return super(RoundGauge, self).updateColors()
+        return super(RoundGauge, self).update_colors()
     
     def on_value(self, instance, value):
         try:

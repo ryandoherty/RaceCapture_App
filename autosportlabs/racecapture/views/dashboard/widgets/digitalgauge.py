@@ -25,5 +25,5 @@ class DigitalGauge(CustomizableGauge):
         except Exception as e:
             print('Failed to update digital gauge title ' + str(e))
 
-    def updateColors(self):
+    def update_colors(self):
         self.alert_background_color = self.select_alert_color()

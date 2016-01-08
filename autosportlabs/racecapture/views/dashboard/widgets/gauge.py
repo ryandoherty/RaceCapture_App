@@ -153,7 +153,7 @@ class SingleChannelGauge(Gauge):
     def on_data_bus(self, instance, value):
         self._update_channel_binding()
     
-    def updateColors(self):
+    def update_colors(self):
         view = self.valueView
         if view:
             view.color = self.normal_color
@@ -162,7 +162,7 @@ class SingleChannelGauge(Gauge):
         view = self.valueView
         if view:
             view.text = self.value_formatter(value)
-            self.updateColors()
+            self.update_colors()
         
     def on_value(self, instance, value):
         self.refresh_value(value)
@@ -273,7 +273,7 @@ class CustomizableGauge(ButtonBehavior, SingleChannelGauge):
             color = self.warning.color
         return color
         
-    def updateColors(self):
+    def update_colors(self):
         view = self.valueView
         if view:
             view.color = self.select_alert_color()

@@ -14,9 +14,9 @@ class FontGraphicalGauge(GraphicalGauge):
     def on_max(self, instance, value):
         self._refresh_gauge()
         
-    def updateColors(self):
+    def update_colors(self):
         self.graphView.color = self.select_alert_color()
-        return super(FontGraphicalGauge, self).updateColors()
+        return super(FontGraphicalGauge, self).update_colors()
         
     def _refresh_gauge(self):
         try:
