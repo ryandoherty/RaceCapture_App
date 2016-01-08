@@ -651,15 +651,10 @@ class DataStore(object):
     def get_location_center(self, sessions=None):
         c = self._conn.cursor()
 
-        base_sql = "SELECT AVG(Latitude), AVG(Longitude) from datapoint"
+        base_sql = 'SELECT AVG(Latitude), AVG(Longitude) from datapoint'
         
         if type(sessions) == list and len(sessions) > 0:
-            base_sql += " JOIN sample ON datapoint.sample_id=sample.id WHERE "            
-            ses_filters = []
-            for s in sessions:
-                ses_filters.append('(sample.session_id = {}'.format(s))
-            base_sql += '     OR '.join(ses_filters)
-        base_sql += ') AND datapoint.Latitude != 0 AND datapoint.Longitude != 0;'
+            base_sql += ' JOIN sample ON datapoint.sample_id=sample.id WHERE sample.session_id IN({}) AND datapoint.Latitude != 0 AND datapoint.Longitude != 0;'.format(','.join(map(str, sessions)))
 
         c.execute(base_sql)
         res = c.fetchone()
@@ -674,11 +669,7 @@ class DataStore(object):
     def _session_select_clause(self, sessions=None):
         sql = ''
         if type(sessions) == list and len(sessions) > 0:
-            sql += " JOIN sample ON datapoint.sample_id=sample.id WHERE "            
-            ses_filters = []
-            for s in sessions:
-                ses_filters.append('sample.session_id = {}'.format(s))
-            sql += '     OR '.join(ses_filters)
+            sql += ' JOIN sample ON datapoint.sample_id=sample.id WHERE sample.session_id IN({})'.format(','.join(map(str, sessions)))            
         return sql
         
     def get_channel_average(self, channel, sessions=None):
