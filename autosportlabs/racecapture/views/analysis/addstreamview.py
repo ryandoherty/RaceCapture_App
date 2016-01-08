@@ -27,9 +27,7 @@ class AddStreamView(BoxLayout):
     def __init__(self, settings, datastore, **kwargs):
         super(AddStreamView, self).__init__(**kwargs)
         stream_select_view = self.ids.streamSelectScreen
-        stream_select_view.bind(on_connect_cloud=self.on_connect_cloud_stream)
-        stream_select_view.bind(on_connect_wireless=self.on_connect_wireless_stream)
-        stream_select_view.bind(on_connect_file=self.on_connect_file_stream)
+        stream_select_view.bind(on_select_stream=self.on_select_stream)
                 
         cloud_connect_view = self.ids.cloudConnectScreen
         cloud_connect_view.settings = settings
@@ -54,46 +52,26 @@ class AddStreamView(BoxLayout):
     def on_connect_stream_complete(self, *args):
         pass
     
+    def on_select_stream(self, instance, stream_type):
+        self.ids.screens.current = stream_type
+
     def connect_stream_start(self, *args):
         self.dispatch('on_connect_stream_start')
         
     def connect_stream_complete(self, instance, session_id):
         self.dispatch('on_connect_stream_complete', session_id)
         
-    def on_connect_file_stream(self, *args):
-        self.ids.screens.current = 'file_connect'        
-
-    def on_connect_cloud_stream(self, *args):
-        self.ids.screens.current = 'cloud_connect'
-        
-    def on_connect_wireless_stream(self, *args):
-        self.ids.screens.current = 'wireless_connect'
-        
 class AddStreamSelectView(Screen):    
     def __init__(self, **kwargs):
         super(AddStreamSelectView, self).__init__(**kwargs)
-        self.register_event_type('on_connect_wireless')
-        self.register_event_type('on_connect_cloud')
-        self.register_event_type('on_connect_file')
-            
-    def connect_cloud_stream(self):
-        self.dispatch('on_connect_cloud')
-        
-    def connect_wireless_stream(self):
-        self.dispatch('on_connect_wireless')
+        self.register_event_type('on_select_stream')
 
-    def connect_file_stream(self):
-        self.dispatch('on_connect_file')
+    def select_stream(self, stream):
+        self.dispatch('on_select_stream', stream )
 
-    def on_connect_cloud(self, *args):
+    def on_select_stream(self, stream):
         pass
     
-    def on_connect_wireless(self, *args):
-        pass
-        
-    def on_connect_file(self, *args):
-        pass
-
 class BaseStreamConnectView(Screen):
     settings = None
     datastore = None
@@ -173,13 +151,17 @@ class LogImportWidget(BoxLayout):
     def set_log_path(self, instance):
         path = instance.selection[0]
         self._log_path = path
-        base_name = os.path.basename(path)
-        session_name, file_extension = os.path.splitext(base_name)
+        base_name = self._extract_base_logfile_name(path)
+        self.ids.session_name.text =  base_name
         self.ids.log_path.text = base_name
-        self.ids.session_name.text =  session_name
+        self.ids.import_button.disabled = False
         
         self._log_select.dismiss()
         self.set_import_file_path(instance.path)
+
+    def _extract_base_logfile_name(self, path):
+        session_name, file_extension = os.path.splitext(os.path.basename(path))
+        return session_name
 
     def set_import_file_path(self, path):
         self.settings.userPrefs.set_pref('preferences', 'import_datalog_dir', path)
@@ -240,9 +222,10 @@ class LogImportWidget(BoxLayout):
 
         Logger.info("LogImportWidget: loading log: {}".format(self.ids.log_path.text))
 
-        if not session_name or len(session_name) == 0:
-            alertPopup('Error', 'A session name must be specified')
-            return
+        #choose a default name if the user deletes the suggested name
+        if not session_name or len(session_name) == 0: 
+            session_name = self._extract_base_logfile_name(logpath)
+            self.ids.session_name.text = session_name
 
         self.ids.current_status.text = "Initializing Datastore"
 

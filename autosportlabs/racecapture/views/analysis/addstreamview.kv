@@ -8,13 +8,13 @@
 			name: 'stream_select'
         CloudConnectView:
             id: cloudConnectScreen
-            name: 'cloud_connect'
+            name: 'cloud'
         WirelessConnectView:
             id: wirelessConnectScreen
-            name: 'wireless_connect'
+            name: 'wireless'
 		FileConnectView:
 		    id: fileConnectScreen
-		    name: 'file_connect'
+		    name: 'file'
         
 <AddStreamSelectView>:
     BoxLayout:
@@ -28,15 +28,15 @@
 #    		DisabledFeatureButton:
  #   			icon: u'\uf0ed'
   #  			title: 'Cloud'
-   # 			on_press: root.connect_cloud_stream()
+   # 			on_press: root.select_stream('cloud')
     #		DisabledFeatureButton:
     #			icon: u'\uf1eb'
     #			title: 'Wireless'
-    #			on_press: root.connect_wireless_stream()
+    #			on_press: root.select_stream('wireless')
     		FeatureButton:
     			icon: u'\uf07c'
     			title: 'Import'
-    			on_press: root.connect_file_stream()	
+                on_press: root.select_stream('file')
     	FieldLabel:
     		size_hint_y: 0.2
     		font_size: root.height * 0.1
@@ -117,6 +117,7 @@
             size_hint_y: 0.1
             LabelIconButton:
                 id: import_button
+                disabled: True
                 size_hint_x: 0.2
                 title: 'Import'
                 icon_size: self.height * .9
