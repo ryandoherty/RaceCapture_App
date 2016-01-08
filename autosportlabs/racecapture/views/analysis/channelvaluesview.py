@@ -122,10 +122,14 @@ class ChannelValuesView(ChannelAnalysisWidget):
             channels_grid.add_widget(self._channel_stat_widgets[key])
 
     def add_channel(self, channel_data):
+        '''
+        Add the specified ChannelData to the dict of channel_stats, keyed by the lap/session source
+        Organization is: dict of channel_stats keyed by source (lap/session key), each having a dict of ChannelData objects keyed by channel name
+        '''
         source_key = str(channel_data.source)
         channels = self.channel_stats.get(source_key)
         if not channels:
-            channels = {}
+            channels = {} #looks like we're adding it for the first time for this source
             self.channel_stats[source_key] = channels
         channels[channel_data.channel] = channel_data
         self._refresh_channels()
