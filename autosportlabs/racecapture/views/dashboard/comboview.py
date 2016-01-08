@@ -29,7 +29,6 @@ class ComboView(Screen):
         for gauge in gauges:
             gauge.settings = settings
             gauge.data_bus = data_bus        
-        pass
             
     def on_tracks_updated(self, trackmanager):
         pass
