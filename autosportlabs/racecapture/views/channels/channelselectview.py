@@ -26,16 +26,24 @@ class ChannelSelectorView(BoxLayout):
         self.multi_select = kwargs.get('multi_select', self.multi_select)
     
     def select_channel(self, channels):
+        '''
+        Select one or more channels to show as selected in the view.
+        the view.trigger_action is some voodoo that simulates a UI selection.
+        '''
         if channels:
             index = 0
             list_adapter = self.ids.channelList.adapter
             for item in self.ids.channelList.adapter.data:
                 if item['text'] in channels:
                     view = list_adapter.get_view(index)
-                    view.trigger_action(duration=0)
+                    view.trigger_action(duration=0) #duration=0 means make it an instant selection
                 index += 1
         
     def on_channels(self, instance, value):    
+        '''
+        Set the list of available channels for this view.
+        Uses the Kivy ListAdapter to adapt the string channel name into a data structure that can track selection in the UI.
+        '''
         data = []
         channel_list = self.ids.channelList
         for channel in self.channels:
