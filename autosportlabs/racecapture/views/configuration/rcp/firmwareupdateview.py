@@ -58,7 +58,6 @@ class FirmwareUpdateView(BaseConfigView):
         
     def prompt_manual_bootloader_mode(self, instance):
         self._popup.dismiss()
-        self._teardown_json_serial()
         popup = None
         def _on_answer(inst, answer):
             popup.dismiss()
@@ -167,8 +166,7 @@ class FirmwareUpdateView(BaseConfigView):
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Firmware:\n\n' + str(detail))
 
-        if not platform == 'win':
-            self._restart_json_serial()
+        self._restart_json_serial()
         self.ids.fw_progress.value = ''
         self.ids.fw_progress.title = ""
 

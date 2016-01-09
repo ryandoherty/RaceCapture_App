@@ -179,7 +179,7 @@ class RcpApi:
                     sleep(NO_DATA_AVAILABLE_DELAY)
                     
             except PortNotOpenException:
-                Logger.warn("RCPAPI: Port not open...")
+                Logger.debug("RCPAPI: Port not open...")
                 msg=''
                 sleep(1.0)
             except Exception:
