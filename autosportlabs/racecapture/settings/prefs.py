@@ -2,6 +2,7 @@ from kivy.event import EventDispatcher
 from kivy.properties import NumericProperty, ListProperty
 from kivy.clock import Clock
 from kivy.config import ConfigParser
+from ConfigParser import NoOptionError
 from kivy.logger import Logger
 import json
 import os
@@ -14,7 +15,7 @@ class Range(EventDispatcher):
     max = NumericProperty(None)
     min = NumericProperty(None)
     color = ListProperty([1.0, 1.0, 1.0, 1.0])
-    
+
     def __init__(self, minimum=None, maximum=None, **kwargs):
         self.min = minimum
         self.max = maximum
@@ -63,13 +64,17 @@ class UserPrefs(EventDispatcher):
     def set_range_alert(self, key, range_alert):
         self._prefs_dict["range_alerts"][key] = range_alert
         self._schedule_save()
-        
+
     def get_range_alert(self, key, default=None):
         return self._prefs_dict["range_alerts"].get(key, default)
 
     def set_gauge_config(self, gauge_id, channel):
         self._prefs_dict["gauge_settings"][gauge_id] = channel
         self._schedule_save()
+
+    @property
+    def datastore_location(self):
+        return self.config.get('preferences', 'dstore_path')
 
     def get_gauge_config(self, gauge_id):
         return self._prefs_dict["gauge_settings"].get(gauge_id, False)
@@ -80,20 +85,24 @@ class UserPrefs(EventDispatcher):
             prefs_file.write(data)
 
     def set_config_defaults(self):
+        self.config.adddefaultsection('help')
         self.config.adddefaultsection('preferences')
         self.config.setdefault('preferences', 'distance_units', 'miles')
         self.config.setdefault('preferences', 'temperature_units', 'Fahrenheit')
         self.config.setdefault('preferences', 'show_laptimes', 1)
         self.config.setdefault('preferences', 'startup_screen', 'Home Page')
         default_user_files_dir = self.user_files_dir
+        self.config.setdefault('preferences', 'dstore_path', os.path.join(self.data_dir, 'datastore.sq3'))        
         self.config.setdefault('preferences', 'config_file_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'firmware_dir', default_user_files_dir )
+        self.config.setdefault('preferences', 'import_datalog_dir', default_user_files_dir )
         self.config.setdefault('preferences', 'first_time_setup', True)
         self.config.setdefault('preferences', 'send_telemetry', False)
         self.config.setdefault('preferences', 'last_dash_screen', 'gaugeView')
+        self.config.setdefault('preferences', 'global_help', True)
 
     def load(self):
-        print("the data dir " + self.data_dir)
+        Logger.info('UserPrefs: Data Dir is: {}'.format(self.data_dir))
         self.config = ConfigParser()
         self.config.read(os.path.join(self.data_dir, 'preferences.ini'))
         self.set_config_defaults()
@@ -116,8 +125,14 @@ class UserPrefs(EventDispatcher):
         except Exception:
             pass
         
-    def get_pref(self, section, option):
-        return self.config.get(section, option)
+    def get_pref(self, section, option, default=None):
+        try:
+            return self.config.get(section, option)
+        except NoOptionError:
+            if default:
+                return default
+            else:
+                raise
     
     def set_pref(self, section, option, value):
         self.config.set(section, option, value)

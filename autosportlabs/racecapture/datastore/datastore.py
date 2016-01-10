@@ -4,6 +4,10 @@ import logging
 import os, os.path
 import time
 import datetime
+from kivy.logger import Logger
+
+class DatastoreException(Exception):
+    pass
 
 def unix_time(dt):
     epoch = datetime.datetime.utcfromtimestamp(0)
@@ -18,7 +22,7 @@ def timing(f):
         time1 = time.time()
         ret = f(*args)
         time2 = time.time()
-        print '%s function took %0.3f ms' % (f.func_name, (time2-time1)*1000.0)
+        Logger.info('Timing: {} function took {} ms'.format(f.func_name, (time2-time1)*1000.0))
         return ret
     return wrap
 
@@ -43,7 +47,7 @@ def _interp_dpoints(start, finish, sample_skip):
 def _smooth_dataset(dset, smoothing_rate):
     #Throw an error if we got a bad smoothing rate
     if not smoothing_rate or smoothing_rate < 2:
-        raise Exception("Invalid smoothing rate")
+        raise DatastoreException("Invalid smoothing rate")
 
     #This is the dataset that we'll be returning
     new_dset = []
@@ -96,12 +100,14 @@ class DataSet(object):
     def channels(self):
         return [x[0] for x in self._cur.description]
 
-    #TODO: Do we want to offer a count of None to do a fetch all?
-    def fetch_columns(self, count):
+    def fetch_columns(self, count=None):
         chanmap = {}
         channels = [x[0] for x in self._cur.description]
 
-        dset = self._cur.fetchmany(count)
+        if count == None:
+            dset = self._cur.fetchall()
+        else:
+            dset = self._cur.fetchmany(count)
         for c in channels:
             idx = channels.index(c)
             chan_dataset =  [x[idx] for x in dset]
@@ -115,7 +121,7 @@ class DataSet(object):
 
         return chanmap
 
-    def fetch_records(self, count):
+    def fetch_records(self, count=None):
         chanmap = self.fetch_columns(count)
 
         #We have to pull the channel datapoint lists out in the order
@@ -126,7 +132,13 @@ class DataSet(object):
 
         return zip(*zlist)
 
-
+class Session(object):
+    def __init__(self, session_id, name, notes = '', date = None):
+        self.session_id = session_id
+        self.name = name
+        self.notes = notes
+        self.date = date
+        
 #Filter container class
 class Filter(object):
     def __init__(self):
@@ -154,6 +166,12 @@ class Filter(object):
             ret = f(self, chan, val)
             return ret
         return wrap
+
+    @add_combop
+    @chan_adj
+    def neq(self, chan, val):
+        self._cmd_seq += '{} != {} '.format(chan, val)
+        return self
 
     @add_combop
     @chan_adj
@@ -204,37 +222,78 @@ class Filter(object):
 
 
 class DatalogChannel(object):
-    def __init__(self, channel_name='', units='', sample_rate=0, smoothing=0):
+    def __init__(self, channel_name='', units='', min=0, max=0, sample_rate=0, smoothing=0):
         self.name = channel_name
         self.units = units
+        self.min = min
+        self.max = max
         self.sample_rate = sample_rate
 
+    def __str__(self):
+        return self.name
 
 class DataStore(object):
+    EXTRA_INDEX_CHANNELS = ["LapCount"]    
     val_filters = ['lt', 'gt', 'eq', 'lt_eq', 'gt_eq']
-    def __init__(self, name=':memory:'):
+    def __init__(self):
         self._channels = []
         self._isopen = False
         self.datalog_channels = {}
         self.datalogchanneltypes = {}
+        self._new_db = False
 
     def close(self):
         self._conn.close()
         self._isopen = False
 
-    def open_db(self, name):
+    @property
+    def db_path(self):
+        return self._db_path[:]
+
+    def open_db(self, db_path):
         if self._isopen:
             self.close()
 
-        self.name = name
-        self._conn = sqlite3.connect(self.name)
+        self._db_path = db_path
+        self._conn = sqlite3.connect(db_path, check_same_thread=False)
+
+        if not self._new_db:
+            self._populate_channel_list()
 
         self._isopen = True
 
-    def new(self, name=':memory:'):
-        self.open_db(name)
+    def new(self, db_path=':memory:'):
+        self._new_db = True
+        self.open_db(db_path)
         self._create_tables()
 
+    def _populate_channel_list(self):
+        c = self._conn.cursor()
+
+        c.execute("""SELECT name, units, min_value, max_value, smoothing
+        from channel""")
+
+        for ch in c.fetchall():
+            self._channels.append(DatalogChannel(channel_name=ch[0],
+                                                 units=ch[1],
+                                                 min=ch[2],
+                                                 max=ch[3],
+                                                 smoothing=ch[4]))
+
+    @property
+    def is_open(self):
+        return self._isopen
+
+    @property
+    def channel_list(self):
+        return self._channels[:]
+
+    def get_channel(self, name): 
+        channel =  [c for c in self._channels if name in c.name]
+        if not len(channel):
+            raise DatastoreException("Unknown channel: {}".format(name))
+        return channel[0]
+        
     def _create_tables(self):
 
         self._conn.execute("""CREATE TABLE session
@@ -251,16 +310,19 @@ class DataStore(object):
         self._conn.execute("""CREATE TABLE datapoint
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
         sample_id INTEGER NOT NULL)""")
+        
+        self._conn.execute("""CREATE INDEX datapoint_sample_id_index_id on datapoint(sample_id)""")
 
         self._conn.execute("""CREATE TABLE sample
         (id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id INTEGER NOT NULL)""")
-
-        self._conn.execute("""CREATE INDEX sample_index_id on sample(id)""")
+        self._conn.execute("""CREATE INDEX sample_id_index_id on sample(id)""")
+        self._conn.execute("""CREATE INDEX sample_session_id_index_id on sample(session_id)""")
 
         self._conn.execute("""CREATE TABLE channel
         (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL,
-        units TEXT NOT NULL, smoothing INTEGER NOT NULL)""")
+        units TEXT NOT NULL, min_value REAL NOT NULL, max_value REAL NOT NULL,
+         smoothing INTEGER NOT NULL)""")
 
         self._conn.execute("""CREATE TABLE datalog_channel_map
         (datalog_id INTEGER NOT NULL, channel_id INTEGER NOT NULL)""")
@@ -270,8 +332,18 @@ class DataStore(object):
 
         self._conn.commit()
 
+    
+    def _add_extra_indexes(self, channels):
+        extra_indexes = []
+        for c in channels:
+            c = str(c)
+            if c in self.EXTRA_INDEX_CHANNELS:
+                extra_indexes.append(c)
+        
+        for index_channel in extra_indexes:
+            self._conn.execute("""CREATE INDEX {}_index_id on datapoint({})""".format(index_channel, index_channel))
+        
     def _extend_datalog_channels(self, channels):
-        #print "Adding channels: ", channel_names
         for channel in channels:
             #Extend the datapoint table to include the channel as a
             #new field
@@ -279,9 +351,10 @@ class DataStore(object):
             ADD {} REAL""".format(channel.name))
 
             #Add the channel to the 'channel' table
-            self._conn.execute("""INSERT INTO channel (name, units, smoothing)
-            VALUES (?,?,?)""", (channel.name, channel.units, 1))
+            self._conn.execute("""INSERT INTO channel (name, units, min_value, max_value, smoothing)
+            VALUES (?,?,?,?,?)""", (channel.name, channel.units, channel.min, channel.max, 1))
 
+        self._add_extra_indexes(channels)
         self._conn.commit()
 
     def _parse_datalog_headers(self, header):
@@ -291,9 +364,8 @@ class DataStore(object):
         try:
             new_channels = []
             for i in range(1, len(raw_channels)+1):
-                name, units, samplerate = raw_channels[i -1].replace('"', '').split('|')
-                #print name, units, samplerate
-                channel = DatalogChannel(name, units, int(samplerate), 0)
+                name, units, min, max, samplerate = raw_channels[i -1].replace('"', '').split('|')
+                channel = DatalogChannel(name, units, float(min), float(max), int(samplerate), 0)
                 channels.append(channel)
                 if not name in [x.name for x in self._channels]:
                     new_channels.append(channel)
@@ -305,7 +377,7 @@ class DataStore(object):
             print '-'*60
             traceback.print_exc(file=sys.stdout)
             print '-'*60
-            raise Exception("Unable to import datalog, bad metadata")
+            raise DatastoreException("Unable to import datalog, bad metadata")
 
         return channels
 
@@ -329,7 +401,7 @@ class DataStore(object):
         #print "Last datapoint ID =", dp_id
         return dl_id
 
-    def _insert_record(self, record, channels, session_id):
+    def _insert_record(self, record, channels, session_id, warnings = None):
         """
         Takes a record of interpolated+extrapolated channels and their header metadata
         and inserts it into the database
@@ -401,7 +473,7 @@ class DataStore(object):
         return extrap_list
 
 
-    def _desparsified_data_generator(self, data_file):
+    def _desparsified_data_generator(self, data_file, warnings=None, progress_cb=None):
         """
         Takes a racecapture pro CSV file and removes sparsity from the dataset.
         This function yields samples that have been extrapolated from the
@@ -445,6 +517,19 @@ class DataStore(object):
         work_list = []
         yield_list = []
 
+        #In order to facilitate a progress callback, we need to know
+        #the number of lines in the file
+
+        #Get the current file cursor position
+        start_pos = data_file.tell()
+
+        #Count the remaining lines in the file
+        line_count = sum(1 for line in data_file)
+        current_line = 0
+
+        #Reset the file cursor
+        data_file.seek(start_pos)
+        
         for line in data_file:
 
             # Strip the line and break it down into it's component
@@ -456,13 +541,22 @@ class DataStore(object):
             # work_list being an empty list), we need to create all of
             # our 'plinko slots' for each channel in both the work and
             # yield lists
-            if len(work_list) == 0:
+            work_list_len = len(work_list)
+            channels_len = len(channels)
+            if work_list_len == 0:
                 work_list = [[] for x in channels]
                 yield_list = [[] for x in channels]
+            
+            if channels_len > work_list_len and current_line > 0:
+                warn_msg = 'Unexpected channel count in line {}. Expected {}, got {}'.format(current_line, work_list_len, channels_len)
+                if warnings:
+                    warnings.append((line, warn_msg))
+                Logger.warn("DataStore: {}".format(warn_msg))
+                continue
 
             # Down to business, first, we stuff each channel's sample
             # into the work list
-            for c in range(len(channels)):
+            for c in range(channels_len):
                 work_list[c].append(channels[c])
 
             # At this point, we need to walk through each channel
@@ -473,8 +567,6 @@ class DataStore(object):
             # interpolate/extrapolate the column, then move everything
             # EXCEPT the last item into the yield list
 
-            # TODO: See about moving this part into the above loop to
-            # reduce algorithmic complexity
             for c in range(len(work_list)):
                 if len(work_list[c]) == 1:
                     continue
@@ -498,13 +590,37 @@ class DataStore(object):
             # new list containing the first item in every column,
             # shift all columns down one, and yield the new list
             if not 0 in [len(x) for x in yield_list]:
+                current_line += 1
                 ds_to_yield = [x[0] for x in yield_list]
                 map(lambda x: x.pop(0), yield_list)
+                if progress_cb:
+                    percent_complete = float(current_line) / line_count * 100
+                    progress_cb(percent_complete)
                 yield ds_to_yield
 
-        #TODO: Finish off by extrapolating out the rest of the columns
-        #and yielding them
+        #now, finish off and extrapolate the remaining items in the
+        #work list and extend the yield list with the resultant values
+        for idx in range(len(work_list)):
+            set_len = len(work_list[idx])
+            work_list[idx] = [work_list[idx][0] for x in range(set_len)]
+            yield_list[idx].extend(work_list[idx])
 
+        #Yield off the remaining items in the yield list
+        while not 0 in [len(x) for x in yield_list]:
+            current_line += 1
+            ds_to_yield = [x[0] for x in yield_list]
+            map(lambda x: x.pop(0), yield_list)
+            if progress_cb:
+                percent_complete = float(current_line) / line_count * 100
+                progress_cb(percent_complete)
+            yield ds_to_yield
+
+    def delete_session(self, session_id):
+        self._conn.execute("""DELETE FROM datapoint WHERE sample_id in (select id from sample where session_id = ?)""", (session_id,))
+        self._conn.execute("""DELETE FROM sample WHERE session_id=?""",(session_id,))
+        self._conn.execute("""DELETE FROM session where id=?""",(session_id,))
+        self._conn.commit()
+        
     def _create_session(self, name, notes=''):
         """
         Creates a new session entry in the sessions table and returns it's ID
@@ -516,53 +632,81 @@ class DataStore(object):
         VALUES (?, ?, ?)""", (name, notes, current_time))
 
         self._conn.commit()
-        ses_id = self._get_last_table_id('session')
+        session_id = self._get_last_table_id('session')
 
-        print "Created session with ID: ", ses_id
-        return ses_id
+        Logger.info('DataStore: Created session with ID: {}'.format(session_id))
+        return session_id
 
-    def _handle_data(self, data_file, headers, session_id):
+    def _handle_data(self, data_file, headers, session_id, warnings=None, progress_cb=None):
         """
         takes a raw dataset in the form of a CSV file and inserts the data
         into the sqlite database
         """
 
         #Create the generator for the desparsified data
-        newdata_gen = self._desparsified_data_generator(data_file)
+        newdata_gen = self._desparsified_data_generator(data_file, warnings=warnings, progress_cb=progress_cb)
 
         for record in newdata_gen:
-            self._insert_record(record, headers, session_id)
-            #print record
+            self._insert_record(record, headers, session_id, warnings=warnings)
 
         self._conn.commit()
 
-    def get_channel_max(self, channel):
+    def get_location_center(self, sessions=None):
         c = self._conn.cursor()
 
-        base_sql = "SELECT {} from datapoint ORDER BY {} DESC LIMIT 1;".format(channel, channel)
+        base_sql = 'SELECT AVG(Latitude), AVG(Longitude) from datapoint'
+        
+        if type(sessions) == list and len(sessions) > 0:
+            base_sql += ' JOIN sample ON datapoint.sample_id=sample.id WHERE sample.session_id IN({}) AND datapoint.Latitude != 0 AND datapoint.Longitude != 0;'.format(','.join(map(str, sessions)))
+
         c.execute(base_sql)
-
         res = c.fetchone()
-
-        if res == None:
-            chan_max = None
-        else:
-            chan_max = res[0]
-        return chan_max
-
-    def get_channel_min(self, channel):
+        
+        lat_average = None
+        lon_average = None
+        if res:
+            lat_average =  res[0]
+            lon_average =  res[1]
+        return (lat_average, lon_average)
+                
+    def _session_select_clause(self, sessions=None):
+        sql = ''
+        if type(sessions) == list and len(sessions) > 0:
+            sql += ' JOIN sample ON datapoint.sample_id=sample.id WHERE sample.session_id IN({})'.format(','.join(map(str, sessions)))            
+        return sql
+        
+    def get_channel_average(self, channel, sessions=None):
         c = self._conn.cursor()
 
-        base_sql = "SELECT {} from datapoint ORDER BY {} ASC LIMIT 1;".format(channel, channel)
+        base_sql = "SELECT AVG({}) from datapoint {};".format(channel, self._session_select_clause(sessions))
         c.execute(base_sql)
-
         res = c.fetchone()
+        average = None if res == None else res[0]
+        return average
+        
+    def _extra_channels(self, extra_channels=None):
+        sql = ''
+        if type(extra_channels) == list:
+            for channel in extra_channels:
+                sql += ',{}'.format(channel)
+        return sql
 
-        if res == None:
-            chan_min = None
-        else:
-            chan_min = res[0]
-        return chan_min
+    def _get_channel_aggregate(self, aggregate, channel, sessions=None, extra_channels=None, exclude_zero=True):
+        c = self._conn.cursor()
+
+        base_sql = "SELECT {}({}) {} from datapoint {} {};".format(aggregate, channel,
+                                                                 self._extra_channels(extra_channels),
+                                                                 self._session_select_clause(sessions),
+                                                                 '{} {} > 0'.format('AND' if sessions else 'WHERE', channel) if exclude_zero else '')
+        c.execute(base_sql)
+        res = c.fetchone()
+        return None if res == None else res if extra_channels else res[0]
+                
+    def get_channel_max(self, channel, sessions=None, extra_channels=None):
+        return self._get_channel_aggregate('MAX', channel, sessions=sessions, extra_channels=extra_channels)
+
+    def get_channel_min(self, channel, sessions=None, extra_channels=None, exclude_zero=True):
+        return self._get_channel_aggregate('MIN', channel, sessions=sessions, extra_channels=extra_channels)
 
     def set_channel_smoothing(self, channel, smoothing):
         """
@@ -578,7 +722,7 @@ class DataStore(object):
             smoothing = 1
 
         if not channel in [x.name for x in self._channels]:
-            raise Exception("Unknown channel: {}".format(channel))
+            raise DatastoreException("Unknown channel: {}".format(channel))
 
         self._conn.execute("""UPDATE channel
         SET smoothing={}
@@ -587,43 +731,55 @@ class DataStore(object):
 
     def get_channel_smoothing(self, channel):
         if not channel in [x.name for x in self._channels]:
-            raise Exception("Unknown channel: {}".format(channel))
+            raise DatastoreException("Unknown channel: {}".format(channel))
 
         c = self._conn.cursor()
 
-        
         base_sql = "SELECT smoothing from channel WHERE channel.name='{}';".format(channel)
         c.execute(base_sql)
 
         res = c.fetchone()
 
         if res == None:
-            raise Exception("Unable to retrieve smoothing for channel: {}".format(channel))
+            raise DatastoreException("Unable to retrieve smoothing for channel: {}".format(channel))
         else:
             return res[0]
 
     @timing
-    def import_datalog(self, path, name, notes='', progress_listener=None):
+    def import_datalog(self, path, name, notes='', progress_cb=None):
+        
+        warnings = []
+        if not self._isopen:
+            raise DatastoreException("Datastore is not open")
+
         try:
             dl = open(path, 'rb')
         except:
-            raise Exception("Unable to open file")
+            raise DatastoreException("Unable to open file")
 
         header = dl.readline()
 
         headers = self._parse_datalog_headers(header)
 
         #Create an event to be tagged to these records
-        ses_id = self._create_session(name, notes)
+        session_id = self._create_session(name, notes)
 
-        self._handle_data(dl, headers, ses_id)
+        self._handle_data(dl, headers, session_id, warnings, progress_cb)
+        return session_id
 
-    def query(self, channels=[], data_filter=None):
+    def query(self, sessions=[], channels=[], data_filter=None, distinct_records=False):
         #Build our select statement
         sel_st  = 'SELECT '
 
+        if distinct_records:
+            sel_st += 'DISTINCT '
+
         columns = []
         joins = []
+
+        #make sure that the sessions list exists
+        if type(sessions) != list or len(sessions) == 0:
+            raise DatastoreException("Must provide a list of sessions to query!")
 
         #If there are no channels, or if a '*' is passed, select all
         #of the channels
@@ -632,12 +788,16 @@ class DataStore(object):
 
         for ch in channels:
             if not ch in [x.name for x in self._channels]:
-                raise Exception("Unable to complete query. Unknown channel: {}".format(ch))
+                raise DatastoreException("Unable to complete query. Unknown channel: {}".format(ch))
             chanst = str(ch)
             tbl_prefix = 'datapoint.'
             alias = ' as {}'.format(chanst)
             columns.append(tbl_prefix+chanst+alias)
             joins.append(tbl_prefix+chanst)
+
+        #Make the session ID the first column
+        ses_sel = "sample.session_id as session_id"
+        columns.insert(0, ses_sel)
 
         #Add the columns to the select statement
         sel_st += ','.join(columns)
@@ -648,14 +808,28 @@ class DataStore(object):
         #Add our joins
         sel_st += 'JOIN datapoint ON datapoint.sample_id=sample.id\n'
 
-        #Add our filter
-        sel_st += 'WHERE '
-
-        if not data_filter == None:
+        if data_filter is not None:
+            #Add our filter
+            sel_st += 'WHERE '
             if not 'Filter' in type(data_filter).__name__:
                 raise TypeError("data_filter must be of class Filter")
 
             sel_st += str(data_filter)
+
+        #create the session filter
+        if data_filter == None:
+            ses_st = "WHERE "
+        else:
+            ses_st = "AND "
+            
+        ses_filters = []
+        for s in sessions:
+            ses_filters.append('sample.session_id = {}'.format(s))
+
+        ses_st += 'OR '.join(ses_filters)
+
+        #Now add the session filter to the select statement
+        sel_st += ses_st
 
         c = self._conn.cursor()
         c.execute(sel_st)
@@ -665,5 +839,28 @@ class DataStore(object):
         for ch in channels:
             sr = self.get_channel_smoothing(ch)
             smoothing_map[ch] = sr
+
+        #add the session_id to the smoothing map with a smoothing rate
+        #of 0
+        smoothing_map['session_id'] = 0
         
         return DataSet(c, smoothing_map)
+    
+    def get_session_by_id(self, session_id, sessions=None):
+        sessions = self.get_sessions() if not sessions else sessions
+        session = next((x for x in sessions if x.session_id == session_id), None)
+        return session
+        
+    def get_sessions(self):
+        c = self._conn.cursor()
+
+        sessions = []
+        for row in c.execute('SELECT id, name, notes, date FROM session ORDER BY name COLLATE NOCASE ASC;'):
+            sessions.append(Session(session_id=row[0], name=row[1], notes=row[2], date=row[3]))
+        
+        return sessions
+    
+    def update_session(self, session):
+        self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.session_id ,))
+        self._conn.commit()
+        

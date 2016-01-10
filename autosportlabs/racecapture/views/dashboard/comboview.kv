@@ -1,3 +1,10 @@
 <ComboView>:
-	Label:
-		text: 'Combo / IMU view'
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            size_hint_x: 0.1
+        ImuGauge:
+            size_hint_x: 0.8
+            rcid: 'imu_gauge'
+        BoxLayout:
+            size_hint_x: 0.1

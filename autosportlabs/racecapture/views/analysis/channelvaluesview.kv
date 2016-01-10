@@ -1,0 +1,36 @@
+<ChannelValueView>:
+    canvas.before:
+        Color:
+            rgba: 0.05, 0.05, 0.05, 0.5
+        Rectangle:
+            pos: self.pos
+            size: self.size            
+
+    orientation: 'horizontal'
+    FieldLabel:
+        size_hint_x: 0.3
+        id: session
+    FieldLabel:
+        size_hint_x: 0.1
+        id: lap
+    FieldLabel:
+        size_hint_x: 0.3
+        id: channel
+    BarGraphGauge:
+        size_hint_x: 0.3
+        id: value
+
+<ChannelValuesView>:
+    options_enabled: False
+    BoxLayout:
+        ScrollView:
+            id: scroller
+            do_scroll_x:False
+            do_scroll_y:True
+            GridLayout:
+                id: channel_values
+                row_default_height: root.height * 0.12
+                row_force_default: True
+                size_hint_y: None
+                height: max(self.minimum_height, scroller.height)
+                cols: 1

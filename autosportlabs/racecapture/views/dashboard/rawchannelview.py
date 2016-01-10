@@ -27,7 +27,7 @@ class RawGauge(DigitalGauge):
         super(RawGauge  , self).__init__(**kwargs)
         self.normal_color =  RAW_NORMAL_COLOR
         
-    def updateColors(self):
+    def update_colors(self):
         color = self.select_alert_color()
         self.valueView.color = color
         
@@ -35,13 +35,13 @@ class RawChannelView(Screen):
     _gauges = {}
     _grid = None
     _bgCurrent = RAW_GRID_BGCOLOR_1
-    _data_bus = None
+    _databus = None
     settings = None
     
-    def __init__(self, **kwargs):
+    def __init__(self, databus, settings, **kwargs):
         super(RawChannelView, self).__init__(**kwargs)
-        self._data_bus = kwargs.get('dataBus', None)
-        self.settings = kwargs.get('settings', None)
+        self._databus = databus
+        self.settings = settings
         self.initScreen()
     
     @property
@@ -56,9 +56,9 @@ class RawChannelView(Screen):
             self._addGauge(channelMeta)
             
     def initScreen(self):
-        dataBus = self._data_bus
+        dataBus = self._databus
         dataBus.addMetaListener(self.on_meta)
-        meta = self._data_bus.getMeta()
+        meta = self._databus.getMeta()
 
         if len(meta) > 0:
             self.on_meta(meta)
@@ -74,7 +74,7 @@ class RawChannelView(Screen):
         
     def _addGauge(self, channelMeta):
         channel = channelMeta.name
-        gauge = RawGauge(rcid=None, dataBus=self._data_bus, settings=self.settings, targetchannel=channel)
+        gauge = RawGauge(rcid=None, dataBus=self._databus, settings=self.settings, targetchannel=channel)
         gridView = self._gridView
         gauge.precision = channelMeta.precision
         

@@ -1,0 +1,22 @@
+<AnalysisWidget>:
+	AnchorLayout:
+        id: options_button
+		anchor_x: 'left'
+		anchor_y: 'top'
+		BoxLayout:
+            canvas.before:
+                Color:
+                    rgba: ColorScheme.get_dark_background_translucent()
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+		
+            id: options_bar
+            orientation: 'horizontal'
+            size_hint: (.1, 0.1)
+            spacing: sp(5)
+			IconButton:
+				id: options
+				size_hint_x: 1.0
+				text: u'\uf013'
+				on_press: root.on_options()

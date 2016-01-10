@@ -1,0 +1,13 @@
+<BarGraphGauge>:
+    RelativeLayout:
+        StencilView:
+            size_hint: (None, 0.9)
+            id: stencil
+            canvas.after:
+                Color:
+                    rgba: root.color
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+    FieldLabel:
+        id: value

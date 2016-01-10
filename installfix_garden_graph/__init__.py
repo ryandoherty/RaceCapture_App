@@ -61,7 +61,7 @@ from kivy.properties import NumericProperty, BooleanProperty,\
     BoundedNumericProperty, StringProperty, ListProperty, ObjectProperty,\
     DictProperty, AliasProperty
 from kivy.clock import Clock
-from kivy.graphics import Mesh, Color, Rectangle
+from kivy.graphics import Mesh, Color, Rectangle, Line
 from kivy.graphics import Fbo
 from kivy.graphics.transformation import Matrix
 from kivy.graphics.texture import Texture
@@ -123,6 +123,15 @@ class Graph(Widget):
     _ticks_majory = ListProperty([])
     _ticks_minory = ListProperty([])
 
+    #manages the marker position on the graph
+    marker_x = NumericProperty(None)
+    '''Position of the marker, in units of % of X axis
+    '''
+
+    marker_color = ListProperty([1, 1, 1 ,0.5])
+    '''Color of marker; defauts to white, 50% alpha
+    '''
+
     tick_color = ListProperty([.25, .25, .25, 1])
     '''Color of the grid/ticks, default to 1/4. grey.
     '''
@@ -144,6 +153,8 @@ class Graph(Widget):
 
         with self.canvas:
             self._fbo = Fbo(size=self.size)
+            self._marker_color = Color(self.marker_color)
+            self._marker = Line()
 
         with self._fbo:
             self._background_color = Color(*self.background_color)
@@ -192,6 +203,16 @@ class Graph(Widget):
         super(Graph, self).remove_widget(widget)
         if widget is self._plot_area:
             self.canvas = canvas
+
+    def on_marker_x(self, instance, value):
+        xmin = self.xmin
+        xmax = self.xmax
+        if xmax <= xmin:
+            return
+        pct = (value - xmin) / (xmax - xmin)
+        x = self.width * pct
+        px, py = self.pos
+        self._marker.points = [px + x, py, px + x, py + self.height]
 
     def _get_ticks(self, major, minor, log, s_min, s_max):
         if major and s_max > s_min:
@@ -296,8 +317,8 @@ class Graph(Widget):
         padding = self.padding
         x_next = padding + x
         y_next = padding + y
-        xextent = width + x
-        yextent = height + y
+        xextent = width + x - padding
+        yextent = height + y - padding
         ymin = self.ymin
         ymax = self.ymax
         xmin = self.xmin
@@ -480,9 +501,11 @@ class Graph(Widget):
         xlog = self.xlog
         xmin = self.xmin
         xmax = self.xmax
-        ymin = self.ymin
-        ymax = self.ymax
+        chart_ymin = self.ymin
+        chart_ymax = self.ymax
         for plot in self.plots:
+            ymin = plot.ymin if plot.ymin else chart_ymin
+            ymax = plot.ymax if plot.ymax else chart_ymax
             plot._update(xlog, xmin, xmax, ylog, ymin, ymax, size)
 
     def _update_colors(self, *args):
@@ -857,6 +880,9 @@ class Plot(EventDispatcher):
         self.ask_draw = Clock.create_trigger(self.draw)
         self.bind(params=self.ask_draw, points=self.ask_draw)
         self._drawings = self.create_drawings()
+        #plot specific y axis min/max
+        self.ymin = None
+        self.ymax = None
 
     # this function is called by graph whenever any of the parameters
     # change. The plot should be recalculated then.
@@ -1020,7 +1046,7 @@ class LinePlot(Plot):
         super(LinePlot, self).__init__(**kwargs)
     
     def create_drawings(self):
-        from kivy.graphics import Line, RenderContext
+        from kivy.graphics import RenderContext
 
         self._grc = RenderContext(
                 use_parent_modelview=True,

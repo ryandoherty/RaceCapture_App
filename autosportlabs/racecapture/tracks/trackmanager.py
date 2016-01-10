@@ -11,7 +11,8 @@ import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
 from kivy.logger import Logger
 from utils import time_to_epoch
-
+TRACK_DEFAULT_SEARCH_RADIUS_METERS = 2000
+TRACK_DEFAULT_SEARCH_BEARING_DEGREES = 360
 
 class TrackMap:
     """Very generic object wrapper around RCL's API endpoint for venues
@@ -166,14 +167,15 @@ class TrackManager:
                 return track
         return None
         
-    def find_nearby_track(self, point, searchRadius):
-        for track_id in self.tracks.keys():
-            track = self.tracks[track_id]
-            track_center = track.centerpoint
-            if track_center and track_center.withinCircle(point, searchRadius):
+    def find_nearby_track(self, point, searchRadius = TRACK_DEFAULT_SEARCH_RADIUS_METERS, searchBearing = TRACK_DEFAULT_SEARCH_BEARING_DEGREES):
+        radius = point.metersToDegrees(searchRadius, searchBearing)
+        for trackId in self.tracks.keys():
+            track = self.tracks[trackId]
+            trackCenter = track.centerpoint
+            if trackCenter and trackCenter.withinCircle(point, radius):
                 return track
         return None
-        
+
     def filter_tracks_by_name(self, name, track_ids=None):
         if track_ids is None:
             track_ids = self.tracks.keys()

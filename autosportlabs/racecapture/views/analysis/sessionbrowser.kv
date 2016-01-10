@@ -1,0 +1,30 @@
+    
+<LapItemButton>:
+    #background_down: ''
+    font_size: self.height * 0.5
+    font_name: 'resource/fonts/ASL_light.ttf'
+
+<Session>:
+    orientation: 'vertical'
+    BoxLayout:
+        orientation: 'horizontal'
+        height: sp(40)
+        size_hint_y: None
+        IconButton: #Edit button
+            text: u'\uf044'
+            on_press: root.edit_session()
+        IconButton: #Delete button
+            text: u'\uf00d'
+            color: ColorScheme.get_primary()
+            on_press: root.prompt_delete_session()
+    BoxLayout:
+        orientation: 'vertical'
+        id: lap_list
+
+<SessionBrowser>:
+    FieldLabel:
+        id: session_alert
+        halign: 'center'
+	
+	
+	

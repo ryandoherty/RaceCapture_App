@@ -1,0 +1,137 @@
+#:kivy 1.8
+<AddStreamView>:
+	orientation: 'vertical'
+	ScreenManager:
+		id: screens
+		AddStreamSelectView:
+			id: streamSelectScreen
+			name: 'stream_select'
+        CloudConnectView:
+            id: cloudConnectScreen
+            name: 'cloud'
+        WirelessConnectView:
+            id: wirelessConnectScreen
+            name: 'wireless'
+		FileConnectView:
+		    id: fileConnectScreen
+		    name: 'file'
+        
+<AddStreamSelectView>:
+    BoxLayout:
+        orientation: 'vertical'
+    	GridLayout:
+    		size_hint_y: 0.8
+    		padding: [self.height * 0.1, self.height * 0.15]
+    		spacing: self.height * 0.1
+    		rows: 1
+    		cols: 3
+#    		DisabledFeatureButton:
+ #   			icon: u'\uf0ed'
+  #  			title: 'Cloud'
+   # 			on_press: root.select_stream('cloud')
+    #		DisabledFeatureButton:
+    #			icon: u'\uf1eb'
+    #			title: 'Wireless'
+    #			on_press: root.select_stream('wireless')
+    		FeatureButton:
+    			icon: u'\uf07c'
+    			title: 'Import'
+                on_press: root.select_stream('file')
+    	FieldLabel:
+    		size_hint_y: 0.2
+    		font_size: root.height * 0.1
+    		font_name: 'resource/fonts/ASL_regular.ttf'
+    		halign: 'center'
+    		text: 'choose a stream to connect'
+		
+<FileConnectView>:
+    BoxLayout:
+        orientation: 'vertical'
+        LogImportWidget:
+            id: log_import
+        
+<CloudConnectView>:
+    FieldLabel:
+        text: 'Cloud connect view'
+        
+<WirelessConnectView>:
+    FieldLabel:
+        text: 'Wireless connect view'
+		
+<LogImportWidget>:
+    size: root.size
+    BoxLayout:
+        spacing: dp(10)
+        padding: (sp(5), sp(5), sp(5), sp(5))
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            spacing: sp(5)            
+            size_hint_y: 0.7
+            
+            BoxLayout:
+                size_hint_y: 0.15
+                orientation: 'horizontal'
+                FieldLabel:
+                    text: 'Datalog Location'
+                BoxLayout:
+                    orientation: 'horizontal'
+                    spacing: sp(10)
+                    FieldLabel:
+                        size_hint_x: 0.5
+                        id: log_path
+                        multiline: False
+                        
+                    LabelIconButton:
+                        id: browse_button
+                        size_hint_x: 0.5
+                        title: 'Browse'
+                        icon_size: self.height * .9
+                        title_font_size: self.height * 0.7
+                        icon: '\357\204\225'
+                        on_press: root.select_log()
+            
+            BoxLayout:
+                size_hint_y: 0.25
+                orientation: 'horizontal'
+                FieldLabel: 
+                    text: 'Session Name'
+                FieldInput:
+                    id: session_name
+                    
+            BoxLayout:
+                size_hint_y: 0.6
+                orientation: 'vertical'
+                spacing: sp(5)
+                FieldLabel:
+                    size_hint_y: 0.1
+                    size_hint_x: 1.0
+                    text: 'Log book'
+                TextInput:
+                    id: session_notes
+                    size_hint_y: 0.9
+
+
+        AnchorLayout:
+            anchor_x: 'right'            
+            size_hint_y: 0.1
+            LabelIconButton:
+                id: import_button
+                disabled: True
+                size_hint_x: 0.2
+                title: 'Import'
+                icon_size: self.height * .9
+                title_font_size: self.height * 0.7
+                icon: u'\uf090'
+                on_press: root.load_log()
+            
+                        
+        FieldLabel:
+            size_hint_y: .05
+            halign: 'center'
+            id: current_status
+            
+        ProgressBar:
+            id: log_load_progress
+            size_hint_y: .05
+		

@@ -1,23 +1,47 @@
 <AnalysisView>:
-	BoxLayout:
-		orientation: 'vertical'
-		FieldLabel:
-			font_size: dp(20)
-			halign: 'center'
-			text: "SOON"
-			
-#<AnalysisView_disabled>:
-#	BoxLayout:
-#		orientation: 'vertical'
-#		BoxLayout:
-#			orientation: 'horizontal'
-#			RaceTrackView:
-#				id: trackview
-#				size_hint_x: 0.75
-#			Label:
-#				size_hint_x: 0.25
-#				text: 'secondary chart'
-#		BoxLayout:
-#			orientation: 'vertical'
-#			Label:
-#				text: 'chart'
+    BoxLayout:
+        orientation: 'vertical'
+    	BoxLayout:
+            padding: (sp(10), sp(10), sp(10), sp(5))
+            spacing: sp(10)       
+            size_hint_y: 0.5
+            orientation: 'horizontal'
+            AnalysisMap:
+                id: analysismap
+                size_hint_x: 0.85
+            BoxLayout:
+                canvas.before:
+                    Color:
+                        rgba: ColorScheme.get_dark_background_translucent()
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                size_hint_x: 0.15
+                orientation: 'vertical'
+                SessionBrowser:
+                    size_hint_y: 0.9
+                    id: sessions_view
+                IconButton:
+                    size_hint_y: 0.1
+                    id: 'read'
+                    font_size: root.height * 0.1
+                    text: u'\uf0fe'
+                    on_release: root.on_add_stream()
+    		
+        AnchorLayout:
+            spacing: sp(10)       
+            padding: (sp(10), sp(5), sp(10), sp(10))
+            size_hint_y: 0.5            
+            AnchorLayout:
+                LineChart:
+                    id: mainchart
+                    on_channel_selected: root.on_channel_selected(*args)
+                    on_marker: root.on_marker(*args)
+            AnchorLayout:
+                anchor_x: 'right'
+                anchor_y: 'top'
+                ChannelValuesView:
+                    size_hint_x: 0.25
+                    #size_hint_y: None
+                    id: channelvalues
+            	

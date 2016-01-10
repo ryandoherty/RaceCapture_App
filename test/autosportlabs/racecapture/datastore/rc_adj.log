@@ -1,4 +1,4 @@
-"ts"|"milliseconds"|200,"Coolant"|"F"|1,"MAP"|"KPa"|5,"FuelLevel"|"Pct"|1,"TPS"|"Pct"|5,"AFR"|"L"|5,"Brake"|"Units"|5,"OilPress"|"Units"|1,"Battery"|"Volts"|1,"Spray"|""|1,"RPM"|"RPM"|5,"AccelX"|"G"|5,"AccelY"|"G"|5,"AccelZ"|"G"|5,"Yaw"|"Deg_Sec"|5,"LapCount"|""|1,"LapTime"|"seconds"|1,"Latitude"|"deg"|5,"Longitude"|"deg"|5,"Speed"|"MPH"|5,"Time"|"Time"|1,"SplitTime"|"seconds"|1
+"Interval"|"ms"|0|0|1,"Coolant"|"F"|0|250|1,"MAP"|"KPa"|0|255|5,"FuelLevel"|"Pct"|0|100|1,"TPS"|"Pct"|0|100|5,"AFR"|"L"|0|20|5,"Brake"|"Units"|0|1000|5,"OilPress"|"Units"|0|150|1,"Battery"|"Volts"|0|20|1,"Spray"|""|0|1|1,"RPM"|"RPM"|0|10000|5,"AccelX"|"G"|-2.5|2.5|5,"AccelY"|"G"|-2.5|2.5|5,"AccelZ"|"G"|-2.5|2.5|5,"Yaw"|"Deg_Sec"|300|-300|5,"LapCount"|""|0|0|1,"LapTime"|"seconds"|0|600|1,"Latitude"|"deg"|-90|90|5,"Longitude"|"deg"|-180|180|5,"Speed"|"MPH"|0|200|5,"Time"|"Time"|0|0|1,"SectorTime"|"seconds"|0|600|1
 0,,70,,0,7.39,73,,,,1120,-0.002,0.150,1.258,-0.640,,,47.254532,-123.196602,4.06,,
 200,,35,,0,7.41,91,,,,1387,0.020,0.033,0.888,-0.853,,,47.254532,-123.196602,4.06,,
 400,,18,,0,7.41,132,,,,1247,0.007,0.039,1.044,-0.426,,,47.254532,-123.196602,4.06,,

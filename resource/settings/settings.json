@@ -15,5 +15,13 @@
         "section": "preferences",
         "key": "send_telemetry",
         "true": "auto"
+    },
+    {
+	"type": "string",
+	"title": "Datastore Location",
+	"desc": "",
+	"section": "preferences",
+	"key": "dstore_path",
+	"true": "auto"
     }
 ]

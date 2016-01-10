@@ -208,8 +208,6 @@ class AutomaticTrackConfigScreen(Screen):
     tracksGrid = None
     track_manager = ObjectProperty(None)
     TRACK_ITEM_MIN_HEIGHT = 200
-    searchRadiusMeters = 2000
-    searchBearing = 360
     trackSelectionPopup = None
     def __init__(self, **kwargs):
         super(AutomaticTrackConfigScreen, self).__init__(**kwargs)

@@ -44,9 +44,10 @@ if __name__ == '__main__':
     from autosportlabs.racecapture.settings.systemsettings import SystemSettings
     from autosportlabs.racecapture.settings.prefs import Range
     from autosportlabs.telemetry.telemetryconnection import TelemetryManager
+    from autosportlabs.help.helpmanager import HelpInfo
     from toolbarview import ToolbarView
     if not is_mobile_platform():
-        kivy.config.Config.set ( 'input', 'mouse', 'mouse,disable_multitouch' )
+        kivy.config.Config.set ( 'input', 'mouse', 'mouse,multitouch_on_demand' )
 
     # If we have a Sentry config file, create a client to send crash reports to
     if os.path.isfile('sentry.cfg'):
@@ -129,7 +130,8 @@ class RaceCaptureApp(App):
         #self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
         self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
-        self.settings.runtimeChannels.data_bus = self._databus        
+        self.settings.runtimeChannels.data_bus = self._databus
+        HelpInfo.settings = self.settings
 
         Window.bind(on_keyboard=self._on_keyboard)
         self.register_event_type('on_tracks_updated')
@@ -328,7 +330,7 @@ class RaceCaptureApp(App):
         return dash_view
     
     def build_analysis_view(self):
-        analysis_view = AnalysisView(name='analysis', data_bus=self._databus, settings=self.settings)
+        analysis_view = AnalysisView(name='analysis', data_bus=self._databus, settings=self.settings, track_manager=self.trackManager)
         self.tracks_listeners.append(analysis_view)
         return analysis_view
     
@@ -519,12 +521,13 @@ class RaceCaptureApp(App):
 class CrashHandler(ExceptionHandler):
     def handle_exception(self, exception_info):
         if type(exception_info) == KeyboardInterrupt:
-            Logger.info("Main: KeyboardInterrupt")
+            Logger.info("CrashHander: KeyboardInterrupt")
             sys.exit()
+        Logger.critical("CrashHandler: Caught exception in Kivy loop: " + str(exception_info))
+        Logger.critical(traceback.format_exc())
         if 'sentry_client' in globals():
             ident = sentry_client.captureException(value=exception_info)
             Logger.critical("CrashHandler: crash caught: Reference is %s" % ident)
-            traceback.print_exc()
         return ExceptionManager.PASS
 
 if __name__ == '__main__':
