@@ -15,6 +15,11 @@ from iconbutton import IconButton, LabelIconButton
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 
 class AnalysisMap(AnalysisWidget):
+    '''
+    Displays a track map with options
+    
+    
+    '''
     SCROLL_FACTOR = 0.15
     track_manager = ObjectProperty(None)
     datastore = ObjectProperty(None)

@@ -79,6 +79,9 @@ class ChannelValueView(BoxLayout):
 
 
 class ChannelValuesView(ChannelAnalysisWidget):
+    '''
+    Shows a list of digital gauges for a combination of session / laps for selected laps
+    '''
     color_sequence = ObjectProperty(None)
 
     def __init__(self, **kwargs):
@@ -121,17 +124,19 @@ class ChannelValuesView(ChannelAnalysisWidget):
         for key in iter(sorted(self._channel_stat_widgets.iterkeys())):
             channels_grid.add_widget(self._channel_stat_widgets[key])
 
-    def add_channel(self, channel_data):
+    def add_channel(self, channel, lap_ref):
         '''
         Add the specified ChannelData to the dict of channel_stats, keyed by the lap/session source
         Organization is: dict of channel_stats keyed by source (lap/session key), each having a dict of ChannelData objects keyed by channel name
         '''
-        source_key = str(channel_data.source)
+        channel_data = self.datastore.get_channel_data(lap_ref, [channel])
+        channel_data_values = channel_data[channel]
+        source_key = str(channel_data_values.source)
         channels = self.channel_stats.get(source_key)
         if not channels:
             channels = {} #looks like we're adding it for the first time for this source
             self.channel_stats[source_key] = channels
-        channels[channel_data.channel] = channel_data
+        channels[channel_data_values.channel] = channel_data_values
         self._refresh_channels()
     
     def refresh_view(self):
@@ -141,10 +146,6 @@ class ChannelValuesView(ChannelAnalysisWidget):
         source_key = str(lap_ref)
         channels = self.channel_stats.get(source_key)
         channels.pop(channel, None)
-
-    def query_new_channel(self, channel, lap_ref):
-        channel_data = self.datastore.get_channel_data(lap_ref, [channel])
-        self.add_channel(channel_data[channel])
 
                 
                 

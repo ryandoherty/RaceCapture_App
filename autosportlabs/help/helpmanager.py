@@ -56,6 +56,24 @@ class HelpBubble(CenteredBubble):
     pass
     
 class HelpInfo(BoxLayout):
+    '''
+    Displays a help popup message with a title and description
+    
+    Description:
+    The help popup is designed to be a 'show once only / first time user's help'. The help function can be repeatedly called;
+    the caller does not need to manage if the help has been shown already.
+
+    The HelpInfo system pulls messages from a central help resource file (resource/help/help_text.json).
+    Each help message is referenced by it's respective key, identified in the file.
+    
+    A popup help bubble can be requested with the specified message key. The bubble is centered on the specified widget. 
+    An arrow can be specified to point towards something of interest.
+    
+    Usage:
+    * Create an entry in the resource/help/help_text.json file
+    * To display the help message, call help_popup(<help_key>, <widget_to_center_on>, <arrow_position>):
+    ** The value for <arrow_position> are the same as specified by kivy Bubble.
+    '''
     Builder.load_string(HELP_INFO_LAYOUT)
     HELP_POPUP_TIMEOUT = 30.01
     HELP_POPUP_SIZE = (sp(500), sp(200))
@@ -83,6 +101,14 @@ class HelpInfo(BoxLayout):
         
     @staticmethod
     def help_popup(key, widget, arrow_pos='bottom_mid'):
+        '''
+        Display a help popup message. This message will only show once (first time help for users) 
+        
+        Args:
+            key: the key representing the help text
+            widget: the widget to center on
+            arrow_pos: help arrow position, as defined in kivy Bubble widget.
+        '''
         try:
             settings = HelpInfo.settings
             show_help = settings.userPrefs.get_pref('help', key, True)

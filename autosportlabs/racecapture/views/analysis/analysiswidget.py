@@ -16,7 +16,14 @@ class OptionsButton(AnchorLayout):
     pass
 
 class AnalysisWidget(AnchorLayout):
-    """ The base analysis widget that can receive lap added / removed events
+    """
+    The base for all analysis UI widgets
+    
+    This base class can handle the addition / removal of laps selected for viewing.
+    Selected laps are the basis for determining what data is displayed in a particular widget.
+    
+    Extend this class directly when you want to create a widget that specifically controls the data to be displayed, such as
+    the analysis map.
     """
     options_enabled = BooleanProperty(None)
     
@@ -30,6 +37,9 @@ class AnalysisWidget(AnchorLayout):
         Clock.schedule_once(lambda dt: self.add_option_buttons())
         
     def add_option_buttons(self):
+        '''
+        Override this to add additional buttons to the widget's floating toolbar
+        '''
         pass
     
     def append_option_button(self, button):
@@ -64,7 +74,10 @@ class AnalysisWidget(AnchorLayout):
             Logger.error("AnalysisWidget: Error removing remove lap " + str(e))
 
 class ChannelAnalysisWidget(AnalysisWidget):
-    """A widget that can select its own channels to display
+    """
+    A base widget that can select one or more channels to display.
+    
+    Extend this class if you want to make a general purpose widget that shows one or more channels.
     """
     sessions = ObjectProperty(None)
     
@@ -79,7 +92,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
         
     def on_lap_added(self, lap_ref):
         for channel in self._selected_channels:
-            self.query_new_channel(channel, lap_ref)
+            self.add_channel(channel, lap_ref)
     
     def on_lap_removed(self, lap_ref):
         for channel in self._selected_channels:
@@ -89,21 +102,27 @@ class ChannelAnalysisWidget(AnalysisWidget):
     def on_channel_selected(self, value):
         pass
     
-    def add_channel(self, channel_data):
+    def add_channel(self, channel, lap_ref):
+        '''
+        Override this to add a channel / lap reference combo to the view
+        '''
         pass
     
-    def remove_channel(self, channel, ref):
+    def remove_channel(self, channel, lap_ref):
+        '''
+        Override this function to remove a channel / lap reference combo from the view
+        '''
         pass
 
-    def query_new_channel_all_laps(self, channel):
-        for lap_ref in self.selected_laps.itervalues():
-            self.query_new_channel(channel, lap_ref)
-
-    def query_new_channel(self, channel, lap_ref):
-        pass
-        
     def refresh_view(self):
+        '''
+        Override this to refresh / re-draw the view
+        '''
         pass
+
+    def _add_channel_all_laps(self, channel):
+        for lap_ref in self.selected_laps.itervalues():
+            self.add_channel(channel, lap_ref)
 
     def _remove_channel_all_laps(self, channel):
         for k,v in self.selected_laps.iteritems():
@@ -121,7 +140,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
 
         for c in added:
             current.append(c)
-            self.query_new_channel_all_laps(c)
+            self._add_channel_all_laps(c)
             
     def select_channels(self, selected_channels):
         self.merge_selected_channels(selected_channels)

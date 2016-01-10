@@ -34,6 +34,9 @@ class ChannelPlot(object):
         return "{}_{}".format(str(self.sourceref), self.channel) 
 
 class LineChart(ChannelAnalysisWidget):
+    '''
+    Displays a line chart capable of showing multiple channels from multiple laps
+    '''
     color_sequence = ObjectProperty(None)
     _channel_plots = {}
     ZOOM_SCALING = 0.02
@@ -183,20 +186,21 @@ class LineChart(ChannelAnalysisWidget):
         
         self.dispatch_marker(pos[0], pos[1])
 
-    def remove_channel(self, channel, ref):
+    def remove_channel(self, channel, lap_ref):
         remove = []
         for channel_plot in self._channel_plots.itervalues():
-            if channel_plot.channel == channel and str(ref) == str(channel_plot.sourceref):
+            if channel_plot.channel == channel and str(lap_ref) == str(channel_plot.sourceref):
                 remove.append(channel_plot)
         
         for channel_plot in remove:
             self.ids.chart.remove_plot(channel_plot.plot)
             del(self._channel_plots[str(channel_plot)])
-
     
-    def add_channel(self, channel_name, query_data):
+    def add_channel(self, channel, lap_ref):
+        query_data = self.datastore.get_channel_data(lap_ref, ['Distance', channel])
+
         chart = self.ids.chart
-        channel_data_values = query_data[channel_name]
+        channel_data_values = query_data[channel]
         distance_data_values = query_data['Distance']
         
         key = channel_data_values.channel + str(channel_data_values.source)
@@ -232,7 +236,4 @@ class LineChart(ChannelAnalysisWidget):
         self.max_distance = max_distance
         self.current_distance = max_distance
     
-    def query_new_channel(self, channel, source_ref):
-        channel_data = self.datastore.get_channel_data(source_ref, ['Distance', channel])
-        self.add_channel(channel, channel_data)        
 
