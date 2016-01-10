@@ -117,6 +117,7 @@ class RcpApi:
         self.comms.cleanup()
         
     def shutdown_comms(self):
+        Logger.info('RCPAPI: shutting down comms')
         try:
             self.comms.close()
             self.comms.port = None
@@ -178,7 +179,7 @@ class RcpApi:
                     sleep(NO_DATA_AVAILABLE_DELAY)
                     
             except PortNotOpenException:
-                Logger.warn("RCPAPI: Port not open...")
+                Logger.debug("RCPAPI: Port not open...")
                 msg=''
                 sleep(1.0)
             except Exception:

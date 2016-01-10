@@ -26,7 +26,7 @@ class SerialConnection():
         return self.ser != None
     
     def open(self, port):
-        ser = serial.Serial(port, timeout=self.timeout, writeTimeout = self.writeTimeout) 
+        ser = serial.Serial(port, timeout=self.timeout, write_timeout = self.writeTimeout)
         self.ser = ser
             
     def close(self):

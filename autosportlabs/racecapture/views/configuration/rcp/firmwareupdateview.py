@@ -10,6 +10,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.app import Builder
 from kivy import platform
+from kivy.logger import Logger
 from autosportlabs.racecapture.views.util.alertview import confirmPopup, okPopup
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
@@ -57,7 +58,6 @@ class FirmwareUpdateView(BaseConfigView):
         
     def prompt_manual_bootloader_mode(self, instance):
         self._popup.dismiss()
-        self._teardown_json_serial()
         popup = None
         def _on_answer(inst, answer):
             popup.dismiss()
@@ -94,6 +94,7 @@ class FirmwareUpdateView(BaseConfigView):
         self.ids.fw_progress.value = int(percent)
 
     def _teardown_json_serial(self):
+        Logger.info('FirmwareUpdateView: Disabling RaceCapture Communcications')
         # It's ok if this fails, in the event of no device being present,
         # we just need to disable the com port
         self.rc_api.disable_autorecover()
@@ -108,6 +109,7 @@ class FirmwareUpdateView(BaseConfigView):
         sleep(5)
 
     def _restart_json_serial(self):
+        Logger.info('FirmwareUpdateView: Re-enabling RaceCapture Communications')
         self.rc_api.enable_autorecover()
         self.rc_api.run_auto_detect()
 
@@ -133,7 +135,7 @@ class FirmwareUpdateView(BaseConfigView):
 
                 #Get our firmware updater class and register the
                 #callback that will update the progress gauge
-                fu = fw_update.FwUpdater()
+                fu = fw_update.FwUpdater(logger=Logger)
                 fu.register_progress_callback(self._update_progress_gauge)
 
                 retries = 5
@@ -164,8 +166,7 @@ class FirmwareUpdateView(BaseConfigView):
         except Exception as detail:
             alertPopup('Error Loading', 'Failed to Load Firmware:\n\n' + str(detail))
 
-        if not platform == 'win':
-            self._restart_json_serial()
+        self._restart_json_serial()
         self.ids.fw_progress.value = ''
         self.ids.fw_progress.title = ""
 

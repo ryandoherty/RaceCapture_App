@@ -4,6 +4,7 @@ import multiprocessing
 from Queue import Empty
 from time import sleep
 from kivy.logger import Logger
+from autosportlabs.comms.commscommon import PortNotOpenException
 
 STAY_ALIVE_TIMEOUT = 4
 COMMAND_CLOSE      = 'CLOSE'
@@ -144,13 +145,14 @@ class Comms():
                 Logger.error('Comms: Timeout joining connection process')
 
     def read_message(self):
-        if not self.isOpen(): raise Exception('Comms Exception')
+        if not self.isOpen():
+            raise PortNotOpenException('Port Closed')
         try:
             return self._rx_queue.get(True, self._timeout)
         except: #returns Empty object if timeout is hit
             return None
     
     def write_message(self, message):
-        if not self.isOpen(): raise Exception('Comms Exception')
+        if not self.isOpen(): raise PortNotOpenException('Port Closed')
         self._tx_queue.put(message, True, Comms.QUEUE_FULL_TIMEOUT )
                     
