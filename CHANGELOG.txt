@@ -1,6 +1,6 @@
 ==1.4.1==
 * Fixed firmware update issue for Windows 10
-* Various fixes and improvments on Analysis Beta
+* Various fixes and improvements on Analysis Beta
 
 ==1.4.0==
 * Analysis Beta available
