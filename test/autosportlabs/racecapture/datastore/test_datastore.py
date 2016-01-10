@@ -17,31 +17,36 @@ class DataStoreTest(unittest.TestCase):
             os.remove(db_path)
 
         self.ds.new(db_path)
+        self._import_initial_data()
 
     @classmethod
     def tearDownClass(self):
+        self._delete_all_sessions()
         self.ds.close()
         os.remove(db_path)
 
-    def test_aaa_valid_import(self):
-        #HACK
-        # Note the strange name here: I need to be sure that this runs
-        # first as other tests will rely on the fact that there is
-        # actually data in the database.  Since this can take several
-        # seconds to populate, I don't want to waste everyone's time
+    @classmethod
+    def _import_initial_data(self):
         try:
             self.ds.import_datalog(log_path, 'rc_adj', 'the notes')
-            success = True
         except:
             import sys, traceback
-            print "Exception in user code:"
+            print "Exception importing datalog:"
             print '-'*60
             traceback.print_exc(file=sys.stdout)
             print '-'*60
 
-            success = False
+    @classmethod
+    def _delete_all_sessions(self):
+        sessions = self.ds.get_sessions()
+        for session in sessions:
+            self.ds.delete_session(session.session_id)
 
-        self.assertEqual(success, True)
+    def test_delete_session(self):
+        session_id = self.ds.import_datalog(log_path, 'rc_adj', 'the notes')
+        self.ds.delete_session(session_id)
+        session = self.ds.get_session_by_id(session_id)
+        self.assertIsNone(session)
 
     def test_basic_filter(self):
         f = Filter().lt('LapCount', 1)
@@ -309,8 +314,3 @@ class DataStoreTest(unittest.TestCase):
         self.assertEqual('name_updated', session.name)
         self.assertEqual('notes_updated', session.notes)
         
-    #HACK - ensure this runs last because.. deleting only session
-    def test_zzz_delete_session(self):
-        self.ds.delete_session(1)
-        sessions = self.ds.get_sessions()
-        self.assertEqual(len(sessions), 0)
