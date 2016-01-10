@@ -184,7 +184,7 @@ class RcpApi:
                 sleep(1.0)
             except Exception:
                 Logger.warn('RCPAPI: Message rx worker exception: {} | {}'.format(msg, str(Exception)))
-                Logger.warn(traceback.format_exc())
+                Logger.debug(traceback.format_exc())
                 msg = ''
                 error_count += 1
                 if error_count > 5 and not self._auto_detect_event.is_set():
