@@ -3,6 +3,7 @@ kivy.require('1.9.0')
 
 from kivy.properties import ObjectProperty
 from kivy import platform
+from kivy.clock import Clock
 from settingsview import SettingsMappedSpinner, SettingsSwitch
 from mappedspinner import MappedSpinner
 from kivy.uix.boxlayout import BoxLayout
@@ -46,15 +47,6 @@ class FirmwareUpdateView(BaseConfigView):
                       content=Label(text='Coming soon!'),
                       size_hint=(None, None), size=(400, 400))
         popup.open()
-
-    def prompt_manual_restart(self):
-        popup = None
-        def _on_ok(*args):
-            popup.dismiss()
-            self._restart_json_serial()
-        popup = okPopup('Operation Complete',
-                        '1. Unplug RaceCapture from USB\n2. Wait 3 seconds\n3. Re-connect USB',
-                        _on_ok)
         
     def prompt_manual_bootloader_mode(self, instance):
         self._popup.dismiss()
@@ -91,7 +83,9 @@ class FirmwareUpdateView(BaseConfigView):
         self._popup.open()
 
     def _update_progress_gauge(self, percent):
-        self.ids.fw_progress.value = int(percent)
+		def update_progress(pct):
+			self.ids.fw_progress.value = int(pct)
+		Clock.schedule_once(lambda dt: update_progress(percent))
 
     def _teardown_json_serial(self):
         Logger.info('FirmwareUpdateView: Disabling RaceCapture Communcications')
@@ -156,9 +150,6 @@ class FirmwareUpdateView(BaseConfigView):
                 fu.update_firmware(filename, port)
                 self.ids.fw_progress.title = "Restarting"
 
-                #Windows workaround
-                if platform == 'win':
-                    self.prompt_manual_restart()
                 #Sleep for a few seconds since we need to let USB re-enumerate
                 sleep(3)
             else:
