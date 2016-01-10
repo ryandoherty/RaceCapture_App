@@ -1,5 +1,5 @@
 https://github.com/autosportlabs/ihexpy/archive/master.zip
-dependencies/asl_f4_loader-0.0.6.tar.gz
+dependencies/asl_f4_loader-0.0.7.tar.gz
 Kivy-Garden==0.1.1
 pyserial==3.0
 requests==2.2.1

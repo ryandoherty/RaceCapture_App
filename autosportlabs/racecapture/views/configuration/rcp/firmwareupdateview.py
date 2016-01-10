@@ -135,7 +135,7 @@ class FirmwareUpdateView(BaseConfigView):
 
                 #Get our firmware updater class and register the
                 #callback that will update the progress gauge
-                fu = fw_update.FwUpdater()
+                fu = fw_update.FwUpdater(logger=Logger)
                 fu.register_progress_callback(self._update_progress_gauge)
 
                 retries = 5
