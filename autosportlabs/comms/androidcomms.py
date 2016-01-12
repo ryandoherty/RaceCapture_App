@@ -33,7 +33,7 @@ class AndroidComms(object):
                                                                 
     def get_available_ports(self):
         bt_ports = self._bt_conn.getAvailableDevices()
-        Logger.info('AndroidComms: detected ports: {}'.format(bt_ports.join(',')))
+        Logger.info('AndroidComms: detected ports: {}'.format(','.join(bt_ports)))
         return bt_ports
     
     def isOpen(self):
