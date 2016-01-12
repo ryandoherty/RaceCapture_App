@@ -401,21 +401,21 @@ class DataStore(object):
         #print "Last datapoint ID =", dp_id
         return dl_id
 
-    def _insert_record(self, record, channels, session_id, warnings = None):
+    def _insert_record(self, cursor, datalog_id, record, channels, session_id, warnings = None):
         """
         Takes a record of interpolated+extrapolated channels and their header metadata
         and inserts it into the database
         """
-        datalog_id = self._get_last_table_id('sample') + 1
 
         #First, insert into the datalog table to give us a reference
         #point for the datapoint insertions
 
-        self._conn.execute("""INSERT INTO sample
+        cursor.execute("""INSERT INTO sample
         (session_id) VALUES (?)""", [session_id])
 
         #Insert the datapoints into their tables
         extrap_vals = [datalog_id] + record
+        datalog_id = cursor.lastrowid
 
         #Now, insert the record into the datalog table using the ID
         #list we built up in the previous iteration
@@ -430,7 +430,9 @@ class DataStore(object):
         base_sql += ')'
 
         #print "Executing SQL Statement: \n{}".format(base_sql)
-        self._conn.execute(base_sql)
+        cursor.execute(base_sql)
+        
+        return datalog_id
 
     def _extrap_datapoints(self, datapoints):
         """
@@ -646,10 +648,16 @@ class DataStore(object):
         #Create the generator for the desparsified data
         newdata_gen = self._desparsified_data_generator(data_file, warnings=warnings, progress_cb=progress_cb)
 
-        for record in newdata_gen:
-            self._insert_record(record, headers, session_id, warnings=warnings)
-
-        self._conn.commit()
+        datalog_id = self._get_last_table_id('sample') + 1
+        
+        cur = self._conn.cursor()
+        try:
+            for record in newdata_gen:
+                datalog_id = self._insert_record(cur, datalog_id, record, headers, session_id, warnings=warnings)
+            self._conn.commit()
+        except:
+            self._conn.rollback()
+            raise
 
     def get_location_center(self, sessions=None):
         c = self._conn.cursor()
