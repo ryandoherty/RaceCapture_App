@@ -42,7 +42,7 @@ class AndroidComms(object):
     def open(self):
         Logger.info('AndroidComms: Opening connection ' + str(self.port))
         self._bt_conn.open(self.port)
-        Logger.info('AndroidComms: after open!!!!!!!!!!!!!!!!')
+        Logger.info('AndroidComms: after open')
     
     def keep_alive(self):
         pass
