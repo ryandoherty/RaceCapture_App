@@ -1,5 +1,6 @@
 ==1.4.2==
 * Connect to the first RaceCapture device it can detect, regardless of the name provided
+* Improve load time by targeting Android 4.4 / API level 19 
 
 ==1.4.1==
 * Fixed firmware update issue for Windows 10
