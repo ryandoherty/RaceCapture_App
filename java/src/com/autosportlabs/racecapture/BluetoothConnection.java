@@ -181,4 +181,14 @@ public class BluetoothConnection {
 			}
 		}
 	}
+
+	public List<String> getAvailableDevices(){
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+
+        List<String> devices = new ArrayList<String>();
+        for(BluetoothDevice bt : pairedDevices)
+            devices.add(bt.getName());
+        return devices;
+	}
 }
