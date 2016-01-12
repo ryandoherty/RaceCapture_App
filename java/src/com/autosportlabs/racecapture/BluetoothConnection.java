@@ -6,6 +6,8 @@ import android.util.Log;
 
 import java.util.UUID;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -180,5 +182,16 @@ public class BluetoothConnection {
 				return false;
 			}
 		}
+	}
+
+	public String[] getAvailableDevices(){
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+
+        List<String> devices = new ArrayList<String>();
+        for(BluetoothDevice bt : pairedDevices)
+            devices.add(bt.getName());
+
+        return devices.toArray(new String[devices.size()]);
 	}
 }

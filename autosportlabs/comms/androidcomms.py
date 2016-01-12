@@ -32,24 +32,26 @@ class AndroidComms(object):
         self._bt_conn = BTConn.createInstance();
                                                                 
     def get_available_ports(self):
-        return ['RaceCapturePro'] #TODO get this from the service directly
+        bt_ports = self._bt_conn.getAvailableDevices()
+        Logger.info('AndroidComms: detected ports: {}'.format(','.join(bt_ports)))
+        return bt_ports
     
     def isOpen(self):
         return self._bt_conn.isOpen()
     
     def open(self):
-        Logger.info('androidcomms: Opening connection ' + str(self.port))
+        Logger.info('AndroidComms: Opening connection ' + str(self.port))
         self._bt_conn.open(self.port)
-        Logger.info('androidcomms: after open!!!!!!!!!!!!!!!!')
+        Logger.info('AndroidComms: after open')
     
     def keep_alive(self):
         pass
     
     def cleanup(self):
-        Logger.info('androidcomms: cleanup')
+        Logger.info('AndroidComms: cleanup')
         
     def close(self):
-        Logger.info('androidcomms: close')
+        Logger.info('AndroidComms: close')
         self._bt_conn.close()
 
     def read_message(self):
