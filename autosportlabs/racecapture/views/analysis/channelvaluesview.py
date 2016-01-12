@@ -92,10 +92,9 @@ class ChannelValuesView(ChannelAnalysisWidget):
     def update_reference_mark(self, source, point):
         channel_data = self.channel_stats.get(str(source))
         for channel, channel_data in channel_data.iteritems():
-            stats = channel_data.data
             key = channel + str(source)
             widget = self._channel_stat_widgets.get(key)
-            values = stats.values
+            values = channel_data.values
             try:
                 value = str(values[point])
             except IndexError:

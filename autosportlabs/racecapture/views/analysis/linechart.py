@@ -215,8 +215,8 @@ class LineChart(ChannelAnalysisWidget):
         distance_index = OrderedDict()
         max_distance = chart.xmax
         sample_index = 0
-        distance_data = distance_data_values.data.values
-        channel_data = channel_data_values.data.values 
+        distance_data = distance_data_values.values
+        channel_data = channel_data_values.values
         for sample in channel_data:
             distance = distance_data[sample_index]
             if distance > max_distance:
@@ -226,7 +226,7 @@ class LineChart(ChannelAnalysisWidget):
             sample_index += 1
         
         channel_plot.distance_index = distance_index
-        channel_plot.samples = sample_index            
+        channel_plot.samples = sample_index
         plot.ymin = channel_data_values.min
         plot.ymax = channel_data_values.max
         chart.xmin = 0
