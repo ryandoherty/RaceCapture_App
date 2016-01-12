@@ -1,3 +1,6 @@
+==1.4.2==
+* Connect to the first RaceCapture device it can detect, regardless of the name provided
+
 ==1.4.1==
 * Fixed firmware update issue for Windows 10
 * Various fixes and improvements on Analysis Beta
