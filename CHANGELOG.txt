@@ -1,5 +1,6 @@
 ==1.4.2==
 * Connect to the first RaceCapture device it can detect, regardless of the name provided
+* Improve analysis data query performance; don't block user interface for long operations; show spinner
 
 ==1.4.1==
 * Fixed firmware update issue for Windows 10
