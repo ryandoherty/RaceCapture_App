@@ -1,5 +1,6 @@
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+import threading
 
 class ChannelStats(object):
     def __init__(self, **kwargs):
@@ -46,7 +47,7 @@ class CachingAnalysisDatastore(DataStore):
         channel_data = ChannelData(values=values, channel=channel, min=channel_meta.min, max=channel_meta.max, source=source_ref)
         return channel_data
                 
-    def get_channel_data(self, source_ref, channels):
+    def _get_channel_data_worker(self, source_ref, channels, callback):
         source_key = str(source_ref)
         channel_data = self._channel_data_cache.get(source_key)
         if not channel_data:
@@ -58,8 +59,11 @@ class CachingAnalysisDatastore(DataStore):
             if not channel_d:
                 channel_d = self._query_channel_data(source_ref, channel)
                 channel_data[channel] = channel_d
-                
-        return channel_data
+        callback(channel_data)
+
+    def get_channel_data(self, source_ref, channels, callback):
+        t = threading.Thread(target=self._get_channel_data_worker, args=(source_ref, channels, callback))
+        t.start()
         
     def get_location_data(self, source_ref):
         source_key = str(source_ref)
