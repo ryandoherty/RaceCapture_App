@@ -116,7 +116,8 @@ class TrackMap(Widget):
 
     def update_marker(self, key, geoPoint):
         marker_point = self._marker_points.get(key)
-        if marker_point:
+        marker_location = self._marker_locations.get(key)
+        if marker_point and marker_location:
             left = self.pos[0]
             bottom = self.pos[1]
             point = self._offset_track_point(self._project_point(geoPoint))
@@ -125,7 +126,7 @@ class TrackMap(Widget):
             scaled_point = self._scale_point(marker_point, self.height, left, bottom)
 
             marker_size = self.marker_width_scale * self.height
-            self._marker_locations[key].circle = (scaled_point.x, scaled_point.y, marker_size)
+            marker_location.circle = (scaled_point.x, scaled_point.y, marker_size)
         
     def update_map(self, *args):
         
