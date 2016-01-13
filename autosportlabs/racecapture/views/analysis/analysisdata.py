@@ -53,7 +53,7 @@ class CachingAnalysisDatastore(DataStore):
 
 
     def _query_channel_data(self, source_ref, channel):
-        Logger.info('CachingAnalysisDatastore: querying ' + str(source_ref) + ' '+  channel)
+        Logger.info('CachingAnalysisDatastore: querying ' + str(source_ref) + ' ' +  channel)
         lap = source_ref.lap
         session = source_ref.session
         f = Filter().eq('LapCount', lap)
@@ -71,18 +71,18 @@ class CachingAnalysisDatastore(DataStore):
         return channel_data
                 
     def _get_channel_data(self, params):
-            source_key = str(params.source_ref)
-            channel_data = self._channel_data_cache.get(source_key)
-            if not channel_data:
-                channel_data = {}
-                self._channel_data_cache[source_key] = channel_data
-            
-            for channel in params.channels:
-                channel_d = channel_data.get(channel)
-                if not channel_d:
-                    channel_d = self._query_channel_data(params.source_ref, channel)
-                    channel_data[channel] = channel_d
-            params.callback(channel_data)
+        source_key = str(params.source_ref)
+        channel_data = self._channel_data_cache.get(source_key)
+        if not channel_data:
+            channel_data = {}
+            self._channel_data_cache[source_key] = channel_data
+        
+        for channel in params.channels:
+            channel_d = channel_data.get(channel)
+            if not channel_d:
+                channel_d = self._query_channel_data(params.source_ref, channel)
+                channel_data[channel] = channel_d
+        params.callback(channel_data)
 
     def _get_location_data(self, params):
         source_ref = params.source_ref
