@@ -71,6 +71,9 @@ class CachingAnalysisDatastore(DataStore):
         return channel_data
                 
     def _get_channel_data(self, params):
+        '''
+        Retrieve cached or query channel data as appropriate.
+        '''
         source_key = str(params.source_ref)
         channel_data = self._channel_data_cache.get(source_key)
         if not channel_data:
@@ -85,6 +88,9 @@ class CachingAnalysisDatastore(DataStore):
         params.callback(channel_data)
 
     def _get_location_data(self, params):
+        '''
+        Retrieve cached or query Location data as appropriate.
+        '''
         source_ref = params.source_ref
         source_key = str(source_ref)
         cache = self._session_location_cache.get(source_key)
@@ -106,7 +112,8 @@ class CachingAnalysisDatastore(DataStore):
         
     def _get_channel_data_worker(self):
         '''
-        Worker to fetch requested data and perform queries as necessary
+        Worker to fetch requested data and perform queries as necessary. Work is queued
+        so multiple requests prevent a race condition or trigger multiple queries for the same data.
         '''
         while True:
             item = self.query_queue.get()
