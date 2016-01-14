@@ -3,9 +3,11 @@ from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
 from autosportlabs.uix.color.colorsequence import ColorSequence
 from autosportlabs.racecapture.datastore import Filter
 from autosportlabs.racecapture.views.analysis.analysisdata import ChannelData
+from autosportlabs.uix.progressspinner import ProgressSpinner
 
 from installfix_garden_graph import Graph, LinePlot, SmoothLinePlot
 from kivy.app import Builder
+from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from collections import OrderedDict
@@ -196,9 +198,12 @@ class LineChart(ChannelAnalysisWidget):
             self.ids.chart.remove_plot(channel_plot.plot)
             del(self._channel_plots[str(channel_plot)])
     
-    def add_channel(self, channel, lap_ref):
-        query_data = self.datastore.get_channel_data(lap_ref, ['Distance', channel])
+    def _add_channels_results(self, channels, query_data):
+        for channel in channels:
+            self._add_channel_results(channel, query_data)
+        ProgressSpinner.decrement_refcount()
 
+    def _add_channel_results(self, channel, query_data):
         chart = self.ids.chart
         channel_data_values = query_data[channel]
         distance_data_values = query_data['Distance']
@@ -215,8 +220,8 @@ class LineChart(ChannelAnalysisWidget):
         distance_index = OrderedDict()
         max_distance = chart.xmax
         sample_index = 0
-        distance_data = distance_data_values.data.values
-        channel_data = channel_data_values.data.values 
+        distance_data = distance_data_values.values
+        channel_data = channel_data_values.values
         for sample in channel_data:
             distance = distance_data[sample_index]
             if distance > max_distance:
@@ -224,9 +229,9 @@ class LineChart(ChannelAnalysisWidget):
             points.append((distance, sample))
             distance_index[distance] = sample_index
             sample_index += 1
-        
+
         channel_plot.distance_index = distance_index
-        channel_plot.samples = sample_index            
+        channel_plot.samples = sample_index
         plot.ymin = channel_data_values.min
         plot.ymax = channel_data_values.max
         chart.xmin = 0
@@ -235,5 +240,10 @@ class LineChart(ChannelAnalysisWidget):
         self._channel_plots[str(channel_plot)] = channel_plot
         self.max_distance = max_distance
         self.current_distance = max_distance
-    
 
+    def add_channels(self, channels, lap_ref):
+        ProgressSpinner.increment_refcount()
+        def get_results(results):
+            Clock.schedule_once(lambda dt: self._add_channels_results(channels, results))
+
+        self.datastore.get_channel_data(lap_ref, ['Distance'] + channels, get_results)

@@ -62,9 +62,8 @@ class AnalysisView(Screen):
             self.ids.channelvalues.add_lap(source_ref)
             map_path_color = self._color_sequence.get_color(source_key)
             self.ids.analysismap.add_reference_mark(source_key, map_path_color)
-            cache = self._datastore.get_location_data(source_ref)
             self._sync_analysis_map(source_ref.session)
-            self.ids.analysismap.add_map_path(source_ref, cache, map_path_color)
+            self._datastore.get_location_data(source_ref, lambda x: self.ids.analysismap.add_map_path(source_ref, x, map_path_color))
 
         else:
             self.ids.mainchart.remove_lap(source_ref)
