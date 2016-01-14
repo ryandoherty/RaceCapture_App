@@ -145,8 +145,11 @@ class CachingAnalysisDatastore(DataStore):
         If immediately available, return it, otherwise use the callback for a later return after querying.
         '''
         cached = self._session_location_cache.get(str(source_ref))
-        if not cached and callback:
-            self.query_queue.put(LocationDataParams(self._get_location_data, source_ref, callback))
+        if callback:
+            if cached:
+                callback(cached)
+            else:
+                self.query_queue.put(LocationDataParams(self._get_location_data, source_ref, callback))
         return cached
 
         
