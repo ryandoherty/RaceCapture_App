@@ -389,50 +389,43 @@ class DataStore(object):
         """
 
         c = self._conn.cursor()
-        base_sql = "SELECT id from {} ORDER BY id DESC LIMIT 1;".format(table_name)
+        base_sql = "SELECT * FROM SQLITE_SEQUENCE WHERE name='{}';".format(table_name)
         c.execute(base_sql)
-
         res = c.fetchone()
 
         if res == None:
             dl_id = 0
         else:
-            dl_id = res[0]
-        #print "Last datapoint ID =", dp_id
+            dl_id = res[1] # comes back as sample|<last id>
         return dl_id
 
-    def _insert_record(self, cursor, datalog_id, record, channels, session_id, warnings = None):
+    def insert_record(self, record, channels, session_id):
         """
         Takes a record of interpolated+extrapolated channels and their header metadata
         and inserts it into the database
         """
 
-        #First, insert into the datalog table to give us a reference
-        #point for the datapoint insertions
-
-        cursor.execute("""INSERT INTO sample
-        (session_id) VALUES (?)""", [session_id])
-
-        #Insert the datapoints into their tables
-        extrap_vals = [datalog_id] + record
-        datalog_id = cursor.lastrowid
-
-        #Now, insert the record into the datalog table using the ID
-        #list we built up in the previous iteration
-
-        #Put together an insert statement containing the column names
-        base_sql = "INSERT INTO datapoint ("
-        base_sql += ','.join(['sample_id'] + [x.name for x in channels])
-        base_sql += ') VALUES ('
-
-        #insert the values
-        base_sql += ','.join([str(x) for x in extrap_vals])
-        base_sql += ')'
-
-        #print "Executing SQL Statement: \n{}".format(base_sql)
-        cursor.execute(base_sql)
-        
-        return datalog_id
+        cursor = self._conn.cursor()
+        try:
+            #First, insert into the datalog table to give us a reference
+            #point for the datapoint insertions
+            cursor.execute("""INSERT INTO sample (session_id) VALUES (?)""", [session_id])
+            datalog_id = cursor.lastrowid
+    
+            #Insert the datapoints into their tables
+            extrap_vals = [datalog_id] + record
+    
+            #Now, insert the record into the datalog table using the ID
+            #list we built up in the previous iteration
+    
+            #Put together an insert statement containing the column names
+            base_sql = "INSERT INTO datapoint ({}) VALUES({});".format(','.join(['sample_id'] + [x.name for x in channels]), 
+                                                                       ','.join([str(x) for x in extrap_vals]))
+            cursor.execute(base_sql)
+            self._conn.commit()
+        except: #rollback under any exception, then re-raise exception
+            self._conn.rollback()
+            raise
 
     def _extrap_datapoints(self, datapoints):
         """
@@ -639,23 +632,48 @@ class DataStore(object):
         Logger.info('DataStore: Created session with ID: {}'.format(session_id))
         return session_id
 
+
+    #class member variable to track ending datalog id when importing
+    _ending_datalog_id  = 0
     def _handle_data(self, data_file, headers, session_id, warnings=None, progress_cb=None):
         """
         takes a raw dataset in the form of a CSV file and inserts the data
-        into the sqlite database
+        into the sqlite database.
+        
+        This function is not thread-safe.
         """
 
+        starting_datalog_id = self._get_last_table_id('sample') + 1
+        self._ending_datalog_id = starting_datalog_id
+
+        def sample_iter(count, sample_id):
+            for x in range(count):
+                yield [sample_id]
+            
+        def datapoint_iter(data, datalog_id):
+            for record in data:
+                record = [datalog_id] + record
+                datalog_id += 1
+                yield record
+            self._ending_datalog_id = datalog_id
+            
         #Create the generator for the desparsified data
         newdata_gen = self._desparsified_data_generator(data_file, warnings=warnings, progress_cb=progress_cb)
 
-        datalog_id = self._get_last_table_id('sample') + 1
+        #Put together an insert statement containing the column names
+        datapoint_sql = "INSERT INTO datapoint ({}) VALUES ({});".format(','.join(['sample_id'] + [x.name for x in headers]), 
+                                                                         ','.join(['?'] * (len(headers) + 1)))
+
+        #Relatively static insert statement for sample table
+        sample_sql = "INSERT INTO sample (session_id) VALUES (?)"
         
+        #Use a generator to efficiently insert data into table, within a transaction
         cur = self._conn.cursor()
         try:
-            for record in newdata_gen:
-                datalog_id = self._insert_record(cur, datalog_id, record, headers, session_id, warnings=warnings)
+            cur.executemany(datapoint_sql, datapoint_iter(newdata_gen, starting_datalog_id))
+            cur.executemany(sample_sql, sample_iter(self._ending_datalog_id - starting_datalog_id, session_id))
             self._conn.commit()
-        except:
+        except: #rollback under any exception, then re-raise exception
             self._conn.rollback()
             raise
 
@@ -755,23 +773,19 @@ class DataStore(object):
 
     @timing
     def import_datalog(self, path, name, notes='', progress_cb=None):
-        
         warnings = []
         if not self._isopen:
             raise DatastoreException("Datastore is not open")
-
         try:
             dl = open(path, 'rb')
         except:
             raise DatastoreException("Unable to open file")
 
         header = dl.readline()
-
         headers = self._parse_datalog_headers(header)
 
         #Create an event to be tagged to these records
         session_id = self._create_session(name, notes)
-
         self._handle_data(dl, headers, session_id, warnings, progress_cb)
         return session_id
 
