@@ -26,6 +26,9 @@ class ChannelData(object):
         self.source = kwargs.get('source', None)
         
 class ChannelDataParams(object):
+    '''
+    Parameters for querying channel data
+    '''
     def __init__(self, get_function, source_ref, channels, callback):
         self.get_function = get_function
         self.source_ref = source_ref
@@ -33,6 +36,9 @@ class ChannelDataParams(object):
         self.callback = callback
 
 class LocationDataParams(object):
+    '''
+    Parameters for querying location data
+    '''
     def __init__(self, get_function, source_ref, callback):
         self.get_function = get_function
         self.source_ref = source_ref
