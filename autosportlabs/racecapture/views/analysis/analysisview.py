@@ -80,7 +80,7 @@ class AnalysisView(Screen):
 
     def on_marker(self, instance, marker):
         source = marker.sourceref
-        cache = self._datastore.get_cached_location_data(source)
+        cache = self._datastore.get_location_data(source)
         if cache != None:
             try:
                 point = cache[marker.data_index]

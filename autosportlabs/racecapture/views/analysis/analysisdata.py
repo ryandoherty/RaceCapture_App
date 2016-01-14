@@ -127,13 +127,21 @@ class CachingAnalysisDatastore(DataStore):
             self.query_queue.task_done()
 
     def get_channel_data(self, source_ref, channels, callback):
+        '''
+        Retrieve channel data for the specified source (session / lap combo).
+        Data is returned with the specified callback function.
+        '''
         self.query_queue.put(ChannelDataParams(self._get_channel_data, source_ref, channels, callback))
         
-    def get_location_data(self, source_ref, callback):
-        self.query_queue.put(LocationDataParams(self._get_location_data, source_ref, callback))
-        
-    def get_cached_location_data(self, source_ref):
-        return self._session_location_cache.get(str(source_ref))
-        
+    def get_location_data(self, source_ref, callback=None):
+        '''
+        Retrieve location data for the specified source (session / lap combo). 
+        If immediately available, return it, otherwise use the callback for a later return after querying.
+        '''
+        cached = self._session_location_cache.get(str(source_ref))
+        if not cached and callback:
+            self.query_queue.put(LocationDataParams(self._get_location_data, source_ref, callback))
+        return cached
+
         
         
