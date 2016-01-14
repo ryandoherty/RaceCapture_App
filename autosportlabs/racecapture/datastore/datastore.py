@@ -22,7 +22,7 @@ def timing(f):
         time1 = time.time()
         ret = f(*args)
         time2 = time.time()
-        Logger.info('Timing: {} function took {} ms'.format(f.func_name, (time2-time1)*1000.0))
+        Logger.info('Datastore: {} function took {} ms'.format(f.func_name, (time2-time1)*1000.0))
         return ret
     return wrap
 
