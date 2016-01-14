@@ -198,6 +198,11 @@ class LineChart(ChannelAnalysisWidget):
             self.ids.chart.remove_plot(channel_plot.plot)
             del(self._channel_plots[str(channel_plot)])
     
+    def _add_channels_results(self, channels, query_data):
+        for channel in channels:
+            self._add_channel_results(channel, query_data)
+        ProgressSpinner.decrement_refcount()
+
     def _add_channel_results(self, channel, query_data):
         chart = self.ids.chart
         channel_data_values = query_data[channel]
@@ -235,11 +240,10 @@ class LineChart(ChannelAnalysisWidget):
         self._channel_plots[str(channel_plot)] = channel_plot
         self.max_distance = max_distance
         self.current_distance = max_distance
-        ProgressSpinner.decrement_refcount()
 
-    def add_channel(self, channel, lap_ref):
+    def add_channels(self, channels, lap_ref):
         ProgressSpinner.increment_refcount()
         def get_results(results):
-            Clock.schedule_once(lambda dt: self._add_channel_results(channel, results))
+            Clock.schedule_once(lambda dt: self._add_channels_results(channels, results))
 
-        self.datastore.get_channel_data(lap_ref, ['Distance', channel], get_results)
+        self.datastore.get_channel_data(lap_ref, ['Distance'] + channels, get_results)

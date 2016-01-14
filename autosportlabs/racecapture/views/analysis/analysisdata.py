@@ -1,4 +1,4 @@
-from autosportlabs.racecapture.datastore import DataStore, Filter
+from autosportlabs.racecapture.datastore import DataStore, Filter, timing
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from threading import Thread
 from kivy.logger import Logger
@@ -58,23 +58,25 @@ class CachingAnalysisDatastore(DataStore):
         t.start()
 
 
-    def _query_channel_data(self, source_ref, channel):
-        Logger.info('CachingAnalysisDatastore: querying ' + str(source_ref) + ' ' +  channel)
+    @timing
+    def _query_channel_data(self, source_ref, channels, combined_channel_data):
+        Logger.info('CachingAnalysisDatastore: querying {} {}'.format(source_ref, channels))
         lap = source_ref.lap
         session = source_ref.session
         f = Filter().eq('LapCount', lap)
-        dataset = self.query(sessions=[session], channels=[channel], data_filter=f)
-        
-        channel_meta = self.get_channel(channel)
+        dataset = self.query(sessions=[session], channels=channels, data_filter=f)
         records = dataset.fetch_records()
-        
-        values = []
-        for record in records:
-            #pluck out just the channel value
-            values.append(record[1])
-            
-        channel_data = ChannelData(values=values, channel=channel, min=channel_meta.min, max=channel_meta.max, source=source_ref)
-        return channel_data
+
+        for index in range(len(channels)):
+            channel = channels[index]
+            values = []
+            for record in records:
+                #pluck out just the channel value
+                values.append(record[1 + index])
+
+            channel_meta = self.get_channel(channel)
+            channel_data = ChannelData(values=values, channel=channel, min=channel_meta.min, max=channel_meta.max, source=source_ref)
+            combined_channel_data[channel] = channel_data
                 
     def _get_channel_data(self, params):
         '''
@@ -86,11 +88,15 @@ class CachingAnalysisDatastore(DataStore):
             channel_data = {}
             self._channel_data_cache[source_key] = channel_data
         
+        channels_to_query = []
         for channel in params.channels:
             channel_d = channel_data.get(channel)
             if not channel_d:
-                channel_d = self._query_channel_data(params.source_ref, channel)
-                channel_data[channel] = channel_d
+                channels_to_query.append(channel)
+
+        if len(channels_to_query) > 0:
+            channel_d = self._query_channel_data(params.source_ref, channels_to_query, channel_data)
+
         params.callback(channel_data)
 
     def _get_location_data(self, params):

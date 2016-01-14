@@ -125,6 +125,10 @@ class ChannelValuesView(ChannelAnalysisWidget):
         for key in iter(sorted(self._channel_stat_widgets.iterkeys())):
             channels_grid.add_widget(self._channel_stat_widgets[key])
 
+    def _add_channels_results(self, channels, channel_data):
+        for channel in channels:
+            self._add_channel_results(channel, channel_data)
+
     def _add_channel_results(self, channel, channel_data):
         '''
         Add the specified ChannelData to the dict of channel_stats, keyed by the lap/session source
@@ -139,11 +143,11 @@ class ChannelValuesView(ChannelAnalysisWidget):
         channels[channel_data_values.channel] = channel_data_values
         self._refresh_channels()
 
-    def add_channel(self, channel, lap_ref):
+    def add_channels(self, channels, lap_ref):
         def get_results(results):
-            Clock.schedule_once(lambda dt: self._add_channel_results(channel, results))
+            Clock.schedule_once(lambda dt: self._add_channels_results(channels, results))
 
-        self.datastore.get_channel_data(lap_ref, [channel], get_results)
+        self.datastore.get_channel_data(lap_ref, channels, get_results)
     
     def refresh_view(self):
         self._refresh_channels()
