@@ -241,6 +241,8 @@ class DataStore(object):
         self.datalog_channels = {}
         self.datalogchanneltypes = {}
         self._new_db = False
+        self._ending_datalog_id  = 0
+        
 
     def close(self):
         self._conn.close()
@@ -634,7 +636,6 @@ class DataStore(object):
 
 
     #class member variable to track ending datalog id when importing
-    _ending_datalog_id  = 0
     def _handle_data(self, data_file, headers, session_id, warnings=None, progress_cb=None):
         """
         takes a raw dataset in the form of a CSV file and inserts the data
