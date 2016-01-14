@@ -680,6 +680,7 @@ class RcpApi:
                 if version_result.version_json != None:
                     Logger.info("RCPAPI: Found device version " + str(testVer) + " on port: " + str(comms.port))
                     self.detect_win(testVer)
+                    self._auto_detect_event.clear()
                 else:
                     Logger.info('RCPAPI: Did not find device')
                     comms.close()
