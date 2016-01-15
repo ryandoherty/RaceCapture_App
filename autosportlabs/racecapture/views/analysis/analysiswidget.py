@@ -143,12 +143,12 @@ class ChannelAnalysisWidget(AnalysisWidget):
             
     def select_channels(self, selected_channels):
         self.merge_selected_channels(selected_channels)
-        self.dispatch('on_channel_selected', selected_channels)
 
     def _channels_customized(self, instance,  updated_channels):
         self._dismiss_popup()
         self.select_channels(updated_channels)
-            
+        self.dispatch('on_channel_selected', updated_channels)
+
     def on_options(self, *args):
         self.show_customize_dialog()
             
