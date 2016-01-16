@@ -62,9 +62,8 @@ class AnalysisView(Screen):
             self.ids.channelvalues.add_lap(source_ref)
             map_path_color = self._color_sequence.get_color(source_key)
             self.ids.analysismap.add_reference_mark(source_key, map_path_color)
-            cache = self._datastore.get_location_data(source_ref)
             self._sync_analysis_map(source_ref.session)
-            self.ids.analysismap.add_map_path(source_ref, cache, map_path_color)
+            self._datastore.get_location_data(source_ref, lambda x: self.ids.analysismap.add_map_path(source_ref, x, map_path_color))
 
         else:
             self.ids.mainchart.remove_lap(source_ref)
@@ -116,9 +115,10 @@ class AnalysisView(Screen):
             if best_lap:
                 best_lap_id = best_lap[1]
                 Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
-                sessions_view.select_lap(new_session_id, best_lap_id, True)
                 main_chart = self.ids.mainchart
                 main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
+                self.ids.channelvalues.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
+                sessions_view.select_lap(new_session_id, best_lap_id, True)
                 HelpInfo.help_popup('suggested_lap', main_chart, arrow_pos='left_mid')
             else:
                 Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
