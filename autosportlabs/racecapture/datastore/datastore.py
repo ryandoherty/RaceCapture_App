@@ -272,6 +272,7 @@ class DataStore(object):
     def _populate_channel_list(self):
         c = self._conn.cursor()
 
+        self._channels = []
         c.execute("""SELECT name, units, min_value, max_value, smoothing
         from channel""")
 
@@ -788,6 +789,9 @@ class DataStore(object):
         #Create an event to be tagged to these records
         session_id = self._create_session(name, notes)
         self._handle_data(dl, headers, session_id, warnings, progress_cb)
+        
+        #update the channel metadata, including re-setting min/max values
+        self.update_channel_metadata()
         return session_id
 
     def query(self, sessions=[], channels=[], data_filter=None, distinct_records=False):
@@ -887,3 +891,33 @@ class DataStore(object):
         self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.session_id ,))
         self._conn.commit()
         
+    def update_channel_metadata(self, channels=None, only_extend_minmax=True):
+        '''
+        Adjust the channel min/max values as necessary based on the min/max values present in the datapoints
+        @param string list of channels to update. If None, all channels are updated
+        @param bool only_extend_minmax True if min/max values should only be extended. If false, min/max are adjusted to actual min/max values in datapoint 
+        '''
+        cursor = self._conn.cursor()
+        channels_to_update = [x for x in self._channels if channels is None or x.name in channels]
+        for channel in channels_to_update:
+            name = channel.name
+            min_max = cursor.execute('SELECT COALESCE(MIN({}), 0), COALESCE(MAX({}), 0) FROM datapoint;'.format(name, name))
+            record = min_max.fetchone()
+            datapoint_min_value = record[0]
+            datapoint_max_value = record[1]
+            min_value = channel.min if only_extend_minmax == True else datapoint_min_value
+            max_value = channel.max if only_extend_minmax == True else datapoint_max_value
+            if only_extend_minmax == True:
+                selected_min_value = min(min_value, datapoint_min_value)
+                selected_max_value = max(max_value, datapoint_max_value) 
+            else:
+                selected_min_value = datapoint_min_value
+                selected_max_value = datapoint_max_value
+
+            Logger.info('Datastore: updating min/max for {}'.format(name))
+            sql = 'UPDATE channel SET min_value={}, max_value={} WHERE name="{}";'.format(selected_min_value, 
+                                                                                          selected_max_value, 
+                                                                                          name) 
+            cursor.execute(sql)
+        self._conn.commit()
+        self._populate_channel_list()
