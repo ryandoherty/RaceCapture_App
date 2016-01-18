@@ -69,13 +69,9 @@ class FirmwareUpdateView(BaseConfigView):
         return self._settings.userPrefs.get_pref('preferences', 'firmware_dir')
         
     def select_file(self):
-        if platform == 'win':
-            ok_cb = self.prompt_manual_bootloader_mode
-        else:
-            ok_cb = self._start_update_fw
         user_path= self.get_firmware_file_path()
         print("the user path " + str(user_path))
-        content = LoadDialog(ok=ok_cb, 
+        content = LoadDialog(ok=self._prompt_save_config_reminder, 
                              cancel=self.dismiss_popup,
                              filters=['*' + '.ihex'],
                              user_path=user_path)
@@ -161,7 +157,20 @@ class FirmwareUpdateView(BaseConfigView):
         self.ids.fw_progress.value = ''
         self.ids.fw_progress.title = ""
 
-
+    def _prompt_save_config_reminder(self, instance):
+        
+        self._popup.dismiss()
+        popup = None
+        def _on_answer(inst, answer):
+            popup.dismiss()
+            if answer == True:
+                if platform == 'win':
+                    self.prompt_manual_bootloader_mode(instance)
+                else:
+                    self._start_update_fw(instance)
+        popup = confirmPopup('Ready to update firmware',
+                             'Please ensure your configuration is saved before continuing\n',
+                             _on_answer)
 
     def _start_update_fw(self, instance):
         self._popup.dismiss()
