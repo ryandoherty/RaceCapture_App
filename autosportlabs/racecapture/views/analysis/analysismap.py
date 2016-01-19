@@ -14,6 +14,12 @@ from iconbutton import IconButton, LabelIconButton
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 
+class ColorLegend(BoxLayout):
+    bar_color = ListProperty([1.0, 1.0, 1.0, 1.0])
+
+class LapLegend(BoxLayout):
+    pass
+
 class AnalysisMap(AnalysisWidget):
     '''
     Displays a track map with options

@@ -1,3 +1,31 @@
+<ColorLegend>:
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: 0.85
+    BoxLayout:
+        canvas.before:
+            Color:
+                rgba: root.bar_color
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        id: color_bar
+        size_hint_y: 0.1
+    BoxLayout:
+        size_hint_y: 0.85
+
+<LapLegend>:
+    orientation: 'horizontal'
+    FieldLabel:
+        id: session
+        text: 'session'
+    FieldLabel:
+        id: lap
+        text: '1'
+    ColorLegend:
+        id: legend
+        bar_color: [1.0, 0, 0, 1.0]
+
 <AnalysisMap>:
     options_enabled: True
     canvas.before:
@@ -13,6 +41,45 @@
             id: track
             height: root.height
             width: root.width
+
+    AnchorLayout:
+        id: options_button
+        anchor_x: 'right'
+        anchor_y: 'top'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (0.5, 1.0)
+            AnchorLayout:
+                size_hint_x: 0.5
+                anchor_y: 'top'
+                anchor_x: 'center'
+                BoxLayout:
+                    size_hint: (1.0, 0.1)
+                    canvas.before:
+                        Color:
+                            rgba: ColorScheme.get_dark_background_translucent()
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    orientation: 'horizontal'
+                    FieldLabel:
+                        halign: 'center'
+                        font_size: self.height * 0.8
+                        text: "my trackmap"
+            GridLayout:
+                id: legend_list
+                cols: 1
+                size_hint: (0.5, 1.0)
+                row_default_height: root.height * 0.12
+                row_force_default: True
+                canvas.before:
+                    Color:
+                        rgba: ColorScheme.get_dark_background_translucent()
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                LapLegend:
+
 
 <CustomizeMapView>:
     orientation: 'vertical'
