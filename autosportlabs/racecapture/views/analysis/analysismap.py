@@ -18,13 +18,13 @@ class ColorLegend(BoxLayout):
     bar_color = ListProperty([1.0, 1.0, 1.0, 1.0])
 
 class LapLegend(BoxLayout):
-    pass
+    color = ListProperty([1.0, 1.0, 1.0, 1.0])
+    session = StringProperty('')
+    lap = StringProperty('')
 
 class AnalysisMap(AnalysisWidget):
     '''
     Displays a track map with options
-    
-    
     '''
     SCROLL_FACTOR = 0.15
     track_manager = ObjectProperty(None)
@@ -41,6 +41,9 @@ class AnalysisMap(AnalysisWidget):
         
         self.sources = {}
         Window.bind(on_motion=self.on_motion)
+        
+        #Contains LapLegned widgets; keyed by session_key
+        self.lap_legends = {}
                 
     def on_center_map(self, *args):    
         scatter = self.ids.scatter
@@ -64,9 +67,17 @@ class AnalysisMap(AnalysisWidget):
 
     def _update_trackmap(self, values):
         track = self.track_manager.get_track_by_id(values.track_id)
+        self._select_track(track)
+    
+    def _select_track(self, track):
         if track != None:
             self.ids.track.setTrackPoints(track.map_points)
-            self.track = track
+            self.ids.track_name.text = '{} {}'.format(track.name, '' if track.configuration is None or track.configuration == '' else '({})'.format(track.configuration))
+        else:
+            self.ids.track_name.text = ''
+            self.ids.track.setTrackPoints([])
+        self.track = track
+        
         
     def _customized(self, instance, values):
         self._update_trackmap(values)
@@ -112,9 +123,7 @@ class AnalysisMap(AnalysisWidget):
         if self.track_manager:
             point = GeoPoint.fromPoint(latitude, longitude)
             track = self.track_manager.find_nearby_track(point)
-            if track != None:
-                self.ids.track.setTrackPoints(track.map_points)
-                self.track = track
+            self._select_track(track)
 
     def remove_reference_mark(self, source):
         self.ids.track.remove_marker(source)
@@ -125,15 +134,28 @@ class AnalysisMap(AnalysisWidget):
     def update_reference_mark(self, source, point):
         self.ids.track.update_marker(str(source), point)
 
-    def add_map_path(self, source_key, path, color):
-        self.sources[str(source_key)] = source_key
-        self.ids.track.add_path(str(source_key), path, color)
+    def add_map_path(self, source_ref, path, color):
+        source_key = str(source_ref)
+        self.sources[source_key] = source_ref
+        self.ids.track.add_path(source_key, path, color)
         if self.heatmap_channel:
             self.add_heat_values(self.heatmap_channel, source_key)
 
-    def remove_map_path(self, source_key):
-        self.ids.track.remove_path(str(source_key))
-        self.sources.pop(str(source_key), None)
+        
+        #Add the lap to the lap legend list
+        session_info = self.datastore.get_session_by_id(source_ref.session)
+        lap_legend = LapLegend(color = color, session = session_info.name, lap = str(source_ref.lap))
+        self.lap_legends[source_key] = lap_legend
+        self.ids.legend_list.add_widget(lap_legend)
+
+    def remove_map_path(self, source_ref):
+        source_key = str(source_ref)
+        self.ids.track.remove_path(source_key)
+        self.sources.pop(source_key, None)
+        
+        #Remove the lap from the lap the legend list
+        lap_legend = self.lap_legends.pop(source_key, None)
+        self.ids.legend_list.remove_widget(lap_legend)
 
     def add_heat_values(self, channel, lap_ref):
         lap = lap_ref.lap

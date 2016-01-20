@@ -48,7 +48,11 @@ class ColorScheme(object):
 
     @staticmethod
     def get_dark_background_translucent():
-        return (0.1, 0.1, 0.1, 0.5)
+        return [0.1, 0.1, 0.1, 0.5]
+     
+    @staticmethod
+    def get_widget_translucent_background():
+        return [0.05, 0.05, 0.05, 0.8]
      
     @staticmethod
     def get_background():

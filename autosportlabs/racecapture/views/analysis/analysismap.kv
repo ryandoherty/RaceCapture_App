@@ -16,15 +16,21 @@
 
 <LapLegend>:
     orientation: 'horizontal'
+    spacing: sp(5)
     FieldLabel:
         id: session
-        text: 'session'
+        size_hint_x: 0.60
+        halign: 'right'
+        text: root.session
     FieldLabel:
         id: lap
-        text: '1'
+        size_hint_x: 0.20
+        halign: 'center'
+        text: root.lap
     ColorLegend:
         id: legend
-        bar_color: [1.0, 0, 0, 1.0]
+        size_hint_x: 0.20
+        bar_color: root.color
 
 <AnalysisMap>:
     options_enabled: True
@@ -34,6 +40,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
+
     Scatter:
         id: scatter
         auto_bring_to_front: False
@@ -48,16 +55,16 @@
         anchor_y: 'top'
         BoxLayout:
             orientation: 'horizontal'
-            size_hint: (0.5, 1.0)
+            size_hint: (0.9, 1.0)
             AnchorLayout:
-                size_hint_x: 0.5
+                size_hint_x: 0.75
                 anchor_y: 'top'
                 anchor_x: 'center'
                 BoxLayout:
                     size_hint: (1.0, 0.1)
                     canvas.before:
                         Color:
-                            rgba: ColorScheme.get_dark_background_translucent()
+                            rgba: ColorScheme.get_widget_translucent_background()
                         Rectangle:
                             pos: self.pos
                             size: self.size
@@ -65,20 +72,20 @@
                     FieldLabel:
                         halign: 'center'
                         font_size: self.height * 0.8
-                        text: "my trackmap"
+                        id: track_name
             GridLayout:
                 id: legend_list
                 cols: 1
-                size_hint: (0.5, 1.0)
+                size_hint: (0.25, 1.0)
+                padding: (sp(5), sp(5))
                 row_default_height: root.height * 0.12
                 row_force_default: True
                 canvas.before:
                     Color:
-                        rgba: ColorScheme.get_dark_background_translucent()
+                        rgba: ColorScheme.get_widget_translucent_background()
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                LapLegend:
 
 
 <CustomizeMapView>:
