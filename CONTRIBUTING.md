@@ -29,8 +29,6 @@ Example:
 :param var_name: <parameter description>
 :type var_name: <type of param>
 """
-We use the Linux Kernel coding standard, which can be found here:
-https://www.kernel.org/doc/Documentation/CodingStyle
 
 File Headers
 ============
