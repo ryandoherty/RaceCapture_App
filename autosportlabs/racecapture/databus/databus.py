@@ -6,7 +6,6 @@ from autosportlabs.racecapture.data.channels import ChannelMeta
 from autosportlabs.racecapture.data.sampledata import Sample, SampleMetaException, ChannelMetaCollection
 from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
-from autosportlabs.racecapture.databus.filter.currentlaptimefilter import CurrentLapTimeFilter
 from autosportlabs.util.threadutil import safe_thread_exit
 
 
@@ -17,7 +16,6 @@ class DataBusFactory(object):
         databus = DataBus()
         databus.add_data_filter(BestLapFilter(system_channels))
         databus.add_data_filter(LaptimeDeltaFilter(system_channels))
-        databus.add_data_filter(CurrentLapTimeFilter(system_channels))
         return databus
     
 class DataBus(object):
