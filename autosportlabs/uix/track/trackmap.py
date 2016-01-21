@@ -101,7 +101,8 @@ class TrackMap(Widget):
     def setTrackPoints(self, geoPoints):
         '''
         Set the points for the track map
-        @param list geoPoints The list of points for the map
+        :param geoPoints The list of points for the map
+        :type list
         '''
         self._gen_map_points(geoPoints)
         self._update_map()
@@ -109,8 +110,10 @@ class TrackMap(Widget):
     def add_path(self, key, path, color):
         '''
         Add a path to the map; typically the driven line
-        @param string key key representing the path
-        @param list color the color for the path
+        :param key key representing the path
+        :type string
+        :param color the color for the path
+        :type list 
         '''
         points = []
         for geo_point in path:
@@ -130,8 +133,10 @@ class TrackMap(Widget):
     def set_heat_range(self, min_range, max_range):
         '''
         Set the min/max range for heat map mode
-        @param float min_range - minimum channel value
-        @param float max_range - maximum channel value
+        :param min_range - minimum channel value
+        :type float
+        :param max_range - maximum channel value
+        :type float
         '''
         self.heat_min = min_range
         self.heat_max = max_range
@@ -139,8 +144,10 @@ class TrackMap(Widget):
     def add_heat_values(self, key, heat_map_values):
         '''
         Add the point values for the specified key
-        @param string The key referencing the heat map values
-        @param list A list of values. The number of values should correspond to exactly the number of points for the path matching the same key in path.
+        :param The key referencing the heat map values
+        :type string
+        :param A list of values. The number of values should correspond to exactly the number of points for the path matching the same key in path.
+        :type list
         '''
         self._heat_map_values[key] = heat_map_values
         self._draw_current_map()
@@ -148,7 +155,8 @@ class TrackMap(Widget):
     def remove_heat_values(self, key):
         '''
         Remove the specified heat values 
-        @param string the key for set of heat values to remove
+        :param the key for set of heat values to remove
+        :type string
         '''
         self._heat_map_values.pop(key, None)
         self._draw_current_map()
@@ -156,7 +164,8 @@ class TrackMap(Widget):
     def remove_path(self, key):
         '''
         Remove the specified path. 
-        @param string key the key representing the path to remove
+        :param key the key representing the path to remove
+        :type string 
         '''
         self._paths.pop(key, None)
         self._scaled_paths.pop(key, None)
@@ -167,15 +176,18 @@ class TrackMap(Widget):
     def add_marker(self, key, color):
         '''
         Adds a marker to be displayed on the track map
-        @param string key key representing the marker
-        @param list color color of the marker
+        param key key representing the marker
+        :type string
+        :param color color of the marker
+        :type list
         '''
         self._marker_points[key] = MarkerPoint(color)
 
     def remove_marker(self, key):
         '''
         Removes the specified marker
-        @param key key representing the marker to remove
+        :param key representing the marker to remove
+        :type string
         '''
         self._marker_points.pop(key, None)
         self._marker_locations.pop(key, None)
@@ -184,16 +196,19 @@ class TrackMap(Widget):
     def get_marker(self, key):
         '''
         Fetch the specified marker
-        @param key the key of ther marker to fetch; 
-        @return MarkerPoint the MarkerPoint object for the key, or None if key doesn't exist
+        :param the key of ther marker to fetch;
+        :type string 
+        :returns MarkerPoint the MarkerPoint object for the key, or None if key doesn't exist
         '''
         return self._marker_points.get(key)
 
     def update_marker(self, key, geoPoint):
         '''
         Update the marker to the specified position
-        @param string the key of the marker
-        @param GeoPoint geoPoint the point for the updated position
+        :param the key of the marker
+        :type string
+        :param geoPoint the point for the updated position
+        :type GeoPoint
         '''
         marker_point = self._marker_points.get(key)
         marker_location = self._marker_locations.get(key)

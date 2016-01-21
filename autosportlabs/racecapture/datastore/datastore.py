@@ -894,8 +894,10 @@ class DataStore(object):
     def update_channel_metadata(self, channels=None, only_extend_minmax=True):
         '''
         Adjust the channel min/max values as necessary based on the min/max values present in the datapoints
-        @param string list of channels to update. If None, all channels are updated
-        @param bool only_extend_minmax True if min/max values should only be extended. If false, min/max are adjusted to actual min/max values in datapoint 
+        :param  list of channels to update. If None, all channels are updated
+        :type string
+        :param only_extend_minmax True if min/max values should only be extended. If false, min/max are adjusted to actual min/max values in datapoint
+        :type bool 
         '''
         cursor = self._conn.cursor()
         channels_to_update = [x for x in self._channels if channels is None or x.name in channels]
