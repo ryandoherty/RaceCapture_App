@@ -1,23 +1,87 @@
-from kivy.properties import ObjectProperty, ListProperty, StringProperty
+from kivy.properties import ObjectProperty, ListProperty, StringProperty, NumericProperty
 from kivy.app import Builder
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics.transformation import Matrix
+from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen, SwapTransition
 from kivy.uix.popup import Popup
 from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidget
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.racecapture.datastore import Filter
+from autosportlabs.uix.color.colorgradient import SimpleColorGradient, HeatColorGradient
 from iconbutton import IconButton, LabelIconButton
+
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 
+class GradientBox(BoxLayout):
+    '''
+    Draws a color gradient box with the specified min / max colors
+    '''
+    min_color = ListProperty([0.0, 0.0, 0.0, 1.0])
+    max_color = ListProperty([1.0, 1.0, 1.0, 1.0])
+    GRADIENT_STEP = 0.01
+    
+    def __init__(self, **kwargs):
+        super(GradientBox, self).__init__(**kwargs)
+        self.color_gradient = SimpleColorGradient()
+        self.bind(pos=self._update_gradient, size=self._update_gradient)
+        self._update_gradient()
+        
+    def on_min_color(self, instance, value):
+        print('on min color')
+        self.color_gradient.min_color = value
+        self._update_gradient()
+        
+    def on_max_color(self, instance, value):
+        self.color_gradient.max_color = value
+        self._update_gradient()
+        
+    def _update_gradient(self, *args):
+        self.canvas.clear()
+        step = GradientBox.GRADIENT_STEP
+        pct = step
+        with self.canvas:
+            while pct < 1.0:
+                color = self.color_gradient.get_color_value(pct)
+                Color(*color)
+                slice_width = self.width * step
+                pos = (self.x + (self.width * pct), self.y)
+                size = (slice_width, self.height)
+                Rectangle(pos=pos, size=size)
+                pct += step
+        
 class ColorLegend(BoxLayout):
+    '''
+    Represents a single color legend. The entire layout is drawn with the color specified.
+    '''
     bar_color = ListProperty([1.0, 1.0, 1.0, 1.0])
 
+class GradientLegend(BoxLayout):
+    '''
+    Represents a gradient legend, specified by min / max colors
+    '''
+    min_color = ListProperty([0.0, 0.0, 0.0, 1.0])
+    max_color = ListProperty([0.0, 0.0, 0.0, 1.0])
+
+class GradientLapLegend(BoxLayout):
+    '''
+    A compound widget that presents a gradient color legend including session/lap and min/max values
+    '''
+    min_color = ListProperty([0.0, 0.0, 0.0, 1.0])
+    max_color = ListProperty([1.0, 1.0, 1.0, 1.0])
+    min_value = NumericProperty(0.0)
+    max_value = NumericProperty(100.0)
+    session = StringProperty('')
+    lap = StringProperty('')
+    
 class LapLegend(BoxLayout):
+    '''
+    A compound widget that presents the the color legend with session/lap information
+    '''
     color = ListProperty([1.0, 1.0, 1.0, 1.0])
     session = StringProperty('')
     lap = StringProperty('')
@@ -45,14 +109,21 @@ class AnalysisMap(AnalysisWidget):
         #Contains LapLegned widgets; keyed by session_key
         self.lap_legends = {}
                 
-    def on_center_map(self, *args):    
+    def add_option_buttons(self):
+        '''
+        Add additional buttons needed by this widget
+        '''
+        self.append_option_button(IconButton(text=u'\uf0b2', on_press=self.on_center_map))
+        
+    def on_center_map(self, *args):
+        '''
+        Restore the track map to the default position/zoom/rotation
+        '''
         scatter = self.ids.scatter
         scatter.scale = 1
         scatter.rotation = 0
         scatter.transform = Matrix().translate(self.pos[0], self.pos[1], 0)
 
-    def add_option_buttons(self):
-        self.append_option_button(IconButton(text=u'\uf0b2', on_press=self.on_center_map))
     
     def on_options(self, *args):
         self.show_customize_dialog()
@@ -78,13 +149,14 @@ class AnalysisMap(AnalysisWidget):
             self.ids.track.setTrackPoints([])
         self.track = track
         
-        
     def _customized(self, instance, values):
         self._update_trackmap(values)
         self._set_heat_map(values.heatmap_channel)
         
     def show_customize_dialog(self):
-        
+        '''
+        Display the customization dialog for this widget
+        '''
         current_track_id = None if self.track == None else self.track.track_id 
         content = CustomizeMapView(params=CustomizeParams(settings=self.settings, datastore=self.datastore, track_manager=self.track_manager),
                                    values=CustomizeValues(heatmap_channel=self.heatmap_channel, track_id=current_track_id)
@@ -120,6 +192,11 @@ class AnalysisMap(AnalysisWidget):
                 pass #no scrollwheel support
         
     def select_map(self, latitude, longitude):
+        '''
+        Find and display a nearby track by latitude / longitude
+        :param float latitude 
+        :param float longitude 
+        '''
         if self.track_manager:
             point = GeoPoint.fromPoint(latitude, longitude)
             track = self.track_manager.find_nearby_track(point)
@@ -129,26 +206,44 @@ class AnalysisMap(AnalysisWidget):
         self.ids.track.remove_marker(source)
 
     def add_reference_mark(self, source, color):
+        '''
+        Add a reference mark for the specified source
+        :param string source the key representing the reference mark
+        :param list color the color of the reference mark
+        '''
         self.ids.track.add_marker(source, color)
 
     def update_reference_mark(self, source, point):
         self.ids.track.update_marker(str(source), point)
 
     def add_map_path(self, source_ref, path, color):
+        '''
+        Add a map path for the specified session/lap source reference
+        :param source_ref the lap/session reference
+        :type source_ref SourceRef
+        :param path a list of points representing the map path
+        :type path list
+        :param color the path of the color
+        :type color list
+        '''
         source_key = str(source_ref)
         self.sources[source_key] = source_ref
         self.ids.track.add_path(source_key, path, color)
         if self.heatmap_channel:
             self.add_heat_values(self.heatmap_channel, source_ref)
-
         
         #Add the lap to the lap legend list
         session_info = self.datastore.get_session_by_id(source_ref.session)
-        lap_legend = LapLegend(color = color, session = session_info.name, lap = str(source_ref.lap))
+        lap_legend = GradientLapLegend(color = color, session = session_info.name, lap = str(source_ref.lap))
         self.lap_legends[source_key] = lap_legend
         self.ids.legend_list.add_widget(lap_legend)
 
     def remove_map_path(self, source_ref):
+        '''
+        Remove te map path for the specified session/lap source reference
+        :param source_ref the source session/lap reference
+        :type source_ref SourceRef
+        '''
         source_key = str(source_ref)
         self.ids.track.remove_path(source_key)
         self.sources.pop(source_key, None)
@@ -157,9 +252,16 @@ class AnalysisMap(AnalysisWidget):
         lap_legend = self.lap_legends.pop(source_key, None)
         self.ids.legend_list.remove_widget(lap_legend)
 
-    def add_heat_values(self, channel, lap_ref):
-        lap = lap_ref.lap
-        session = lap_ref.session
+    def add_heat_values(self, channel, source_ref):
+        '''
+        Add heat values to the track map
+        :param channel the channel for the selected heat values
+        :type channel string
+        :param source_ref the source session/lap reference
+        :type source_ref SourceRef
+        '''
+        lap = source_ref.lap
+        session = source_ref.session
         f = Filter().eq('LapCount', lap)
         dataset = self.datastore.query(sessions=[session], channels=[channel], data_filter=f)
         records = dataset.fetch_records()
@@ -172,23 +274,32 @@ class AnalysisMap(AnalysisWidget):
         self.heat_values = values
         channel_info = self.datastore.get_channel(channel)
         self.ids.track.set_heat_range(channel_info.min, channel_info.max)
-        self.ids.track.add_heat_values(str(lap_ref), values)
+        self.ids.track.add_heat_values(str(source_ref), values)
 
     def remove_heat_values(self, lap_ref):
         self.ids.track.remove_heat_values(str(lap_ref))   
     
 class CustomizeParams(object):
+    '''
+    A container class for holding multiple parameter for customization dialog
+    '''
     def __init__(self, settings, datastore, track_manager, **kwargs):
         self.settings = settings
         self.datastore = datastore
         self.track_manager = track_manager
 
 class CustomizeValues(object):
+    '''
+    A container class for holding customization values
+    '''
     def __init__(self, heatmap_channel, track_id, **kwargs):
         self.heatmap_channel = heatmap_channel
         self.track_id = track_id
     
 class BaseCustomizeMapView(Screen):
+    '''
+    A base class for a customization screen. This can be extended when adding the next option screen
+    '''
     def __init__(self, params, values, **kwargs):
         super(BaseCustomizeMapView, self).__init__(**kwargs)
         self.initialized = False
@@ -206,6 +317,9 @@ class TrackmapButton(LabelIconButton):
     pass
 
 class CustomizeHeatmapView(BaseCustomizeMapView):
+    '''
+    The customization view for customizing the heatmap options
+    '''
     available_channels = ListProperty()
     
     def __init__(self, params, values, **kwargs):
@@ -239,6 +353,9 @@ class CustomizeHeatmapView(BaseCustomizeMapView):
             self.dispatch('on_modified')
         
 class CustomizeTrackView(BaseCustomizeMapView):
+    '''
+    The customization view for selecting a track to display
+    '''
     track_id = StringProperty(None, allownone=True)
     def __init__(self, params, values, **kwargs):
         super(CustomizeTrackView, self).__init__(params, values, **kwargs)
@@ -252,6 +369,9 @@ class CustomizeTrackView(BaseCustomizeMapView):
         self.dispatch('on_modified')
 
 class CustomizeMapView(BoxLayout):
+    '''
+    The main customization view which manages the various customization screens
+    '''
     def __init__(self, params, values, **kwargs):
         super(CustomizeMapView, self).__init__(**kwargs)
         self.values = values

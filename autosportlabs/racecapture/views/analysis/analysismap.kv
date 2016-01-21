@@ -1,9 +1,7 @@
-<GradientColorLegend>:
-
 <ColorLegend>:
     orientation: 'vertical'
     BoxLayout:
-        size_hint_y: 0.85
+        size_hint_y: 0.35
     BoxLayout:
         canvas.before:
             Color:
@@ -12,28 +10,61 @@
                 pos: self.pos
                 size: self.size
         id: color_bar
-        size_hint_y: 0.1
+        size_hint_y: 0.30
     BoxLayout:
-        size_hint_y: 0.85
+        size_hint_y: 0.35
+
+<GradientLegend>:
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: 0.35
+    GradientBox:
+        size_hint_y: 0.30
+        min_color: root.min_color
+        max_color: root.max_color
+        id: gradient
+    BoxLayout:
+        size_hint_y: 0.35
 
 <LapLegend>:
     orientation: 'horizontal'
     spacing: sp(5)
     FieldLabel:
-        id: session
-        size_hint_x: 0.60
-        halign: 'right'
-        text: root.session
-    FieldLabel:
         id: lap
-        size_hint_x: 0.20
-        halign: 'center'
-        text: root.lap
+        size_hint_x: 0.55
+        halign: 'right'
+        text: '{} :: {}'.format(root.lap, root.session)
     ColorLegend:
         id: legend
-        size_hint_x: 0.20
+        size_hint_x: 0.45
         bar_color: root.color
 
+<GradientLapLegend>:
+    orientation: 'horizontal'
+    spacing: sp(5)
+    min_color: [1.0, 1.0, 1.0, 1.0]
+    max_color: [1.0, 0.0, 0.0, 1.0]
+    FieldLabel:
+        id: lap
+        size_hint_x: 0.4
+        halign: 'right'
+        text: '{} :: {}'.format(root.lap, root.session)
+    FieldLabel:
+        id: min_value
+        text: str(root.min_value)
+        size_hint_x: 0.2
+        halign: 'right'
+    GradientLegend:
+        id: legend
+        size_hint_x: 0.2
+        min_color: root.min_color
+        max_color: root.max_color
+    FieldLabel:
+        id: max_value
+        text: str(root.max_value)
+        size_hint_x: 0.2
+        halign: 'left'
+        
 <AnalysisMap>:
     options_enabled: True
     canvas.before:
@@ -58,7 +89,7 @@
             orientation: 'horizontal'
             size_hint: (0.9, 1.0)
             AnchorLayout:
-                size_hint_x: 0.75
+                size_hint_x: 0.6
                 anchor_y: 'top'
                 anchor_x: 'center'
                 BoxLayout:
@@ -77,7 +108,7 @@
             GridLayout:
                 id: legend_list
                 cols: 1
-                size_hint: (0.25, 1.0)
+                size_hint: (0.4, 1.0)
                 padding: (sp(5), sp(5))
                 row_default_height: root.height * 0.12
                 row_force_default: True
