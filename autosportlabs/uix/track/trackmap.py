@@ -7,7 +7,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.scatter import Scatter
 from kivy.app import Builder
 from kivy.metrics import sp
-from kivy.properties import ListProperty
+from kivy.properties import ListProperty, NumericProperty
 from kivy.graphics import Color, Line, Bezier, Rectangle
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from utils import *
@@ -32,7 +32,12 @@ class TrackPath(object):
         self.path = path
 
 class TrackMap(Widget):
+    #min / max for heat map range
+    heat_min = NumericProperty(0.0)
+    heat_max = NumericProperty(100.0)
+    
     track_color = ListProperty([1.0, 1.0, 1.0, 0.5])
+    
     MIN_PADDING = sp(1)
     DEFAULT_TRACK_WIDTH_SCALE = 0.01
     DEFAULT_MARKER_WIDTH_SCALE = 0.02
@@ -41,19 +46,19 @@ class TrackMap(Widget):
 
     def __init__(self, **kwargs):
         super(TrackMap, self).__init__(**kwargs)
-        self.bind(pos=self.update_map)
-        self.bind(size=self.update_map)
+        self.bind(pos=self._update_map)
+        self.bind(size=self._update_map)
 
         self.track_width_scale = self.DEFAULT_TRACK_WIDTH_SCALE
         self.marker_width_scale = self.DEFAULT_MARKER_WIDTH_SCALE
         self.path_width_scale = self.DEFAULT_PATH_WIDTH_SCALE
         self.heat_width_scale = self.DEFAULT_HEAT_WIDTH_SCALE
         
+        #these manage rendering of the points
         self._offset_point = Point(0,0)
         self._global_ratio = 0
         self._height_padding = 0
         self._width_padding = 0
-        
         self._min_XY = Point(-1, -1)
         self._max_XY = Point(-1, -1)
     
@@ -74,7 +79,20 @@ class TrackMap(Widget):
     def on_trackColor(self, instance, value):
         self._draw_current_map()
 
+    def setTrackPoints(self, geoPoints):
+        '''
+        Set the points for the track map
+        @param list geoPoints The list of points for the map
+        '''
+        self._gen_map_points(geoPoints)
+        self._update_map()
+
     def add_path(self, key, path, color):
+        '''
+        Add a path to the map; typically the driven line
+        @param string key key representing the path
+        @param list color the color for the path
+        '''
         points = []
         for geo_point in path:
             point = self._project_point(geo_point)
@@ -88,33 +106,76 @@ class TrackMap(Widget):
             point.y = point.y - min_y
 
         self._paths[key] = TrackPath(points, color)
-        self.update_map()
+        self._update_map()
 
+    def set_heat_range(self, min_range, max_range):
+        '''
+        Set the min/max range for heat map mode
+        @param float min_range - minimum channel value
+        @param float max_range - maximum channel value
+        '''
+        self.heat_min = min_range
+        self.heat_max = max_range
+        
     def add_heat_values(self, key, heat_map_values):
+        '''
+        Add the point values for the specified key
+        @param string The key referencing the heat map values
+        @param list A list of values. The number of values should correspond to exactly the number of points for the path matching the same key in path.
+        '''
         self._heat_map_values[key] = heat_map_values
         self._draw_current_map()
 
     def remove_heat_values(self, key):
+        '''
+        Remove the specified heat values 
+        @param string the key for set of heat values to remove
+        '''
         self._heat_map_values.pop(key, None)
         self._draw_current_map()
 
     def remove_path(self, key):
+        '''
+        Remove the specified path. 
+        @param string key the key representing the path to remove
+        '''
         self._paths.pop(key, None)
         self._scaled_paths.pop(key, None)
+        #Also remove heat values since they are paired with the same key
+        self._heat_map_values.pop(key, None)  
         self._draw_current_map()
 
     def add_marker(self, key, color):
+        '''
+        Adds a marker to be displayed on the track map
+        @param string key key representing the marker
+        @param list color color of the marker
+        '''
         self._marker_points[key] = MarkerPoint(color)
 
     def remove_marker(self, key):
+        '''
+        Removes the specified marker
+        @param key key representing the marker to remove
+        '''
         self._marker_points.pop(key, None)
         self._marker_locations.pop(key, None)
         self._draw_current_map()
 
     def get_marker(self, key):
+        '''
+        Fetch the specified marker
+        @param key the key of ther marker to fetch; 
+        @return MarkerPoint the MarkerPoint object for the key, or None if key doesn't exist
+        '''
         return self._marker_points.get(key)
 
     def update_marker(self, key, geoPoint):
+        '''
+        Update the marker to the specified position
+        @param string the key of the marker
+        @param GeoPoint geoPoint the point for the updated position
+        '''
         marker_point = self._marker_points.get(key)
         marker_location = self._marker_locations.get(key)
         if marker_point and marker_location:
@@ -128,8 +189,7 @@ class TrackMap(Widget):
             marker_size = self.marker_width_scale * self.height
             marker_location.circle = (scaled_point.x, scaled_point.y, marker_size)
         
-    def update_map(self, *args):
-        
+    def _update_map(self, *args):
         padding_both_sides = self.MIN_PADDING * 2
         
         width = self.size[0]
@@ -196,6 +256,8 @@ class TrackMap(Widget):
                     point_count = len(path_points)
                     value_index = 0
                     heat_value = 0
+                    heat_min = self.heat_min
+                    heat_max = self.heat_max
                     try:
                         for i in range(0, point_count - 2, 2):
                             x1 = path_points[i]
@@ -203,14 +265,15 @@ class TrackMap(Widget):
                             x2 = path_points[i + 2]
                             y2 = path_points[i + 3]
                             heat_value = heat_path[value_index]
-                            heat_color = self._get_heat_map_color(heat_value / 100.0) #TODO get the channel meta min / max
+                            heat_pct = (heat_value - heat_min) / (heat_max - heat_min)
+                            heat_color = self._get_heat_map_color(heat_pct) #TODO get the channel meta min / max
                             Color(*heat_color)
                             Line(points=[x1, y1, x2, y2], width=sp(self.heat_width_scale * self.height), closed=False, joint='round')
                             value_index+=1
                     except IndexError: #if the number of heat values mismatch the heat map points, terminate early
                         pass
                 else:
-                    #draw regular map
+                    #draw regular map trace
                     Color(*self._paths[key].color)
                     Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True)
 
@@ -220,11 +283,6 @@ class TrackMap(Widget):
                 scaled_point = self._scale_point(marker_point, self.height, left, bottom)
                 Color(*marker_point.color)
                 self._marker_locations[key] = Line(circle=(scaled_point.x, scaled_point.y, marker_size), width=marker_size, closed=True)
-
-         
-    def setTrackPoints(self, geoPoints):
-        self.gen_map_points(geoPoints)
-        self.update_map()
         
     def _offset_track_point(self, point):
         point.x = point.x - self._min_XY.x
@@ -243,7 +301,7 @@ class TrackMap(Widget):
         adjusted_Y = int((self._height_padding + (point.y * self._global_ratio))) + bottom
         return Point(adjusted_X, adjusted_Y)
 
-    def gen_map_points(self, geo_points):
+    def _gen_map_points(self, geo_points):
         points = []
         
         # min and max coordinates, used in the computation below
