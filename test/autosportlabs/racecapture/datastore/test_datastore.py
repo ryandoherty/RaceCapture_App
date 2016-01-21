@@ -314,3 +314,49 @@ class DataStoreTest(unittest.TestCase):
         self.assertEqual('name_updated', session.name)
         self.assertEqual('notes_updated', session.notes)
         
+    def test_update_metadata(self):
+
+        def get_channel(name):
+            channels = self.ds.channel_list
+            return [x for x in channels if x.name == name][0]
+        
+        #test update specific name
+        accel_x = get_channel('AccelX')
+
+        #simulate bad metadata for min/max
+        accel_x.min = 0
+        accel_x.max = 0
+        self.ds.update_channel_metadata()
+        accel_x = get_channel('AccelX')
+        #AccelX min value should've been updated since the data file contains data < 0
+        self.assertLess(accel_x.min, 0)
+        self.assertGreater(accel_x.max, 0)
+        
+        #change min/max to an exceedingly large value
+        #setting only_extend_minmax to false will force min/max to rail to actual min/max values in datapoint table
+        accel_x.min = -100
+        accel_x.max = 100
+        self.ds.update_channel_metadata(only_extend_minmax=False)
+        accel_x = get_channel('AccelX')
+        #now it should be adjusted to be exactly the min value in the datapoints
+        self.assertLess(-100, accel_x.min)
+        self.assertGreater(100, accel_x.max)
+        
+        #Now test only updating specific channels
+        #test update specific name
+        accel_x = get_channel('AccelX')
+        accel_y = get_channel('AccelY')
+        
+        #simulate bad metadata for min/max
+        accel_x.min = 0
+        accel_x.max = 0
+        self.ds.update_channel_metadata(channels=['AccelX'], only_extend_minmax=False)
+        new_accel_x = get_channel('AccelX')
+        new_accel_y = get_channel('AccelY')
+        
+        #only AccelX should've been updated
+        self.assertLess(new_accel_x.min, 0)
+        self.assertGreater(new_accel_x.max, 0)
+        #AccelY shoudn't have changed
+        self.assertEqual(new_accel_y.min, accel_y.min)
+        self.assertEqual(new_accel_y.max, accel_y.max)

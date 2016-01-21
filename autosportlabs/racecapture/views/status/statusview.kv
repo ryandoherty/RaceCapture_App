@@ -51,8 +51,6 @@
 <ApplicationLogView>:
     orientation: 'horizontal'
     padding: (0, sp(5))
-    BoxLayout:
-        size_hint_x: (.35)
     LabelIconButton:
         size_hint_x: (.3)
         title_font_size: self.height * 0.5
@@ -60,4 +58,4 @@
         icon: u'\uf0c5'
         on_press: root.copy_app_log()
     BoxLayout:
-        size_hint_x: (.35)
+        size_hint_x: (0.7)

@@ -112,6 +112,10 @@ class RaceCaptureApp(App):
 
     _telemetry_connection = None
 
+    @staticmethod
+    def get_app_version():
+        return __version__
+    
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
 
@@ -518,19 +522,20 @@ class RaceCaptureApp(App):
             else:
                 self._telemetry_connection.telemetry_enabled = False
 
-class CrashHandler(ExceptionHandler):
-    def handle_exception(self, exception_info):
-        if type(exception_info) == KeyboardInterrupt:
-            Logger.info("CrashHander: KeyboardInterrupt")
-            sys.exit()
-        Logger.critical("CrashHandler: Caught exception in Kivy loop: " + str(exception_info))
-        Logger.critical(traceback.format_exc())
-        if 'sentry_client' in globals():
-            ident = sentry_client.captureException(value=exception_info)
-            Logger.critical("CrashHandler: crash caught: Reference is %s" % ident)
-        return ExceptionManager.PASS
-
 if __name__ == '__main__':
+
+    class CrashHandler(ExceptionHandler):
+        def handle_exception(self, exception_info):
+            if type(exception_info) == KeyboardInterrupt:
+                Logger.info("CrashHander: KeyboardInterrupt")
+                sys.exit()
+            Logger.critical("CrashHandler: Caught exception in Kivy loop: " + str(exception_info))
+            Logger.critical(traceback.format_exc())
+            if 'sentry_client' in globals():
+                ident = sentry_client.captureException(value=exception_info)
+                Logger.critical("CrashHandler: crash caught: Reference is %s" % ident)
+            return ExceptionManager.PASS
+
     ExceptionManager.add_handler(CrashHandler())
     try:
         RaceCaptureApp().run()
