@@ -198,12 +198,12 @@ class LineChart(ChannelAnalysisWidget):
             self.ids.chart.remove_plot(channel_plot.plot)
             del(self._channel_plots[str(channel_plot)])
     
-    def _add_channels_results(self, query_data):
+    def _add_channels_results(self, channels, query_data):
         try:
             distance_data_values = query_data['Distance']
-            for key in [k for k in query_data.iterkeys() if k != 'Distance']:
+            for channel in channels:
                 chart = self.ids.chart
-                channel_data_values = query_data[key]
+                channel_data_values = query_data[channel]
                 
                 key = channel_data_values.channel + str(channel_data_values.source)
                 plot = SmoothLinePlot(color=self.color_sequence.get_color(key))
@@ -244,5 +244,6 @@ class LineChart(ChannelAnalysisWidget):
     def add_channels(self, channels, lap_ref):
         ProgressSpinner.increment_refcount()
         def get_results(results):
-            Clock.schedule_once(lambda dt: self._add_channels_results(results))
+            #clone the incoming list of channels and pass it to the handler
+            Clock.schedule_once(lambda dt: self._add_channels_results(channels[:], results))
         self.datastore.get_channel_data(lap_ref, ['Distance'] + channels, get_results)
