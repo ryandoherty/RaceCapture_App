@@ -48,8 +48,7 @@ class FirmwareUpdateView(BaseConfigView):
                       size_hint=(None, None), size=(400, 400))
         popup.open()
         
-    def prompt_manual_bootloader_mode(self, instance):
-        self._popup.dismiss()
+    def _prompt_manual_bootloader_mode(self, instance):
         popup = None
         def _on_answer(inst, answer):
             popup.dismiss()
@@ -68,24 +67,29 @@ class FirmwareUpdateView(BaseConfigView):
     def get_firmware_file_path(self):
         return self._settings.userPrefs.get_pref('preferences', 'firmware_dir')
         
-    def select_file(self):
-        if platform == 'win':
-            ok_cb = self.prompt_manual_bootloader_mode
-        else:
-            ok_cb = self._start_update_fw
+    def _select_file(self):
+        def _on_answer(instance):
+            popup.dismiss()
+            if platform == 'win':
+                self._prompt_manual_bootloader_mode(instance)
+            else:
+                self._start_update_fw(instance)
+
+        def dismiss_popup(self, *args):
+            popup.dismiss()
+
         user_path= self.get_firmware_file_path()
-        print("the user path " + str(user_path))
-        content = LoadDialog(ok=ok_cb, 
-                             cancel=self.dismiss_popup,
+        content = LoadDialog(ok=_on_answer, 
+                             cancel=dismiss_popup,
                              filters=['*' + '.ihex'],
                              user_path=user_path)
-        self._popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
-        self._popup.open()
+        popup = Popup(title="Load file", content=content, size_hint=(0.9, 0.9))
+        popup.open()
 
     def _update_progress_gauge(self, percent):
-		def update_progress(pct):
-			self.ids.fw_progress.value = int(pct)
-		Clock.schedule_once(lambda dt: update_progress(percent))
+        def update_progress(pct):
+            self.ids.fw_progress.value = int(pct)
+        Clock.schedule_once(lambda dt: update_progress(percent))
 
     def _teardown_json_serial(self):
         Logger.info('FirmwareUpdateView: Disabling RaceCapture Communcications')
@@ -114,16 +118,9 @@ class FirmwareUpdateView(BaseConfigView):
             if filename:
                 #Even though we stopped the RX thread, this is OK
                 #since it doesn't return a value
-                try:
-                    self.ids.fw_progress.title="Processing"
-                    self._teardown_json_serial()
-                except:
-                    import sys, traceback
-                    print "Exception in user code:"
-                    print '-'*60
-                    traceback.print_exc(file=sys.stdout)
-                    print '-'*60
-                    pass
+                self.ids.fw_progress.title="Processing"
+
+                self._teardown_json_serial()
 
                 self.ids.fw_progress.title="Progress"
 
@@ -161,16 +158,21 @@ class FirmwareUpdateView(BaseConfigView):
         self.ids.fw_progress.value = ''
         self.ids.fw_progress.title = ""
 
-
+    def update_pre_check(self):
+        
+        popup = None
+        def _on_answer(inst, answer):
+            popup.dismiss()
+            if answer == True:
+                self._select_file()
+        popup = confirmPopup('Ready to update firmware',
+                             'Please ensure your configuration is saved before continuing\n',
+                             _on_answer)
 
     def _start_update_fw(self, instance):
-        self._popup.dismiss()
         self.set_firmware_file_path(instance.path)
-        print('path: ' + str(self.get_firmware_file_path()))        
         #The comma is necessary since we need to pass in a sequence of args
         t = Thread(target=self._update_thread, args=(instance,))
         t.daemon = True
         t.start()
 
-    def dismiss_popup(self, *args):
-        self._popup.dismiss()
