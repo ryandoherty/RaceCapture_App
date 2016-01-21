@@ -27,7 +27,7 @@ class GradientBox(BoxLayout):
     
     def __init__(self, **kwargs):
         super(GradientBox, self).__init__(**kwargs)
-        self.color_gradient = SimpleColorGradient()
+        self.color_gradient = HeatColorGradient()
         self.bind(pos=self._update_gradient, size=self._update_gradient)
         self._update_gradient()
         
