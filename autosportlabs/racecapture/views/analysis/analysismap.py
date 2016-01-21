@@ -139,7 +139,7 @@ class AnalysisMap(AnalysisWidget):
         self.sources[source_key] = source_ref
         self.ids.track.add_path(source_key, path, color)
         if self.heatmap_channel:
-            self.add_heat_values(self.heatmap_channel, source_key)
+            self.add_heat_values(self.heatmap_channel, source_ref)
 
         
         #Add the lap to the lap legend list
@@ -170,6 +170,8 @@ class AnalysisMap(AnalysisWidget):
             values.append(record[1])
 
         self.heat_values = values
+        channel_info = self.datastore.get_channel(channel)
+        self.ids.track.set_heat_range(channel_info.min, channel_info.max)
         self.ids.track.add_heat_values(str(lap_ref), values)
 
     def remove_heat_values(self, lap_ref):
