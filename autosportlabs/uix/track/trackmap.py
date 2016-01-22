@@ -29,6 +29,7 @@ from kivy.metrics import sp
 from kivy.properties import ListProperty, NumericProperty
 from kivy.graphics import Color, Line, Bezier, Rectangle
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
+from autosportlabs.uix.color.colorgradient import HeatColorGradient, SimpleColorGradient
 from utils import *
 
 Builder.load_file('autosportlabs/uix/track/trackmap.kv')
@@ -60,8 +61,9 @@ class TrackMap(Widget):
     MIN_PADDING = sp(1)
     DEFAULT_TRACK_WIDTH_SCALE = 0.01
     DEFAULT_MARKER_WIDTH_SCALE = 0.02
-    DEFAULT_PATH_WIDTH_SCALE = 0.002
-    DEFAULT_HEAT_WIDTH_SCALE = 0.005  
+    DEFAULT_PATH_WIDTH_SCALE = 0.004
+    DEFAULT_HEAT_WIDTH_SCALE = 0.005
+    HEAT_MAP_WIDTH_STEP = 2
 
     def __init__(self, **kwargs):
         super(TrackMap, self).__init__(**kwargs)
@@ -285,20 +287,32 @@ class TrackMap(Widget):
         bottom = self.pos[1]
         self.canvas.clear()
 
+        heat_width_step = sp(self.HEAT_MAP_WIDTH_STEP)
+        path_count = len(self._scaled_paths.keys())
+        heat_width = sp(self.heat_width_scale * self.height) + ((path_count - 1) * heat_width_step)
+        
         with self.canvas:
-
             Color(*self.track_color)
             Line(points=self._scaled_map_points, width=sp(self.track_width_scale * self.height), closed=True, joint='round')
-
+            
+            if path_count > 1:
+                color_gradient = SimpleColorGradient()
+                color_gradient.min_color=[0.0, 0.0, 0.0, 1.0]
+                multi_paths = True
+            else:
+                color_gradient = HeatColorGradient()
+                multi_paths = False
+                
             #draw all of the traces
             for key, path_points in self._scaled_paths.iteritems():
 
                 heat_path = self._heat_map_values.get(key)
                 if heat_path:
+                    if multi_paths:
+                        color_gradient.max_color = self._paths[key].color
                     #draw heat map
                     point_count = len(path_points)
                     value_index = 0
-                    heat_value = 0
                     heat_min = self.heat_min
                     heat_max = self.heat_max
                     try:
@@ -309,16 +323,17 @@ class TrackMap(Widget):
                             y2 = path_points[i + 3]
                             heat_value = heat_path[value_index]
                             heat_pct = (heat_value - heat_min) / (heat_max - heat_min)
-                            heat_color = self._get_heat_map_color(heat_pct) #TODO get the channel meta min / max
+                            heat_color = color_gradient.get_color_value(heat_pct)
                             Color(*heat_color)
-                            Line(points=[x1, y1, x2, y2], width=sp(self.heat_width_scale * self.height), closed=False, joint='round')
+                            Line(points=[x1, y1, x2, y2], width=heat_width, closed=False, joint='round')
                             value_index+=1
+                        heat_width -= heat_width_step
                     except IndexError: #if the number of heat values mismatch the heat map points, terminate early
                         pass
                 else:
                     #draw regular map trace
                     Color(*self._paths[key].color)
-                    Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True)
+                    Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True, cap='square', joint='miter')
 
             #draw the markers
             marker_size = self.marker_width_scale * self.height

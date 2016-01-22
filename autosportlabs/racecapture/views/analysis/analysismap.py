@@ -272,7 +272,7 @@ class AnalysisMap(AnalysisWidget):
 
     def remove_map_path(self, source_ref):
         '''
-        Remove te map path for the specified session/lap source reference
+        Remove the map path for the specified session/lap source reference
         :param source_ref the source session/lap reference
         :type source_ref SourceRef
         '''
@@ -283,6 +283,7 @@ class AnalysisMap(AnalysisWidget):
         #Remove the lap from the lap the legend list
         lap_legend = self.lap_legends.pop(source_key, None)
         self.ids.legend_list.remove_widget(lap_legend)
+
 
     def _add_heat_value_results(self, channel, source_ref, query_data):
         '''

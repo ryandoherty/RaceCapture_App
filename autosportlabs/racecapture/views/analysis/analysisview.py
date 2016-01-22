@@ -89,7 +89,6 @@ class AnalysisView(Screen):
             self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
             self.ids.analysismap.remove_map_path(source_ref)
-            self.ids.analysismap.remove_heat_values(source_ref)
     
     def on_tracks_updated(self, track_manager):
         self.ids.analysismap.track_manager = track_manager

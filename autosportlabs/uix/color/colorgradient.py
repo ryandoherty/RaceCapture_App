@@ -8,6 +8,9 @@ class HeatColorGradient:
     :type value float
     '''
     
+    def __init__(self):
+        self.alpha = 1.0
+    
     def get_color_value(self, value):
         colors = [[0,0,1,1], [0,1,0,1], [1,1,0,1], [1,0,0,1]]
         num_colors = len(colors)
@@ -30,7 +33,7 @@ class HeatColorGradient:
         green = (colors[idx2][1] - colors[idx1][1]) * frac_between + colors[idx1][1];
         blue  = (colors[idx2][2] - colors[idx1][2]) * frac_between + colors[idx1][2];
         
-        return [red, green, blue, 1.0]
+        return [red, green, blue, self.alpha]
     
 class SimpleColorGradient():
     '''
@@ -40,6 +43,7 @@ class SimpleColorGradient():
     def __init__(self):
         self.min_color = [0.0, 0.0, 0.0, 0.0]
         self.max_color = [0.0, 0.0, 0.0, 0.0]
+        self.alpha = 1.0
     
     def get_color_value(self, value):
         '''
@@ -53,6 +57,6 @@ class SimpleColorGradient():
         red = min_color[0] + (max_color[0] - min_color[0]) * value
         green = min_color[1] + (max_color[1] - min_color[1]) * value
         blue = min_color[2] + (max_color[2] - min_color[2]) * value
-        return [red, green, blue, 1.0]
+        return [red, green, blue, self.alpha]
         
         
