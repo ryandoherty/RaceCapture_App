@@ -104,7 +104,7 @@ class TrackMap(Widget):
         '''
         Set the points for the track map
         :param geoPoints The list of points for the map
-        :type list
+        :type geoPoints list
         '''
         self._gen_map_points(geoPoints)
         self._update_map()
@@ -113,8 +113,8 @@ class TrackMap(Widget):
         '''
         Fetch a path by the specified key
         :param key the key representing the path
-        :type string
-        :returns the TrackPath object matching the key, o 
+        :type key string
+        :returns the TrackPath object matching the key, or None 
         '''
         return self._paths.get(key)
     
@@ -122,9 +122,9 @@ class TrackMap(Widget):
         '''
         Add a path to the map; typically the driven line
         :param key key representing the path
-        :type string
+        :type key string
         :param color the color for the path
-        :type list 
+        :type color list 
         '''
         points = []
         for geo_point in path:
@@ -145,9 +145,9 @@ class TrackMap(Widget):
         '''
         Set the min/max range for heat map mode
         :param min_range - minimum channel value
-        :type float
+        :type min_range float
         :param max_range - maximum channel value
-        :type float
+        :type max_range float
         '''
         self.heat_min = min_range
         self.heat_max = max_range
@@ -155,10 +155,10 @@ class TrackMap(Widget):
     def add_heat_values(self, key, heat_map_values):
         '''
         Add the point values for the specified key
-        :param The key referencing the heat map values
-        :type string
-        :param A list of values. The number of values should correspond to exactly the number of points for the path matching the same key in path.
-        :type list
+        :param key The key referencing the heat map values
+        :type key string
+        :param heat_map_values A list of values. The number of values should correspond to exactly the number of points for the path matching the same key in path.
+        :type heat_map_values list
         '''
         self._heat_map_values[key] = heat_map_values
         self._draw_current_map()
@@ -166,8 +166,8 @@ class TrackMap(Widget):
     def remove_heat_values(self, key):
         '''
         Remove the specified heat values 
-        :param the key for set of heat values to remove
-        :type string
+        :param key the key for set of heat values to remove
+        :type key string
         '''
         self._heat_map_values.pop(key, None)
         self._draw_current_map()
@@ -176,7 +176,7 @@ class TrackMap(Widget):
         '''
         Remove the specified path. 
         :param key the key representing the path to remove
-        :type string 
+        :type key string 
         '''
         self._paths.pop(key, None)
         self._scaled_paths.pop(key, None)
@@ -187,10 +187,10 @@ class TrackMap(Widget):
     def add_marker(self, key, color):
         '''
         Adds a marker to be displayed on the track map
-        param key key representing the marker
-        :type string
+        :param key The key representing the marker
+        :type key string
         :param color color of the marker
-        :type list
+        :type color list
         '''
         self._marker_points[key] = MarkerPoint(color)
 
@@ -198,7 +198,7 @@ class TrackMap(Widget):
         '''
         Removes the specified marker
         :param key representing the marker to remove
-        :type string
+        :type key string
         '''
         self._marker_points.pop(key, None)
         self._marker_locations.pop(key, None)
@@ -207,8 +207,8 @@ class TrackMap(Widget):
     def get_marker(self, key):
         '''
         Fetch the specified marker
-        :param the key of ther marker to fetch;
-        :type string 
+        :param key the key of ther marker to fetch;
+        :type key string 
         :returns MarkerPoint the MarkerPoint object for the key, or None if key doesn't exist
         '''
         return self._marker_points.get(key)
@@ -216,8 +216,8 @@ class TrackMap(Widget):
     def update_marker(self, key, geoPoint):
         '''
         Update the marker to the specified position
-        :param the key of the marker
-        :type string
+        :param key The key of the marker
+        :type key string
         :param geoPoint the point for the updated position
         :type GeoPoint
         '''

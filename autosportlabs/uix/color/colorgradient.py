@@ -2,7 +2,7 @@ import math
 
 class HeatColorGradient(object):
     '''
-    Calculate a heat gradient color based on the specified percentage
+    Calculate a heat gradient color based on the specified value
     
     :param value the value for the gradient, between 0.0 - 1.0
     :type value float
