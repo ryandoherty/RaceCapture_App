@@ -122,20 +122,34 @@
                         halign: 'center'
                         font_size: self.height * 0.8
                         id: track_name
-            GridLayout:
-                id: legend_list
-                cols: 1
+            BoxLayout:
+                id: legend_box
+                orientation: 'vertical'
                 size_hint_x: 0.25
-                padding: (sp(5), sp(5))
-                row_default_height: root.height * 0.12
-                row_force_default: True
-                canvas.before:
-                    Color:
-                        rgba: ColorScheme.get_widget_translucent_background()
-                    Rectangle:
-                        pos: self.pos
-                        size: self.size
-
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: 0.1
+                    BoxLayout:
+                        size_hint_x: 0.4
+                    FieldLabel:
+                        id: heat_channel_name
+                        halign: 'center'
+                        font_size: self.height * 0.8
+                        size_hint_x: 0.6
+                BoxLayout:
+                    size_hint_y: 0.9
+                    GridLayout:
+                        cols: 1
+                        id: legend_list
+                        padding: (sp(5), sp(5))
+                        row_default_height: root.height * 0.12
+                        row_force_default: True
+                        canvas.before:
+                            Color:
+                                rgba: ColorScheme.get_widget_translucent_background()
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
 
 <CustomizeMapView>:
     orientation: 'vertical'

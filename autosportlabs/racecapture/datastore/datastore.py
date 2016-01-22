@@ -291,7 +291,13 @@ class DataStore(object):
     def channel_list(self):
         return self._channels[:]
 
-    def get_channel(self, name): 
+    def get_channel(self, name):
+        '''
+        Retreives information for a channel
+        :param name the channel name
+        :type string
+        :returns DatalogChannel object for the channel. Raises DatastoreException if channel is unknown
+        ''' 
         channel =  [c for c in self._channels if name in c.name]
         if not len(channel):
             raise DatastoreException("Unknown channel: {}".format(name))

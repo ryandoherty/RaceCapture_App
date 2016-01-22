@@ -116,6 +116,7 @@ class AnalysisMap(AnalysisWidget):
         #State settings
         self.got_mouse = False
         self.heatmap_channel = None
+        self.heatmap_channel_units = ''
         
         self.sources = {}
         Window.bind(on_motion=self.on_motion)
@@ -160,10 +161,13 @@ class AnalysisMap(AnalysisWidget):
         '''
         if self.heatmap_channel:
             self.ids.top_bar.size_hint_x=0.6
-            self.ids.legend_list.size_hint_x=0.4
+            self.ids.legend_box.size_hint_x=0.4
+            units = self.heatmap_channel_units
+            self.ids.heat_channel_name.text = '{} {}'.format(self.heatmap_channel, '' if len(units) == 0 else '({})'.format(units)) 
         else:
             self.ids.top_bar.size_hint_x=0.75
-            self.ids.legend_list.size_hint_x=0.25
+            self.ids.legend_box.size_hint_x=0.25
+            self.ids.heat_channel_name.text = ''
         
     def _update_trackmap(self, values):
         track = self.track_manager.get_track_by_id(values.track_id)
@@ -340,6 +344,7 @@ class AnalysisMap(AnalysisWidget):
         if heatmap_channel:
             session_info = self.datastore.get_session_by_id(source_ref.session)
             channel_info = self.datastore.get_channel(heatmap_channel)
+            self.heatmap_channel_units = channel_info.units
             lap_legend = GradientLapLegend(session = session_info.name, 
                                            lap = str(source_ref.lap),
                                            min_value = channel_info.min,
