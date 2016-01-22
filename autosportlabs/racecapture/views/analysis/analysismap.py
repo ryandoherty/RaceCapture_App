@@ -149,16 +149,23 @@ class AnalysisMap(AnalysisWidget):
         self.show_customize_dialog()
             
     def _set_heat_map(self, heatmap_channel):
-        self.heatmap_channel = heatmap_channel
+        current_heatmap_channel = self.heatmap_channel
+
         for source in self.sources.itervalues():
-            if heatmap_channel:
-                self.add_heat_values(heatmap_channel, source)
-            else:
+            if current_heatmap_channel != heatmap_channel:
                 self.remove_heat_values(source)
-            self._update_lap_legend(source)
+                if heatmap_channel:
+                    self.add_heat_values(heatmap_channel, source)
+                
+        self.heatmap_channel = heatmap_channel
+        self._refresh_lap_legends()
         self._update_legend_box_layout()
         
     def _update_legend_box_layout(self):
+        '''
+        This will set the size of the box that contains
+        the lap legend widgets
+        '''
         if self.heatmap_channel:
             self.ids.top_bar.size_hint_x=0.6
             self.ids.legend_list.size_hint_x=0.4
@@ -262,7 +269,7 @@ class AnalysisMap(AnalysisWidget):
         if self.heatmap_channel:
             self.add_heat_values(self.heatmap_channel, source_ref)
             
-        self._update_lap_legend(source_ref, color)
+        self._add_lap_legend(source_ref, color)
 
     def remove_map_path(self, source_ref):
         '''
@@ -278,6 +285,22 @@ class AnalysisMap(AnalysisWidget):
         lap_legend = self.lap_legends.pop(source_key, None)
         self.ids.legend_list.remove_widget(lap_legend)
 
+    def _add_heat_value_results(self, channel, source_ref, query_data):
+        '''
+        Callback for adding channel data from the heat values
+        :param channel the channel fetched
+        :type string
+        :param source_ref the session / lap reference
+        :type SourceRef
+        :param query_data the data results
+        :type ChannelData
+        '''
+        source_key = str(source_ref)
+        values = query_data[channel].values
+        channel_info = self.datastore.get_channel(channel)
+        self.ids.track.set_heat_range(channel_info.min, channel_info.max)
+        self.ids.track.add_heat_values(source_key, values)
+        
     def add_heat_values(self, channel, source_ref):
         '''
         Add heat values to the track map
@@ -286,24 +309,9 @@ class AnalysisMap(AnalysisWidget):
         :param source_ref the source session/lap reference
         :type source_ref SourceRef
         '''
-        source_key = str(source_ref)
-        lap = source_ref.lap
-        session = source_ref.session
-        f = Filter().eq('LapCount', lap)
-        dataset = self.datastore.query(sessions=[session], channels=[channel], data_filter=f)
-        records = dataset.fetch_records()
-
-        values = []
-        for record in records:
-            #pluck out just the channel value
-            values.append(record[1])
-
-        channel_info = self.datastore.get_channel(channel)
-        self.ids.track.set_heat_range(channel_info.min, channel_info.max)
-        self.ids.track.add_heat_values(source_key, values)
-        
-        self._update_lap_legend(source_ref)
-        
+        def get_results(results):
+            Clock.schedule_once(lambda dt: self._add_heat_value_results(channel, source_ref, results))
+        self.datastore.get_channel_data(source_ref, [channel], get_results)
 
     def remove_heat_values(self, source_ref):
         '''
@@ -314,34 +322,43 @@ class AnalysisMap(AnalysisWidget):
         source_key = str(source_ref)
         self.ids.track.remove_heat_values(source_key)
     
-    def _update_lap_legend(self, source_ref, path_color=[]):
+    def _refresh_lap_legends(self):
+        '''
+        Wholesale refresh the list of lap legends
+        '''
+        self.ids.legend_list.clear_widgets()
+        self.lap_legends.clear()
+        for source_ref in self.sources.itervalues():
+            source_key = str(source_ref)
+            path_color = self.ids.track.get_path(source_key).color
+            self._add_lap_legend(source_ref, path_color)
+
+    def _add_lap_legend(self, source_ref, path_color):
         '''
         Update the lap legend for the specified source, 
         switching between normal and gradient as needed.
+        :param source_ref the session/lap reference
+        :type source_ref SourceRef
+        :param path_color the color of the trackmap path
+        :type list
         '''
-        source_key = str(source_ref)
         heatmap_channel = self.heatmap_channel
-        lap_legend = self.lap_legends.get(source_key)
-        new_lap_legend = None
-        
-        if heatmap_channel is not None:
-            if not lap_legend or not isinstance(lap_legend, GradientLapLegend):
-                session_info = self.datastore.get_session_by_id(source_ref.session)
-                channel_info = self.datastore.get_channel(heatmap_channel)            
-                new_lap_legend = GradientLapLegend(session = session_info.name, 
-                                               lap = str(source_ref.lap),
-                                               min_value = channel_info.min,
-                                               max_value = channel_info.max)
+        source_key = str(source_ref)
+        if heatmap_channel:
+            session_info = self.datastore.get_session_by_id(source_ref.session)
+            channel_info = self.datastore.get_channel(heatmap_channel)
+            lap_legend = GradientLapLegend(session = session_info.name, 
+                                           lap = str(source_ref.lap),
+                                           min_value = channel_info.min,
+                                           max_value = channel_info.max)
         else:
-            if not lap_legend or not isinstance(lap_legend, LapLegend):
-                session_info = self.datastore.get_session_by_id(source_ref.session)
-                new_lap_legend = LapLegend(color = path_color, session = session_info.name, lap = str(source_ref.lap))
-            
-        if new_lap_legend:
-            if lap_legend:
-                self.ids.legend_list.remove_widget(lap_legend)
-            self.ids.legend_list.add_widget(new_lap_legend)
-            self.lap_legends[source_key] = new_lap_legend
+            session_info = self.datastore.get_session_by_id(source_ref.session)
+            path_color = self.ids.track.get_path(source_key).color
+            lap_legend = LapLegend(color = path_color, 
+                                   session = session_info.name, 
+                                   lap = str(source_ref.lap))
+        self.ids.legend_list.add_widget(lap_legend)
+        self.lap_legends[source_key] = lap_legend
         
 class CustomizeParams(object):
     '''

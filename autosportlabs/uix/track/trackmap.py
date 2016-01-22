@@ -107,6 +107,15 @@ class TrackMap(Widget):
         self._gen_map_points(geoPoints)
         self._update_map()
 
+    def get_path(self, key):
+        '''
+        Fetch a path by the specified key
+        :param key the key representing the path
+        :type string
+        :returns the TrackPath object matching the key, o 
+        '''
+        return self._paths.get(key)
+    
     def add_path(self, key, path, color):
         '''
         Add a path to the map; typically the driven line
