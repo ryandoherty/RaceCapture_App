@@ -52,7 +52,6 @@ class GradientBox(BoxLayout):
         self._update_gradient()
         
     def on_min_color(self, instance, value):
-        print('on min color')
         self.color_gradient.min_color = value
         self._update_gradient()
         
