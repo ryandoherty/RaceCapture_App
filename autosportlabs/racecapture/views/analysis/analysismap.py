@@ -227,8 +227,10 @@ class AnalysisMap(AnalysisWidget):
     def select_map(self, latitude, longitude):
         '''
         Find and display a nearby track by latitude / longitude
-        :param float latitude 
-        :param float longitude 
+        :param latitude
+        :type  latitude float
+        :param longitude
+        :type longitude float 
         '''
         if self.track_manager:
             point = GeoPoint.fromPoint(latitude, longitude)
@@ -241,8 +243,10 @@ class AnalysisMap(AnalysisWidget):
     def add_reference_mark(self, source, color):
         '''
         Add a reference mark for the specified source
-        :param string source the key representing the reference mark
-        :param list color the color of the reference mark
+        :param source the key representing the reference mark
+        :type source string
+        :param color the color of the reference mark
+        :type color list
         '''
         self.ids.track.add_marker(source, color)
 
@@ -283,11 +287,11 @@ class AnalysisMap(AnalysisWidget):
         '''
         Callback for adding channel data from the heat values
         :param channel the channel fetched
-        :type string
+        :type channel string
         :param source_ref the session / lap reference
-        :type SourceRef
+        :type source_ref SourceRef
         :param query_data the data results
-        :type ChannelData
+        :type query_data ChannelData
         '''
         source_key = str(source_ref)
         values = query_data[channel].values
@@ -311,7 +315,7 @@ class AnalysisMap(AnalysisWidget):
         '''
         Remove the heat values for the specified source reference
         :param source_ref the session/lap reference
-        :type SourceRef
+        :type source_ref SourceRef
         '''
         source_key = str(source_ref)
         self.ids.track.remove_heat_values(source_key)
@@ -337,7 +341,7 @@ class AnalysisMap(AnalysisWidget):
         :param source_ref the session/lap reference
         :type source_ref SourceRef
         :param path_color the color of the trackmap path
-        :type list
+        :type path_color list
         '''
         heatmap_channel = self.heatmap_channel
         source_key = str(source_ref)
