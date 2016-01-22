@@ -1,6 +1,6 @@
 import math
 
-class HeatColorGradient:
+class HeatColorGradient(object):
     '''
     Calculate a heat gradient color based on the specified percentage
     
@@ -35,16 +35,37 @@ class HeatColorGradient:
         
         return [red, green, blue, self.alpha]
     
-class SimpleColorGradient():
+class SimpleColorGradient(object):
     '''
     Generates a simple 2-color gradient
     '''
     
-    def __init__(self):
-        self.min_color = [0.0, 0.0, 0.0, 0.0]
-        self.max_color = [0.0, 0.0, 0.0, 0.0]
+    def __init__(self, **kwargs):
         self.alpha = 1.0
+        max_color = kwargs.get('max_color', [1.0, 1.0, 1.0])
+        min_color = kwargs.get('min_color', None)
+        alpha = kwargs.get('alpha', 1.0)
+        self.set_colors(max_color, min_color, alpha = alpha)
     
+    def set_colors(self, max_color, min_color = None, **kwargs):
+        '''
+        Sets the min/max gradient values 
+        Color for max value is set from the supplied color; min color is set as the inverse of the max if not specified
+        :param max_color the color to set for the max color value
+        :type max_color list rgb color values 
+        :param min_color the color to set for the min color value
+        :type min_color list rgb color values
+        :param alpha kwarg specifying alpha transparency
+        :param alpha float
+        '''
+        self.max_color = max_color[:]
+        if min_color:
+            self.min_color = min_color[:]
+        else:
+            self.min_color=[1.0 - max_color[0], 1.0 - max_color[1], 1.0 - max_color[2]]
+
+        self.alpha = kwargs.get('alpha', self.alpha)
+
     def get_color_value(self, value):
         '''
         Calculate a gradient color based on the specified percentage

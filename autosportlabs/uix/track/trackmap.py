@@ -297,7 +297,6 @@ class TrackMap(Widget):
             
             if path_count > 1:
                 color_gradient = SimpleColorGradient()
-                color_gradient.min_color=[0.0, 0.0, 0.0, 1.0]
                 multi_paths = True
             else:
                 color_gradient = HeatColorGradient()
@@ -309,7 +308,8 @@ class TrackMap(Widget):
                 heat_path = self._heat_map_values.get(key)
                 if heat_path:
                     if multi_paths:
-                        color_gradient.max_color = self._paths[key].color
+                        color = self._paths[key].color
+                        color_gradient.set_colors(color)
                     #draw heat map
                     point_count = len(path_points)
                     value_index = 0

@@ -39,33 +39,30 @@ Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
 
 class GradientBox(BoxLayout):
     '''
-    Draws a color gradient box with the specified min / max colors
+    Draws a color gradient box with the specified base color
     '''
-    min_color = ListProperty([0.0, 0.0, 0.0, 1.0])
-    max_color = ListProperty([1.0, 1.0, 1.0, 1.0])
+    color = ObjectProperty([1.0, 1.0, 1.0], allownone = True)
     GRADIENT_STEP = 0.01
     
     def __init__(self, **kwargs):
         super(GradientBox, self).__init__(**kwargs)
-        self.color_gradient = HeatColorGradient()
         self.bind(pos=self._update_gradient, size=self._update_gradient)
         self._update_gradient()
         
-    def on_min_color(self, instance, value):
-        self.color_gradient.min_color = value
+    def on_color(self, instance, value):
         self._update_gradient()
-        
-    def on_max_color(self, instance, value):
-        self.color_gradient.max_color = value
-        self._update_gradient()
-        
+
     def _update_gradient(self, *args):
+        '''
+        Actually draws the gradient
+        '''
+        color_gradient = HeatColorGradient() if self.color is None else SimpleColorGradient(max_color=self.color)
         self.canvas.clear()
         step = GradientBox.GRADIENT_STEP
         pct = step
         with self.canvas:
             while pct < 1.0:
-                color = self.color_gradient.get_color_value(pct)
+                color = color_gradient.get_color_value(pct)
                 Color(*color)
                 slice_width = self.width * step
                 pos = (self.x + (self.width * pct), self.y)
@@ -83,15 +80,13 @@ class GradientLegend(BoxLayout):
     '''
     Represents a gradient legend, specified by min / max colors
     '''
-    min_color = ListProperty([0.0, 0.0, 0.0, 1.0])
-    max_color = ListProperty([0.0, 0.0, 0.0, 1.0])
+    color = ObjectProperty([0.0, 0.0, 0.0, 1.0], allownone = True)
 
 class GradientLapLegend(BoxLayout):
     '''
     A compound widget that presents a gradient color legend including session/lap and min/max values
     '''
-    min_color = ListProperty([0.0, 0.0, 0.0, 1.0])
-    max_color = ListProperty([1.0, 1.0, 1.0, 1.0])
+    color = ObjectProperty([1.0, 1.0, 1.0], allownone = True)
     min_value = NumericProperty(0.0)
     max_value = NumericProperty(100.0)
     session = StringProperty('')
@@ -125,8 +120,6 @@ class AnalysisMap(AnalysisWidget):
         self.sources = {}
         Window.bind(on_motion=self.on_motion)
         
-        #Contains LapLegned widgets; keyed by session_key
-        self.lap_legends = {}
                 
     def add_option_buttons(self):
         '''
@@ -268,7 +261,7 @@ class AnalysisMap(AnalysisWidget):
         if self.heatmap_channel:
             self.add_heat_values(self.heatmap_channel, source_ref)
             
-        self._add_lap_legend(source_ref, color)
+        self._refresh_lap_legends()
 
     def remove_map_path(self, source_ref):
         '''
@@ -280,10 +273,7 @@ class AnalysisMap(AnalysisWidget):
         self.ids.track.remove_path(source_key)
         self.sources.pop(source_key, None)
         
-        #Remove the lap from the lap the legend list
-        lap_legend = self.lap_legends.pop(source_key, None)
-        self.ids.legend_list.remove_widget(lap_legend)
-
+        self._refresh_lap_legends()
 
     def _add_heat_value_results(self, channel, source_ref, query_data):
         '''
@@ -327,10 +317,13 @@ class AnalysisMap(AnalysisWidget):
         Wholesale refresh the list of lap legends
         '''
         self.ids.legend_list.clear_widgets()
-        self.lap_legends.clear()
+
+        multi_laps_selected = len(self.sources.keys()) > 1
         for source_ref in self.sources.itervalues():
             source_key = str(source_ref)
-            path_color = self.ids.track.get_path(source_key).color
+            #specify the heatmap color if multiple laps are selected, else use the default 
+            #multi-color heatmap for a single lap selection
+            path_color = self.ids.track.get_path(source_key).color if multi_laps_selected else None
             self._add_lap_legend(source_ref, path_color)
 
     def _add_lap_legend(self, source_ref, path_color):
@@ -350,7 +343,9 @@ class AnalysisMap(AnalysisWidget):
             lap_legend = GradientLapLegend(session = session_info.name, 
                                            lap = str(source_ref.lap),
                                            min_value = channel_info.min,
-                                           max_value = channel_info.max)
+                                           max_value = channel_info.max,
+                                           color = path_color
+                                           )
         else:
             session_info = self.datastore.get_session_by_id(source_ref.session)
             path_color = self.ids.track.get_path(source_key).color
@@ -358,7 +353,6 @@ class AnalysisMap(AnalysisWidget):
                                    session = session_info.name, 
                                    lap = str(source_ref.lap))
         self.ids.legend_list.add_widget(lap_legend)
-        self.lap_legends[source_key] = lap_legend
         
 class CustomizeParams(object):
     '''

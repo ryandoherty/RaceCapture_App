@@ -40,8 +40,7 @@
         size_hint_y: 0.35
     GradientBox:
         size_hint_y: 0.30
-        min_color: root.min_color
-        max_color: root.max_color
+        color: root.color
         id: gradient
     BoxLayout:
         size_hint_y: 0.35
@@ -62,8 +61,6 @@
 <GradientLapLegend>:
     orientation: 'horizontal'
     spacing: sp(5)
-    min_color: [1.0, 1.0, 1.0, 1.0]
-    max_color: [1.0, 0.0, 0.0, 1.0]
     FieldLabel:
         id: lap
         size_hint_x: 0.4
@@ -77,8 +74,7 @@
     GradientLegend:
         id: legend
         size_hint_x: 0.2
-        min_color: root.min_color
-        max_color: root.max_color
+        color: root.color
     FieldLabel:
         id: max_value
         text: str(root.max_value)
