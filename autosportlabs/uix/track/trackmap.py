@@ -19,6 +19,7 @@
 #this code. If not, see <http://www.gnu.org/licenses/>.
 import kivy
 import math
+from autosportlabs.uix.color import colorgradient
 kivy.require('1.9.0')
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
@@ -294,22 +295,14 @@ class TrackMap(Widget):
         with self.canvas:
             Color(*self.track_color)
             Line(points=self._scaled_map_points, width=sp(self.track_width_scale * self.height), closed=True, joint='round')
-            
-            if path_count > 1:
-                color_gradient = SimpleColorGradient()
-                multi_paths = True
-            else:
-                color_gradient = HeatColorGradient()
-                multi_paths = False
+
+            color_gradient = HeatColorGradient()
                 
             #draw all of the traces
             for key, path_points in self._scaled_paths.iteritems():
 
                 heat_path = self._heat_map_values.get(key)
                 if heat_path:
-                    if multi_paths:
-                        color = self._paths[key].color
-                        color_gradient.set_colors(color)
                     #draw heat map
                     point_count = len(path_points)
                     value_index = 0

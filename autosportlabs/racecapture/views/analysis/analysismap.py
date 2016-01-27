@@ -24,86 +24,97 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics.transformation import Matrix
-from kivy.graphics import Color, Rectangle
 from kivy.uix.screenmanager import Screen, SwapTransition
 from kivy.uix.popup import Popup
 from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidget
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.racecapture.datastore import Filter
-from autosportlabs.uix.color.colorgradient import SimpleColorGradient, HeatColorGradient
 from iconbutton import IconButton, LabelIconButton
-
-
-Builder.load_file('autosportlabs/racecapture/views/analysis/analysismap.kv')
-
-class GradientBox(BoxLayout):
-    '''
-    Draws a color gradient box with the specified base color
-    '''
-    color = ObjectProperty([1.0, 1.0, 1.0], allownone = True)
-    GRADIENT_STEP = 0.01
-    
-    def __init__(self, **kwargs):
-        super(GradientBox, self).__init__(**kwargs)
-        self.bind(pos=self._update_gradient, size=self._update_gradient)
-        self._update_gradient()
-        
-    def on_color(self, instance, value):
-        self._update_gradient()
-
-    def _update_gradient(self, *args):
-        '''
-        Actually draws the gradient
-        '''
-        color_gradient = HeatColorGradient() if self.color is None else SimpleColorGradient(max_color=self.color)
-        self.canvas.clear()
-        step = GradientBox.GRADIENT_STEP
-        pct = step
-        with self.canvas:
-            while pct < 1.0:
-                color = color_gradient.get_color_value(pct)
-                Color(*color)
-                slice_width = self.width * step
-                pos = (self.x + (self.width * pct), self.y)
-                size = (slice_width, self.height)
-                Rectangle(pos=pos, size=size)
-                pct += step
-        
-class ColorLegend(BoxLayout):
-    '''
-    Represents a single color legend. The entire layout is drawn with the color specified.
-    '''
-    bar_color = ListProperty([1.0, 1.0, 1.0, 1.0])
-
-class GradientLegend(BoxLayout):
-    '''
-    Represents a gradient legend, specified by min / max colors
-    '''
-    color = ObjectProperty([0.0, 0.0, 0.0, 1.0], allownone = True)
-
-class GradientLapLegend(BoxLayout):
-    '''
-    A compound widget that presents a gradient color legend including session/lap and min/max values
-    '''
-    color = ObjectProperty([1.0, 1.0, 1.0], allownone = True)
-    min_value = NumericProperty(0.0)
-    max_value = NumericProperty(100.0)
-    session = StringProperty('')
-    lap = StringProperty('')
-    
-class LapLegend(BoxLayout):
-    '''
-    A compound widget that presents the the color legend with session/lap information
-    '''
-    color = ListProperty([1.0, 1.0, 1.0, 1.0])
-    session = StringProperty('')
-    lap = StringProperty('')
+from autosportlabs.uix.legends.gradientlegends import GradientLapLegend, LapLegend
 
 class AnalysisMap(AnalysisWidget):
     '''
     Displays a track map with options
     '''
+    Builder.load_string('''
+<AnalysisMap>:
+    options_enabled: True
+    canvas.before:
+        Color:
+            rgba: ColorScheme.get_dark_background_translucent()
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    Scatter:
+        id: scatter
+        auto_bring_to_front: False
+        TrackMap:
+            id: track
+            height: root.height
+            width: root.width
+
+    AnchorLayout:
+        anchor_x: 'right'
+        anchor_y: 'top'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: (0.9, 1.0)
+            AnchorLayout:
+                id: top_bar
+                size_hint_x: 0.75
+                anchor_y: 'top'
+                anchor_x: 'center'
+                BoxLayout:
+                    size_hint: (1.0, 0.1)
+                    canvas.before:
+                        Color:
+                            rgba: ColorScheme.get_widget_translucent_background()
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    orientation: 'horizontal'
+                    FieldLabel:
+                        halign: 'center'
+                        font_size: self.height * 0.8
+                        id: track_name
+            BoxLayout:
+                id: legend_box
+                orientation: 'vertical'
+                size_hint_x: 0.25
+                BoxLayout:
+                    canvas.before:
+                        Color:
+                            rgba: ColorScheme.get_widget_translucent_background()
+                        Rectangle:
+                            pos: self.pos
+                            size: self.size
+                    orientation: 'horizontal'
+                    size_hint_y: 0.1
+                    BoxLayout:
+                        size_hint_x: 0.4
+                    FieldLabel:
+                        id: heat_channel_name
+                        halign: 'center'
+                        font_size: self.height * 0.8
+                        size_hint_x: 0.6
+                BoxLayout:
+                    size_hint_y: 0.9
+                    GridLayout:
+                        cols: 1
+                        id: legend_list
+                        padding: (sp(5), sp(5))
+                        row_default_height: root.height * 0.12
+                        row_force_default: True
+                        canvas.before:
+                            Color:
+                                rgba: ColorScheme.get_widget_translucent_background()
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size    
+    ''')
+    
     SCROLL_FACTOR = 0.15
     track_manager = ObjectProperty(None)
     datastore = ObjectProperty(None)
@@ -326,42 +337,33 @@ class AnalysisMap(AnalysisWidget):
         '''
         self.ids.legend_list.clear_widgets()
 
-        multi_laps_selected = len(self.sources.keys()) > 1
+        height_pct = 0.4
         for source_ref in self.sources.itervalues():
             source_key = str(source_ref)
             #specify the heatmap color if multiple laps are selected, else use the default 
             #multi-color heatmap for a single lap selection
-            path_color = self.ids.track.get_path(source_key).color if multi_laps_selected else None
-            self._add_lap_legend(source_ref, path_color)
+            heatmap_channel = self.heatmap_channel
+            source_key = str(source_ref)
+            if heatmap_channel:
+                session_info = self.datastore.get_session_by_id(source_ref.session)
+                channel_info = self.datastore.get_channel(heatmap_channel)
+                self.heatmap_channel_units = channel_info.units
+                lap_legend = GradientLapLegend(session = session_info.name, 
+                                               lap = str(source_ref.lap),
+                                               min_value = channel_info.min,
+                                               max_value = channel_info.max,
+                                               color=None,
+                                               height_pct = height_pct
+                                               )
+            else:
+                session_info = self.datastore.get_session_by_id(source_ref.session)
+                path_color = self.ids.track.get_path(source_key).color
+                lap_legend = LapLegend(color = path_color, 
+                                       session = session_info.name, 
+                                       lap = str(source_ref.lap))
+            self.ids.legend_list.add_widget(lap_legend)
+            height_pct *= 0.6
 
-    def _add_lap_legend(self, source_ref, path_color):
-        '''
-        Update the lap legend for the specified source, 
-        switching between normal and gradient as needed.
-        :param source_ref the session/lap reference
-        :type source_ref SourceRef
-        :param path_color the color of the trackmap path
-        :type path_color list
-        '''
-        heatmap_channel = self.heatmap_channel
-        source_key = str(source_ref)
-        if heatmap_channel:
-            session_info = self.datastore.get_session_by_id(source_ref.session)
-            channel_info = self.datastore.get_channel(heatmap_channel)
-            self.heatmap_channel_units = channel_info.units
-            lap_legend = GradientLapLegend(session = session_info.name, 
-                                           lap = str(source_ref.lap),
-                                           min_value = channel_info.min,
-                                           max_value = channel_info.max,
-                                           color = path_color
-                                           )
-        else:
-            session_info = self.datastore.get_session_by_id(source_ref.session)
-            path_color = self.ids.track.get_path(source_key).color
-            lap_legend = LapLegend(color = path_color, 
-                                   session = session_info.name, 
-                                   lap = str(source_ref.lap))
-        self.ids.legend_list.add_widget(lap_legend)
         
 class CustomizeParams(object):
     '''
@@ -395,15 +397,37 @@ class BaseCustomizeMapView(Screen):
         pass
         
 class HeatmapButton(LabelIconButton):
-    pass
+    Builder.load_string('''
+<HeatmapButton>:
+    title: 'Heat Map'
+    icon_size: self.height * .9
+    title_font_size: self.height * 0.6
+    icon: u'\uf06d'    
+    ''')
 
 class TrackmapButton(LabelIconButton):
-    pass
+    Builder.load_string('''
+<TrackmapButton>:
+    title: 'Track Map'
+    icon_size: self.height * .9
+    title_font_size: self.height * 0.6
+    icon: u'\uf018'    
+    ''')
 
 class CustomizeHeatmapView(BaseCustomizeMapView):
     '''
     The customization view for customizing the heatmap options
     '''
+    Builder.load_string('''
+<CustomizeHeatmapView>:
+    BoxLayout:
+        orientation: 'vertical'
+        ChannelSelectorView:
+            multi_select: False
+            id: heatmap_channel
+            size_hint_y: 0.9    
+    ''')
+    
     available_channels = ListProperty()
     
     def __init__(self, params, values, **kwargs):
@@ -440,6 +464,16 @@ class CustomizeTrackView(BaseCustomizeMapView):
     '''
     The customization view for selecting a track to display
     '''
+    Builder.load_string('''
+<CustomizeTrackView>:
+    BoxLayout:
+        orientation: 'vertical'
+        TracksBrowser:
+            trackHeight: dp(200)
+            multi_select: False
+            id: track_browser
+            size_hint_y: 0.90    
+    ''')
     track_id = StringProperty(None, allownone=True)
     def __init__(self, params, values, **kwargs):
         super(CustomizeTrackView, self).__init__(params, values, **kwargs)
@@ -456,6 +490,44 @@ class CustomizeMapView(BoxLayout):
     '''
     The main customization view which manages the various customization screens
     '''
+    Builder.load_string('''
+<CustomizeMapView>:
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: 0.9
+        orientation: 'horizontal'
+        ScrollView:
+            size_hint_x: 0.3
+            id: scroller
+            do_scroll_x:False
+            do_scroll_y:True
+            GridLayout:
+                padding: (sp(10), sp(10))
+                spacing: sp(10)
+                id: options
+                row_default_height: root.height * 0.12
+                row_force_default: True
+                size_hint_y: None
+                height: max(self.minimum_height, scroller.height)
+                cols: 1
+        ScreenManager:
+            id: screens
+            size_hint_x: 0.7
+    BoxLayout:
+        size_hint_y: 0.1
+        orientation: 'horizontal'
+        IconButton:
+            id: confirm
+            disabled: True
+            text: u'\uf00c'
+            on_release: root.confirm()
+        IconButton:
+            color: ColorScheme.get_primary()
+            id: go_back
+            text: u'\uf00d'
+            on_release: root.cancel()    
+    ''')
+    
     def __init__(self, params, values, **kwargs):
         super(CustomizeMapView, self).__init__(**kwargs)
         self.values = values
