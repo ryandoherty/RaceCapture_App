@@ -63,7 +63,7 @@ class TrackMap(Widget):
     DEFAULT_TRACK_WIDTH_SCALE = 0.01
     DEFAULT_MARKER_WIDTH_SCALE = 0.02
     DEFAULT_PATH_WIDTH_SCALE = 0.004
-    DEFAULT_HEAT_WIDTH_SCALE = 0.005
+    DEFAULT_HEAT_WIDTH_SCALE = 0.01
     HEAT_MAP_WIDTH_STEP = 2
 
     def __init__(self, **kwargs):
@@ -294,7 +294,7 @@ class TrackMap(Widget):
         
         with self.canvas:
             Color(*self.track_color)
-            Line(points=self._scaled_map_points, width=sp(self.track_width_scale * self.height), closed=True, joint='round')
+            Line(points=self._scaled_map_points, width=sp(self.track_width_scale * self.height), closed=True, cap='round', joint='round')
 
             color_gradient = HeatColorGradient()
                 
@@ -305,21 +305,28 @@ class TrackMap(Widget):
                 if heat_path:
                     #draw heat map
                     point_count = len(path_points)
-                    value_index = 0
                     heat_min = self.heat_min
-                    heat_max = self.heat_max
+                    heat_range = self.heat_max - heat_min
+                    value_index = 0
+                    current_heat_pct = 0
+                    i=0
+                    line_points = []
+                    
                     try:
-                        for i in range(0, point_count - 2, 2):
-                            x1 = path_points[i]
-                            y1 = path_points[i + 1]
-                            x2 = path_points[i + 2]
-                            y2 = path_points[i + 3]
+                        line_points.extend([path_points[i], path_points[i + 1]])
+                        current_heat_pct = int(((heat_path[value_index] - heat_min) / heat_range) * 100.0)
+                        while i < point_count - 2:
                             heat_value = heat_path[value_index]
-                            heat_pct = (heat_value - heat_min) / (heat_max - heat_min)
-                            heat_color = color_gradient.get_color_value(heat_pct)
-                            Color(*heat_color)
-                            Line(points=[x1, y1, x2, y2], width=heat_width, closed=False, joint='round')
-                            value_index+=1
+                            heat_pct = int(((heat_value - heat_min) / heat_range) * 100.0)
+                            if heat_pct != current_heat_pct:
+                                heat_color = color_gradient.get_color_value(heat_pct / 100.0)
+                                Color(*heat_color)
+                                Line(points=line_points, width=heat_width, closed=False, joint='miter', cap='round')
+                                line_points=[path_points[i-2], path_points[i-1]]
+                                current_heat_pct = heat_pct
+                            line_points.extend([path_points[i], path_points[i + 1]])
+                            value_index += 1
+                            i += 2
                         heat_width -= heat_width_step
                     except IndexError: #if the number of heat values mismatch the heat map points, terminate early
                         pass
