@@ -80,6 +80,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
     Extend this class if you want to make a general purpose widget that shows one or more channels.
     """
     sessions = ObjectProperty(None)
+    DEFAULT_CHANNELS = ["Speed"]
     
     def __init__(self, **kwargs):
         super(ChannelAnalysisWidget, self).__init__(**kwargs)
@@ -91,6 +92,8 @@ class ChannelAnalysisWidget(AnalysisWidget):
         self.refresh_view()
         
     def on_lap_added(self, lap_ref):
+        if len(self._selected_channels) == 0:
+            self._selected_channels = list(self.DEFAULT_CHANNELS)
         self.add_channels(self._selected_channels, lap_ref)
     
     def on_lap_removed(self, lap_ref):
