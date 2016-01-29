@@ -121,23 +121,33 @@ class TrackMap(Widget):
     
     def add_path(self, key, path, color):
         '''
-        Add a path to the map; typically the driven line
-        :param key key representing the path
+        Add the specified path to the trackmap
+        :param key the key identifying the path
         :type key string
-        :param color the color for the path
-        :type color list 
+        :param path a list of points representing the path
+        :type path list of GeoPoint objects
+        :param color the color of the path
+        :type color list rgba colors
         '''
         points = []
+        min_XY = self._min_XY
+        max_XY = self._max_XY
+
         for geo_point in path:
             point = self._project_point(geo_point)
+            min_XY.x = point.x if min_XY.x == -1 else min(min_XY.x, point.x)
+            min_XY.y = point.y if min_XY.y == -1 else min(min_XY.y, point.y)
             points.append(point);
 
-        min_x = self._min_XY.x
-        min_y = self._min_XY.y
-
+        # now, we need to keep track the max X and Y values
         for point in points:
-            point.x = point.x - min_x
-            point.y = point.y - min_y
+            point.x = point.x - min_XY.x
+            point.y = point.y - min_XY.y
+            max_XY.x = point.x if max_XY.x == -1 else max(max_XY.x, point.x)
+            max_XY.y = point.y if max_XY.y == -1 else max(max_XY.y, point.y)
+
+        self._min_XY = min_XY
+        self._max_XY = max_XY
 
         self._paths[key] = TrackPath(points, color)
         self._update_map()
@@ -300,7 +310,6 @@ class TrackMap(Widget):
                 
             #draw all of the traces
             for key, path_points in self._scaled_paths.iteritems():
-
                 heat_path = self._heat_map_values.get(key)
                 if heat_path:
                     #draw heat map
