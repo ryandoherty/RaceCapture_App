@@ -33,12 +33,12 @@ class ChannelSelectorView(BoxLayout):
         if channels:
             index = 0
             list_adapter = self.ids.channelList.adapter
-            for item in self.ids.channelList.adapter.data:
+            for item in list_adapter.data:
                 if item['text'] in channels:
                     view = list_adapter.get_view(index)
                     view.trigger_action(duration=0) #duration=0 means make it an instant selection
                 index += 1
-        
+
     def on_channels(self, instance, value):    
         '''
         Set the list of available channels for this view.
@@ -50,7 +50,7 @@ class ChannelSelectorView(BoxLayout):
             data.append({'text': str(channel), 'is_selected': False})
         
         args_converter = lambda row_index, rec: {'text': rec['text'], 'size_hint_y': None, 'height': dp(50)}
-        
+
         list_adapter = ListAdapter(data=data,
                            args_converter=args_converter,
                            cls=ChannelItemButton,
@@ -71,20 +71,17 @@ class ChannelSelectorView(BoxLayout):
     
 class ChannelSelectView(FloatLayout):
     channel = None
-    def __init__(self, **kwargs):
+    def __init__(self, settings, channel, **kwargs):
         super(ChannelSelectView, self).__init__(**kwargs)
         self.register_event_type('on_channel_selected')
         self.register_event_type('on_channel_cancel')
-        
-        settings = kwargs.get('settings')
-        type = kwargs.get('type')
-        channel = kwargs.get('channel')
-        
         data = []
         channel_list = self.ids.channelList
+
+        available_channels = list(settings.runtimeChannels.get_active_channels().iterkeys())
+        available_channels.sort()
         try:
-            for available_channel,channelMeta in settings.runtimeChannels.channels.iteritems():
-                channel_type = channelMeta.type
+            for available_channel in available_channels:
                 data.append({'text': available_channel, 'is_selected': False})
                 
             args_converter = lambda row_index, rec: {'text': rec['text'], 'size_hint_y': None, 'height': dp(50)}
@@ -95,7 +92,16 @@ class ChannelSelectView(FloatLayout):
                                selection_mode='single',
                                allow_empty_selection=True)
     
-            channel_list.adapter=list_adapter
+            channel_list.adapter = list_adapter
+
+            #select the current channel
+            index = 0
+            for item in list_adapter.data:
+                if item['text'] == channel:
+                    view = list_adapter.get_view(index)
+                    view.trigger_action(duration=0) #duration=0 means make it an instant selection
+                index += 1
+
             list_adapter.bind(on_selection_change=self.on_select)
             self.channel = channel
         except Exception as e:
