@@ -45,6 +45,7 @@ class AnalysisWidget(AnchorLayout):
     the analysis map.
     """
     options_enabled = BooleanProperty(None)
+    laps_selected = BooleanProperty(False)
     
     def __init__(self, **kwargs):
         super(AnalysisWidget, self).__init__(**kwargs)
@@ -75,20 +76,32 @@ class AnalysisWidget(AnchorLayout):
     def on_options(self, *args):
         pass
 
-    def on_lap_added(self, lap_ref):
+    def on_lap_added(self, source_ref):
         pass
     
-    def on_lap_removed(self, lap_ref):
+    def on_lap_removed(self, source_ref):
         pass
         
-    def add_lap(self, lap_ref):
-        self.selected_laps[str(lap_ref)] = lap_ref
-        self.on_lap_added(lap_ref)
+    def add_lap(self, source_ref):
+        '''
+        Add a lap specified by the source reference
+        :param source_ref indicating the selected session / lap
+        :type SourceRef
+        '''
+        self.selected_laps[str(source_ref)] = source_ref
+        self.on_lap_added(source_ref)
+        self.laps_selected = True
     
-    def remove_lap(self, lap_ref):
+    def remove_lap(self, source_ref):
+        '''
+        Remove a lap specified by the source reference
+        :param source_ref indicating the selected session / lap
+        :type SourceRef
+        '''
         try:
-            self.on_lap_removed(lap_ref)
-            del(self.selected_laps[str(lap_ref)])
+            self.on_lap_removed(source_ref)
+            del(self.selected_laps[str(source_ref)])
+            self.laps_selected = bool(self.selected_laps)
         except Exception as e:
             Logger.error("AnalysisWidget: Error removing remove lap " + str(e))
 
@@ -99,6 +112,8 @@ class ChannelAnalysisWidget(AnalysisWidget):
     Extend this class if you want to make a general purpose widget that shows one or more channels.
     """
     sessions = ObjectProperty(None)
+    DEFAULT_CHANNELS = ["Speed"]
+    channels_selected = BooleanProperty(False)
     
     def __init__(self, **kwargs):
         super(ChannelAnalysisWidget, self).__init__(**kwargs)
@@ -109,24 +124,27 @@ class ChannelAnalysisWidget(AnalysisWidget):
     def on_sessions(self, instance, value):
         self.refresh_view()
         
-    def on_lap_added(self, lap_ref):
-        self.add_channels(self._selected_channels, lap_ref)
+    def on_lap_added(self, source_ref):
+        if len(self._selected_channels) == 0:
+            self.merge_selected_channels(self.DEFAULT_CHANNELS)
+        else:
+            self.add_channels(self._selected_channels, source_ref)
     
-    def on_lap_removed(self, lap_ref):
+    def on_lap_removed(self, source_ref):
         for channel in self._selected_channels:
-            self.remove_channel(channel, lap_ref)
+            self.remove_channel(channel, source_ref)
         self.refresh_view()
 
     def on_channel_selected(self, value):
         pass
     
-    def add_channels(self, channels, lap_ref):
+    def add_channels(self, channels, source_ref):
         '''
         Override this to add a channel / lap reference combo to the view
         '''
         pass
     
-    def remove_channel(self, channel, lap_ref):
+    def remove_channel(self, channel, source_ref):
         '''
         Override this function to remove a channel / lap reference combo from the view
         '''
@@ -139,8 +157,8 @@ class ChannelAnalysisWidget(AnalysisWidget):
         pass
 
     def _add_channels_all_laps(self, channels):
-        for lap_ref in self.selected_laps.itervalues():
-            self.add_channels(channels, lap_ref)
+        for source_ref in self.selected_laps.itervalues():
+            self.add_channels(channels, source_ref)
 
     def _remove_channel_all_laps(self, channel):
         for k,v in self.selected_laps.iteritems():
@@ -159,6 +177,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
         for c in added:
             current.append(c)
         self._add_channels_all_laps(added)
+        self.channels_selected = bool(self._selected_channels)
             
     def select_channels(self, selected_channels):
         self.merge_selected_channels(selected_channels)

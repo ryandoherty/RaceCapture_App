@@ -207,10 +207,10 @@ class LineChart(ChannelAnalysisWidget):
         
         self.dispatch_marker(pos[0], pos[1])
 
-    def remove_channel(self, channel, lap_ref):
+    def remove_channel(self, channel, source_ref):
         remove = []
         for channel_plot in self._channel_plots.itervalues():
-            if channel_plot.channel == channel and str(lap_ref) == str(channel_plot.sourceref):
+            if channel_plot.channel == channel and str(source_ref) == str(channel_plot.sourceref):
                 remove.append(channel_plot)
         
         for channel_plot in remove:
@@ -260,9 +260,9 @@ class LineChart(ChannelAnalysisWidget):
         finally:
             ProgressSpinner.decrement_refcount()
 
-    def add_channels(self, channels, lap_ref):
+    def add_channels(self, channels, source_ref):
         ProgressSpinner.increment_refcount()
         def get_results(results):
             #clone the incoming list of channels and pass it to the handler
             Clock.schedule_once(lambda dt: self._add_channels_results(channels[:], results))
-        self.datastore.get_channel_data(lap_ref, ['Distance'] + channels, get_results)
+        self.datastore.get_channel_data(source_ref, ['Distance'] + channels, get_results)
