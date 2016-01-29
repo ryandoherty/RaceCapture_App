@@ -65,11 +65,8 @@ class DataBus(object):
         This should be called when the channel information has changed
         """
         self.channel_metas.clear()
-        self.active_channel_names = []
         for meta in metas.channel_metas:
-            channel_name = meta.name
-            self.channel_metas[channel_name] = meta
-            self.active_channel_names.append(channel_name)
+            self.channel_metas[meta.name] = meta
             
         #add channel meta for existing filters
         for f in self.data_filters:
