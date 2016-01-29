@@ -150,6 +150,7 @@ class AnalysisMap(AnalysisWidget):
 
     
     def on_options(self, *args):
+        self.got_mouse = False
         self.show_customize_dialog()
             
     def _set_heat_map(self, heatmap_channel):
