@@ -3,7 +3,7 @@ class ChainableException(Exception):
         m = ''
 
         if cause is not None:
-            m += 'caused by %s' % repr(cause)
+            m += 'caused by {}'.format(repr(cause))
             m.strip()
 
         super(Exception, self).__init__(m)
