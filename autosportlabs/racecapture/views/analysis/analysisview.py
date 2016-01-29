@@ -1,3 +1,22 @@
+#
+# Race Capture App
+#
+# Copyright (C) 2014-2016 Autosport Labs
+#
+# This file is part of the Race Capture App
+#
+# This is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details. You should
+#have received a copy of the GNU General Public License along with
+#this code. If not, see <http://www.gnu.org/licenses/>.
 import os.path
 from threading import Thread
 import kivy
@@ -70,7 +89,6 @@ class AnalysisView(Screen):
             self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
             self.ids.analysismap.remove_map_path(source_ref)
-            self.ids.analysismap.remove_heat_values(source_ref)
     
     def on_tracks_updated(self, track_manager):
         self.ids.analysismap.track_manager = track_manager
