@@ -27,7 +27,8 @@ class StatusPump(object):
         self._listeners.append(listener)
 
     def start(self, rc_api):
-        if self._status_thread != None and self._status_thread.is_alive():
+        if self._status_thread is not None and \
+           self._status_thread.is_alive():
             Logger.info('StatusPump: Already running')
             return
 
