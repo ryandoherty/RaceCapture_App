@@ -162,17 +162,17 @@ class ChannelValuesView(ChannelAnalysisWidget):
         channels[channel_data_values.channel] = channel_data_values
         self._refresh_channels()
 
-    def add_channels(self, channels, lap_ref):
+    def add_channels(self, channels, source_ref):
         def get_results(results):
             Clock.schedule_once(lambda dt: self._add_channels_results(channels, results))
 
-        self.datastore.get_channel_data(lap_ref, channels, get_results)
+        self.datastore.get_channel_data(source_ref, channels, get_results)
     
     def refresh_view(self):
         self._refresh_channels()
         
-    def remove_channel(self, channel, lap_ref):
-        source_key = str(lap_ref)
+    def remove_channel(self, channel, source_ref):
+        source_key = str(source_ref)
         channels = self.channel_stats.get(source_key)
         channels.pop(channel, None)
 
