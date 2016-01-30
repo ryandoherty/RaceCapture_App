@@ -1,24 +1,12 @@
 from kivy.clock import Clock
 from time import sleep
 from kivy.logger import Logger
-from threading import Thread, Event, Lock
+from threading import Thread, Event
 from autosportlabs.racecapture.data.channels import ChannelMeta
 from autosportlabs.racecapture.data.sampledata import Sample, SampleMetaException, ChannelMetaCollection
 from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
-from autosportlabs.util.threadutil import safe_thread_exit
-
-class ThreadSafeDict(dict) :
-    def __init__(self, * p_arg, ** n_arg) :
-        dict.__init__(self, * p_arg, ** n_arg)
-        self._lock = Lock()
-
-    def __enter__(self) :
-        self._lock.acquire()
-        return self
-
-    def __exit__(self, type, value, traceback) :
-        self._lock.release()
+from autosportlabs.util.threadutil import safe_thread_exit, ThreadSafeDict
 
 DEFAULT_DATABUS_UPDATE_INTERVAL = 0.02  # 50Hz UI update rate
 
@@ -41,7 +29,7 @@ class DataBus(object):
 
     Note: DataBus must be started via start_update before any data flows
     """
-    channel_metas = {}
+    channel_metas = ThreadSafeDict()
     channel_data = ThreadSafeDict()
     sample = None
     channel_listeners = {}
@@ -68,24 +56,27 @@ class DataBus(object):
 
     def _update_datafilter_meta(self, datafilter):
         metas = datafilter.get_channel_meta()
-        for channel, meta in metas.iteritems():
-            self.channel_metas[channel] = meta
+        with self.channel_metas as cm:
+            for channel, meta in metas.iteritems():
+                cm[channel] = meta
 
     def update_channel_meta(self, metas):
         """update channel metadata information
         This should be called when the channel information has changed
         """
-        # update
-        with self.channel_data as cd:
-            self.channel_metas.clear()
+        # update channel metadata
+        with self.channel_metas as cm:
+            cm.clear()
             for meta in metas.channel_metas:
-                self.channel_metas[meta.name] = meta
+                cm[meta.name] = meta
 
             # add channel meta for existing filters
             for f in self.data_filters:
                 self._update_datafilter_meta(f)
-            # clear our list of channel data values, in case channels
-            # were removed on this metadata update
+
+        # clear our list of channel data values, in case channels
+        # were removed on this metadata update
+        with self.channel_data as cd:
             cd.clear()
 
         self.meta_updated = True
@@ -109,11 +100,12 @@ class DataBus(object):
 
     def notify_listeners(self, dt):
 
-        with self.channel_data as cd:
-            if self.meta_updated:
-                self.notify_meta_listeners(self.channel_metas)
+        if self.meta_updated:
+            with self.channel_metas as cm:
+                self.notify_meta_listeners(cm)
                 self.meta_updated = False
 
+        with self.channel_data as cd:
             for channel, value in cd.iteritems():
                 self.notify_channel_listeners(channel, value)
 
