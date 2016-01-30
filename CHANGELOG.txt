@@ -3,7 +3,17 @@
 * Improve analysis data query performance; don't block user interface for long operations; show spinner
 * Improve load time by targeting Android 4.4 / API level 19 
 * Add selected track name to analysis map view
-* Add lap selection legends to analysis map view
+* Added debugging option for API messages
+* Draw GPS path correctly if no track map is loaded
+* Automatically select a default channel (Speed) as needed
+* Only show active channels in dashboard channel selector view
+* Prevent status querying thread from multiplying when re-connect occurs
+* Show a lap/color trace legend for selected laps
+* Show a heatmap color legend when heatmap channels are enabled
+* Make it easier to differentiate heatmap paths by drawing them at varying widths
+* Add app version to status page
+* Firmware update screen improvements (show reminder to save config before updating)
+* Automatically extend min/max values upon importing analysis data
 
 ==1.4.1==
 * Fixed firmware update issue for Windows 10
