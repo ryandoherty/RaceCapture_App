@@ -8,6 +8,17 @@ from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
 from autosportlabs.util.threadutil import safe_thread_exit
 
+class ThreadSafeDict(dict) :
+    def __init__(self, * p_arg, ** n_arg) :
+        dict.__init__(self, * p_arg, ** n_arg)
+        self._lock = Lock()
+
+    def __enter__(self) :
+        self._lock.acquire()
+        return self
+
+    def __exit__(self, type, value, traceback) :
+        self._lock.release()
 
 DEFAULT_DATABUS_UPDATE_INTERVAL = 0.02  # 50Hz UI update rate
 
@@ -31,7 +42,7 @@ class DataBus(object):
     Note: DataBus must be started via start_update before any data flows
     """
     channel_metas = {}
-    channel_data = {}
+    channel_data = ThreadSafeDict()
     sample = None
     channel_listeners = {}
     meta_listeners = []
@@ -40,7 +51,6 @@ class DataBus(object):
     sample_listeners = []
     _polling = False
     rcp_meta_read = False
-    channel_data_lock = Lock()
 
     def __init__(self, **kwargs):
         super(DataBus, self).__init__(**kwargs)
@@ -66,7 +76,7 @@ class DataBus(object):
         This should be called when the channel information has changed
         """
         # update
-        with self.channel_data_lock:
+        with self.channel_data as cd:
             self.channel_metas.clear()
             for meta in metas.channel_metas:
                 self.channel_metas[meta.name] = meta
@@ -76,7 +86,7 @@ class DataBus(object):
                 self._update_datafilter_meta(f)
             # clear our list of channel data values, in case channels
             # were removed on this metadata update
-            self.channel_data.clear()
+            cd.clear()
 
         self.meta_updated = True
         self.rcp_meta_read = True
@@ -87,28 +97,28 @@ class DataBus(object):
     def update_samples(self, sample):
         """Update channel data with new samples
         """
-        with self.channel_data_lock:
+        with self.channel_data as cd:
             for sample_item in sample.samples:
                 channel = sample_item.channelMeta.name
                 value = sample_item.value
-                self.channel_data[channel] = value
+                cd[channel] = value
 
             # apply filters to updated data
             for f in self.data_filters:
-                f.filter(self.channel_data)
+                f.filter(cd)
 
     def notify_listeners(self, dt):
 
-        with self.channel_data_lock:
+        with self.channel_data as cd:
             if self.meta_updated:
                 self.notify_meta_listeners(self.channel_metas)
                 self.meta_updated = False
 
-            for channel, value in self.channel_data.iteritems():
+            for channel, value in cd.iteritems():
                 self.notify_channel_listeners(channel, value)
 
             for listener in self.sample_listeners:
-                listener(self.channel_data)
+                listener(cd)
 
     def notify_channel_listeners(self, channel, value):
         listeners = self.channel_listeners.get(str(channel))
