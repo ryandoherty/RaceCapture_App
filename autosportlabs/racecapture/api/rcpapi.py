@@ -99,6 +99,7 @@ class RcpApi:
     def _shutdown_workers(self):
         Logger.info('RCPAPI: Stopping msg rx worker')
         self._running.clear()
+        # this allows the auto detect worker to fall through if needed
         self._auto_detect_event.set()
         self._enable_autodetect.set()
         self._auto_detect_worker.join()
