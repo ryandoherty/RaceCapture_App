@@ -65,6 +65,8 @@ class RcpApi:
     _auto_detect_event = Event()
     _auto_detect_busy = Event()
 
+    COMMAND_SEQUENCE_TIMEOUT = 1.0
+
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
         self._running = Event()
@@ -236,7 +238,7 @@ class RcpApi:
         while self._running.is_set():
             try:
                 # Block for 1 second for messages
-                command = self._command_queue.get(True, 1.0)
+                command = self._command_queue.get(True, RcpApi.COMMAND_SEQUENCE_TIMEOUT)
 
                 command_list = command.command_list
                 rootName = command.rootName
