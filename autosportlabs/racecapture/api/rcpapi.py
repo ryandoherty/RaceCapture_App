@@ -114,6 +114,7 @@ class RcpApi:
 
     def cleanup_comms(self):
         self.comms.cleanup()
+        self.stop_message_rx_worker()
 
     def shutdown_comms(self):
         Logger.info('RCPAPI: shutting down comms')
