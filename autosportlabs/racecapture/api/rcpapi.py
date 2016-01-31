@@ -202,7 +202,7 @@ class RcpApi:
                 else:
                     sleep(0.25)
 
-        Logger.info("RCPAPI: RxWorker exiting")
+        Logger.info("RCPAPI: msg_rx_worker exiting")
 
     def rcpCmdComplete(self, msgReply):
         self.cmdSequenceQueue.put(msgReply)
