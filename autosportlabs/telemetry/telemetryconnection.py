@@ -124,7 +124,7 @@ class TelemetryManager(EventDispatcher):
 
     # Starts connection, checks to see if requirements are met
     def start(self):
-        Logger.info("TelemetryManager: start() telemetry_enabled: " + str(self.telemetry_enabled) + " cell_enabled: "+ str(self.cell_enabled))
+        Logger.info("TelemetryManager: start() telemetry_enabled: " + str(self.telemetry_enabled) + " cell_enabled: " + str(self.cell_enabled))
         self._auth_failed = False
 
         if self.telemetry_enabled and not self.cell_enabled and self.device_id != "":
@@ -170,7 +170,7 @@ class TelemetryManager(EventDispatcher):
     # Status function that receives events from TelemetryConnection thread
     # Bubbles up events into main app
     def status(self, status, msg, status_code):
-        Logger.debug("TelemetryManager: got telemetry status: " + str(status) + " message: " + str(msg) + " code: "+ str(status_code))
+        Logger.debug("TelemetryManager: got telemetry status: " + str(status) + " message: " + str(msg) + " code: " + str(status_code))
         if status_code == TelemetryConnection.STATUS_CONNECTED:
             self.dispatch('on_connected', msg)
         elif status_code == TelemetryConnection.STATUS_AUTHORIZED:
@@ -237,7 +237,7 @@ class TelemetryConnection(asynchat.async_chat):
 
     SAMPLE_INTERVAL = 0.1
 
-    def __init__(self, host, port, device_id, channels, data_bus, update_status_cb):
+    def __init__(self, host, port, device_id, channel_metas, data_bus, update_status_cb):
         asynchat.async_chat.__init__(self)
 
         self.status = self.STATUS_UNINITIALIZED
@@ -252,7 +252,7 @@ class TelemetryConnection(asynchat.async_chat):
         self.authorized = False
         self.meta_sent = False
 
-        self._channel_data = channels
+        self._channel_metas = channel_metas
         self._sample_data = None
 
         self.host = host
@@ -273,7 +273,7 @@ class TelemetryConnection(asynchat.async_chat):
     def _on_meta(self, meta):
         Logger.debug("TelemetryConnection: got new meta")
         if self.authorized:
-            self._channel_data = meta
+            self._channel_metas = meta
 
             self._running.clear()
             try:
@@ -354,7 +354,7 @@ class TelemetryConnection(asynchat.async_chat):
         t, v, trace = sys.exc_info()
 
         tbinfo = []
-        if not trace: # Must have a traceback
+        if not trace:  # Must have a traceback
             raise AssertionError("traceback does not exist")
         while trace:
             tbinfo.append((
@@ -379,7 +379,7 @@ class TelemetryConnection(asynchat.async_chat):
                 Logger.error("TelemetryConnection: timeout connecting")
                 self._update_status("error", "Timeout connecting", self.ERROR_TIMEOUT)
             else:
-                Logger.error("TelemetryConnection: unknown error connecting " + str(t) + " " +str(v))
+                Logger.error("TelemetryConnection: unknown error connecting " + str(t) + " " + str(v))
                 self._update_status("error", "Unknown error", self.ERROR_UNKNOWN)
             self.end()
         else:
@@ -446,15 +446,16 @@ class TelemetryConnection(asynchat.async_chat):
         msg = {"s":{"meta":[]}}
         meta = []
 
-        for channel_name, channel_config in self._channel_data.iteritems():
-            channel = {
-                "nm": channel_config.name,
-                "ut": channel_config.units,
-                "sr": channel_config.sampleRate,
-                "min": channel_config.min,
-                "max": channel_config.max
-            }
-            meta.append(channel)
+        with self._channel_metas as cm:
+            for channel_config in cm.itervalues():
+                channel = {
+                    "nm": channel_config.name,
+                    "ut": channel_config.units,
+                    "sr": channel_config.sampleRate,
+                    "min": channel_config.min,
+                    "max": channel_config.max
+                }
+                meta.append(channel)
 
         msg["s"]["meta"] = meta
         msg_json = json.dumps(msg)
@@ -465,26 +466,26 @@ class TelemetryConnection(asynchat.async_chat):
         if self._sample_data is not None:
             update = {"s": {"d": None}}
             bitmasks = []
-            bitmasks_needed = int(max(0, math.floor((len(self._channel_data) - 1) / 32)) + 1)
             channel_bit_position = 0
             bitmask_index = 0
-
             data = []
 
-            for x in range(0, bitmasks_needed):
-                bitmasks.append(0)
+            with self._sample_data as sd, self._channel_metas as cm:
+                bitmasks_needed = int(max(0, math.floor((len(cm) - 1) / 32)) + 1)
+                for x in range(0, bitmasks_needed):
+                    bitmasks.append(0)
 
-            for channel_name, value in self._channel_data.iteritems():
-                if channel_bit_position > 31:
-                    bitmask_index += 1
-                    channel_bit_position = 0
+                for channel_name, value in cm.iteritems():
+                    if channel_bit_position > 31:
+                        bitmask_index += 1
+                        channel_bit_position = 0
 
-                if channel_name in self._sample_data:
-                    value = self._sample_data[channel_name]
-                    bitmasks[bitmask_index] = bitmasks[bitmask_index] | (1 << channel_bit_position)
-                    data.append(value)
+                    value = sd.get(channel_name)
+                    if value is not None:
+                        bitmasks[bitmask_index] = bitmasks[bitmask_index] | (1 << channel_bit_position)
+                        data.append(value)
 
-                channel_bit_position += 1
+                    channel_bit_position += 1
 
             for bitmask in bitmasks:
                 data.append(bitmask)
