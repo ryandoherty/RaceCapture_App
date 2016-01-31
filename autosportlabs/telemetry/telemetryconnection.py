@@ -470,23 +470,22 @@ class TelemetryConnection(asynchat.async_chat):
             bitmask_index = 0
             data = []
 
-            with self._sample_data as sd:
-                with self._channel_metas as cm:
-                    bitmasks_needed = int(max(0, math.floor((len(cm) - 1) / 32)) + 1)
-                    for x in range(0, bitmasks_needed):
-                        bitmasks.append(0)
+            with self._sample_data as sd, self._channel_metas as cm:
+                bitmasks_needed = int(max(0, math.floor((len(cm) - 1) / 32)) + 1)
+                for x in range(0, bitmasks_needed):
+                    bitmasks.append(0)
 
-                    for channel_name, value in cm.iteritems():
-                        if channel_bit_position > 31:
-                            bitmask_index += 1
-                            channel_bit_position = 0
+                for channel_name, value in cm.iteritems():
+                    if channel_bit_position > 31:
+                        bitmask_index += 1
+                        channel_bit_position = 0
 
-                        value = sd.get(channel_name)
-                        if value is not None:
-                            bitmasks[bitmask_index] = bitmasks[bitmask_index] | (1 << channel_bit_position)
-                            data.append(value)
+                    value = sd.get(channel_name)
+                    if value is not None:
+                        bitmasks[bitmask_index] = bitmasks[bitmask_index] | (1 << channel_bit_position)
+                        data.append(value)
 
-                        channel_bit_position += 1
+                    channel_bit_position += 1
 
             for bitmask in bitmasks:
                 data.append(bitmask)
