@@ -30,6 +30,11 @@ class StatusPump(object):
         self._listeners.append(listener)
 
     def start(self, rc_api):
+        if self._status_thread is not None and \
+           self._status_thread.is_alive():
+            Logger.info('StatusPump: Already running')
+            return
+
         self._rc_api = rc_api
         t = Thread(target=self.status_worker)
         t.daemon = True
