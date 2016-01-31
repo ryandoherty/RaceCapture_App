@@ -646,14 +646,14 @@ class RcpApi:
             version_result_event.set()
 
         while self._running.is_set():
+            self._auto_detect_event.wait()
+            self._auto_detect_event.clear()
+            self._enable_autodetect.wait()
+            # check again if we're shutting down
+            # to prevent a needless re-detection attempt
+            if not self._running.is_set():
+                break
             try:
-                self._auto_detect_event.wait()
-                self._auto_detect_event.clear()
-                self._enable_autodetect.wait()
-                # check again if we're shutting down
-                # to prevent a needless re-detection attempt
-                if not self._running.is_set():
-                    break
                 Logger.info("RCPAPI: Starting auto-detect")
                 self._auto_detect_busy.set()
                 self.sendCommandLock.acquire()
@@ -715,11 +715,10 @@ class RcpApi:
                 Logger.error('RCPAPI: Error running auto detect: ' + str(e))
                 Logger.debug(traceback.format_exc())
             finally:
-                if self._running.is_set():
-                    Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
-                    self._auto_detect_busy.clear()
-                    self.removeListener("ver", on_ver_win)
-                    self.sendCommandLock.release()
-                    sleep(AUTODETECT_COOLOFF_TIME)
+                Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
+                self._auto_detect_busy.clear()
+                self.removeListener("ver", on_ver_win)
+                self.sendCommandLock.release()
+                sleep(AUTODETECT_COOLOFF_TIME)
 
         Logger.info('RCPAPI: auto_detect_worker exiting')
