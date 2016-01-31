@@ -6,8 +6,7 @@ from autosportlabs.racecapture.data.channels import ChannelMeta
 from autosportlabs.racecapture.data.sampledata import Sample, SampleMetaException, ChannelMetaCollection
 from autosportlabs.racecapture.databus.filter.bestlapfilter import BestLapFilter
 from autosportlabs.racecapture.databus.filter.laptimedeltafilter import LaptimeDeltaFilter
-from autosportlabs.util.threadutil import safe_thread_exit
-
+from autosportlabs.util.threadutil import safe_thread_exit, ThreadSafeDict
 
 DEFAULT_DATABUS_UPDATE_INTERVAL = 0.02  # 50Hz UI update rate
 
@@ -30,8 +29,8 @@ class DataBus(object):
 
     Note: DataBus must be started via start_update before any data flows
     """
-    channel_metas = {}
-    channel_data = {}
+    channel_metas = ThreadSafeDict()
+    channel_data = ThreadSafeDict()
     sample = None
     channel_listeners = {}
     meta_listeners = []
@@ -57,20 +56,28 @@ class DataBus(object):
 
     def _update_datafilter_meta(self, datafilter):
         metas = datafilter.get_channel_meta()
-        for channel, meta in metas.iteritems():
-            self.channel_metas[channel] = meta
+        with self.channel_metas as cm:
+            for channel, meta in metas.iteritems():
+                cm[channel] = meta
 
     def update_channel_meta(self, metas):
         """update channel metadata information
         This should be called when the channel information has changed
         """
-        self.channel_metas.clear()
-        for meta in metas.channel_metas:
-            self.channel_metas[meta.name] = meta
+        # update channel metadata
+        with self.channel_metas as cm, self.channel_data as cd:
+            # clear our list of channel data values, in case channels
+            # were removed on this metadata update
+            cd.clear()
 
-        # add channel meta for existing filters
-        for f in self.data_filters:
-            self._update_datafilter_meta(f)
+            # clear and reload our channel metas
+            cm.clear()
+            for meta in metas.channel_metas:
+                cm[meta.name] = meta
+
+            # add channel meta for existing filters
+            for f in self.data_filters:
+                self._update_datafilter_meta(f)
 
         self.meta_updated = True
         self.rcp_meta_read = True
@@ -81,28 +88,29 @@ class DataBus(object):
     def update_samples(self, sample):
         """Update channel data with new samples
         """
-        for sample_item in sample.samples:
-            channel = sample_item.channelMeta.name
-            value = sample_item.value
-            self.channel_data[channel] = value
+        with self.channel_data as cd:
+            for sample_item in sample.samples:
+                channel = sample_item.channelMeta.name
+                value = sample_item.value
+                cd[channel] = value
 
-        # apply filters to updated data
-        for f in self.data_filters:
-            f.filter(self.channel_data)
+            # apply filters to updated data
+            for f in self.data_filters:
+                f.filter(cd)
 
     def notify_listeners(self, dt):
-        sample_data = {}
 
         if self.meta_updated:
-            self.notify_meta_listeners(self.channel_metas)
-            self.meta_updated = False
+            with self.channel_metas as cm:
+                self.notify_meta_listeners(cm)
+                self.meta_updated = False
 
-        for channel, value in self.channel_data.iteritems():
-            self.notify_channel_listeners(channel, value)
-            sample_data[channel] = value
+        with self.channel_data as cd:
+            for channel, value in cd.iteritems():
+                self.notify_channel_listeners(channel, value)
 
-        for listener in self.sample_listeners:
-            listener(sample_data)
+            for listener in self.sample_listeners:
+                listener(cd)
 
     def notify_channel_listeners(self, channel, value):
         listeners = self.channel_listeners.get(str(channel))
@@ -202,9 +210,9 @@ class DataBusPump(object):
         dataBus = self._data_bus
         try:
             sample.fromJson(sample_json)
-            dataBus.update_samples(sample)
             if sample.updated_meta:
                 dataBus.update_channel_meta(sample.metas)
+            dataBus.update_samples(sample)
             self._sample_event.set()
         except SampleMetaException:
             # this is to prevent repeated sample meta requests
@@ -218,6 +226,10 @@ class DataBusPump(object):
             else:
                 self._meta_is_stale_counter -= 1
 
+    def stopDataPump(self):
+        self._running.clear()
+        self._sample_thread.join()
+
     def meta_is_stale(self):
         self.request_meta()
 
@@ -229,6 +241,7 @@ class DataBusPump(object):
         sample_event = self._sample_event
 
         Logger.info('DataBusPump: sample_worker starting')
+
         sample_event.clear()
         if sample_event.wait(SAMPLE_POLL_TEST_TIMEOUT) == True:
             Logger.info('DataBusPump: Async sampling detected')
