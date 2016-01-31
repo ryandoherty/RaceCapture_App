@@ -65,7 +65,12 @@ class DataBus(object):
         This should be called when the channel information has changed
         """
         # update channel metadata
-        with self.channel_metas as cm:
+        with self.channel_metas as cm, self.channel_data as cd:
+            # clear our list of channel data values, in case channels
+            # were removed on this metadata update
+            cd.clear()
+
+            # clear and reload our channel metas
             cm.clear()
             for meta in metas.channel_metas:
                 cm[meta.name] = meta
@@ -74,10 +79,6 @@ class DataBus(object):
             for f in self.data_filters:
                 self._update_datafilter_meta(f)
 
-        # clear our list of channel data values, in case channels
-        # were removed on this metadata update
-        with self.channel_data as cd:
-            cd.clear()
 
         self.meta_updated = True
         self.rcp_meta_read = True
