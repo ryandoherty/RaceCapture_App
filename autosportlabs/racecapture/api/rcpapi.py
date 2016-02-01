@@ -11,29 +11,29 @@ from kivy.clock import Clock
 from kivy.logger import Logger
 from traceback import print_stack
 
-TRACK_ADD_MODE_IN_PROGRESS      = 1
-TRACK_ADD_MODE_COMPLETE         = 2
+TRACK_ADD_MODE_IN_PROGRESS = 1
+TRACK_ADD_MODE_COMPLETE = 2
 
-SCRIPT_ADD_MODE_IN_PROGRESS     = 1
-SCRIPT_ADD_MODE_COMPLETE        = 2
+SCRIPT_ADD_MODE_IN_PROGRESS = 1
+SCRIPT_ADD_MODE_COMPLETE = 2
 
-DEFAULT_LEVEL2_RETRIES          = 3
-DEFAULT_MSG_RX_TIMEOUT          = 1
+DEFAULT_LEVEL2_RETRIES = 3
+DEFAULT_MSG_RX_TIMEOUT = 1
 
-AUTODETECT_COOLOFF_TIME         = 1
-AUTODETECT_LEVEL2_RETRIES       = 1
-DEFAULT_READ_RETRIES            = 2
+AUTODETECT_COOLOFF_TIME = 1
+AUTODETECT_LEVEL2_RETRIES = 1
+DEFAULT_READ_RETRIES = 2
 
-COMMS_KEEP_ALIVE_TIMEOUT        = 2
+COMMS_KEEP_ALIVE_TIMEOUT = 2
 
-NO_DATA_AVAILABLE_DELAY         = 0.1
+NO_DATA_AVAILABLE_DELAY = 0.1
 class RcpCmd:
     name = None
     cmd = None
     payload = None
     index = None
     option = None
-    def __init__(self, name, cmd, payload = None, index = None, option = None):
+    def __init__(self, name, cmd, payload=None, index=None, option=None):
         self.name = name
         self.cmd = cmd
         self.payload = payload
@@ -65,6 +65,8 @@ class RcpApi:
     _auto_detect_event = Event()
     _auto_detect_busy = Event()
 
+    COMMAND_SEQUENCE_TIMEOUT = 1.0
+
     def __init__(self, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
         self._running = Event()
@@ -91,29 +93,36 @@ class RcpApi:
 
     def _start_message_rx_worker(self):
         self._running.set()
-        self._msg_rx_thread = Thread(target=self.msg_rx_worker)
-        self._msg_rx_thread.daemon = True
-        self._msg_rx_thread.start()
+        t = Thread(target=self.msg_rx_worker)
+        t.start()
+        self._msg_rx_thread = t
 
-    def stop_message_rx_worker(self):
+    def _shutdown_workers(self):
         Logger.info('RCPAPI: Stopping msg rx worker')
         self._running.clear()
+        # this allows the auto detect worker to fall through if needed
+        self._auto_detect_event.set()
+        self._enable_autodetect.set()
+        self._auto_detect_worker.join()
         self._msg_rx_thread.join()
+        self._cmd_sequence_thread.join()
 
     def _start_cmd_sequence_worker(self):
-        self._cmd_sequence_thread = Thread(target=self.cmd_sequence_worker)
-        self._cmd_sequence_thread.daemon = True
-        self._cmd_sequence_thread.start()
+        t = Thread(target=self.cmd_sequence_worker)
+        t.start()
+        self._cmd_sequence_thread = t
 
-    def init_comms(self, comms):
+
+    def init_api(self, comms):
         self.comms = comms
         self._start_message_rx_worker()
         self._start_cmd_sequence_worker()
         self.start_auto_detect_worker()
         Clock.schedule_interval(lambda dt: comms.keep_alive(), COMMS_KEEP_ALIVE_TIMEOUT)
 
-    def cleanup_comms(self):
-        self.comms.cleanup()
+    def shutdown_api(self):
+        self._shutdown_workers()
+        self.shutdown_comms()
 
     def shutdown_comms(self):
         Logger.info('RCPAPI: shutting down comms')
@@ -148,7 +157,7 @@ class RcpApi:
             listeners.discard(callback)
 
     def msg_rx_worker(self):
-        Logger.info('RCPAPI: msg_rx_worker started')
+        Logger.info('RCPAPI: msg_rx_worker starting')
         comms = self.comms
         error_count = 0
         while self._running.is_set():
@@ -156,10 +165,10 @@ class RcpApi:
             try:
                 msg = comms.read_message()
                 if msg:
-                    #clean incoming string, and drop illegal characters
+                    # clean incoming string, and drop illegal characters
                     msg = unicode(msg, errors='ignore')
                     Logger.debug('RCPAPI: Rx: ' + str(msg))
-                    msgJson = json.loads(msg, strict = False)
+                    msgJson = json.loads(msg, strict=False)
                     self.on_rx(True)
                     error_count = 0
                     for messageName in msgJson.keys():
@@ -179,7 +188,7 @@ class RcpApi:
 
             except PortNotOpenException:
                 Logger.debug("RCPAPI: Port not open...")
-                msg=''
+                msg = ''
                 sleep(1.0)
             except Exception:
                 Logger.warn('RCPAPI: Message rx worker exception: {} | {}'.format(msg, str(Exception)))
@@ -193,7 +202,7 @@ class RcpApi:
                 else:
                     sleep(0.25)
 
-        Logger.info("RCPAPI: RxWorker exiting")
+        Logger.info("RCPAPI: msg_rx_worker exiting")
 
     def rcpCmdComplete(self, msgReply):
         self.cmdSequenceQueue.put(msgReply)
@@ -223,9 +232,11 @@ class RcpApi:
         self._command_queue.put(command)
 
     def cmd_sequence_worker(self):
-        while True:
+        Logger.info('RCPAPI: cmd_sequence_worker starting')
+        while self._running.is_set():
             try:
-                command = self._command_queue.get() #this blocks forever
+                # Block for 1 second for messages
+                command = self._command_queue.get(True, RcpApi.COMMAND_SEQUENCE_TIMEOUT)
 
                 command_list = command.command_list
                 rootName = command.rootName
@@ -305,8 +316,13 @@ class RcpApi:
 
                 Logger.info('RCPAPI: Execute Sequence complete')
 
+            except Queue.Empty:
+                pass
+
             except Exception as e:
                 Logger.error('RCPAPI: Execute command exception ' + str(e))
+
+        Logger.info('RCPAPI: cmd_sequence_worker exiting')
 
     def sendCommand(self, cmd):
         try:
@@ -326,7 +342,7 @@ class RcpApi:
             self.on_tx(True)
 
 
-    def sendGet(self, name, index = None):
+    def sendGet(self, name, index=None):
         if index == None:
             index = None
         else:
@@ -334,7 +350,7 @@ class RcpApi:
         cmd = {name:index}
         self.sendCommand(cmd)
 
-    def sendSet(self, name, payload, index = None):
+    def sendSet(self, name, payload, index=None):
         if not index == None:
             self.sendCommand({name: {str(index): payload}})
         else:
@@ -345,26 +361,26 @@ class RcpApi:
         winCallback(cfg)
 
     def getRcpCfg(self, cfg, winCallback, failCallback):
-        cmdSequence = [       RcpCmd('ver',         self.sendGetVersion),
-                              RcpCmd('capabilities',self.getCapabilities),
-                              RcpCmd('analogCfg',   self.getAnalogCfg),
-                              RcpCmd('imuCfg',      self.getImuCfg),
-                              RcpCmd('gpsCfg',      self.getGpsCfg),
-                              RcpCmd('lapCfg',      self.getLapCfg),
-                              RcpCmd('timerCfg',    self.getTimerCfg),
-                              RcpCmd('gpioCfg',     self.getGpioCfg),
-                              RcpCmd('pwmCfg',      self.getPwmCfg),
-                              RcpCmd('trackCfg',    self.getTrackCfg),
-                              RcpCmd('canCfg',      self.getCanCfg),
-                              RcpCmd('obd2Cfg',     self.getObd2Cfg),
-                              RcpCmd('scriptCfg',   self.getScript),
-                              RcpCmd('connCfg',     self.getConnectivityCfg),
-                              RcpCmd('trackDb',     self.getTrackDb)
+        cmdSequence = [       RcpCmd('ver', self.sendGetVersion),
+                              RcpCmd('capabilities', self.getCapabilities),
+                              RcpCmd('analogCfg', self.getAnalogCfg),
+                              RcpCmd('imuCfg', self.getImuCfg),
+                              RcpCmd('gpsCfg', self.getGpsCfg),
+                              RcpCmd('lapCfg', self.getLapCfg),
+                              RcpCmd('timerCfg', self.getTimerCfg),
+                              RcpCmd('gpioCfg', self.getGpioCfg),
+                              RcpCmd('pwmCfg', self.getPwmCfg),
+                              RcpCmd('trackCfg', self.getTrackCfg),
+                              RcpCmd('canCfg', self.getCanCfg),
+                              RcpCmd('obd2Cfg', self.getObd2Cfg),
+                              RcpCmd('scriptCfg', self.getScript),
+                              RcpCmd('connCfg', self.getConnectivityCfg),
+                              RcpCmd('trackDb', self.getTrackDb)
                            ]
 
         self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)
 
-    def writeRcpCfg(self, cfg, winCallback = None, failCallback = None):
+    def writeRcpCfg(self, cfg, winCallback=None, failCallback=None):
         cmdSequence = []
 
         connCfg = cfg.connectivityConfig
@@ -441,13 +457,13 @@ class RcpApi:
 
         self.sendCommand({'sysReset': {'loader':loaderint, 'delay':reset_delay}})
 
-    def getAnalogCfg(self, channelId = None):
+    def getAnalogCfg(self, channelId=None):
         self.sendGet('getAnalogCfg', channelId)
 
     def setAnalogCfg(self, analogCfg, channelId):
         self.sendSet('setAnalogCfg', analogCfg, channelId)
 
-    def getImuCfg(self, channelId = None):
+    def getImuCfg(self, channelId=None):
         self.sendGet('getImuCfg', channelId)
 
     def setImuCfg(self, imuCfg, channelId):
@@ -465,7 +481,7 @@ class RcpApi:
     def setGpsCfg(self, gpsCfg):
         self.sendSet('setGpsCfg', gpsCfg)
 
-    def getTimerCfg(self, channelId = None):
+    def getTimerCfg(self, channelId=None):
         self.sendGet('getTimerCfg', channelId)
 
     def setTimerCfg(self, timerCfg, channelId):
@@ -474,10 +490,10 @@ class RcpApi:
     def setGpioCfg(self, gpioCfg, channelId):
         self.sendSet('setGpioCfg', gpioCfg, channelId)
 
-    def getGpioCfg(self, channelId = None):
+    def getGpioCfg(self, channelId=None):
         self.sendGet('getGpioCfg', channelId)
 
-    def getPwmCfg(self, channelId = None):
+    def getPwmCfg(self, channelId=None):
         self.sendGet('getPwmCfg', channelId)
 
     def setPwmCfg(self, pwmCfg, channelId):
@@ -511,7 +527,7 @@ class RcpApi:
         self.sendGet('getScriptCfg', None)
 
     def setScriptPage(self, scriptPage, page, mode):
-        self.sendCommand({'setScriptCfg': {'data':scriptPage,'page':page, 'mode':mode}})
+        self.sendCommand({'setScriptCfg': {'data':scriptPage, 'page':page, 'mode':mode}})
 
     def get_status(self):
         self.sendGet('getStatus', None)
@@ -536,7 +552,7 @@ class RcpApi:
     def runScript(self, winCallback, failCallback):
         self.executeSingle(RcpCmd('runScript', self.sendRunScript), winCallback, failCallback)
 
-    def setLogfileLevel(self, level, winCallback = None, failCallback = None):
+    def setLogfileLevel(self, level, winCallback=None, failCallback=None):
         def setLogfileLevelCmd():
             self.sendCommand({'setLogfileLevel': {'level':level}})
 
@@ -545,7 +561,7 @@ class RcpApi:
         else:
             setLogfileLevelCmd()
 
-    def getLogfile(self, winCallback = None, failCallback = None):
+    def getLogfile(self, winCallback=None, failCallback=None):
         def getLogfileCmd():
             self.sendCommand({'getLogfile': None})
 
@@ -613,11 +629,12 @@ class RcpApi:
     def start_auto_detect_worker(self):
         self._auto_detect_event.clear()
         t = Thread(target=self.auto_detect_worker)
-        t.daemon = True
         t.start()
+        self._auto_detect_worker = t
 
     def auto_detect_worker(self):
 
+        Logger.info('RCPAPI: auto_detect_worker starting')
         class VersionResult(object):
             version_json = None
 
@@ -625,15 +642,20 @@ class RcpApi:
             version_result.version_json = value
             version_result_event.set()
 
-        while True:
+        while self._running.is_set():
+            self._auto_detect_event.wait()
+            self._auto_detect_event.clear()
+            self._enable_autodetect.wait()
+            # check again if we're shutting down
+            # to prevent a needless re-detection attempt
+            if not self._running.is_set():
+                break
             try:
-                self._auto_detect_event.wait()
-                self._auto_detect_event.clear()
-                self._enable_autodetect.wait()
                 Logger.info("RCPAPI: Starting auto-detect")
                 self._auto_detect_busy.set()
                 self.sendCommandLock.acquire()
                 self.addListener("ver", on_ver_win)
+
 
                 comms = self.comms
                 if comms and comms.isOpen():
@@ -662,7 +684,7 @@ class RcpApi:
                         if version_result.version_json != None:
                             testVer.fromJson(version_result.version_json.get('ver', None))
                             if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
-                                break #we found something!
+                                break  # we found something!
                         else:
                             try:
                                 Logger.warn('RCPAPI: Giving up on ' + str(p))
@@ -695,3 +717,5 @@ class RcpApi:
                 self.removeListener("ver", on_ver_win)
                 self.sendCommandLock.release()
                 sleep(AUTODETECT_COOLOFF_TIME)
+
+        Logger.info('RCPAPI: auto_detect_worker exiting')

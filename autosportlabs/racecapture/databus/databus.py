@@ -79,7 +79,6 @@ class DataBus(object):
             for f in self.data_filters:
                 self._update_datafilter_meta(f)
 
-
         self.meta_updated = True
         self.rcp_meta_read = True
 
@@ -177,7 +176,7 @@ class DataBusPump(object):
     def __init__(self, **kwargs):
         super(DataBusPump, self).__init__(**kwargs)
 
-    def startDataPump(self, data_bus, rc_api):
+    def start(self, data_bus, rc_api):
         if self._sample_thread == None:
             self._rc_api = rc_api
             self._data_bus = data_bus
@@ -186,12 +185,19 @@ class DataBusPump(object):
             rc_api.addListener('meta', self.on_meta)
 
             self._running.set()
-            self._sample_thread = Thread(target=self.sample_worker)
-            self._sample_thread.daemon = True
-            self._sample_thread.start()
+            t = Thread(target=self.sample_worker)
+            t.start()
+            self._sample_thread = t
         else:
             # we're already running, refresh channel meta data
             self.meta_is_stale()
+
+    def stop(self):
+        self._running.clear()
+        try:
+            self._sample_thread.join()
+        except Exception as e:
+            Logger.warning('DataBusPump: Failed to join sample_worker: {}'.format(e))
 
     def on_meta(self, meta_json):
         metas = self.sample.metas
@@ -234,7 +240,8 @@ class DataBusPump(object):
         rc_api = self._rc_api
         sample_event = self._sample_event
 
-        Logger.info('DataBusPump: DataBus Sampler Starting')
+        Logger.info('DataBusPump: sample_worker starting')
+
         sample_event.clear()
         if sample_event.wait(SAMPLE_POLL_TEST_TIMEOUT) == True:
             Logger.info('DataBusPump: Async sampling detected')
@@ -255,6 +262,6 @@ class DataBusPump(object):
                 finally:
                     sample_event.clear()
 
-        Logger.info('DataBusPump: DataBus Sampler Exiting')
+        Logger.info('DataBusPump: sample_worker exiting')
         safe_thread_exit()
 

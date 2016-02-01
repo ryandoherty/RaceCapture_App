@@ -14,6 +14,7 @@
 * Add app version to status page
 * Firmware update screen improvements (show reminder to save config before updating)
 * Automatically extend min/max values upon importing analysis data
+* Made app exit more cleanly / address exceptions on program exit
 
 ==1.4.1==
 * Fixed firmware update issue for Windows 10
