@@ -185,9 +185,9 @@ class DataBusPump(object):
             rc_api.addListener('meta', self.on_meta)
 
             self._running.set()
-            self._sample_thread = Thread(target=self.sample_worker)
-            self._sample_thread.daemon = True
-            self._sample_thread.start()
+            t = Thread(target=self.sample_worker)
+            t.start()
+            self._sample_thread = t
         else:
             # we're already running, refresh channel meta data
             self.meta_is_stale()

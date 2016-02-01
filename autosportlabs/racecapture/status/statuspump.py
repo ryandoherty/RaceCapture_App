@@ -37,7 +37,6 @@ class StatusPump(object):
 
         self._rc_api = rc_api
         t = Thread(target=self.status_worker)
-        t.daemon = True
         self._running.set()
         t.start()
         self._status_thread = t

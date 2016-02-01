@@ -94,7 +94,6 @@ class RcpApi:
     def _start_message_rx_worker(self):
         self._running.set()
         t = Thread(target=self.msg_rx_worker)
-        t.daemon = True
         t.start()
         self._msg_rx_thread = t
 
@@ -110,7 +109,6 @@ class RcpApi:
 
     def _start_cmd_sequence_worker(self):
         t = Thread(target=self.cmd_sequence_worker)
-        t.daemon = True
         t.start()
         self._cmd_sequence_thread = t
 
@@ -631,7 +629,6 @@ class RcpApi:
     def start_auto_detect_worker(self):
         self._auto_detect_event.clear()
         t = Thread(target=self.auto_detect_worker)
-        t.daemon = True
         t.start()
         self._auto_detect_worker = t
 
