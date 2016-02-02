@@ -34,7 +34,9 @@ File Headers
 ============
 
 Always ensure that the file header at the top of the file matches the
-following:
+following block. If it doesn't, please fix it as part of your patch.
+
+```
 #
 # Race Capture App
 #
@@ -54,6 +56,5 @@ following:
 # See the GNU General Public License for more details. You should
 #have received a copy of the GNU General Public License along with
 #this code. If not, see <http://www.gnu.org/licenses/>.
-
-If it doesn't, please fix it as part of your patch.
+```
 
