@@ -952,6 +952,14 @@ class VersionConfig(object):
     def is_compatible_version(self):
         return self.major == RCP_COMPATIBLE_MAJOR_VERSION and self.minor >= RCP_MINIMUM_MINOR_VERSION
     
+    @property
+    def is_valid(self):
+        '''
+        Indicates if version data represents valid version data
+        :returns True if version data is valid
+        '''
+        return self.major > 0 and len(self.name) > 0 and len(self.serial) > 0
+
 class ChannelCapabilities(object):
     analog = 8
     imu = 6
