@@ -1,5 +1,6 @@
 ==1.4.3==
 * Resolves sporadic stuck communications status bar
+* Resolves sporadic issue where rapid lap selection may result in internal errors
 
 ==1.4.2==
 * Connect to the first RaceCapture device it can detect, regardless of the name provided
