@@ -683,7 +683,7 @@ class RcpApi:
                         version_result_event.clear()
                         if version_result.version_json != None:
                             testVer.fromJson(version_result.version_json.get('ver', None))
-                            if testVer.major > 0 or testVer.minor > 0 or testVer.bugfix > 0:
+                            if testVer.is_valid:
                                 break  # we found something!
                         else:
                             try:
