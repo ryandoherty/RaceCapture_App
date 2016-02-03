@@ -382,9 +382,9 @@ class RaceCaptureApp(App):
         self.mainNav.anim_type = 'slide_above_anim'
 
         rc_api = self._rc_api
-        rc_api.on_progress = lambda value: status_bar.dispatch('on_progress', value)
-        rc_api.on_rx = lambda value: status_bar.dispatch('on_rc_rx', value)
-        rc_api.on_tx = lambda value: status_bar.dispatch('on_rc_tx', value)
+        rc_api.on_progress = lambda value: Clock.schedule_once(lambda dt: status_bar.dispatch('on_progress', value))
+        rc_api.on_rx = lambda value: Clock.schedule_once(lambda dt: status_bar.dispatch('on_rc_rx', value))
+        rc_api.on_tx = lambda value: Clock.schedule_once(lambda dt: status_bar.dispatch('on_rc_tx', value))
 
         screenMgr = root.ids.main
         # NoTransition
