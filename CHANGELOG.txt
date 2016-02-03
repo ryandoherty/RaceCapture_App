@@ -1,3 +1,6 @@
+==1.4.3==
+* Resolves sporadic issue where rapid lap selection may result in internal errors
+
 ==1.4.2==
 * Connect to the first RaceCapture device it can detect, regardless of the name provided
 * Improve analysis data query performance; don't block user interface for long operations; show spinner
