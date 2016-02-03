@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from iconbutton import IconButton
 from kivy.app import Builder
 from kivy.metrics import dp

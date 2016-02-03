@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.app import Builder
 from kivy.properties import ListProperty
 from kivy.uix.label import Label
