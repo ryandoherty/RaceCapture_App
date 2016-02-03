@@ -530,7 +530,7 @@ if __name__ == '__main__':
         def handle_exception(self, exception_info):
             if type(exception_info) == KeyboardInterrupt:
                 Logger.info("CrashHander: KeyboardInterrupt")
-                sys.exit()
+                App.get_running_app().stop()
             Logger.critical("CrashHandler: Caught exception in Kivy loop: " + str(exception_info))
             Logger.critical(traceback.format_exc())
             if 'sentry_client' in globals():
