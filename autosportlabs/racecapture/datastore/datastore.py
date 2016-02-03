@@ -22,7 +22,7 @@ def timing(f):
         time1 = time.time()
         ret = f(*args)
         time2 = time.time()
-        Logger.info('Timing: {} function took {} ms'.format(f.func_name, (time2-time1)*1000.0))
+        Logger.info('Datastore: {} function took {} ms'.format(f.func_name, (time2-time1)*1000.0))
         return ret
     return wrap
 
@@ -241,6 +241,8 @@ class DataStore(object):
         self.datalog_channels = {}
         self.datalogchanneltypes = {}
         self._new_db = False
+        self._ending_datalog_id  = 0
+        
 
     def close(self):
         self._conn.close()
@@ -270,6 +272,7 @@ class DataStore(object):
     def _populate_channel_list(self):
         c = self._conn.cursor()
 
+        self._channels = []
         c.execute("""SELECT name, units, min_value, max_value, smoothing
         from channel""")
 
@@ -288,7 +291,13 @@ class DataStore(object):
     def channel_list(self):
         return self._channels[:]
 
-    def get_channel(self, name): 
+    def get_channel(self, name):
+        '''
+        Retreives information for a channel
+        :param name the channel name
+        :type name string
+        :returns DatalogChannel object for the channel. Raises DatastoreException if channel is unknown
+        ''' 
         channel =  [c for c in self._channels if name in c.name]
         if not len(channel):
             raise DatastoreException("Unknown channel: {}".format(name))
@@ -389,48 +398,43 @@ class DataStore(object):
         """
 
         c = self._conn.cursor()
-        base_sql = "SELECT id from {} ORDER BY id DESC LIMIT 1;".format(table_name)
+        base_sql = "SELECT * FROM SQLITE_SEQUENCE WHERE name='{}';".format(table_name)
         c.execute(base_sql)
-
         res = c.fetchone()
 
         if res == None:
             dl_id = 0
         else:
-            dl_id = res[0]
-        #print "Last datapoint ID =", dp_id
+            dl_id = res[1] # comes back as sample|<last id>
         return dl_id
 
-    def _insert_record(self, record, channels, session_id, warnings = None):
+    def insert_record(self, record, channels, session_id):
         """
         Takes a record of interpolated+extrapolated channels and their header metadata
         and inserts it into the database
         """
-        datalog_id = self._get_last_table_id('sample') + 1
 
-        #First, insert into the datalog table to give us a reference
-        #point for the datapoint insertions
-
-        self._conn.execute("""INSERT INTO sample
-        (session_id) VALUES (?)""", [session_id])
-
-        #Insert the datapoints into their tables
-        extrap_vals = [datalog_id] + record
-
-        #Now, insert the record into the datalog table using the ID
-        #list we built up in the previous iteration
-
-        #Put together an insert statement containing the column names
-        base_sql = "INSERT INTO datapoint ("
-        base_sql += ','.join(['sample_id'] + [x.name for x in channels])
-        base_sql += ') VALUES ('
-
-        #insert the values
-        base_sql += ','.join([str(x) for x in extrap_vals])
-        base_sql += ')'
-
-        #print "Executing SQL Statement: \n{}".format(base_sql)
-        self._conn.execute(base_sql)
+        cursor = self._conn.cursor()
+        try:
+            #First, insert into the datalog table to give us a reference
+            #point for the datapoint insertions
+            cursor.execute("""INSERT INTO sample (session_id) VALUES (?)""", [session_id])
+            datalog_id = cursor.lastrowid
+    
+            #Insert the datapoints into their tables
+            extrap_vals = [datalog_id] + record
+    
+            #Now, insert the record into the datalog table using the ID
+            #list we built up in the previous iteration
+    
+            #Put together an insert statement containing the column names
+            base_sql = "INSERT INTO datapoint ({}) VALUES({});".format(','.join(['sample_id'] + [x.name for x in channels]), 
+                                                                       ','.join([str(x) for x in extrap_vals]))
+            cursor.execute(base_sql)
+            self._conn.commit()
+        except: #rollback under any exception, then re-raise exception
+            self._conn.rollback()
+            raise
 
     def _extrap_datapoints(self, datapoints):
         """
@@ -637,19 +641,49 @@ class DataStore(object):
         Logger.info('DataStore: Created session with ID: {}'.format(session_id))
         return session_id
 
+
+    #class member variable to track ending datalog id when importing
     def _handle_data(self, data_file, headers, session_id, warnings=None, progress_cb=None):
         """
         takes a raw dataset in the form of a CSV file and inserts the data
-        into the sqlite database
+        into the sqlite database.
+        
+        This function is not thread-safe.
         """
 
+        starting_datalog_id = self._get_last_table_id('sample') + 1
+        self._ending_datalog_id = starting_datalog_id
+
+        def sample_iter(count, sample_id):
+            for x in range(count):
+                yield [sample_id]
+            
+        def datapoint_iter(data, datalog_id):
+            for record in data:
+                record = [datalog_id] + record
+                datalog_id += 1
+                yield record
+            self._ending_datalog_id = datalog_id
+            
         #Create the generator for the desparsified data
         newdata_gen = self._desparsified_data_generator(data_file, warnings=warnings, progress_cb=progress_cb)
 
-        for record in newdata_gen:
-            self._insert_record(record, headers, session_id, warnings=warnings)
+        #Put together an insert statement containing the column names
+        datapoint_sql = "INSERT INTO datapoint ({}) VALUES ({});".format(','.join(['sample_id'] + [x.name for x in headers]), 
+                                                                         ','.join(['?'] * (len(headers) + 1)))
 
-        self._conn.commit()
+        #Relatively static insert statement for sample table
+        sample_sql = "INSERT INTO sample (session_id) VALUES (?)"
+        
+        #Use a generator to efficiently insert data into table, within a transaction
+        cur = self._conn.cursor()
+        try:
+            cur.executemany(datapoint_sql, datapoint_iter(newdata_gen, starting_datalog_id))
+            cur.executemany(sample_sql, sample_iter(self._ending_datalog_id - starting_datalog_id, session_id))
+            self._conn.commit()
+        except: #rollback under any exception, then re-raise exception
+            self._conn.rollback()
+            raise
 
     def get_location_center(self, sessions=None):
         c = self._conn.cursor()
@@ -747,24 +781,23 @@ class DataStore(object):
 
     @timing
     def import_datalog(self, path, name, notes='', progress_cb=None):
-        
         warnings = []
         if not self._isopen:
             raise DatastoreException("Datastore is not open")
-
         try:
             dl = open(path, 'rb')
         except:
             raise DatastoreException("Unable to open file")
 
         header = dl.readline()
-
         headers = self._parse_datalog_headers(header)
 
         #Create an event to be tagged to these records
         session_id = self._create_session(name, notes)
-
         self._handle_data(dl, headers, session_id, warnings, progress_cb)
+        
+        #update the channel metadata, including re-setting min/max values
+        self.update_channel_metadata()
         return session_id
 
     def query(self, sessions=[], channels=[], data_filter=None, distinct_records=False):
@@ -864,3 +897,35 @@ class DataStore(object):
         self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.session_id ,))
         self._conn.commit()
         
+    def update_channel_metadata(self, channels=None, only_extend_minmax=True):
+        '''
+        Adjust the channel min/max values as necessary based on the min/max values present in the datapoints
+        :param channels list of channels to update. If None, all channels are updated
+        :type channels list
+        :param only_extend_minmax True if min/max values should only be extended. If false, min/max are adjusted to actual min/max values in datapoint
+        :type only_extend_minmax bool 
+        '''
+        cursor = self._conn.cursor()
+        channels_to_update = [x for x in self._channels if channels is None or x.name in channels]
+        for channel in channels_to_update:
+            name = channel.name
+            min_max = cursor.execute('SELECT COALESCE(MIN({}), 0), COALESCE(MAX({}), 0) FROM datapoint;'.format(name, name))
+            record = min_max.fetchone()
+            datapoint_min_value = record[0]
+            datapoint_max_value = record[1]
+            min_value = channel.min if only_extend_minmax == True else datapoint_min_value
+            max_value = channel.max if only_extend_minmax == True else datapoint_max_value
+            if only_extend_minmax == True:
+                selected_min_value = min(min_value, datapoint_min_value)
+                selected_max_value = max(max_value, datapoint_max_value) 
+            else:
+                selected_min_value = datapoint_min_value
+                selected_max_value = datapoint_max_value
+
+            Logger.info('Datastore: updating min/max for {}'.format(name))
+            sql = 'UPDATE channel SET min_value={}, max_value={} WHERE name="{}";'.format(selected_min_value, 
+                                                                                          selected_max_value, 
+                                                                                          name) 
+            cursor.execute(sql)
+        self._conn.commit()
+        self._populate_channel_list()

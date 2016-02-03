@@ -278,7 +278,7 @@ class CustomizableGauge(ButtonBehavior, SingleChannelGauge):
         if view:
             view.color = self.select_alert_color()
 
-    def showChannelSelectDialog(self):  
+    def showChannelSelectDialog(self):
         content = ChannelSelectView(settings=self.settings, channel=self.channel)
         content.bind(on_channel_selected=self.channel_selected)
         content.bind(on_channel_cancel=self._dismiss_popup)

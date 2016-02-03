@@ -1,8 +1,28 @@
+#
+# Race Capture App
+#
+# Copyright (C) 2014-2016 Autosport Labs
+#
+# This file is part of the Race Capture App
+#
+# This is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details. You should
+#have received a copy of the GNU General Public License along with
+#this code. If not, see <http://www.gnu.org/licenses/>.
 import kivy
 kivy.require('1.9.1')
 from kivy.logger import Logger
 from kivy.graphics import Color
 from kivy.app import Builder
+from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.datastore import DataStore, Filter
@@ -91,16 +111,16 @@ class ChannelValuesView(ChannelAnalysisWidget):
 
     def update_reference_mark(self, source, point):
         channel_data = self.channel_stats.get(str(source))
-        for channel, channel_data in channel_data.iteritems():
-            stats = channel_data.data
-            key = channel + str(source)
-            widget = self._channel_stat_widgets.get(key)
-            values = stats.values
-            try:
-                value = str(values[point])
-            except IndexError:
-                value = values[len(values) - 1]
-            widget.value = value 
+        if channel_data:
+            for channel, channel_data in channel_data.iteritems():
+                key = channel + str(source)
+                widget = self._channel_stat_widgets.get(key)
+                values = channel_data.values
+                try:
+                    value = str(values[point])
+                except IndexError:
+                    value = values[len(values) - 1]
+                widget.value = value
                 
 
     def _refresh_channels(self):
@@ -124,12 +144,15 @@ class ChannelValuesView(ChannelAnalysisWidget):
         for key in iter(sorted(self._channel_stat_widgets.iterkeys())):
             channels_grid.add_widget(self._channel_stat_widgets[key])
 
-    def add_channel(self, channel, lap_ref):
+    def _add_channels_results(self, channels, channel_data):
+        for channel in channels:
+            self._add_channel_results(channel, channel_data)
+
+    def _add_channel_results(self, channel, channel_data):
         '''
         Add the specified ChannelData to the dict of channel_stats, keyed by the lap/session source
         Organization is: dict of channel_stats keyed by source (lap/session key), each having a dict of ChannelData objects keyed by channel name
         '''
-        channel_data = self.datastore.get_channel_data(lap_ref, [channel])
         channel_data_values = channel_data[channel]
         source_key = str(channel_data_values.source)
         channels = self.channel_stats.get(source_key)
@@ -138,12 +161,18 @@ class ChannelValuesView(ChannelAnalysisWidget):
             self.channel_stats[source_key] = channels
         channels[channel_data_values.channel] = channel_data_values
         self._refresh_channels()
+
+    def add_channels(self, channels, source_ref):
+        def get_results(results):
+            Clock.schedule_once(lambda dt: self._add_channels_results(channels, results))
+
+        self.datastore.get_channel_data(source_ref, channels, get_results)
     
     def refresh_view(self):
         self._refresh_channels()
         
-    def remove_channel(self, channel, lap_ref):
-        source_key = str(lap_ref)
+    def remove_channel(self, channel, source_ref):
+        source_key = str(source_ref)
         channels = self.channel_stats.get(source_key)
         channels.pop(channel, None)
 

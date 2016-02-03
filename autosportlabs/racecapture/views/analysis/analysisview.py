@@ -1,3 +1,22 @@
+#
+# Race Capture App
+#
+# Copyright (C) 2014-2016 Autosport Labs
+#
+# This file is part of the Race Capture App
+#
+# This is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details. You should
+#have received a copy of the GNU General Public License along with
+#this code. If not, see <http://www.gnu.org/licenses/>.
 import os.path
 from threading import Thread
 import kivy
@@ -62,16 +81,14 @@ class AnalysisView(Screen):
             self.ids.channelvalues.add_lap(source_ref)
             map_path_color = self._color_sequence.get_color(source_key)
             self.ids.analysismap.add_reference_mark(source_key, map_path_color)
-            cache = self._datastore.get_location_data(source_ref)
             self._sync_analysis_map(source_ref.session)
-            self.ids.analysismap.add_map_path(source_ref, cache, map_path_color)
+            self._datastore.get_location_data(source_ref, lambda x: self.ids.analysismap.add_map_path(source_ref, x, map_path_color))
 
         else:
             self.ids.mainchart.remove_lap(source_ref)
             self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
             self.ids.analysismap.remove_map_path(source_ref)
-            self.ids.analysismap.remove_heat_values(source_ref)
     
     def on_tracks_updated(self, track_manager):
         self.ids.analysismap.track_manager = track_manager
@@ -116,9 +133,10 @@ class AnalysisView(Screen):
             if best_lap:
                 best_lap_id = best_lap[1]
                 Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
-                sessions_view.select_lap(new_session_id, best_lap_id, True)
                 main_chart = self.ids.mainchart
                 main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
+                self.ids.channelvalues.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
+                sessions_view.select_lap(new_session_id, best_lap_id, True)
                 HelpInfo.help_popup('suggested_lap', main_chart, arrow_pos='left_mid')
             else:
                 Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))

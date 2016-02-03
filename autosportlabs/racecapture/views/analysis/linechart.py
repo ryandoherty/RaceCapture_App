@@ -1,11 +1,32 @@
+#
+# Race Capture App
+#
+# Copyright (C) 2014-2016 Autosport Labs
+#
+# This file is part of the Race Capture App
+#
+# This is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details. You should
+#have received a copy of the GNU General Public License along with
+#this code. If not, see <http://www.gnu.org/licenses/>.
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
 from autosportlabs.uix.color.colorsequence import ColorSequence
 from autosportlabs.racecapture.datastore import Filter
 from autosportlabs.racecapture.views.analysis.analysisdata import ChannelData
+from autosportlabs.uix.progressspinner import ProgressSpinner
 
 from installfix_garden_graph import Graph, LinePlot, SmoothLinePlot
 from kivy.app import Builder
+from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from collections import OrderedDict
@@ -186,54 +207,62 @@ class LineChart(ChannelAnalysisWidget):
         
         self.dispatch_marker(pos[0], pos[1])
 
-    def remove_channel(self, channel, lap_ref):
+    def remove_channel(self, channel, source_ref):
         remove = []
         for channel_plot in self._channel_plots.itervalues():
-            if channel_plot.channel == channel and str(lap_ref) == str(channel_plot.sourceref):
+            if channel_plot.channel == channel and str(source_ref) == str(channel_plot.sourceref):
                 remove.append(channel_plot)
         
         for channel_plot in remove:
             self.ids.chart.remove_plot(channel_plot.plot)
             del(self._channel_plots[str(channel_plot)])
     
-    def add_channel(self, channel, lap_ref):
-        query_data = self.datastore.get_channel_data(lap_ref, ['Distance', channel])
-
-        chart = self.ids.chart
-        channel_data_values = query_data[channel]
-        distance_data_values = query_data['Distance']
+    def _add_channels_results(self, channels, query_data):
+        try:
+            distance_data_values = query_data['Distance']
+            for channel in channels:
+                chart = self.ids.chart
+                channel_data_values = query_data[channel]
+                
+                key = channel_data_values.channel + str(channel_data_values.source)
+                plot = SmoothLinePlot(color=self.color_sequence.get_color(key))
+                channel_plot = ChannelPlot(plot, 
+                                           channel_data_values.channel, 
+                                           channel_data_values.min, 
+                                           channel_data_values.max, 
+                                           channel_data_values.source)
+                
+                chart.add_plot(plot)
+                points = []
+                distance_index = OrderedDict()
+                max_distance = chart.xmax
+                sample_index = 0
+                distance_data = distance_data_values.values
+                channel_data = channel_data_values.values
+                for sample in channel_data:
+                    distance = distance_data[sample_index]
+                    if distance > max_distance:
+                        max_distance = distance 
+                    points.append((distance, sample))
+                    distance_index[distance] = sample_index
+                    sample_index += 1
         
-        key = channel_data_values.channel + str(channel_data_values.source)
-        plot = SmoothLinePlot(color=self.color_sequence.get_color(key))
-        channel_plot = ChannelPlot(plot, 
-                                   channel_data_values.channel, 
-                                   channel_data_values.min, 
-                                   channel_data_values.max, 
-                                   channel_data_values.source)
-        chart.add_plot(plot)
-        points = []
-        distance_index = OrderedDict()
-        max_distance = chart.xmax
-        sample_index = 0
-        distance_data = distance_data_values.data.values
-        channel_data = channel_data_values.data.values 
-        for sample in channel_data:
-            distance = distance_data[sample_index]
-            if distance > max_distance:
-                max_distance = distance 
-            points.append((distance, sample))
-            distance_index[distance] = sample_index
-            sample_index += 1
-        
-        channel_plot.distance_index = distance_index
-        channel_plot.samples = sample_index            
-        plot.ymin = channel_data_values.min
-        plot.ymax = channel_data_values.max
-        chart.xmin = 0
-        chart.xmax = max_distance
-        plot.points = points
-        self._channel_plots[str(channel_plot)] = channel_plot
-        self.max_distance = max_distance
-        self.current_distance = max_distance
-    
+                channel_plot.distance_index = distance_index
+                channel_plot.samples = sample_index
+                plot.ymin = channel_data_values.min
+                plot.ymax = channel_data_values.max
+                chart.xmin = 0
+                chart.xmax = max_distance
+                plot.points = points
+                self._channel_plots[str(channel_plot)] = channel_plot
+                self.max_distance = max_distance
+                self.current_distance = max_distance
+        finally:
+            ProgressSpinner.decrement_refcount()
 
+    def add_channels(self, channels, source_ref):
+        ProgressSpinner.increment_refcount()
+        def get_results(results):
+            #clone the incoming list of channels and pass it to the handler
+            Clock.schedule_once(lambda dt: self._add_channels_results(channels[:], results))
+        self.datastore.get_channel_data(source_ref, ['Distance'] + channels, get_results)

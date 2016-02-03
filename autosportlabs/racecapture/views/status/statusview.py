@@ -13,7 +13,7 @@ from fieldlabel import FieldLabel
 from kivy.logger import LoggerHistory, Logger
 from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.uix.toast.kivytoast import toast
-
+from main import RaceCaptureApp
 STATUS_KV_FILE = 'autosportlabs/racecapture/views/status/statusview.kv'
 
 RAW_STATUS_BGCOLOR_1 = ColorScheme.get_background()
@@ -193,7 +193,8 @@ class StatusView(Screen):
     def render_app(self):
         label_widget = StatusTitle(text='Application Log')
         self.ids.status_grid.add_widget(label_widget)
-        self.ids.status_grid.add_widget(ApplicationLogView())        
+        self.ids.status_grid.add_widget(ApplicationLogView())
+        self._add_item('Application Version', RaceCaptureApp.get_app_version())
         
     def render_system(self):
         version = '.'.join(

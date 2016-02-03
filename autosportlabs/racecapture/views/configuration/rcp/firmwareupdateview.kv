@@ -9,14 +9,16 @@
         spacing: 10
         HSeparator:
             text: 'Firmware Update'
-        Button:
-            size_hint: (1., .1)
-            text: "Check for updates online"
-            on_press: root.check_online()
-        Button:
-            size_hint: (1, .1)
-            text: "Update Firmware"
-            on_press: root.select_file()
+#        Button:
+#            size_hint: (1., .1)
+#            text: "Check for updates online"
+#            on_press: root.check_online()
+        AnchorLayout:
+            size_hint_y: 0.1
+            Button:
+                size_hint_x: 0.4
+                text: "Update Firmware"
+                on_press: root.update_pre_check()
         RoundGauge:
             id: fw_progress
             max: 100

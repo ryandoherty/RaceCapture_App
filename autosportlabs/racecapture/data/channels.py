@@ -101,6 +101,16 @@ class RuntimeChannels(EventDispatcher):
                 self.channel_names.insert(0,channel_name)
                 channels[channel_name] = copy.copy(runtime_meta)
 
+    def get_active_channels(self):
+        '''
+        Return a dict of active ChannelMeta objects. If we have a data connection, filter for only the currently active channels.
+        If no data connection, send back all System channels
+        :returns dict of ChannelMeta objects, keyed by channel name
+        '''
+        if self.data_bus.rcp_meta_read == True:
+            return self.data_bus.channel_metas.copy()
+        else:
+            return self.channels.copy()
 
 class SystemChannels(EventDispatcher):
     channels = ObjectProperty(None)
