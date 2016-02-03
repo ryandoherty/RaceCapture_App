@@ -169,7 +169,7 @@ class RcpApi:
                     msg = unicode(msg, errors='ignore')
                     Logger.debug('RCPAPI: Rx: ' + str(msg))
                     msgJson = json.loads(msg, strict=False)
-                    self.on_rx(True)
+                    Clock.schedule_once(lambda dt: self.on_rx(True))
                     error_count = 0
                     for messageName in msgJson.keys():
                         Logger.trace('RCPAPI: processing message ' + messageName)
@@ -213,7 +213,7 @@ class RcpApi:
 
     def notifyProgress(self, count, total):
         if self.on_progress:
-            self.on_progress((float(count) / float(total)) * 100)
+            Clock.schedule_once(lambda dt: self.on_progress((float(count) / float(total)) * 100))
 
     def executeSingle(self, cmd, win_callback, fail_callback):
         command = CommandSequence()
@@ -339,7 +339,7 @@ class RcpApi:
             self.recover_connection()
         finally:
             self.sendCommandLock.release()
-            self.on_tx(True)
+            Clock.schedule_once(lambda dt: self.on_tx(True))
 
 
     def sendGet(self, name, index=None):
