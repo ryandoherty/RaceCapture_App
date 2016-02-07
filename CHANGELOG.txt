@@ -6,7 +6,6 @@
 ==1.4.2==
 * Connect to the first RaceCapture device it can detect, regardless of the name provided
 * Improve analysis data query performance; don't block user interface for long operations; show spinner
-* Improve load time by targeting Android 4.4 / API level 19 
 * Add selected track name to analysis map view
 * Added debugging option for API messages
 * Draw GPS path correctly if no track map is loaded
