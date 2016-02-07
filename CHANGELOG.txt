@@ -2,6 +2,8 @@
 * Resolve erroneous v0.0.0 incompatibility complaint upon RaceCapture detection
 * Resolves sporadic stuck communications status bar
 * Resolves sporadic issue where rapid lap selection may result in internal errors
+* Resize graph length as needed when laps are selected / de-selected
+* Restored gauge alert coloring (regression in 1.4.2)
 
 ==1.4.2==
 * Connect to the first RaceCapture device it can detect, regardless of the name provided
