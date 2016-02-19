@@ -405,8 +405,23 @@ class RaceCaptureApp(App):
         Clock.schedule_once(lambda dt: self.init_data())
         Clock.schedule_once(lambda dt: self.init_rc_comms())
         Clock.schedule_once(lambda dt: self.show_startup_view())
+
+        #Ugly hack to handle track ids changing from strings to integers
+        if self.settings.userPrefs.get_pref('preferences', 'integer_map_ids') == 'False' and self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'False':
+            Clock.schedule_once(lambda dt: self.refresh_tracks(), 0.5)
+
         self.check_first_time_setup()
 
+    def refresh_tracks(self):
+        popup = None
+        def _on_answer(instance, answer):
+            popup.dismiss()
+            if answer:
+                self.showMainView('tracks')
+                self.trackManager.delete_all_local_tracks()
+                self.settings.userPrefs.set_pref('preferences', 'integer_map_ids', True)
+                Clock.schedule_once(lambda dt: self.mainViews['tracks'].check_for_update(), 0.5)
+        popup = confirmPopup('Race Tracks', 'RaceCapture needs to refresh all tracks in order to properly configure RaceCapture/Pro.', _on_answer)
 
     def check_first_time_setup(self):
         if self.settings.userPrefs.get_pref('preferences', 'first_time_setup') == 'True':

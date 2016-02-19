@@ -7,6 +7,7 @@ import logging
 from threading import Thread, Lock
 import urllib2
 import os
+import glob
 import traceback
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
 from kivy.logger import Logger
@@ -285,7 +286,7 @@ class TrackManager:
         return venues_list
 
     def download_track(self, track_id):
-        track_url = self.RCP_VENUE_URL + '/' + track_id
+        track_url = self.RCP_VENUE_URL + '/' + str(track_id)
         response = self.load_json(track_url)
         track_map = TrackMap()
         try:
@@ -296,7 +297,7 @@ class TrackManager:
             return None
         
     def save_track(self, track):
-        path = self.tracks_user_dir + '/' + track.track_id + '.json'
+        path = self.tracks_user_dir + '/' + str(track.track_id) + '.json'
         track_json_string = json.dumps(track.to_dict(), sort_keys=True, indent=2, separators=(',', ': '))
         with open(path, 'w') as text_file:
             text_file.write(track_json_string)
@@ -419,6 +420,14 @@ class TrackManager:
                                 progress_cb(count=count, total=track_count, message=updated_track.name)
                     else:
                         progress_cb(count=count, total=track_count)
+
+    def delete_all_local_tracks(self):
+        """WARNING: this will delete all local tracks!!!
+        """
+        files = glob.glob(self.tracks_user_dir + '/*')
+        for f in files:
+            os.remove(f)
+        self.tracks.clear()
 
 
 class MissingKeyException(Exception):
