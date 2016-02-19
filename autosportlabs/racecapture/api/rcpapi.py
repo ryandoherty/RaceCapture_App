@@ -76,11 +76,11 @@ class RcpApi:
         self._disconnect_callback = kwargs.get('on_disconnect')
 
     def enable_autorecover(self):
-        Logger.info("RCPAPI: Enabling auto recover")
+        Logger.debug("RCPAPI: Enabling auto recover")
         self._enable_autodetect.set()
 
     def disable_autorecover(self):
-        Logger.info("RCPAPI: Disabling auto recover")
+        Logger.debug("RCPAPI: Disabling auto recover")
         self._enable_autodetect.clear()
 
     def recover_connection(self):
@@ -88,7 +88,7 @@ class RcpApi:
             self._disconnect_callback()
 
         if self._enable_autodetect.is_set():
-            Logger.info("RCPAPI: attempting to recover connection")
+            Logger.debug("RCPAPI: attempting to recover connection")
             self.run_auto_detect()
 
     def _start_message_rx_worker(self):
@@ -244,7 +244,7 @@ class RcpApi:
                 failCallback = command.failCallback
                 comms = self.comms
 
-                Logger.info('RCPAPI: Execute Sequence begin')
+                Logger.debug('RCPAPI: Execute Sequence begin')
 
                 if not comms.isOpen(): self.run_auto_detect()
 
@@ -281,14 +281,14 @@ class RcpApi:
                                     result = q.get(True, self.msg_rx_timeout)
                                     msgName = result.keys()[0]
                                     if not msgName == name:
-                                        Logger.info('RCPAPI: rx message did not match expected name ' + str(name) + '; ' + str(msgName))
+                                        Logger.warn('RCPAPI: rx message did not match expected name ' + str(name) + '; ' + str(msgName))
                                         result = None
                                 except Exception as e:
-                                    Logger.info('RCPAPI: Read message timeout ' + str(e))
+                                    Logger.warn('RCPAPI: Read message timeout ' + str(e))
                                     self.recoverTimeout()
                                     retry += 1
                             if not result:
-                                Logger.info('RCPAPI: Level 2 retry for (' + str(level2Retry) + ') ' + name)
+                                Logger.warn('RCPAPI: Level 2 retry for (' + str(level2Retry) + ') ' + name)
                                 level2Retry += 1
 
 
@@ -314,7 +314,7 @@ class RcpApi:
                     failCallback(detail)
                     self.recover_connection()
 
-                Logger.info('RCPAPI: Execute Sequence complete')
+                Logger.debug('RCPAPI: Execute Sequence complete')
 
             except Queue.Empty:
                 pass
@@ -617,7 +617,7 @@ class RcpApi:
         self._queue_multiple(cmd_sequence, 'calImu', winCallback, failCallback)
 
     def get_meta(self):
-        Logger.info("RCPAPI: sending meta")
+        Logger.debug("RCPAPI: sending meta")
         self.sendCommand({'getMeta':None})
 
     def sample(self, include_meta=False):
@@ -651,7 +651,7 @@ class RcpApi:
             if not self._running.is_set():
                 break
             try:
-                Logger.info("RCPAPI: Starting auto-detect")
+                Logger.debug("RCPAPI: Starting auto-detect")
                 self._auto_detect_busy.set()
                 self.sendCommandLock.acquire()
                 self.addListener("ver", on_ver_win)
@@ -669,12 +669,12 @@ class RcpApi:
                     ports = [comms.port]
                 else:
                     ports = comms.get_available_ports()
-                    Logger.info('RCPAPI: Searching for device on all ports')
+                    Logger.debug('RCPAPI: Searching for device on all ports')
 
                 testVer = VersionConfig()
                 for p in ports:
                     try:
-                        Logger.info('RCPAPI: Trying ' + str(p))
+                        Logger.debug('RCPAPI: Trying ' + str(p))
                         if self.detect_activity_callback: self.detect_activity_callback(str(p))
                         comms.port = p
                         comms.open()
@@ -687,7 +687,7 @@ class RcpApi:
                                 break  # we found something!
                         else:
                             try:
-                                Logger.warn('RCPAPI: Giving up on ' + str(p))
+                                Logger.info('RCPAPI: Giving up on ' + str(p))
                                 comms.close()
                             finally:
                                 pass
@@ -704,7 +704,7 @@ class RcpApi:
                     self.detect_win(testVer)
                     self._auto_detect_event.clear()
                 else:
-                    Logger.info('RCPAPI: Did not find device')
+                    Logger.debug('RCPAPI: Did not find device')
                     comms.close()
                     comms.port = None
                     if self.detect_fail_callback: self.detect_fail_callback()
@@ -712,7 +712,7 @@ class RcpApi:
                 Logger.error('RCPAPI: Error running auto detect: ' + str(e))
                 Logger.debug(traceback.format_exc())
             finally:
-                Logger.info("RCPAPI: auto detect finished. port=" + str(comms.port))
+                Logger.debug("RCPAPI: auto detect finished. port=" + str(comms.port))
                 self._auto_detect_busy.clear()
                 self.removeListener("ver", on_ver_win)
                 self.sendCommandLock.release()
