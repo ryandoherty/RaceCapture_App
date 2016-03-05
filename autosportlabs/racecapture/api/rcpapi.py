@@ -67,13 +67,14 @@ class RcpApi:
 
     COMMAND_SEQUENCE_TIMEOUT = 1.0
 
-    def __init__(self, **kwargs):
+    def __init__(self, settings, on_disconnect, **kwargs):
         self.comms = kwargs.get('comms', self.comms)
         self._running = Event()
         self._running.clear()
         self._enable_autodetect = Event()
         self._enable_autodetect.set()
-        self._disconnect_callback = kwargs.get('on_disconnect')
+        self._settings = settings
+        self._disconnect_callback = on_disconnect
 
     def enable_autorecover(self):
         Logger.debug("RCPAPI: Enabling auto recover")
@@ -669,6 +670,13 @@ class RcpApi:
                     ports = [comms.port]
                 else:
                     ports = comms.get_available_ports()
+                    last_known_port = self._settings.userPrefs.get_pref('preferences', 'last_known_port')
+                    # if there was a last known port try this one first.
+                    if last_known_port:
+                        Logger.info('RCPAPI: trying last known port first: {}'.format(last_known_port))
+                        # ensure we remove it from the existing list
+                        ports.remove(last_known_port)
+                        ports = [last_known_port] + ports
                     Logger.debug('RCPAPI: Searching for device on all ports')
 
                 testVer = VersionConfig()
@@ -703,6 +711,7 @@ class RcpApi:
                     Logger.info("RCPAPI: Found device version " + str(testVer) + " on port: " + str(comms.port))
                     self.detect_win(testVer)
                     self._auto_detect_event.clear()
+                    self._settings.userPrefs.set_pref('preferences', 'last_known_port', comms.port)
                 else:
                     Logger.debug('RCPAPI: Did not find device')
                     comms.close()
