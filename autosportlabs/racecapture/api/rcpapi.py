@@ -675,7 +675,10 @@ class RcpApi:
                     if last_known_port:
                         Logger.info('RCPAPI: trying last known port first: {}'.format(last_known_port))
                         # ensure we remove it from the existing list
-                        ports.remove(last_known_port)
+                        try:
+                            ports.remove(last_known_port)
+                        except ValueError:
+                            pass
                         ports = [last_known_port] + ports
                     Logger.debug('RCPAPI: Searching for device on all ports')
 
