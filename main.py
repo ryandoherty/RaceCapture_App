@@ -127,14 +127,16 @@ class RaceCaptureApp(App):
         else:
             self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # RaceCapture serial I/O
-        self._rc_api = RcpApi(on_disconnect=self._on_rcp_disconnect)
 
         # self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         # self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
         self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
         self.settings.runtimeChannels.data_bus = self._databus
+
+        # RaceCapture communications API
+        self._rc_api = RcpApi(on_disconnect=self._on_rcp_disconnect, settings=self.settings)
+
         HelpInfo.settings = self.settings
 
         Window.bind(on_keyboard=self._on_keyboard)
