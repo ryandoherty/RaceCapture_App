@@ -19,8 +19,11 @@ class LaptimeDeltaFilter(object):
     def reset(self):
         pass
     
-    def get_channel_meta(self):
-        return {LaptimeDeltaFilter.LAP_DELTA_KEY: self.lap_delta_meta}
+    def get_channel_meta(self, channel_meta):
+        metas = {}
+        if channel_meta.get(self.LAPTIME_KEY):
+            metas[LaptimeDeltaFilter.LAP_DELTA_KEY] = self.lap_delta_meta
+        return metas
         
     def filter(self, channel_data):
         laptime = channel_data.get(LaptimeDeltaFilter.LAPTIME_KEY)
