@@ -167,13 +167,6 @@ class RaceCaptureApp(App):
         return self.app_args.get(name, None)
 
     def first_time_setup(self):
-        popup = None
-        def _on_answer(instance, answer):
-            popup.dismiss()
-            if answer:
-                self.showMainView('tracks')
-                Clock.schedule_once(lambda dt: self.mainViews['tracks'].check_for_update(), 0.5)
-        popup = confirmPopup('Race Tracks', 'Looks like this is your first time running.\n\nShould I update the Race Track database?', _on_answer)
         self.settings.userPrefs.set_pref('preferences', 'first_time_setup', False)
 
     def loadCurrentTracksSuccess(self):
