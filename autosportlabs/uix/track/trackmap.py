@@ -58,6 +58,7 @@ class TrackMapView(Widget):
     heat_max = NumericProperty(100.0)
 
     track_color = ListProperty([1.0, 1.0, 1.0, 0.5])
+    marker_scale = NumericProperty(1.0)
 
     MIN_PADDING = sp(1)
     DEFAULT_TRACK_WIDTH_SCALE = 0.01
@@ -88,14 +89,17 @@ class TrackMapView(Widget):
         self._map_points = []
         self._scaled_map_points = []
 
+        # markers for trackmap
+        self._marker_points = {}
+        self._marker_locations = {}
+
         # The map _paths
         self._paths = {}
         self._scaled_paths = {}
         self._heat_map_values = {}
 
-        # markers for trackmap
-        self._marker_points = {}
-        self._marker_locations = {}
+    def on_marker_scale(self, instance, value):
+        self._draw_current_map()
 
 
     def on_trackColor(self, instance, value):
@@ -242,7 +246,7 @@ class TrackMapView(Widget):
             marker_point.y = point.y
             scaled_point = self._scale_point(marker_point, self.height, left, bottom)
 
-            marker_size = self.marker_width_scale * self.height
+            marker_size = (self.marker_width_scale * self.height) * self.marker_scale
             marker_location.circle = (scaled_point.x, scaled_point.y, marker_size)
 
     def _update_map(self, *args):
@@ -345,7 +349,7 @@ class TrackMapView(Widget):
                     Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True, cap='square', joint='miter')
 
             # draw the markers
-            marker_size = self.marker_width_scale * self.height
+            marker_size = (self.marker_width_scale * self.height) * self.marker_scale
             for key, marker_point in self._marker_points.iteritems():
                 scaled_point = self._scale_point(marker_point, self.height, left, bottom)
                 Color(*marker_point.color)

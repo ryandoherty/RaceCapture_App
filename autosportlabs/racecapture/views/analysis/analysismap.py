@@ -233,7 +233,10 @@ class AnalysisMap(AnalysisWidget):
                 if scale < self.SCROLL_FACTOR:
                     scale = self.SCROLL_FACTOR
                 scatter.scale = scale
+                self.ids.track.marker_scale = 1.0/scale
             except:
+                import traceback
+                traceback.print_exc(    )
                 pass  # no scrollwheel support
 
     def select_map(self, latitude, longitude):
