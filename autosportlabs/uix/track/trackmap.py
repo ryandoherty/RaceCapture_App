@@ -101,7 +101,6 @@ class TrackMapView(Widget):
     def on_marker_scale(self, instance, value):
         self._draw_current_markers()
 
-
     def on_trackColor(self, instance, value):
         self._draw_current_map()
 
@@ -234,7 +233,7 @@ class TrackMapView(Widget):
         :param key The key of the marker
         :type key string
         :param geoPoint the point for the updated position
-        :type GeoPoint
+        :type GeoPoint - default is None. if None, don't update position
         '''
         marker_point = self._marker_points.get(key)
         marker_location = self._marker_locations.get(key)
@@ -248,6 +247,7 @@ class TrackMapView(Widget):
             scaled_point = self._scale_point(marker_point, self.height, left, bottom)
             marker_size = (self.marker_width_scale * self.height) * self.marker_scale
             marker_location.circle = (scaled_point.x, scaled_point.y, marker_size)
+            marker_location.width = marker_size
 
     def _draw_current_markers(self):
         for key in self._marker_points.iterkeys():

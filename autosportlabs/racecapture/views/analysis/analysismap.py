@@ -34,7 +34,7 @@ from iconbutton import IconButton, LabelIconButton
 from autosportlabs.uix.legends.gradientlegends import GradientLapLegend, LapLegend
 
 # The scaling we use while we zoom
-ANALYSIS_MAP_ZOOM_SCALE = 1.3
+ANALYSIS_MAP_ZOOM_SCALE = 1.1
 class AnalysisMap(AnalysisWidget):
     '''
     Displays a track map with options
