@@ -15,8 +15,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # See the GNU General Public License for more details. You should
-#have received a copy of the GNU General Public License along with
-#this code. If not, see <http://www.gnu.org/licenses/>.
+# have received a copy of the GNU General Public License along with
+# this code. If not, see <http://www.gnu.org/licenses/>.
 import os.path
 from threading import Thread
 import kivy
@@ -63,7 +63,7 @@ class AnalysisView(Screen):
         self._datastore = CachingAnalysisDatastore()
         self.register_event_type('on_tracks_updated')
         self._databus = kwargs.get('dataBus')
-        self._settings = kwargs.get('settings') 
+        self._settings = kwargs.get('settings')
         self._track_manager = kwargs.get('track_manager')
         self.ids.sessions_view.bind(on_lap_selected=self.lap_selected)
         self.ids.channelvalues.color_sequence = self._color_sequence
@@ -73,7 +73,7 @@ class AnalysisView(Screen):
 
     def on_sessions(self, instance, value):
         self.ids.channelvalues.sessions = value
-        
+
     def lap_selected(self, instance, source_ref, selected):
         source_key = str(source_ref)
         if selected:
@@ -85,12 +85,11 @@ class AnalysisView(Screen):
             self._datastore.get_location_data(source_ref, lambda x: self.ids.analysismap.add_map_path(source_ref, x, map_path_color))
 
         else:
-            print('unselect lap')
             self.ids.mainchart.remove_lap(source_ref)
             self.ids.channelvalues.remove_lap(source_ref)
             self.ids.analysismap.remove_reference_mark(source_key)
             self.ids.analysismap.remove_map_path(source_ref)
-    
+
     def on_tracks_updated(self, track_manager):
         self.ids.analysismap.track_manager = track_manager
 
@@ -107,7 +106,7 @@ class AnalysisView(Screen):
                 point = cache[len(cache) - 1]
             self.ids.analysismap.update_reference_mark(source, point)
             self.ids.channelvalues.update_reference_mark(source, marker.data_index)
-                          
+
     def _sync_analysis_map(self, session):
         analysis_map = self.ids.analysismap
         if not analysis_map.track:
@@ -119,14 +118,14 @@ class AnalysisView(Screen):
 
     def on_add_stream(self, *args):
         self.show_add_stream_dialog()
-                
+
     def on_stream_connected(self, instance, new_session_id):
         self.stream_connecting = False
         self._dismiss_popup()
         self.ids.sessions_view.refresh_session_list()
         self.check_load_suggested_lap(new_session_id)
-    
-    #The following selects a best lap if there are no other laps currently selected
+
+    # The following selects a best lap if there are no other laps currently selected
     def check_load_suggested_lap(self, new_session_id):
         sessions_view = self.ids.sessions_view
         if len(sessions_view.selected_laps) == 0:
@@ -141,16 +140,16 @@ class AnalysisView(Screen):
                 HelpInfo.help_popup('suggested_lap', main_chart, arrow_pos='left_mid')
             else:
                 Logger.warn('AnalysisView: Could not determine best lap for session {}'.format(new_session_id))
-        
+
     def on_stream_connecting(self, *args):
         self.stream_connecting = True
-        
+
     def show_add_stream_dialog(self):
         self.stream_connecting = False
         content = AddStreamView(settings=self._settings, datastore=self._datastore)
         content.bind(on_connect_stream_start=self.on_stream_connecting)
         content.bind(on_connect_stream_complete=self.on_stream_connected)
-        
+
         popup = Popup(title="Add Telemetry Stream", content=content, size_hint=(0.7, 0.7))
         popup.bind(on_dismiss=self.popup_dismissed)
         popup.open()
@@ -170,7 +169,7 @@ class AnalysisView(Screen):
         t = Thread(target=_init_datastore, args=(dstore_path,))
         t.daemon = True
         t.start()
-                
+
     def init_view(self):
         self.init_datastore()
         mainchart = self.ids.mainchart
@@ -188,7 +187,7 @@ class AnalysisView(Screen):
         if self.stream_connecting:
             return True
         self._popup = None
-        
+
     def _dismiss_popup(self, *args):
         if self._popup is not None:
             self._popup.dismiss()
