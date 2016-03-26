@@ -251,7 +251,6 @@ class SessionBrowser(AnchorLayout):
             self.selected_laps.pop(source_key, None)
         self._notify_lap_selected(source_ref, selected)
 
-
     def _notify_lap_selected(self, source_ref, selected):
         '''
         Deselect all laps specified in the list of source refs
