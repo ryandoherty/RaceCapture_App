@@ -84,6 +84,19 @@ class Session(BoxLayout):
         self.ids.lap_list.add_widget(lapitem)
         return lapitem
     
+    def get_all_laps(self):
+        '''
+        Get a list of laps for this session
+        :returns an array of SourceRef objects
+        :type array 
+        '''        
+        lap_list = self.ids.lap_list
+        lap_refs = []
+        for child in lap_list.children:
+            lap_refs.append(SourceRef(child.lap, child.session))
+            
+        return lap_refs
+            
     def append_label(self, message):
         self.ids.lap_list.add_widget(FieldLabel(text=message, halign='center'))
         
@@ -207,6 +220,8 @@ class SessionBrowser(AnchorLayout):
         popup = editor_popup('Edit Session', session_editor, _on_answer)
     
     def delete_session(self, instance, id):
+        self.deselect_laps(instance.get_all_laps())
+        return
         try:
             self.datastore.delete_session(id)
             Logger.info('SessionBrowser: Session {} deleted'.format(id))
@@ -227,17 +242,18 @@ class SessionBrowser(AnchorLayout):
         pass
     
     def lap_selected(self, instance):
-        self._select_lap(instance)
-    
-    def _select_lap(self, instance):
-        selected = instance.state == 'down'
         source_ref = SourceRef(instance.lap, instance.session)
-        self.dispatch('on_lap_selected', source_ref, selected)
         source_key = str(source_ref)
+        selected = instance.state == 'down'
         if selected:
             self.selected_laps[source_key] = instance
         else:
             self.selected_laps.pop(source_key, None)
+        self._select_lap(source_ref, selected)
+            
+    
+    def _select_lap(self, source_ref, selected):
+        self.dispatch('on_lap_selected', source_ref, selected)
             
     def clear_sessions(self):
         self.current_laps = {}
@@ -250,4 +266,13 @@ class SessionBrowser(AnchorLayout):
         if lap_instance: 
             lap_instance.state = 'down' if selected else 'normal'
             self._select_lap(lap_instance)
+        
+    def deselect_laps(self, source_refs):
+        '''
+        Deselect all laps specified in the list of source refs
+        :param the list of source_refs
+        :type array 
+        '''                
+        for source_ref in source_refs:
+            self.select_lap(source_ref.session, source_ref.lap, False)
         

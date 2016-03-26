@@ -103,7 +103,9 @@ class AnalysisWidget(AnchorLayout):
             del(self.selected_laps[str(source_ref)])
             self.laps_selected = bool(self.selected_laps)
         except Exception as e:
+            import traceback
             Logger.error("AnalysisWidget: Error removing remove lap " + str(e))
+            traceback.print_exc()
 
 class ChannelAnalysisWidget(AnalysisWidget):
     """
