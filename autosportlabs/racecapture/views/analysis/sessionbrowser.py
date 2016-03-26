@@ -253,6 +253,13 @@ class SessionBrowser(AnchorLayout):
 
 
     def _notify_lap_selected(self, source_ref, selected):
+        '''
+        Deselect all laps specified in the list of source refs
+        :param source_ref the source reference for the lap
+        :type SourceRef
+        :param selected true if the lap is selected
+        :type Boolean 
+        '''
         self.dispatch('on_lap_selected', source_ref, selected)
 
     def clear_sessions(self):
@@ -269,7 +276,7 @@ class SessionBrowser(AnchorLayout):
     def deselect_laps(self, source_refs):
         '''
         Deselect all laps specified in the list of source refs
-        :param the list of source_refs
+        :param source_refs the list of source_refs
         :type array 
         '''
         for source_ref in source_refs:
