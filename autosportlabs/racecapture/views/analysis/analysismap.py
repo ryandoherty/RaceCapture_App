@@ -33,6 +33,8 @@ from autosportlabs.racecapture.datastore import Filter
 from iconbutton import IconButton, LabelIconButton
 from autosportlabs.uix.legends.gradientlegends import GradientLapLegend, LapLegend
 
+# The scaling we use while we zoom
+ANALYSIS_MAP_ZOOM_SCALE = 1.1
 class AnalysisMap(AnalysisWidget):
     '''
     Displays a track map with options
@@ -233,6 +235,11 @@ class AnalysisMap(AnalysisWidget):
                 if scale < self.SCROLL_FACTOR:
                     scale = self.SCROLL_FACTOR
                 scatter.scale = scale
+                marker_scale = 1
+                if scale > 1:
+                    # adjust the scale only if we're zooming beyond 1x
+                    marker_scale = ANALYSIS_MAP_ZOOM_SCALE / scale
+                self.ids.track.marker_scale = marker_scale
             except:
                 pass  # no scrollwheel support
 
