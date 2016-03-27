@@ -65,7 +65,7 @@ class AnalysisView(Screen):
         self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings')
         self._track_manager = kwargs.get('track_manager')
-        self.ids.sessions_view.bind(on_lap_selected=self.lap_selected)
+        self.ids.sessions_view.bind(on_lap_selection=self.lap_selection)
         self.ids.channelvalues.color_sequence = self._color_sequence
         self.ids.mainchart.color_sequence = self._color_sequence
         self.stream_connecting = False
@@ -74,7 +74,7 @@ class AnalysisView(Screen):
     def on_sessions(self, instance, value):
         self.ids.channelvalues.sessions = value
 
-    def lap_selected(self, instance, source_ref, selected):
+    def lap_selection(self, instance, source_ref, selected):
         source_key = str(source_ref)
         if selected:
             self.ids.mainchart.add_lap(source_ref)
