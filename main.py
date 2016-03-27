@@ -283,15 +283,12 @@ class RaceCaptureApp(App):
         self._telemetry_connection.telemetry_enabled = False
 
     def showMainView(self, view_name):
-        try:
-            view = self.mainViews.get(view_name)
-            if not view:
-                view = self.view_builders[view_name]()
-                self.screenMgr.add_widget(view)
-                self.mainViews[view_name] = view
-            self.screenMgr.current = view_name
-        except Exception as detail:
-            Logger.error('RaceCaptureApp: Failed to load main view ' + str(view_name) + ' ' + str(detail))
+        view = self.mainViews.get(view_name)
+        if not view:
+            view = self.view_builders[view_name]()
+            self.screenMgr.add_widget(view)
+            self.mainViews[view_name] = view
+        self.screenMgr.current = view_name
 
     def switchMainView(self, view_name):
             self.mainNav.anim_to_state('closed')

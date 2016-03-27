@@ -58,6 +58,7 @@ class TrackMapView(Widget):
     heat_max = NumericProperty(100.0)
 
     track_color = ListProperty([1.0, 1.0, 1.0, 0.5])
+    marker_scale = NumericProperty(1.0)
 
     MIN_PADDING = sp(1)
     DEFAULT_TRACK_WIDTH_SCALE = 0.01
@@ -88,15 +89,17 @@ class TrackMapView(Widget):
         self._map_points = []
         self._scaled_map_points = []
 
+        # markers for trackmap
+        self._marker_points = {}
+        self._marker_locations = {}
+
         # The map _paths
         self._paths = {}
         self._scaled_paths = {}
         self._heat_map_values = {}
 
-        # markers for trackmap
-        self._marker_points = {}
-        self._marker_locations = {}
-
+    def on_marker_scale(self, instance, value):
+        self._draw_current_markers()
 
     def on_trackColor(self, instance, value):
         self._draw_current_map()
@@ -224,26 +227,31 @@ class TrackMapView(Widget):
         '''
         return self._marker_points.get(key)
 
-    def update_marker(self, key, geoPoint):
+    def update_marker(self, key, geoPoint=None):
         '''
         Update the marker to the specified position
         :param key The key of the marker
         :type key string
         :param geoPoint the point for the updated position
-        :type GeoPoint
+        :type GeoPoint - default is None. if None, don't update position
         '''
         marker_point = self._marker_points.get(key)
         marker_location = self._marker_locations.get(key)
         if marker_point and marker_location:
             left = self.pos[0]
             bottom = self.pos[1]
-            point = self._offset_track_point(self._project_point(geoPoint))
-            marker_point.x = point.x
-            marker_point.y = point.y
+            if geoPoint is not None:
+                point = self._offset_track_point(self._project_point(geoPoint))
+                marker_point.x = point.x
+                marker_point.y = point.y
             scaled_point = self._scale_point(marker_point, self.height, left, bottom)
-
-            marker_size = self.marker_width_scale * self.height
+            marker_size = (self.marker_width_scale * self.height) * self.marker_scale
             marker_location.circle = (scaled_point.x, scaled_point.y, marker_size)
+            marker_location.width = marker_size
+
+    def _draw_current_markers(self):
+        for key in self._marker_points.iterkeys():
+            self.update_marker(key)
 
     def _update_map(self, *args):
         padding_both_sides = self.MIN_PADDING * 2
@@ -345,7 +353,7 @@ class TrackMapView(Widget):
                     Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True, cap='square', joint='miter')
 
             # draw the markers
-            marker_size = self.marker_width_scale * self.height
+            marker_size = (self.marker_width_scale * self.height) * self.marker_scale
             for key, marker_point in self._marker_points.iteritems():
                 scaled_point = self._scale_point(marker_point, self.height, left, bottom)
                 Color(*marker_point.color)
