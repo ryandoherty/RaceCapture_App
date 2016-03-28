@@ -1,6 +1,7 @@
 ==1.4.4==
 * Don't create BestLap, LapDelta calculated channels if LapTiming is turned off
 * Pre-package tracks with app to avoid 1st time download. Remove prompt to download tracks when first installed
+* Dynamically adjust size of track marker when zooming
 
 ==1.4.3==
 * Resolve erroneous v0.0.0 incompatibility complaint upon RaceCapture detection
