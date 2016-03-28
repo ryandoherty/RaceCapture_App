@@ -239,7 +239,7 @@ class DatalogChannel(object):
         return self.name
 
 class DataStore(object):
-    EXTRA_INDEX_CHANNELS = ["LapCount","CurrentLap"]    
+    EXTRA_INDEX_CHANNELS = ["CurrentLap"]    
     val_filters = ['lt', 'gt', 'eq', 'lt_eq', 'gt_eq']
     def __init__(self):
         self._channels = []
