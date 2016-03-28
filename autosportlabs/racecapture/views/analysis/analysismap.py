@@ -195,6 +195,7 @@ class AnalysisMap(AnalysisWidget):
             self.ids.track_name.text = ''
             self.ids.track.setTrackPoints([])
         self.track = track
+        return track
 
     def _customized(self, instance, values):
         self._update_trackmap(values)
@@ -254,7 +255,8 @@ class AnalysisMap(AnalysisWidget):
         if self.track_manager:
             point = GeoPoint.fromPoint(latitude, longitude)
             track = self.track_manager.find_nearby_track(point)
-            self._select_track(track)
+            return self._select_track(track)
+        return None
 
     def remove_reference_mark(self, source):
         self.ids.track.remove_marker(source)
