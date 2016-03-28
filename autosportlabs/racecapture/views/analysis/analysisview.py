@@ -114,12 +114,11 @@ class AnalysisView(Screen):
         lat_avg, lon_avg = self._datastore.get_location_center([session])
         new_track = analysis_map.select_map(lat_avg, lon_avg)
 
-        if current_track is not None:
-            if current_track.track_id != new_track.track_id:
-                #if a new track is selected, then
-                #unselect all laps for all other sessions
-                sessions_view = self.ids.sessions_view
-                sessions_view.deselect_other_laps(session)
+        if current_track != new_track:
+            #if a new track is selected, then
+            #unselect all laps for all other sessions
+            sessions_view = self.ids.sessions_view
+            sessions_view.deselect_other_laps(session)
         
 
     def open_datastore(self):

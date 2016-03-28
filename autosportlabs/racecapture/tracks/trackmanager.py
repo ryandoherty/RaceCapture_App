@@ -35,6 +35,11 @@ class TrackMap:
         self.country_code = None
         self.configuration = None
 
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.track_id == other.track_id
+        return False
+
     @property
     def centerpoint(self):
         if len(self.map_points) > 0:
