@@ -269,7 +269,7 @@ class SessionBrowser(AnchorLayout):
         '''
         Deselect all laps except from the session specified
         :param session id
-        :type integer
+        :type session integer
         '''
         source_refs = []
         for instance in self.selected_laps.itervalues():
@@ -281,7 +281,7 @@ class SessionBrowser(AnchorLayout):
         '''
         Deselect all laps specified in the list of source refs
         :param source_refs the list of source_refs
-        :type array 
+        :type source_refs array 
         '''
         for source_ref in source_refs:
             source_key = str(source_ref)
