@@ -250,13 +250,13 @@ class AnalysisMap(AnalysisWidget):
         :param latitude
         :type  latitude float
         :param longitude
-        :type longitude float 
+        :type longitude float
+        :returns the selected track
+        :type Track 
         '''
-        if self.track_manager:
-            point = GeoPoint.fromPoint(latitude, longitude)
-            track = self.track_manager.find_nearby_track(point)
-            return self._select_track(track)
-        return None
+        point = GeoPoint.fromPoint(latitude, longitude)
+        track = self.track_manager.find_nearby_track(point)
+        return self._select_track(track)
 
     def remove_reference_mark(self, source):
         self.ids.track.remove_marker(source)
