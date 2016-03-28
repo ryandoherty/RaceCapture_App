@@ -141,24 +141,16 @@ class SessionBrowser(AnchorLayout):
         try:
             self.clear_sessions()
             sessions = self.datastore.get_sessions()
-            f = Filter().gt('LapCount', 0)
+            f = Filter().gt('CurrentLap', 0)
             session = None
             for session in sessions:
                 session = self.append_session(session_id=session.session_id, name=session.name, notes=session.notes)
-                dataset = self.datastore.query(sessions=[session.session_id],
-                                        channels=['LapCount', 'LapTime'],
-                                        data_filter=f,
-                                        distinct_records=True)
-        
-                records = dataset.fetch_records()
-                lap_count = 0
-                for r in records:
-                    lap_id = int(r[1])
-                    laptime = r[2]
-                    self.append_lap(session, lap_id, laptime)
-                    lap_count += 1
-                if lap_count == 0:
-                    session.append_label('No Laps')
+                laps = self.datastore.get_laps(session.session_id)
+                if len(laps) == 0:
+                    session.append_label('No Laps') 
+                else:
+                    for lap in laps:
+                        self.append_lap(session, lap.lap, lap.lap_time)
 
             self.sessions = sessions
             self.ids.session_alert.text = '' if session else 'No Sessions'

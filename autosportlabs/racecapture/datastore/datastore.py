@@ -139,6 +139,12 @@ class Session(object):
         self.notes = notes
         self.date = date
         
+class Lap(object):
+    def __init__(self, lap, session_id, lap_time):
+        self.lap = lap
+        self.session_id = session_id
+        self.lap_time = lap_time
+
 #Filter container class
 class Filter(object):
     def __init__(self):
@@ -233,7 +239,7 @@ class DatalogChannel(object):
         return self.name
 
 class DataStore(object):
-    EXTRA_INDEX_CHANNELS = ["LapCount"]    
+    EXTRA_INDEX_CHANNELS = ["CurrentLap"]    
     val_filters = ['lt', 'gt', 'eq', 'lt_eq', 'gt_eq']
     def __init__(self):
         self._channels = []
@@ -864,6 +870,7 @@ class DataStore(object):
         #Now add the session filter to the select statement
         sel_st += ses_st
 
+        Logger.debug('[datastore] Query execute: {}'.format(sel_st))
         c = self._conn.cursor()
         c.execute(sel_st)
 
@@ -892,7 +899,31 @@ class DataStore(object):
             sessions.append(Session(session_id=row[0], name=row[1], notes=row[2], date=row[3]))
         
         return sessions
-    
+
+    def get_laps(self, session_id):
+        '''
+        Fetches a list of lap information for the specified session id
+        :param session_id the session id
+        :type session_id int
+        :returns list of Lap objects
+        :type list 
+        '''        
+        laps = []
+        c = self._conn.cursor()
+        for row in c.execute('''SELECT DISTINCT sample.session_id AS session_id, 
+                                datapoint.CurrentLap AS CurrentLap, 
+                                max(datapoint.ElapsedTime) AS ElapsedTime
+                                FROM sample
+                                JOIN datapoint ON datapoint.sample_id=sample.id
+                                WHERE datapoint.CurrentLap > 0
+                                AND sample.session_id = ?
+                                GROUP BY CurrentLap, session_id
+                                ORDER BY datapoint.CurrentLap ASC;''',
+                                (session_id,)):
+            laps.append(Lap(session_id=row[0], lap=row[1], lap_time=row[2]))
+        return laps
+                
+        
     def update_session(self, session):
         self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.session_id ,))
         self._conn.commit()
