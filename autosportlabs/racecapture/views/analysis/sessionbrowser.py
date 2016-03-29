@@ -264,15 +264,29 @@ class SessionBrowser(AnchorLayout):
             lap_instance.state = 'down' if selected else 'normal'
             self._notify_lap_selected(source_ref, True)
 
+
+    def deselect_other_laps(self, session):
+        '''
+        Deselect all laps except from the session specified
+        :param session id
+        :type session integer
+        '''
+        source_refs = []
+        for instance in self.selected_laps.itervalues():
+            if instance.session != session:
+                source_refs.append(SourceRef(instance.lap, instance.session))
+        self.deselect_laps(source_refs)
+
     def deselect_laps(self, source_refs):
         '''
         Deselect all laps specified in the list of source refs
         :param source_refs the list of source_refs
-        :type array 
+        :type source_refs array 
         '''
         for source_ref in source_refs:
             source_key = str(source_ref)
             instance = self.selected_laps.get(source_key)
             if instance:
+                instance.state = 'normal'
                 self.selected_laps.pop(source_key, None)
                 self._notify_lap_selected(source_ref, False)
