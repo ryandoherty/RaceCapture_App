@@ -16,16 +16,15 @@ Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/roundgauge.
 
 class SvgRoundGauge(BoxLayout):
     # these values match the dimensions of the svg elements used in this gauge.
-    gauge_height = 85.485
-    mask_offset = -14.515
-    gauge_width = 100
-    trim_factor = 0.97
 
     value = NumericProperty(0)
     color = ListProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
         super(SvgRoundGauge, self).__init__(**kwargs)
+        self.gauge_height = 100 #85.485
+        self.gauge_width = 100
+        self.trim_factor = 1.1 #.97
 
         self.mask_rotations = []
         size = self.height if self.height < self.width else self.width
@@ -37,9 +36,7 @@ class SvgRoundGauge(BoxLayout):
             PushMatrix()
             self.gauge_translate = Translate(x_center, y_center, 0)
             self.gauge_scale = Scale(x=gauge_height, y=gauge_height)
-            Rectangle(source='resource/gauge/round_gauge_270.png')
-            # self.dial = Svg('resource/gauge/round_gauge_270.svg',  bezier_points=1, circle_points=1,color=[1,1,1,1])
-            Translate(0, self.mask_offset)
+            Rectangle(source='resource/gauge/round_gauge_270.png', pos=self.pos, size=self.size)
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-135, axis=(0, 0, 1), origin=(self.center[0], self.center[1])))
             Svg('resource/gauge/gauge_mask.svg')
@@ -59,7 +56,6 @@ class SvgRoundGauge(BoxLayout):
             self.shadow_translate = Translate(x_center, y_center, 0)
             self.shadow_scale = Scale(x=gauge_height, y=gauge_height)
             Rectangle(source='resource/gauge/round_gauge_270_shadow.png')
-            # Svg('resource/gauge/round_gauge_270_shadow.svg', bezier_points=1, circle_points=1)
             PopMatrix()
 
         self.bind(pos=self.update_all, size=self.update_all)
