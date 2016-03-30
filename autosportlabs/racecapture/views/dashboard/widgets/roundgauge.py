@@ -16,7 +16,7 @@ class SweepGauge(BoxLayout):
     # these values match the dimensions of the svg elements used in this gauge.
 
     value = NumericProperty(0)
-    color = ListProperty([0, 1, 1, 1])
+    color = ListProperty([1, 1, 1, 1])
 
     def __init__(self, **kwargs):
         super(SweepGauge, self).__init__(**kwargs)
@@ -120,7 +120,7 @@ class RoundGauge(CustomizableGauge):
             offset = railedValue - min
             self.ids.gauge.value = offset * 100 / range
         except Exception as e:
-            Logger.error('RoundGauge: error setting font gauge value ' + str(e))
+            Logger.error('RoundGauge: error setting gauge value ' + str(e))
 
         return super(RoundGauge, self).on_value(instance, value)
 
