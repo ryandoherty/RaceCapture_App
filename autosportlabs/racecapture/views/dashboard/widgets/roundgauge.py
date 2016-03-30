@@ -7,24 +7,22 @@ from kivy.metrics import dp
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import CustomizableGauge
 from utils import kvFind
 from kivy.graphics import *
-from kivy.graphics.svg import Svg
 from kivy.properties import NumericProperty, ListProperty
-from xml.etree.cElementTree import parse
 from kivy.logger import Logger
 Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/roundgauge.kv')
 
 
-class SvgRoundGauge(BoxLayout):
+class SweepGauge(BoxLayout):
     # these values match the dimensions of the svg elements used in this gauge.
 
     value = NumericProperty(0)
-    color = ListProperty([1, 1, 1, 1])
+    color = ListProperty([0, 1, 1, 1])
 
     def __init__(self, **kwargs):
-        super(SvgRoundGauge, self).__init__(**kwargs)
-        self.gauge_height = 100 #85.485
+        super(SweepGauge, self).__init__(**kwargs)
+        self.gauge_height = 110
         self.gauge_width = 100
-        self.trim_factor = 1.1 #.97
+        self.zoom_factor = 1.1
 
         self.mask_rotations = []
         size = self.height if self.height < self.width else self.width
@@ -34,25 +32,27 @@ class SvgRoundGauge(BoxLayout):
 
         with self.canvas:
             PushMatrix()
+            self.dial_color = Color(rgba=self.color)
             self.gauge_translate = Translate(x_center, y_center, 0)
             self.gauge_scale = Scale(x=gauge_height, y=gauge_height)
             Rectangle(source='resource/gauge/round_gauge_270.png', pos=self.pos, size=self.size)
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-135, axis=(0, 0, 1), origin=(self.center[0], self.center[1])))
-            Svg('resource/gauge/gauge_mask.svg')
+            Rectangle(source='resource/gauge/gauge_mask.png')
             PopMatrix()
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-225, axis=(0, 0, 1), origin=(self.center[0], self.center[1])))
-            Svg('resource/gauge/gauge_mask.svg')
+            Rectangle(source='resource/gauge/gauge_mask.png')
             PopMatrix()
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-315, axis=(0, 0, 1), origin=(self.center[0], self.center[1])))
-            Svg('resource/gauge/gauge_mask.svg')
+            Rectangle(source='resource/gauge/gauge_mask.png')
             PopMatrix()
             PopMatrix()
 
         with self.canvas.after:
             PushMatrix()
+            Color(1, 1, 1, 1)
             self.shadow_translate = Translate(x_center, y_center, 0)
             self.shadow_scale = Scale(x=gauge_height, y=gauge_height)
             Rectangle(source='resource/gauge/round_gauge_270_shadow.png')
@@ -62,7 +62,7 @@ class SvgRoundGauge(BoxLayout):
 
     def update_all(self, *args):
         size = self.height if self.height < self.width else self.width
-        gauge_height = size / self.gauge_height * self.trim_factor
+        gauge_height = size / self.gauge_height * self.zoom_factor
 
         x_center = self.pos[0] + self.width / 2 - (self.gauge_width / 2) * gauge_height
         y_center = self.pos[1] + self.height / 2 - (self.gauge_height / 2) * gauge_height
@@ -84,7 +84,7 @@ class SvgRoundGauge(BoxLayout):
         self.mask_rotations[2].angle = -135 - angle  if angle > 180 else -315
 
     def on_color(self, instance, value):
-        self.dial.color = value
+        self.dial_color.rgba = value
 
 class RoundGauge(CustomizableGauge):
 
@@ -102,7 +102,7 @@ class RoundGauge(CustomizableGauge):
 
 
     def update_colors(self):
-        self.ids.svg_gauge.color = self.select_alert_color()
+        self.ids.gauge.color = self.select_alert_color()
         return super(RoundGauge, self).update_colors()
 
     def on_value(self, instance, value):
@@ -118,7 +118,7 @@ class RoundGauge(CustomizableGauge):
 
             range = max - min
             offset = railedValue - min
-            self.ids.svg_gauge.value = offset * 100 / range
+            self.ids.gauge.value = offset * 100 / range
         except Exception as e:
             Logger.error('RoundGauge: error setting font gauge value ' + str(e))
 

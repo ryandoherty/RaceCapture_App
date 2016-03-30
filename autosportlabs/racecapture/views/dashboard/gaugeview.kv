@@ -3,14 +3,19 @@
 
         AnchorLayout:
             anchor_x:'left'
-            anchor_y:'center'
-            BoxLayout:
+            anchor_y:'top'
+            RoundGauge:
                 size_hint_x: 0.3
-                orientation: 'vertical'
-                RoundGauge:
-                    rcid: 'tl'
-                RoundGauge:
-                    rcid: 'bl'
+                size_hint_y: 0.5
+                rcid: 'tl'
+
+        AnchorLayout:
+            anchor_x:'left'
+            anchor_y:'bottom'
+            RoundGauge:
+                size_hint_x: 0.3
+                size_hint_y: 0.5
+                rcid: 'bl'
         
         AnchorLayout:
             anchor_x:'right'
@@ -28,7 +33,7 @@
             anchor_x:'center'
             anchor_y:'center'
             BoxLayout:
-                size_hint_x: 0.4
+                size_hint_x: 0.5
                 orientation: 'vertical'
                 RoundGauge:
                     rcid: 'center'
