@@ -4,6 +4,8 @@
 * Dynamically adjust size of track marker when zooming
 * Correctly switch between trackmaps when selecting laps from a different tracks
 * Remove any selected laps for a session if that session is deleted
+* Remember the Bluetooth Name for RaceCapture for faster next time acquisition
+* Fix memory leak around gauge alert colors
 
 ==1.4.3==
 * Resolve erroneous v0.0.0 incompatibility complaint upon RaceCapture detection
