@@ -118,7 +118,7 @@ class TrackMap:
 class TrackManager:
     """Manages fetching tracks from RCL's API, figuring out if any tracks have been updated, saving and loading tracks
     """
-    RCP_VENUE_URL = 'https://race-capture.com/api/v1/venues'
+    RCP_VENUE_URL = 'https://podium.live/api/v1/venues'
     READ_RETRIES = 3
     RETRY_DELAY = 1.0
 
