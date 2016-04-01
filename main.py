@@ -139,6 +139,8 @@ class RaceCaptureApp(App):
 
         HelpInfo.settings = self.settings
 
+        #Ensure soft input mode text inputs aren't obstructed
+        Window.softinput_mode = 'pan'
         Window.bind(on_keyboard=self._on_keyboard)
         self.register_event_type('on_tracks_updated')
         self.processArgs()
