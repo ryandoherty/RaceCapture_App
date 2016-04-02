@@ -27,6 +27,7 @@ from kivy.clock import Clock
 from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
@@ -35,6 +36,7 @@ from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
 from autosportlabs.racecapture.views.analysis.addstreamview import AddStreamView
 from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser
+from autosportlabs.racecapture.views.analysis.flyinpanel import FlyinPanel
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent, SourceRef
 from autosportlabs.racecapture.views.analysis.linechart import LineChart
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
@@ -46,6 +48,7 @@ from autosportlabs.help.helpmanager import HelpInfo
 import traceback
 
 ANALYSIS_VIEW_KV = 'autosportlabs/racecapture/views/analysis/analysisview.kv'
+
 
 class AnalysisView(Screen):
     SUGGESTED_CHART_CHANNELS = ['Speed']
@@ -190,7 +193,6 @@ class AnalysisView(Screen):
         self.ids.analysismap.datastore = self._datastore
         Clock.schedule_once(lambda dt: HelpInfo.help_popup('beta_analysis_welcome', self, arrow_pos='right_mid'), 0.5)
 
-
     def popup_dismissed(self, *args):
         if self.stream_connecting:
             return True
@@ -200,3 +202,4 @@ class AnalysisView(Screen):
         if self._popup is not None:
             self._popup.dismiss()
             self._popup = None
+
