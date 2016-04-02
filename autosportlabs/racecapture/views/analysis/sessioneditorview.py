@@ -22,7 +22,7 @@ from threading import Thread
 import kivy
 from kivy.uix.boxlayout import BoxLayout
 
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.app import Builder
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/sessioneditorview.kv')
