@@ -72,7 +72,7 @@ class FlyinPanel(FloatLayout):
     
     #how long we wait to auto-dismiss session list
     #after a perioud of disuse
-    SESSION_HIDE_DELAY = 3.0
+    SESSION_HIDE_DELAY = 2.0
     TRANSITION_STYLE = 'in_out_elastic'
     SHOW_POSITION = 0
 #    contents = ObjectProperty(None, allownone=True)
@@ -87,24 +87,20 @@ class FlyinPanel(FloatLayout):
         
         Clock.schedule_once(lambda dt: self.show())
         self.hide_decay()     
-        
+    
+    def flyin_collide_point(self, x, y):
+        return self.ids.flyin.collide_point(x, y)
+    
     def on_motion(self, instance, event, motion_event):
         if self.ids.flyin.collide_point(motion_event.x, motion_event.y):
-            print('on motion')
             self.cancel_hide()
         
     def on_mouse_pos(self, x, pos):
         if self.ids.flyin.collide_point(pos[0], pos[1]):
-            print('on mouse pos')
             self.cancel_hide()
+            return True
         return False
-        
-    def on_touch_down(self, touch):
-        if self.ids.flyin.collide_point(touch.x, touch.y):
-            print('touch down')
-            self.cancel_hide()
-        return super(FlyinPanel, self).on_touch_down(touch)
-        
+                
     def add_widget(self, widget):
         if len(self.children) == 0:
             super(FlyinPanel, self).add_widget(widget)

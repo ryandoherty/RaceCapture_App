@@ -31,6 +31,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
+from kivy.core.window import Window
 from autosportlabs.racecapture.views.analysis.analysisdata import CachingAnalysisDatastore
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
@@ -72,7 +73,24 @@ class AnalysisView(Screen):
         self.ids.channelvalues.color_sequence = self._color_sequence
         self.ids.mainchart.color_sequence = self._color_sequence
         self.stream_connecting = False
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        Window.bind(on_motion=self.on_motion)        
         self.init_view()
+
+    def on_motion(self, instance, event, motion_event):
+        flyin = self.ids.laps_flyin
+        if self.collide_point(motion_event.x, motion_event.y):
+            if not flyin.flyin_collide_point(motion_event.x, motion_event.y):
+                flyin.schedule_hide()
+        
+    def on_mouse_pos(self, x, pos):
+        flyin = self.ids.laps_flyin
+        x = pos[0]
+        y = pos[1]
+        if self.collide_point(x, y):
+            if not flyin.flyin_collide_point(x, y):
+                flyin.schedule_hide()
+        return False
 
     def on_sessions(self, instance, value):
         self.ids.channelvalues.sessions = value
