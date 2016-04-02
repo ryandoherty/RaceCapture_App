@@ -21,6 +21,7 @@ from autosportlabs.racecapture.datastore import DataStore, Filter, timing
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from threading import Thread
 from kivy.logger import Logger
+from kivy.clock import Clock
 import Queue
 
 class ChannelStats(object):
@@ -82,7 +83,7 @@ class CachingAnalysisDatastore(DataStore):
         Logger.info('CachingAnalysisDatastore: querying {} {}'.format(source_ref, channels))
         lap = source_ref.lap
         session = source_ref.session
-        f = Filter().eq('LapCount', lap)
+        f = Filter().eq('CurrentLap', lap)
         dataset = self.query(sessions=[session], channels=channels, data_filter=f)
         records = dataset.fetch_records()
 
@@ -116,7 +117,7 @@ class CachingAnalysisDatastore(DataStore):
         if len(channels_to_query) > 0:
             channel_d = self._query_channel_data(params.source_ref, channels_to_query, channel_data)
 
-        params.callback(channel_data)
+        Clock.schedule_once(lambda dt: params.callback(channel_data))
 
     def _get_location_data(self, params):
         '''
@@ -128,7 +129,7 @@ class CachingAnalysisDatastore(DataStore):
         if cache == None:
             session = source_ref.session
             lap = source_ref.lap
-            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("LapCount", lap)
+            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("CurrentLap", lap)
             dataset = self.query(sessions = [session], 
                                             channels = ["Latitude", "Longitude"], 
                                             data_filter = f)
@@ -139,7 +140,9 @@ class CachingAnalysisDatastore(DataStore):
                 lon = r[2]
                 cache.append(GeoPoint.fromPoint(lat, lon))
             self._session_location_cache[source_key]=cache
-        params.callback(cache)
+
+        Clock.schedule_once(lambda dt: params.callback(cache))
+
         
     def _get_channel_data_worker(self):
         '''

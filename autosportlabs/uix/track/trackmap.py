@@ -15,8 +15,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # See the GNU General Public License for more details. You should
-#have received a copy of the GNU General Public License along with
-#this code. If not, see <http://www.gnu.org/licenses/>.
+# have received a copy of the GNU General Public License along with
+# this code. If not, see <http://www.gnu.org/licenses/>.
 import kivy
 import math
 from autosportlabs.uix.color import colorgradient
@@ -41,24 +41,25 @@ class Point(object):
     def __init__(self, x, y):
         self.x = x
         self.y = y
-    
+
 class MarkerPoint(Point):
     def __init__(self, color):
         super(MarkerPoint, self).__init__(0, 0)
         self.color = color
-    
+
 class TrackPath(object):
     def __init__(self, path, color):
         self.color = color
         self.path = path
 
-class TrackMap(Widget):
-    #min / max for heat map range
+class TrackMapView(Widget):
+    # min / max for heat map range
     heat_min = NumericProperty(0.0)
     heat_max = NumericProperty(100.0)
-    
+
     track_color = ListProperty([1.0, 1.0, 1.0, 0.5])
-    
+    marker_scale = NumericProperty(1.0)
+
     MIN_PADDING = sp(1)
     DEFAULT_TRACK_WIDTH_SCALE = 0.01
     DEFAULT_MARKER_WIDTH_SCALE = 0.02
@@ -67,7 +68,7 @@ class TrackMap(Widget):
     HEAT_MAP_WIDTH_STEP = 2
 
     def __init__(self, **kwargs):
-        super(TrackMap, self).__init__(**kwargs)
+        super(TrackMapView, self).__init__(**kwargs)
         self.bind(pos=self._update_map)
         self.bind(size=self._update_map)
 
@@ -75,29 +76,31 @@ class TrackMap(Widget):
         self.marker_width_scale = self.DEFAULT_MARKER_WIDTH_SCALE
         self.path_width_scale = self.DEFAULT_PATH_WIDTH_SCALE
         self.heat_width_scale = self.DEFAULT_HEAT_WIDTH_SCALE
-        
-        #these manage rendering of the points
-        self._offset_point = Point(0,0)
+
+        # these manage rendering of the points
+        self._offset_point = Point(0, 0)
         self._global_ratio = 0
         self._height_padding = 0
         self._width_padding = 0
         self._min_XY = Point(-1, -1)
         self._max_XY = Point(-1, -1)
-    
-        #The trackmap
+
+        # The trackmap
         self._map_points = []
         self._scaled_map_points = []
-    
-        #The map _paths
-        self._paths = {}
-        self._scaled_paths = {}
-        self._heat_map_values = {}
-        
-        #markers for trackmap
+
+        # markers for trackmap
         self._marker_points = {}
         self._marker_locations = {}
 
-    
+        # The map _paths
+        self._paths = {}
+        self._scaled_paths = {}
+        self._heat_map_values = {}
+
+    def on_marker_scale(self, instance, value):
+        self._draw_current_markers()
+
     def on_trackColor(self, instance, value):
         self._draw_current_map()
 
@@ -118,7 +121,7 @@ class TrackMap(Widget):
         :returns the TrackPath object matching the key, or None 
         '''
         return self._paths.get(key)
-    
+
     def add_path(self, key, path, color):
         '''
         Add the specified path to the trackmap
@@ -162,7 +165,7 @@ class TrackMap(Widget):
         '''
         self.heat_min = min_range
         self.heat_max = max_range
-        
+
     def add_heat_values(self, key, heat_map_values):
         '''
         Add the point values for the specified key
@@ -191,8 +194,8 @@ class TrackMap(Widget):
         '''
         self._paths.pop(key, None)
         self._scaled_paths.pop(key, None)
-        #Also remove heat values since they are paired with the same key
-        self._heat_map_values.pop(key, None)  
+        # Also remove heat values since they are paired with the same key
+        self._heat_map_values.pop(key, None)
         self._draw_current_map()
 
     def add_marker(self, key, color):
@@ -224,41 +227,46 @@ class TrackMap(Widget):
         '''
         return self._marker_points.get(key)
 
-    def update_marker(self, key, geoPoint):
+    def update_marker(self, key, geoPoint=None):
         '''
         Update the marker to the specified position
         :param key The key of the marker
         :type key string
         :param geoPoint the point for the updated position
-        :type GeoPoint
+        :type GeoPoint - default is None. if None, don't update position
         '''
         marker_point = self._marker_points.get(key)
         marker_location = self._marker_locations.get(key)
         if marker_point and marker_location:
             left = self.pos[0]
             bottom = self.pos[1]
-            point = self._offset_track_point(self._project_point(geoPoint))
-            marker_point.x = point.x
-            marker_point.y = point.y
+            if geoPoint is not None:
+                point = self._offset_track_point(self._project_point(geoPoint))
+                marker_point.x = point.x
+                marker_point.y = point.y
             scaled_point = self._scale_point(marker_point, self.height, left, bottom)
-
-            marker_size = self.marker_width_scale * self.height
+            marker_size = (self.marker_width_scale * self.height) * self.marker_scale
             marker_location.circle = (scaled_point.x, scaled_point.y, marker_size)
-        
+            marker_location.width = marker_size
+
+    def _draw_current_markers(self):
+        for key in self._marker_points.iterkeys():
+            self.update_marker(key)
+
     def _update_map(self, *args):
         padding_both_sides = self.MIN_PADDING * 2
-        
+
         width = self.size[0]
         height = self.size[1]
-        
+
         left = self.pos[0]
         bottom = self.pos[1]
-        
+
         # the actual drawing space for the map on the image
         map_width = width - padding_both_sides;
         map_height = height - padding_both_sides;
 
-        #determine the width and height ratio because we need to magnify the map to fit into the given image dimension
+        # determine the width and height ratio because we need to magnify the map to fit into the given image dimension
         map_width_ratio = float(map_width) / float(self._max_XY.x)
         map_height_ratio = float(map_height) / float(self._max_XY.y)
 
@@ -266,12 +274,12 @@ class TrackMap(Widget):
         # the global ratio that will perfectly fit into the given image dimension
         self._global_ratio = min(map_width_ratio, map_height_ratio)
 
-        #now we need to readjust the padding to ensure the map is always drawn on the center of the given image dimension
+        # now we need to readjust the padding to ensure the map is always drawn on the center of the given image dimension
         self._height_padding = (height - (self._global_ratio * self._max_XY.y)) / 2.0
         self._width_padding = (width - (self._global_ratio * self._max_XY.x)) / 2.0
         self._offset_point = self._min_XY
-        
-        #track outline
+
+        # track outline
         points = self._map_points
         scaled_map_points = []
         for point in points:
@@ -301,26 +309,26 @@ class TrackMap(Widget):
         heat_width_step = sp(self.HEAT_MAP_WIDTH_STEP)
         path_count = len(self._scaled_paths.keys())
         heat_width = sp(self.heat_width_scale * self.height) + ((path_count - 1) * heat_width_step)
-        
+
         with self.canvas:
             Color(*self.track_color)
             Line(points=self._scaled_map_points, width=sp(self.track_width_scale * self.height), closed=True, cap='round', joint='round')
 
             color_gradient = HeatColorGradient()
-                
-            #draw all of the traces
+
+            # draw all of the traces
             for key, path_points in self._scaled_paths.iteritems():
                 heat_path = self._heat_map_values.get(key)
                 if heat_path:
-                    #draw heat map
+                    # draw heat map
                     point_count = len(path_points)
                     heat_min = self.heat_min
                     heat_range = self.heat_max - heat_min
                     value_index = 0
                     current_heat_pct = 0
-                    i=0
+                    i = 0
                     line_points = []
-                    
+
                     try:
                         line_points.extend([path_points[i], path_points[i + 1]])
                         current_heat_pct = int(((heat_path[value_index] - heat_min) / heat_range) * 100.0)
@@ -331,31 +339,31 @@ class TrackMap(Widget):
                                 heat_color = color_gradient.get_color_value(heat_pct / 100.0)
                                 Color(*heat_color)
                                 Line(points=line_points, width=heat_width, closed=False, joint='miter', cap='round')
-                                line_points=[path_points[i-2], path_points[i-1]]
+                                line_points = [path_points[i - 2], path_points[i - 1]]
                                 current_heat_pct = heat_pct
                             line_points.extend([path_points[i], path_points[i + 1]])
                             value_index += 1
                             i += 2
                         heat_width -= heat_width_step
-                    except IndexError: #if the number of heat values mismatch the heat map points, terminate early
+                    except IndexError:  # if the number of heat values mismatch the heat map points, terminate early
                         pass
                 else:
-                    #draw regular map trace
+                    # draw regular map trace
                     Color(*self._paths[key].color)
                     Line(points=path_points, width=sp(self.path_width_scale * self.height), closed=True, cap='square', joint='miter')
 
-            #draw the markers
-            marker_size = self.marker_width_scale * self.height
+            # draw the markers
+            marker_size = (self.marker_width_scale * self.height) * self.marker_scale
             for key, marker_point in self._marker_points.iteritems():
                 scaled_point = self._scale_point(marker_point, self.height, left, bottom)
                 Color(*marker_point.color)
                 self._marker_locations[key] = Line(circle=(scaled_point.x, scaled_point.y, marker_size), width=marker_size, closed=True)
-        
+
     def _offset_track_point(self, point):
         point.x = point.x - self._min_XY.x
         point.y = point.y - self._min_XY.y
         return point
-        
+
     def _project_point(self, geo_point):
         latitude = geo_point.latitude * float(math.pi / 180.0)
         longitude = geo_point.longitude * float(math.pi / 180.0)
@@ -364,36 +372,36 @@ class TrackMap(Widget):
 
     def _scale_point(self, point, height, left, bottom):
         adjusted_X = int((self._width_padding + (point.x * self._global_ratio))) + left
-        #need to invert the Y since 0,0 starts at top left
+        # need to invert the Y since 0,0 starts at top left
         adjusted_Y = int((self._height_padding + (point.y * self._global_ratio))) + bottom
         return Point(adjusted_X, adjusted_Y)
 
     def _gen_map_points(self, geo_points):
         points = []
-        
+
         # min and max coordinates, used in the computation below
         min_XY = Point(-1, -1)
         max_XY = Point(-1, -1)
-        
+
         for geo_point in geo_points:
             point = self._project_point(geo_point)
             min_XY.x = point.x if min_XY.x == -1 else min(min_XY.x, point.x)
             min_XY.y = point.y if min_XY.y == -1 else min(min_XY.y, point.y)
             points.append(point);
-        
+
         # now, we need to keep track the max X and Y values
         for point in points:
             point.x = point.x - min_XY.x
             point.y = point.y - min_XY.y
             max_XY.x = point.x if max_XY.x == -1 else max(max_XY.x, point.x)
             max_XY.y = point.y if max_XY.y == -1 else max(max_XY.y, point.y);
-                
+
         self._min_XY = min_XY
         self._max_XY = max_XY
-        self._map_points =  points
-        
+        self._map_points = points
+
     def _get_heat_map_color(self, value):
-        colors = [[0,0,1,1], [0,1,0,1], [1,1,0,1], [1,0,0,1]]
+        colors = [[0, 0, 1, 1], [0, 1, 0, 1], [1, 1, 0, 1], [1, 0, 0, 1]]
         num_colors = len(colors)
 
         idx1 = 0
@@ -406,12 +414,12 @@ class TrackMap(Widget):
             idx1 = idx2 = num_colors - 1
         else:
             value = value * (num_colors - 1)
-            idx1  = int(math.floor(value))
-            idx2  = idx1 + 1
+            idx1 = int(math.floor(value))
+            idx2 = idx1 + 1
             frac_between = value - float(idx1)
 
-        red   = (colors[idx2][0] - colors[idx1][0]) * frac_between + colors[idx1][0];
+        red = (colors[idx2][0] - colors[idx1][0]) * frac_between + colors[idx1][0];
         green = (colors[idx2][1] - colors[idx1][1]) * frac_between + colors[idx1][1];
-        blue  = (colors[idx2][2] - colors[idx1][2]) * frac_between + colors[idx1][2];
-        
+        blue = (colors[idx2][2] - colors[idx1][2]) * frac_between + colors[idx1][2];
+
         return [red, green, blue, 1.0]

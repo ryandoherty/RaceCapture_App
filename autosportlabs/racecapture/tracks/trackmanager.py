@@ -3,16 +3,20 @@ import time
 import copy
 import errno
 import string
-import logging
 from threading import Thread, Lock
 import urllib2
 import os
 import traceback
+from StringIO import StringIO
+import gzip
+import zipfile
 from autosportlabs.racecapture.geo.geopoint import GeoPoint, Region
+from autosportlabs.util.timeutil import time_to_epoch
 from kivy.logger import Logger
-from utils import time_to_epoch
+
 TRACK_DEFAULT_SEARCH_RADIUS_METERS = 2000
 TRACK_DEFAULT_SEARCH_BEARING_DEGREES = 360
+TRACK_DOWNLOAD_TIMEOUT = 30
 
 class TrackMap:
     """Very generic object wrapper around RCL's API endpoint for venues
@@ -30,6 +34,11 @@ class TrackMap:
         self.finish_point = None
         self.country_code = None
         self.configuration = None
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.track_id == other.track_id
+        return False
 
     @property
     def centerpoint(self):
@@ -77,7 +86,7 @@ class TrackMap:
 
         if not self.short_id > 0:
             raise Warning("Could not parse trackMap: short_id is invalid")
-    
+
     def to_dict(self):
         """Create a dict for saving this object's data. Usually for saving to a file
         """
@@ -109,7 +118,7 @@ class TrackMap:
 class TrackManager:
     """Manages fetching tracks from RCL's API, figuring out if any tracks have been updated, saving and loading tracks
     """
-    RCP_VENUE_URL = 'https://race-capture.com/api/v1/venues'
+    RCP_VENUE_URL = 'https://podium.live/api/v1/venues'
     READ_RETRIES = 3
     RETRY_DELAY = 1.0
 
@@ -125,7 +134,7 @@ class TrackManager:
         self.tracks = {}
         self.track_ids_in_region = []
         self.base_dir = kwargs.get('base_dir')
-        
+
     def set_tracks_user_dir(self, path):
         try:
             os.makedirs(path)
@@ -133,11 +142,12 @@ class TrackManager:
             if exception.errno != errno.EEXIST:
                 raise
         self.tracks_user_dir = path
-        
+
     def init(self, progress_cb, success_cb, fail_cb):
         self.load_regions()
+        self.check_load_default_tracks()
         self.load_tracks(progress_cb, success_cb, fail_cb)
-        
+
     def load_regions(self):
         """Regions are an array of lat/long points that make a bounding box. Usually around a country or continent
         """
@@ -156,18 +166,18 @@ class TrackManager:
     @property
     def track_ids(self):
         return self.tracks.keys()
-    
+
     def get_track_ids_in_region(self):
         return self.track_ids_in_region
-        
+
     def find_track_by_short_id(self, short_id):
         for track_id in self.tracks.keys():
             track = self.tracks.get(track_id)
             if track and short_id == track.short_id:
                 return track
         return None
-        
-    def find_nearby_track(self, point, searchRadius = TRACK_DEFAULT_SEARCH_RADIUS_METERS, searchBearing = TRACK_DEFAULT_SEARCH_BEARING_DEGREES):
+
+    def find_nearby_track(self, point, searchRadius=TRACK_DEFAULT_SEARCH_RADIUS_METERS, searchBearing=TRACK_DEFAULT_SEARCH_BEARING_DEGREES):
         radius = point.metersToDegrees(searchRadius, searchBearing)
         for trackId in self.tracks.keys():
             track = self.tracks[trackId]
@@ -187,11 +197,11 @@ class TrackManager:
                 filtered_track_ids.append(track_id)
 
         return filtered_track_ids
-                
+
     def filter_tracks_by_region(self, region_name):
         track_ids_in_region = self.track_ids_in_region
         del track_ids_in_region[:]
-        
+
         if region_name is None:
             track_ids_in_region.extend(self.track_ids)
         else:
@@ -209,7 +219,7 @@ class TrackManager:
 
     def get_track_by_id(self, track_id):
         return self.tracks.get(track_id)
-    
+
     def load_json(self, uri):
         """Semi-generic method for fetching JSON data
         """
@@ -217,9 +227,13 @@ class TrackManager:
         while retries < self.READ_RETRIES:
             try:
                 opener = urllib2.build_opener()
-                opener.addheaders = [('Accept', 'application/json')]
-                response = opener.open(uri).read()
-                j = json.loads(response)
+                opener.addheaders = [('Accept', 'application/json'), ('Accept-encoding', 'gzip')]
+                response = opener.open(uri, timeout=TRACK_DOWNLOAD_TIMEOUT)
+                data = response.read()
+                if response.info().get('Content-Encoding') == 'gzip':
+                    string_buffer = StringIO(data)
+                    data = gzip.GzipFile(fileobj=string_buffer).read()
+                j = json.loads(data)
                 return j
             except Exception as detail:
                 Logger.warning('TrackManager: Failed to read: from {} : {}'.format(uri, traceback.format_exc()))
@@ -258,6 +272,7 @@ class TrackManager:
         venues_list = []
 
         while next_uri:
+            Logger.info('TrackManager: Fetching venue data: {}'.format(next_uri))
             response = self.load_json(next_uri)
             try:
                 if total_venues is None:
@@ -276,7 +291,7 @@ class TrackManager:
             except MissingKeyException as detail:
                 Logger.error('TrackManager: Malformed venue JSON from url ' + next_uri + '; json =  ' + str(response) +
                              ' ' + str(detail))
-                
+
         Logger.info('TrackManager: fetched list of ' + str(len(venues_list)) + ' tracks')
 
         if not total_venues == len(venues_list):
@@ -294,13 +309,13 @@ class TrackManager:
             return copy.deepcopy(track_map)
         except Warning:
             return None
-        
+
     def save_track(self, track):
-        path = self.tracks_user_dir + '/' + track.track_id + '.json'
+        path = os.path.join(self.tracks_user_dir, track.track_id + '.json')
         track_json_string = json.dumps(track.to_dict(), sort_keys=True, indent=2, separators=(',', ': '))
         with open(path, 'w') as text_file:
             text_file.write(track_json_string)
-    
+
     def load_current_tracks_worker(self, success_cb, fail_cb, progress_cb=None):
         """Method for loading local tracks files in a separate thread
         """
@@ -309,11 +324,21 @@ class TrackManager:
             self.load_tracks(progress_cb)
             success_cb()
         except Exception as detail:
-            logging.exception('')
+            Logger.exception('')
             fail_cb(detail)
         finally:
             self.update_lock.release()
-        
+
+    def check_load_default_tracks(self):
+        track_file_names = os.listdir(self.tracks_user_dir)
+        if (len(track_file_names) == 0):
+            Logger.info("TrackManager: No tracks found; loading defaults")
+            try:
+                with zipfile.ZipFile(os.path.join(self.base_dir, 'defaults', 'default_tracks.zip'), 'r') as z:
+                    z.extractall(self.tracks_user_dir)
+            except Exception as e:
+                Logger.error("TrackManager: Could not load default tracks: {}".format(e))
+
     def load_tracks(self, progress_cb=None, success_cb=None, fail_cb=None):
         """Loads tracks from local files. If called with success and fail callbacks it sets up a separate thread
         """
@@ -329,7 +354,7 @@ class TrackManager:
 
             for trackPath in track_file_names:
                 try:
-                    json_data = open(self.tracks_user_dir + '/' + trackPath)
+                    json_data = open(os.path.join(self.tracks_user_dir, trackPath))
                     track_dict = json.load(json_data)
                     resave = False
 
@@ -353,7 +378,7 @@ class TrackManager:
 
             del self.track_ids_in_region[:]
             self.track_ids_in_region.extend(self.track_ids)
-                        
+
     def update_all_tracks_worker(self, success_cb, fail_cb, progress_cb=None):
         """Method for updating all tracks in a separate thread
         """
@@ -362,11 +387,11 @@ class TrackManager:
             self.refresh(progress_cb)
             success_cb()
         except Exception as detail:
-            logging.exception('')
+            Logger.exception('')
             fail_cb(detail)
         finally:
             self.update_lock.release()
-            
+
     def refresh(self, progress_cb=None, success_cb=None, fail_cb=None):
         """Refreshes all tracks. If success and fail callbacks are provided, sets up a new thread.
         If no tracks are saved locally, it will fetch all track data from RCL and save it.
