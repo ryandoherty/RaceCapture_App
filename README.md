@@ -1,20 +1,10 @@
 RaceCapture App
 ===============
 
-Next Gen version of the RaceCapture App.
+App for the RaceCapture series of motorsport telemetry systems.
 
-Dependencies:
-* Kivy 1.9.1
-* Python 2.7.x
-* Patched Kivy 1.9.x (https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched) 
-* Pyserial 2.6.x
-* Pygame
-* Included in package right now but ultimately shouldn't be:
-  * Graph (via kivy-garden via python-pip)
-  * NavigationDrawer (via kivy-garden)
-  * ModernMenu (via kivy-garden)
-  * asl_f4_loader (in dependencies folder)
-  * ihexpy (manual install from https://github.com/autosportlabs/ihexpy )
+## Dependencies
+See requirements.txt for full list of requirements
 
 ## dev installation (OS X)
 
@@ -105,7 +95,7 @@ The script will create the .App file and .dmg for distribution.
 
 ## dev installation (Linux - Ubuntu)
 
-1. Install kivy via pip
+1. Install kivy 1.9.1 via pip
 1. install [virtualenv]: `sudo pip install virtualenv`
 1. create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. activate the virtualenv: `. _ve/bin/activate`
