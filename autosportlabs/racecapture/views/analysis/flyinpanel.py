@@ -18,7 +18,7 @@
 # have received a copy of the GNU General Public License along with
 # this code. If not, see <http://www.gnu.org/licenses/>.
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.logger import Logger
 from kivy.app import Builder
 from kivy.clock import Clock
@@ -27,6 +27,7 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.animation import Animation
 from kivy.properties import ObjectProperty
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.core.window import Window
 
 FLYIN_PANEL_LAYOUT='''
 <FlyinPanel>:
@@ -34,9 +35,8 @@ FLYIN_PANEL_LAYOUT='''
     BoxLayout:
         id: flyin
         orientation: 'vertical'
-        size_hint: (1,1)
+        size_hint: (0.25,1)
         pos: (root.width - self.width, self.height)
-        size_hint_x: 0.25
         canvas.before:
             Color:
                 rgba: (0,0,0,1)
@@ -82,8 +82,28 @@ class FlyinPanel(FloatLayout):
         Builder.load_string(FLYIN_PANEL_LAYOUT)
         super(FlyinPanel, self).__init__(**kwargs)
         self.hide_decay = Clock.create_trigger(lambda dt: self.hide(), self.SESSION_HIDE_DELAY)
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        Window.bind(on_motion=self.on_motion)
+        
         Clock.schedule_once(lambda dt: self.show())
         self.hide_decay()     
+        
+    def on_motion(self, instance, event, motion_event):
+        if self.ids.flyin.collide_point(motion_event.x, motion_event.y):
+            print('on motion')
+            self.cancel_hide()
+        
+    def on_mouse_pos(self, x, pos):
+        if self.ids.flyin.collide_point(pos[0], pos[1]):
+            print('on mouse pos')
+            self.cancel_hide()
+        return False
+        
+    def on_touch_down(self, touch):
+        if self.ids.flyin.collide_point(touch.x, touch.y):
+            print('touch down')
+            self.cancel_hide()
+        return super(FlyinPanel, self).on_touch_down(touch)
         
     def add_widget(self, widget):
         if len(self.children) == 0:
