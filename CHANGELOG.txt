@@ -8,7 +8,6 @@
 * Fix memory leak around gauge alert colors
 
 ==1.4.3==
-* Migrate to Kivy 1.9.1
 * Resolve erroneous v0.0.0 incompatibility complaint upon RaceCapture detection
 * Resolves sporadic stuck communications status bar
 * Resolves sporadic issue where rapid lap selection may result in internal errors
