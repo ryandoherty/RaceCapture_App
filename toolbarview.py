@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from utils import *
 from kivy.properties import ObjectProperty, NumericProperty, ListProperty, StringProperty
 from kivy.uix.stacklayout import StackLayout

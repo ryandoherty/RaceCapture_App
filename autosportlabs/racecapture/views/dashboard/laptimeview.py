@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from fieldlabel import FieldLabel
 from kivy.app import Builder
 from kivy.uix.screenmanager import Screen

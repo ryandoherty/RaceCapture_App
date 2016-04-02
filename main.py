@@ -18,7 +18,7 @@ if __name__ == '__main__':
     from kivy.clock import Clock
     from kivy.config import Config
     from kivy.logger import Logger
-    kivy.require('1.9.0')
+    kivy.require('1.9.1')
     from kivy.base import ExceptionManager, ExceptionHandler
     Config.set('graphics', 'width', '1024')
     Config.set('graphics', 'height', '576')
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #optimize scroll vs touch behavior for mobile platform
     if is_mobile_platform():
         Config.set('widgets', 'scroll_distance', '20')
-        Config.set('widgets', 'scroll_timeout', '50')    
+        Config.set('widgets', 'scroll_timeout', '50')
     from kivy.core.window import Window
     from kivy.uix.boxlayout import BoxLayout
     from kivy.uix.label import Label
