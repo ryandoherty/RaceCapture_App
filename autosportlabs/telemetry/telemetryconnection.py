@@ -29,7 +29,7 @@ class TelemetryManager(EventDispatcher):
     telemetry_enabled = BooleanProperty(False)
 
     def __init__(self, data_bus, device_id=None, host=None, port=None, **kwargs):
-        self.host = 'race-capture.com'
+        self.host = 'telemetry.podium.live'
         self.port = 8080
         self.connection = None
         self._connection_process = None

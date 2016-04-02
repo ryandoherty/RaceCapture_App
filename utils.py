@@ -10,23 +10,21 @@ __all__ = ('is_mobile_platform', 'intersection', 'difference', 'curry', 'strtotu
            'deprecated', 'SafeList',
            'interpolate', 'OrderedDict', 'kvFind', 'kvFindClass', 'kvPrintAttr',
            'breadth_first', 'walk_tree', 'filter_tree', 'kvquery', 'pct_h', 'pct_w',
-           'time_to_epoch', 'strip_whitespace', 'paste_clipboard')
+           'strip_whitespace', 'paste_clipboard')
 
 import time
-import calendar
 from re import match, split
 from UserDict import DictMixin
 from kivy.core.window import Window
 from kivy import platform
-from datetime import datetime
 from kivy.core.clipboard import Clipboard
 
 def strip_whitespace(value):
-    return value.replace('\n','').replace('\r','').strip()
+    return value.replace('\n', '').replace('\r', '').strip()
 
 def is_mobile_platform():
     return True if platform == 'android' or platform == 'ios' else False
-    
+
 def pct_h(pct):
     return Window.height * pct
 
@@ -40,9 +38,6 @@ def boundary(value, minvalue, maxvalue):
     '''Limit a value between a minvalue and maxvalue'''
     return min(max(value, minvalue), maxvalue)
 
-def time_to_epoch(timestamp):
-    return int(calendar.timegm(datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%SZ").timetuple()))
-    
 def intersection(set1, set2):
     '''Return intersection between 2 list'''
     return filter(lambda s: s in set2, set1)
@@ -113,7 +108,7 @@ def get_color_from_hex(s):
     if s.startswith('#'):
         return get_color_from_hex(s[1:])
 
-    value = [int(x, 16)/255. for x in split('([0-9a-f]{2})', s.lower()) if x != '']
+    value = [int(x, 16) / 255. for x in split('([0-9a-f]{2})', s.lower()) if x != '']
     if len(value) == 3:
         value.append(1)
     return value
@@ -206,8 +201,8 @@ class OrderedDict(dict, DictMixin):
 
     def clear(self):
         self.__end = end = []
-        end += [None, end, end]         # sentinel node for doubly linked list
-        self.__map = {}                 # key --> [key, prev, next]
+        end += [None, end, end]  # sentinel node for doubly linked list
+        self.__map = {}  # key --> [key, prev, next]
         dict.clear(self)
 
     def __setitem__(self, key, value):
@@ -254,8 +249,8 @@ class OrderedDict(dict, DictMixin):
         inst_dict = vars(self).copy()
         self.__map, self.__end = tmp
         if inst_dict:
-            return (self.__class__, (items, ), inst_dict)
-        return self.__class__, (items, )
+            return (self.__class__, (items,), inst_dict)
+        return self.__class__, (items,)
 
     def keys(self):
         return list(self)
@@ -271,7 +266,7 @@ class OrderedDict(dict, DictMixin):
 
     def __repr__(self):
         if not self:
-            return '%s()' % (self.__class__.__name__, )
+            return '%s()' % (self.__class__.__name__,)
         return '%s(%r)' % (self.__class__.__name__, self.items())
 
     def copy(self):
@@ -286,7 +281,7 @@ class OrderedDict(dict, DictMixin):
 
     def __eq__(self, other):
         if isinstance(other, OrderedDict):
-            return len(self)==len(other) and self.items() == other.items()
+            return len(self) == len(other) and self.items() == other.items()
         return dict.__eq__(self, other)
 
     def __ne__(self, other):
@@ -301,19 +296,19 @@ def kvPrintAttr(w, k):
         print 'None'
     for c in w.children:
         kvPrintAttr(c, k)
-        
+
 def kvFindClass(w, k):
     matched = []
     if issubclass(type(w), k):
         matched.append(w)
-        
+
     for child in w.children:
         matched.extend(kvFindClass(child, k))
-        
+
     return matched
-    
+
 def kvFind(w, k, v):
-    #print "kvFind " + str(w) + " for " + k + ':' + v ,
+    # print "kvFind " + str(w) + " for " + k + ':' + v ,
     if hasattr(w, k):
         att = getattr(w, k, None)
       #  print("= " + str(att)),
@@ -321,9 +316,9 @@ def kvFind(w, k, v):
      #       print ' found ' + k + ':' + v + '! ' + str(w)
             return w
 
-    #print 'searching children for ' + k + ':' + v 
+    # print 'searching children for ' + k + ':' + v
     for child in w.children:
-     #   print '\nsearching child ' + str(child) + ' of ' + str(w) + ' for ' + k + ':' + v 
+     #   print '\nsearching child ' + str(child) + ' of ' + str(w) + ' for ' + k + ':' + v
         foundWidget = kvFind(child, k, v)
         if foundWidget:
             return foundWidget
@@ -450,7 +445,7 @@ Pastes a string to the system clipboard.
 Tries to find the first appropriate generic text clipboard and pastes to that.
 '''
 def paste_clipboard(text):
-    #convert to generic
+    # convert to generic
     text = text.encode('ascii')
 
     clipboard_types = Clipboard.get_types()
@@ -458,5 +453,5 @@ def paste_clipboard(text):
         if str(cb_type).lower().strip().startswith('text'):
             Clipboard.put(text, cb_type)
             return
-                
+
     raise Exception('Could not find plain text clipboard in ' + str(clipboard_types))

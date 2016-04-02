@@ -59,13 +59,13 @@ class DashboardView(Screen):
         gaugeView = GaugeView(name='gaugeView', databus=databus, settings=settings)
         tachView = TachometerView(name='tachView', databus=databus, settings=settings)
         laptimeView = LaptimeView(name='laptimeView', databus=databus, settings=settings)
-        comboView = ComboView(name='comboView', databus=databus, settings=settings)
+        #comboView = ComboView(name='comboView', databus=databus, settings=settings)
         rawChannelView = RawChannelView(name='rawchannelView', databus=databus, settings=settings)
         
         screenMgr.add_widget(gaugeView)
         screenMgr.add_widget(tachView)
         screenMgr.add_widget(laptimeView) 
-        screenMgr.add_widget(comboView)
+        #screenMgr.add_widget(comboView)
         screenMgr.add_widget(rawChannelView)
 
         gauges = list(kvFindClass(self, DigitalGauge))
@@ -78,7 +78,7 @@ class DashboardView(Screen):
         self._tachView = tachView
         self._rawchannelView = rawChannelView
         self._laptimeView = laptimeView
-        self._comboView = comboView
+        #self._comboView = comboView
         self._screen_mgr = screenMgr
         databus.start_update()
         Clock.schedule_once(lambda dt: self._show_last_view())

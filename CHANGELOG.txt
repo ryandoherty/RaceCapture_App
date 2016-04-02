@@ -1,13 +1,23 @@
+==1.4.4==
+* Don't create BestLap, LapDelta calculated channels if LapTiming is turned off
+* Pre-package tracks with app to avoid 1st time download. Remove prompt to download tracks when first installed
+* Dynamically adjust size of track marker when zooming
+* Correctly switch between trackmaps when selecting laps from a different tracks
+* Remove any selected laps for a session if that session is deleted
+* Remember the Bluetooth Name for RaceCapture for faster next time acquisition
+* Fix memory leak around gauge alert colors
+
 ==1.4.3==
 * Migrate to Kivy 1.9.1
 * Resolve erroneous v0.0.0 incompatibility complaint upon RaceCapture detection
 * Resolves sporadic stuck communications status bar
 * Resolves sporadic issue where rapid lap selection may result in internal errors
+* Resize graph length as needed when laps are selected / de-selected
+* Restored gauge alert coloring (regression in 1.4.2)
 
 ==1.4.2==
 * Connect to the first RaceCapture device it can detect, regardless of the name provided
 * Improve analysis data query performance; don't block user interface for long operations; show spinner
-* Improve load time by targeting Android 4.4 / API level 19 
 * Add selected track name to analysis map view
 * Added debugging option for API messages
 * Draw GPS path correctly if no track map is loaded

@@ -55,7 +55,8 @@ class DataBus(object):
         self._polling = False
 
     def _update_datafilter_meta(self, datafilter):
-        metas = datafilter.get_channel_meta()
+        channel_metas = self.channel_metas
+        metas = datafilter.get_channel_meta(channel_metas)
         with self.channel_metas as cm:
             for channel, meta in metas.iteritems():
                 cm[channel] = meta

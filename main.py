@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.4.2"
+__version__ = "1.4.4"
 import sys
 import os
 
@@ -127,14 +127,16 @@ class RaceCaptureApp(App):
         else:
             self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
-        # RaceCapture serial I/O
-        self._rc_api = RcpApi(on_disconnect=self._on_rcp_disconnect)
 
         # self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
         # self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
         self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
         self.settings.runtimeChannels.data_bus = self._databus
+
+        # RaceCapture communications API
+        self._rc_api = RcpApi(on_disconnect=self._on_rcp_disconnect, settings=self.settings)
+
         HelpInfo.settings = self.settings
 
         Window.bind(on_keyboard=self._on_keyboard)
@@ -165,13 +167,6 @@ class RaceCaptureApp(App):
         return self.app_args.get(name, None)
 
     def first_time_setup(self):
-        popup = None
-        def _on_answer(instance, answer):
-            popup.dismiss()
-            if answer:
-                self.showMainView('tracks')
-                Clock.schedule_once(lambda dt: self.mainViews['tracks'].check_for_update(), 0.5)
-        popup = confirmPopup('Race Tracks', 'Looks like this is your first time running.\n\nShould I update the Race Track database?', _on_answer)
         self.settings.userPrefs.set_pref('preferences', 'first_time_setup', False)
 
     def loadCurrentTracksSuccess(self):
@@ -288,15 +283,12 @@ class RaceCaptureApp(App):
         self._telemetry_connection.telemetry_enabled = False
 
     def showMainView(self, view_name):
-        try:
-            view = self.mainViews.get(view_name)
-            if not view:
-                view = self.view_builders[view_name]()
-                self.screenMgr.add_widget(view)
-                self.mainViews[view_name] = view
-            self.screenMgr.current = view_name
-        except Exception as detail:
-            Logger.error('RaceCaptureApp: Failed to load main view ' + str(view_name) + ' ' + str(detail))
+        view = self.mainViews.get(view_name)
+        if not view:
+            view = self.view_builders[view_name]()
+            self.screenMgr.add_widget(view)
+            self.mainViews[view_name] = view
+        self.screenMgr.current = view_name
 
     def switchMainView(self, view_name):
             self.mainNav.anim_to_state('closed')

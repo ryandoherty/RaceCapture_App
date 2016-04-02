@@ -13,13 +13,13 @@ package.domain = com.autosportlabs
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas,ttf,json,svg,cfg,obj,mtl,glsl
+source.include_exts = py,png,jpg,kv,atlas,ttf,json,svg,cfg,obj,mtl,glsl,zip
 
 # (list) Source files to exclude (let empty to not exclude anything)
 #source.exclude_exts = spec
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = tests, bin, .git, install
+source.exclude_dirs = tests, bin, .git, install, build_tools
 
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
