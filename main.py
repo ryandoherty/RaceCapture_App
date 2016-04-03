@@ -26,8 +26,8 @@ if __name__ == '__main__':
     from utils import is_mobile_platform
     #optimize scroll vs touch behavior for mobile platform
     if is_mobile_platform():
-        Config.set('widgets', 'scroll_distance', '20')
-        Config.set('widgets', 'scroll_timeout', '50')
+        Config.set('widgets', 'scroll_distance', '1000')
+        Config.set('widgets', 'scroll_timeout', '1')
     from kivy.core.window import Window
     from kivy.uix.boxlayout import BoxLayout
     from kivy.uix.label import Label
