@@ -241,7 +241,7 @@ class SessionBrowser(AnchorLayout):
             self.selected_laps[source_key] = instance
         else:
             self.selected_laps.pop(source_key, None)
-        self._notify_lap_selected(source_ref, selected)
+        Clock.schedule_once(lambda dt: self._notify_lap_selected(source_ref, selected))
 
     def _notify_lap_selected(self, source_ref, selected):
         '''
