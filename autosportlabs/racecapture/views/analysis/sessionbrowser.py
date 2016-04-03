@@ -151,6 +151,10 @@ class SessionBrowser(AnchorLayout):
     def on_datastore(self, instance, value):
         Clock.schedule_once(lambda dt: self.refresh_session_list())
 
+    @property
+    def selected_count(self):
+        return len(self.selected_laps.values())
+    
     def refresh_session_list(self):
         try:
             self.clear_sessions()
