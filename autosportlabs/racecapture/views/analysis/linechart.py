@@ -207,7 +207,7 @@ class LineChart(ChannelAnalysisWidget):
         if not self.collide_point(pos[0], pos[1]):
             return False
         
-        self.dispatch_marker(pos[0] * self.metrics_base.density, pos[1])
+        self.dispatch_marker(pos[0] * self.metrics_base.density, pos[1] * self.metrics_base.density)
 
     def remove_channel(self, channel, source_ref):
         remove = []
