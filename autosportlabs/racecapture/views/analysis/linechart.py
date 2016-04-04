@@ -30,6 +30,7 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from collections import OrderedDict
+from  kivy.metrics import MetricsBase
 import bisect
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
@@ -68,7 +69,9 @@ class LineChart(ChannelAnalysisWidget):
         self.register_event_type('on_marker')
         Window.bind(mouse_pos=self.on_mouse_pos)
         Window.bind(on_motion=self.on_motion)
-        
+
+        self.metrics_base = MetricsBase()
+
         self.got_mouse = False
         self._touches = []
         self._initial_touch_distance = 0
@@ -162,7 +165,6 @@ class LineChart(ChannelAnalysisWidget):
         
     def on_touch_move(self, touch):
         x, y = touch.x, touch.y
-        
         if self.collide_point(x, y):
             touches = len(self._touches)
             if touches == 1:
@@ -205,7 +207,7 @@ class LineChart(ChannelAnalysisWidget):
         if not self.collide_point(pos[0], pos[1]):
             return False
         
-        self.dispatch_marker(pos[0], pos[1])
+        self.dispatch_marker(pos[0] * self.metrics_base.density, pos[1])
 
     def remove_channel(self, channel, source_ref):
         remove = []
