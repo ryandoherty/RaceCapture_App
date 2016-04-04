@@ -72,7 +72,7 @@ class FlyinPanel(FloatLayout):
     
     #how long we wait to auto-dismiss session list
     #after a perioud of disuse
-    SESSION_HIDE_DELAY = 2.0
+    SESSION_HIDE_DELAY = 1.0
     TRANSITION_STYLE = 'in_out_elastic'
     SHOW_POSITION = 0
 #    contents = ObjectProperty(None, allownone=True)
@@ -84,9 +84,7 @@ class FlyinPanel(FloatLayout):
         self.hide_decay = Clock.create_trigger(lambda dt: self.hide(), self.SESSION_HIDE_DELAY)
         Window.bind(mouse_pos=self.on_mouse_pos)
         Window.bind(on_motion=self.on_motion)
-        
         Clock.schedule_once(lambda dt: self.show())
-        self.hide_decay()     
     
     def flyin_collide_point(self, x, y):
         return self.ids.flyin.collide_point(x, y)

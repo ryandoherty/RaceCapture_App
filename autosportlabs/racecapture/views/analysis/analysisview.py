@@ -87,9 +87,12 @@ class AnalysisView(Screen):
         flyin = self.ids.laps_flyin
         x = pos[0]
         y = pos[1]
-        if self.collide_point(x, y):
-            if not flyin.flyin_collide_point(x, y):
-                flyin.schedule_hide()
+        self_collide = self.collide_point(x, y)
+        flyin_collide = flyin.flyin_collide_point(x, y)
+        laps_selected = self.ids.sessions_view.selected_count > 0
+        
+        if self_collide and not flyin_collide and laps_selected:
+            flyin.schedule_hide()
         return False
 
     def on_sessions(self, instance, value):
