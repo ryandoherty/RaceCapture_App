@@ -15,10 +15,7 @@ class ScrollContainer(ScrollView):
 		#The starting vertical scroll position
 		self._start_y = None
 		super(ScrollContainer, self).__init__(**kwargs)
-	
-#	def _start_decrease_alpha(self, *l):
-#		pass
-	
+		
 	def on_scroll_start(self, touch, check_children=True):
 		'''
 		Override the on_scroll_start so that we can capture the original start position
