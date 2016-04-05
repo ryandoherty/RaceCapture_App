@@ -25,6 +25,7 @@ from kivy.app import Builder
 from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget

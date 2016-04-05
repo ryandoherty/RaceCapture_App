@@ -10,6 +10,7 @@ from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.digitalgauge import DigitalGauge
 from kivy.properties import StringProperty
 from kivy.graphics import Color, Rectangle
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/rawchannelview.kv')
 
