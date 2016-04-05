@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 
 from kivy.properties import ObjectProperty
 from kivy.core.clipboard import Clipboard
@@ -7,7 +7,6 @@ from kivy.metrics import dp
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.scrollview import ScrollView
 from kivy.logger import Logger
 from kivy.uix.popup import Popup
 from kivy.clock import Clock
@@ -22,6 +21,7 @@ from autosportlabs.racecapture.views.tracks.tracksview import TrackInfoView, Tra
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
 from autosportlabs.uix.toast.kivytoast import toast
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 TRACK_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/trackconfigview.kv'
 

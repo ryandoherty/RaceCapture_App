@@ -20,7 +20,7 @@
 import os
 from threading import Thread
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.logger import Logger
 from kivy.app import Builder
 from kivy.clock import Clock
@@ -38,6 +38,7 @@ from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
 from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
 from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectorView
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from iconbutton import IconButton
 from fieldlabel import FieldLabel
 

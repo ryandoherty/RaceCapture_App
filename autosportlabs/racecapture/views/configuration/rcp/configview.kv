@@ -1,4 +1,4 @@
-#:kivy 1.9.0
+#:kivy 1.9.1
 
 <LinkedTreeViewLabel>:
     font_size: dp(16)
@@ -10,9 +10,10 @@
         BoxLayout:
             size_hint_x: 0.2
             orientation: 'vertical'
-            ScrollView:
+            ScrollContainer:
                 size_hint_y: 0.75
-                id: scroller            
+                id: scroller 
+                do_scroll_x:False
                 TreeView:
                     height: max(self.minimum_height, scroller.height)
                     id: menu

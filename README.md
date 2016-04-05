@@ -1,25 +1,15 @@
 RaceCapture App
 ===============
 
-Next Gen version of the RaceCapture App.
+App for the RaceCapture series of motorsport telemetry systems.
 
-Dependencies:
-* Python 2.7.x
-* Patched Kivy 1.9.x (https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched) 
-* Pyserial 2.6.x
-* Pygame
-* Included in package right now but ultimately shouldn't be:
-  * Graph (via kivy-garden via python-pip)
-  * NavigationDrawer (via kivy-garden)
-  * ModernMenu (via kivy-garden)
-  * asl_f4_loader (in dependencies folder)
-  * ihexpy (manual install from https://github.com/autosportlabs/ihexpy )
+## Dependencies
+See requirements.txt for full list of requirements
 
 ## dev installation (OS X)
 
-1. download patched 1.9.0 kivy from https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched 
-1. Install from source
-- > Instructions: http://kivy.org/docs/installation/installation-macosx.html
+1. Install kivy 1.9.1 via pip 
+- > Instructions: https://kivy.org/docs/installation/installation-osx.html
 1. install [virtualenv](http://www.virtualenv.org)
 1. create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. activate the virtualenv: `. _ve/bin/activate`
@@ -28,9 +18,8 @@ Dependencies:
 1. install pygame (http://www.pygame.org/download.shtml - use correct package for your OSX+Python version)
 
 ## Simplified dev install (OS X)
-1. download patched 1.9.0 kivy from https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched 
-1. Install from source
- * > make && sudo make install 
+1. Install kivy 1.9.1 via pip 
+- > Instructions: https://kivy.org/docs/installation/installation-osx.html
 1. install Kivy into Applications and run symlink script
 1. install [virtualenv](http://www.virtualenv.org)
 1. re-enable setup tools for Kivy virtualenv: `sudo virtualenv /Applications/Kivy.app/Contents/Resources/venv/`
@@ -62,18 +51,7 @@ The script will create the .App file and .dmg for distribution.
 
 ## installation (Win7)
 
-1. Download [Kivy](http://kivy.org/#download) (current is 1.9.0) - remember to get the py2.7 version
-1. Follow Kivy install instructions- install to c:\Kivy-1.9.0
-1. Rename kivy27 to kivy27_original (move it out of the way)
-1. Pull down patched 1.9.0 from https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched
- * Place in same installation directory (c:\Kivy-1.9.0)
- * Rename to kivy27
-1. Build modified kivy
- * Launch kivy-bash-2.7.bat
- * In the MinGW console, enter kivy27 directory
- * Build by issuing 'make'
- * When complete, there should be a kivy27/build directory - this will be the patched version
-1. `my_kivy_install_folder\kivy.bat` (sets path variables for current shell)
+1. Install kivy via pip - instructions https://kivy.org/docs/installation/installation-windows.html
 1. Install [virtualenv]: `pip install virtualenv`
 1. Create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. Activate the virtualenv: `_ve\Scripts\activate`
@@ -117,9 +95,7 @@ The script will create the .App file and .dmg for distribution.
 
 ## dev installation (Linux - Ubuntu)
 
-1. Download patched source from https://github.com/autosportlabs/kivy/tree/asl_1.9.0_patched
-1. Install from source. From the downloaded kivy source execute:
-* > sudo python setup.py install
+1. Install kivy 1.9.1 via pip
 1. install [virtualenv]: `sudo pip install virtualenv`
 1. create a virtual environment (perhaps in this directory): `virtualenv _ve`
 1. activate the virtualenv: `. _ve/bin/activate`

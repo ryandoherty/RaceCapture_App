@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.properties import ListProperty, StringProperty, NumericProperty, ObjectProperty, DictProperty,\
     BooleanProperty
 from kivy.metrics import dp

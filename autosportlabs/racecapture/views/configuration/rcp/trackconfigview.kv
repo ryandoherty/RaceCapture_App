@@ -1,4 +1,4 @@
-#:kivy 1.9.0
+#:kivy 1.9.1
 #:import ColorScheme autosportlabs.racecapture.theme.color.ColorScheme
         
 <SectorPointView>:
@@ -131,7 +131,7 @@
     AnchorLayout:
     	AnchorLayout:
         	spacing: dp(10)
-    		ScrollView:
+    		ScrollContainer:
     			canvas.before:
     		        Color:
     		            rgba: 0.05, 0.05, 0.05, 1
@@ -180,7 +180,7 @@
 				id: finish_line
 				size_hint_y: 0.15
 		    	
-		    ScrollView:
+		    ScrollContainer:
                 id: scroller
 		    	size_hint_y: 0.6
 				do_scroll_x: False

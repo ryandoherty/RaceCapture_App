@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
@@ -7,6 +7,7 @@ from samplerateview import *
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 GPS_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/gpschannelsview.kv'
             
