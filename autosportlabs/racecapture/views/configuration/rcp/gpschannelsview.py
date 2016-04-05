@@ -7,6 +7,7 @@ from samplerateview import *
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 GPS_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/gpschannelsview.kv'
             

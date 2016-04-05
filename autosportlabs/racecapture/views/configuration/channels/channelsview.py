@@ -15,6 +15,7 @@ from autosportlabs.racecapture.data.channels import ChannelMeta
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
 from valuefield import FloatValueField, IntegerValueField, TextValueField
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/channels/channelsview.kv')
 

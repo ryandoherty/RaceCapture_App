@@ -14,6 +14,7 @@ from kivy.logger import LoggerHistory, Logger
 from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.uix.toast.kivytoast import toast
 from main import RaceCaptureApp
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 STATUS_KV_FILE = 'autosportlabs/racecapture/views/status/statusview.kv'
 
 RAW_STATUS_BGCOLOR_1 = ColorScheme.get_background()

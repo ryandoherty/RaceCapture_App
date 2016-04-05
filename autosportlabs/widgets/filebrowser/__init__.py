@@ -77,6 +77,7 @@ from os.path import sep, dirname, expanduser, isdir
 from os import walk
 from functools import partial
 from utils import is_mobile_platform
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 platform = core_platform()
 if platform == 'win':
@@ -144,7 +145,7 @@ Builder.load_string('''
             min_size: '153sp'
             size_hint: (.2, 1)
             id: splitter
-            ScrollView:
+            ScrollContainer:
                 LinkTree:
                     id: link_tree
                     browser: tabbed_browser

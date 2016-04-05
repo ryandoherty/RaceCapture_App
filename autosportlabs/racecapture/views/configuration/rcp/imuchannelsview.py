@@ -10,6 +10,7 @@ from valuefield import IntegerValueField, FloatValueField
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.racecapture.views.util.alertview import alertPopup
 from autosportlabs.racecapture.config.rcpconfig import *
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 import traceback
 
 IMU_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/imuchannelsview.kv'

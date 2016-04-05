@@ -15,7 +15,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
 from kivy.logger import Logger
-from kivy.uix.scrollview import ScrollView
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *

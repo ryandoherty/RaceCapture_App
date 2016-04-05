@@ -3,7 +3,6 @@ kivy.require('1.9.1')
 
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.accordion import Accordion, AccordionItem
-from kivy.uix.scrollview import ScrollView
 from kivy.uix.spinner import Spinner
 from kivy.app import Builder
 from mappedspinner import MappedSpinner
