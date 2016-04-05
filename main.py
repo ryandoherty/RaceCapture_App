@@ -131,9 +131,6 @@ class RaceCaptureApp(App):
         else:
             self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
-
-        # self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
-        # self._keyboard.bind(on_key_down=self._on_keyboard_down)
         self.settings = SystemSettings(self.user_data_dir, base_dir=self.base_dir)
         self._databus = DataBusFactory().create_standard_databus(self.settings.systemChannels)
         self.settings.runtimeChannels.data_bus = self._databus
@@ -143,7 +140,12 @@ class RaceCaptureApp(App):
 
         HelpInfo.settings = self.settings
 
+        #Ensure soft input mode text inputs aren't obstructed
+        Window.softinput_mode = 'below_target'
+        
+        #Capture keyboard events for handling escape / back
         Window.bind(on_keyboard=self._on_keyboard)
+        
         self.register_event_type('on_tracks_updated')
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
