@@ -10,7 +10,7 @@
         BoxLayout:
             orientation: 'vertical'
             size_hint_y: 0.9
-            ScrollView:
+            ScrollContainer:
                 size_hint_y: 0.75
                 do_scroll_x:False
                 id: luaScriptScrollView
@@ -24,7 +24,7 @@
             Splitter:
                 horizontal: False
                 sizable_from: 'top'
-                ScrollView:
+                ScrollContainer:
                     size_hint_y: 0.25
                     id: loggingScrollView
                     rcid: 'logfileSv'

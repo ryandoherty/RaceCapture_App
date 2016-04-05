@@ -142,6 +142,7 @@ class SessionBrowser(AnchorLayout):
         self.register_event_type('on_lap_selection')
         accordion = Accordion(orientation='vertical', size_hint=(1.0, None))
         sv = ScrollContainer(size_hint=(1.0, 1.0), do_scroll_x=False)
+        print('sd / st: '.format(sv.scroll_distance, sv.scroll_timeout))
         self.selected_laps = {}
         self.current_laps = {}
         sv.add_widget(accordion)

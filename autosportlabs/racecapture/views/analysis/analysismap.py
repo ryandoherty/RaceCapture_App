@@ -30,6 +30,7 @@ from autosportlabs.racecapture.views.analysis.analysiswidget import AnalysisWidg
 from autosportlabs.uix.track.racetrackview import RaceTrackView
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from autosportlabs.racecapture.datastore import Filter
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from iconbutton import IconButton, LabelIconButton
 from autosportlabs.uix.legends.gradientlegends import GradientLapLegend, LapLegend
 
@@ -508,7 +509,7 @@ class CustomizeMapView(BoxLayout):
     BoxLayout:
         size_hint_y: 0.9
         orientation: 'horizontal'
-        ScrollView:
+        ScrollContainer:
             size_hint_x: 0.3
             id: scroller
             do_scroll_x:False
