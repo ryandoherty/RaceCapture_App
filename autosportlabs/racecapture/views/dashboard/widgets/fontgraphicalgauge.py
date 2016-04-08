@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from utils import kvFind
 from kivy.properties import NumericProperty
 from autosportlabs.racecapture.views.dashboard.widgets.graphicalgauge import GraphicalGauge

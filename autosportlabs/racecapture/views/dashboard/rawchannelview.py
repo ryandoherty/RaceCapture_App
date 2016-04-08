@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.app import Builder
@@ -10,6 +10,7 @@ from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.views.dashboard.widgets.digitalgauge import DigitalGauge
 from kivy.properties import StringProperty
 from kivy.graphics import Color, Rectangle
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 Builder.load_file('autosportlabs/racecapture/views/dashboard/rawchannelview.kv')
 

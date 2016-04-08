@@ -18,13 +18,14 @@
 #have received a copy of the GNU General Public License along with
 #this code. If not, see <http://www.gnu.org/licenses/>.
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.logger import Logger
 from kivy.graphics import Color
 from kivy.app import Builder
 from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from autosportlabs.racecapture.datastore import DataStore, Filter
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget

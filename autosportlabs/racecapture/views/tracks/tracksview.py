@@ -1,7 +1,7 @@
 import kivy
 from autosportlabs.racecapture.theme.color import ColorScheme
 from kivy.uix.behaviors import ToggleButtonBehavior
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, ListProperty
 from kivy.uix.boxlayout import BoxLayout
 from kivy.clock import Clock
@@ -22,6 +22,7 @@ from autosportlabs.uix.track.racetrackview import RaceTrackView
 from utils import *
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from iconbutton import LabelIconButton
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 Builder.load_file('autosportlabs/racecapture/views/tracks/tracksview.kv')
 

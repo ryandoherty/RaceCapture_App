@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
@@ -14,6 +14,7 @@ from kivy.logger import LoggerHistory, Logger
 from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.uix.toast.kivytoast import toast
 from main import RaceCaptureApp
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 STATUS_KV_FILE = 'autosportlabs/racecapture/views/status/statusview.kv'
 
 RAW_STATUS_BGCOLOR_1 = ColorScheme.get_background()

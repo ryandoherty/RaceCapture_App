@@ -2,7 +2,7 @@ import os
 import traceback
 import kivy
 from time import sleep
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
 from utils import *
@@ -15,7 +15,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
 from kivy.logger import Logger
-from kivy.uix.scrollview import ScrollView
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 FIRMWARE_UPDATABLE =  not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *

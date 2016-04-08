@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.metrics import dp
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
@@ -15,6 +15,7 @@ from autosportlabs.racecapture.data.channels import ChannelMeta
 from utils import *
 from autosportlabs.racecapture.config.rcpconfig import *
 from valuefield import FloatValueField, IntegerValueField, TextValueField
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
 
 Builder.load_file('autosportlabs/racecapture/views/configuration/channels/channelsview.kv')
 

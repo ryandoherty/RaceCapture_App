@@ -1,7 +1,7 @@
 import os
 from threading import Thread
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 from kivy.app import Builder
 from kivy.logger import Logger
 from kivy.clock import Clock

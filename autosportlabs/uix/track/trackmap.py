@@ -19,8 +19,8 @@
 # this code. If not, see <http://www.gnu.org/licenses/>.
 import kivy
 import math
+kivy.require('1.9.1')
 from autosportlabs.uix.color import colorgradient
-kivy.require('1.9.0')
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.widget import Widget

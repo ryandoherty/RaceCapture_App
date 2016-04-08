@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.9.0')
+kivy.require('1.9.1')
 
 from settingsview import SettingsMappedSpinner, SettingsSwitch
 from mappedspinner import MappedSpinner

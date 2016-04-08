@@ -1,4 +1,8 @@
 ==1.4.5==
+* Update to Kivy 1.9.1
+* Improve ability to select items in scrolling window when in touch screen environments
+* Ensure text field is always positioned above on-screen keyboard to prevent keyboard from hiding field
+* Ensure we don't start polling for sample data on Mobile platform, only do it on desktop via USB
 
 ==1.4.4==
 * Don't create BestLap, LapDelta calculated channels if LapTiming is turned off
