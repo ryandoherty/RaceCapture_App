@@ -249,8 +249,8 @@ class DataBusPump(object):
                 rc_api.sample()
                 sleep(SAMPLE_POLL_INTERVAL_TIMEOUT)
             except Exception as e:
-                sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
                 Logger.error('DataBusPump: Exception in sample_worker: ' + str(e))
+                sleep(SAMPLE_POLL_EXCEPTION_RECOVERY)
 
         Logger.info('DataBusPump: sample_worker exiting')
         safe_thread_exit()

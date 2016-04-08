@@ -31,19 +31,14 @@ class TelemetryConfigView(BaseConfigView):
     def on_device_id(self, instance, value):
         if self.connectivityConfig:
             value = strip_whitespace(value)
-            if len(value) > 0:
-                if self.validate_device_id(value):
-                    instance.setValue(value)
-                    self.connectivityConfig.telemetryConfig.deviceId = value
-                    self.connectivityConfig.stale = True
-                    self.dispatch('on_modified')
-                    instance.clear_error()
-                else:
-                    try:
-                        instance.set_error('Only numbers / letters allowed')
-                    except Exception as e:
-                        import traceback
-                        traceback.print_exc()
+            if len(value) > 0 and not self.validate_device_id(value):
+                instance.set_error('Only numbers / letters allowed')
+            else:
+                instance.setValue(value)
+                self.connectivityConfig.telemetryConfig.deviceId = value
+                self.connectivityConfig.stale = True
+                self.dispatch('on_modified')
+                instance.clear_error()
 
 
     def on_bg_stream(self, instance, value):

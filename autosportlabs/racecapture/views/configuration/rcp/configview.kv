@@ -12,7 +12,8 @@
             orientation: 'vertical'
             ScrollContainer:
                 size_hint_y: 0.75
-                id: scroller            
+                id: scroller 
+                do_scroll_x:False
                 TreeView:
                     height: max(self.minimum_height, scroller.height)
                     id: menu
