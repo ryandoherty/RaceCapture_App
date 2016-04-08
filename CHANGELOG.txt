@@ -1,3 +1,6 @@
+==1.4.6==
+* Allow complete erasing of device id field
+
 ==1.4.5==
 * Update to Kivy 1.9.1
 * Improve ability to select items in scrolling window when in touch screen environments
