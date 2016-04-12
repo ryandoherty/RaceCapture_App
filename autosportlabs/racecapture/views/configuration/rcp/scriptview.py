@@ -11,15 +11,19 @@ from kivy.app import Builder
 from kivy.extras.highlight import KivyLexer
 from pygments import lexers
 from utils import *
+from kivy.logger import Logger
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from autosportlabs.uix.toast.kivytoast import toast
 from iconbutton import IconButton, LabelIconButton
 from settingsview import SettingsMappedSpinner
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
+from utils import paste_clipboard, is_mobile_platform
 
 SCRIPT_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/scriptview.kv'
 
 LOGFILE_POLL_INTERVAL = 1
-LOGWINDOW_MAX_LENGTH = 1000
+LOGWINDOW_MAX_LENGTH_MOBILE = 1000
+LOGWINDOW_MAX_LENGTH_DESKTOP = 10000
         
 class LogLevelSpinner(SettingsMappedSpinner):
     def __init__(self, **kwargs):    
@@ -38,6 +42,8 @@ class LuaScriptingView(BaseConfigView):
         self.register_event_type('on_poll_logfile')
         self.register_event_type('on_logfile')
         self.register_event_type('on_set_logfile_level')
+        self._logwindow_max_length = LOGWINDOW_MAX_LENGTH_MOBILE\
+            if is_mobile_platform() else LOGWINDOW_MAX_LENGTH_DESKTOP
 
     def on_loglevel_selected(self, instance, value):
         self.dispatch('on_set_logfile_level', value)
@@ -62,11 +68,20 @@ class LuaScriptingView(BaseConfigView):
     def on_poll_logfile(self):
         pass
         
+    def copy_log(self):
+        try:
+            paste_clipboard(self.ids.logfile.text)
+            toast('RaceCapture log copied to clipboard')
+        except Exception as e:
+            Logger.error("ApplicationLogView: Error copying app log to clipboard: " + str(e))
+            toast('Unable to copy to clipboard\n' + str(e), True)
+
+
     def on_logfile(self, value):
         logfile_view = self.ids.logfile
         current_text = logfile_view.text
         current_text += str(value)
-        overflow = len(current_text) - LOGWINDOW_MAX_LENGTH
+        overflow = len(current_text) - self._logwindow_max_length
         if overflow > 0:
             current_text = current_text[overflow:]
         logfile_view.text = current_text

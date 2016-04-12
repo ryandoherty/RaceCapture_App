@@ -28,13 +28,20 @@
                     size_hint_y: 0.25
                     id: logfile_sv
                     do_scroll_x:False
-                    TextInput:
+                    Label:
+                        canvas.before:
+                            Color:
+                                rgba: ColorScheme.get_dark_background()
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
                         font_name: 'resource/fonts/RobotoMono-Regular.ttf'
                         id: logfile
-                    	color: (1.0, 1.0, 1.0, 1.0)
-                    	background_color: (0.8, 0.8, 0.8, 1.0)
+                        color: (1.0, 1.0, 1.0, 1.0)
+                        background_color: (0.8, 0.8, 0.8, 1.0)
                         size_hint_y: None
-                        height: max(self.minimum_height, logfile_sv.height)
+                        text_size: self.width, None
+                        height: max(self.texture_size[1], logfile_sv.height)
         BoxLayout:
             height: dp(30)
             size_hint_y: None
@@ -49,34 +56,38 @@
             	FieldLabel:
             		size_hint_x: 0.75
             		halign: 'left'
-            		text: 'Poll logfile'
+                    text: 'Poll log'
 
 			BoxLayout:
 				size_hint_x: 0.25
 				spacing: dp(5)
 				orientation: 'horizontal'
-            	FieldLabel:
-            		size_hint_x: 0.5
-            		halign: 'right'
-            		text: 'Level'
         		LogLevelSpinner:
         			size_hint_x: 0.5
         			size_hint_y: 1.0
                     id: log_level
         			on_control: root.on_loglevel_selected(*args)
             Label:
-                size_hint_x: 0.1         	
+                size_hint_x: 0.1
+            LabelIconButton:
+                size_hint_x: None
+                width: dp(90)
+                title: "Copy"
+                icon: u'\uf0c5'
+                on_press: root.copy_log()
+            BoxLayout:
+                size_hint_x: 0.03
             LabelIconButton:
             	size_hint_x: None
-            	width: dp(100)
+                width: dp(90)
             	title: "Clear"
             	icon: "\357\200\215"
             	on_press: root.clearLog()
-            Label:
+            BoxLayout:
                 size_hint_x: 0.03                                               	
             LabelIconButton:
                 size_hint_x: None
-                width: dp(100)
+                width: dp(90)
                 title: "Run"
                 icon: "\357\200\241"
                 on_press: root.runScript()
