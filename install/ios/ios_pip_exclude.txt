@@ -1,0 +1,4 @@
+kivy
+cython
+mock
+raven

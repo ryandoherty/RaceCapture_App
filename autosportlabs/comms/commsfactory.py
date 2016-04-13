@@ -2,7 +2,8 @@ from kivy import platform
 if platform == 'android':
     pass
 elif platform == 'ios':
-    from autosportlabs.comms.socket.socketconnection import SocketConnection
+    pass
+    #from autosportlabs.comms.socket.socketconnection import SocketConnection
 else:
     from autosportlabs.comms.serial.serialconnection import SerialConnection
 
