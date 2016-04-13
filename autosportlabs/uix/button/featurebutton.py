@@ -2,8 +2,6 @@ import kivy
 kivy.require('1.9.1')
 from iconbutton import TileIconButton
 from kivy.app import Builder
-from kivy.uix.label import Label
-from kivy.uix.button import ButtonBehavior
 
 Builder.load_file('autosportlabs/uix/button/featurebutton.kv')
 
