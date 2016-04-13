@@ -28,20 +28,13 @@
                     size_hint_y: 0.25
                     id: logfile_sv
                     do_scroll_x:False
-                    Label:
-                        canvas.before:
-                            Color:
-                                rgba: ColorScheme.get_dark_background()
-                            Rectangle:
-                                pos: self.pos
-                                size: self.size
-                        font_name: 'resource/fonts/RobotoMono-Regular.ttf'
+                    TextInput:
                         id: logfile
-                        color: (1.0, 1.0, 1.0, 1.0)
-                        background_color: (0.8, 0.8, 0.8, 1.0)
+                        font_name: 'resource/fonts/RobotoMono-Regular.ttf'
+                        foreground_color: ColorScheme.get_light_primary_text()
+                        background_color: ColorScheme.get_dark_background()
                         size_hint_y: None
-                        text_size: self.width, None
-                        height: max(self.texture_size[1], logfile_sv.height)
+                        height: max(self.minimum_height, logfile_sv.height)
         BoxLayout:
             height: dp(30)
             size_hint_y: None
