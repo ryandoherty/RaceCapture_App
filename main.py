@@ -188,34 +188,6 @@ class RaceCaptureApp(App):
     def _serial_warning(self):
         alertPopup('Warning', 'Command failed. Ensure you have selected a correct serial port')
 
-    # Logfile
-    def on_poll_logfile(self, instance):
-        try:
-            self._rc_api.getLogfile()
-        except:
-            pass
-
-
-    def on_set_logfile_level(self, instance, level):
-        try:
-            self._rc_api.setLogfileLevel(level, None, self.on_set_logfile_level_error)
-        except:
-            logging.exception('')
-            self._serial_warning()
-
-    def on_set_logfile_level_error(self, detail):
-        alertPopup('Error', 'Error Setting Logfile Level:\n\n' + str(detail))
-
-    # Run Script
-    def on_run_script(self, instance):
-        self._rc_api.runScript(self.on_run_script_complete, self.on_run_script_error)
-
-    def on_run_script_complete(self, result):
-        Logger.info('RaceCaptureApp: run script complete: ' + str(result))
-
-    def on_run_script_error(self, detail):
-        alertPopup('Error Running', 'Error Running Script:\n\n' + str(detail))
-
     # Write Configuration
     def on_write_config(self, instance, *args):
         rcpConfig = self.rc_config
@@ -310,10 +282,6 @@ class RaceCaptureApp(App):
                                 track_manager=self.trackManager)
         config_view.bind(on_read_config=self.on_read_config)
         config_view.bind(on_write_config=self.on_write_config)
-        config_view.bind(on_run_script=self.on_run_script)
-        config_view.bind(on_poll_logfile=self.on_poll_logfile)
-        config_view.bind(on_set_logfile_level=self.on_set_logfile_level)
-        self._rc_api.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: config_view.on_logfile(value)))
         self.config_listeners.append(config_view)
         self.tracks_listeners.append(config_view)
         return config_view
