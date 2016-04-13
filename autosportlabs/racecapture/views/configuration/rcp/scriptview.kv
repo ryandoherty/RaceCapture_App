@@ -52,7 +52,7 @@
             	CheckBox:
                     id: poll_log
             		size_hint_x: 0.25
-            		on_active: root.enableScript(*args)
+            		on_active: root.enable_polling(*args)
             	FieldLabel:
             		size_hint_x: 0.75
             		halign: 'left'
@@ -66,7 +66,7 @@
         			size_hint_x: 0.5
         			size_hint_y: 1.0
                     id: log_level
-        			on_control: root.on_loglevel_selected(*args)
+        			on_control: root.set_logfile_level(*args)
             Label:
                 size_hint_x: 0.1
             LabelIconButton:
@@ -82,7 +82,7 @@
                 width: dp(90)
             	title: "Clear"
             	icon: "\357\200\215"
-            	on_press: root.clearLog()
+            	on_press: root.clear_log()
             BoxLayout:
                 size_hint_x: 0.03                                               	
             LabelIconButton:
@@ -90,5 +90,5 @@
                 width: dp(90)
                 title: "Run"
                 icon: "\357\200\241"
-                on_press: root.runScript()
+                on_press: root.run_script()
             	
