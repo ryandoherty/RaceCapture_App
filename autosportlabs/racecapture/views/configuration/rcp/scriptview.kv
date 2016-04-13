@@ -53,10 +53,11 @@
                     id: poll_log
             		size_hint_x: 0.25
             		on_active: root.enable_polling(*args)
-            	FieldLabel:
+            	LabelButton:
             		size_hint_x: 0.75
             		halign: 'left'
                     text: 'Poll log'
+                    on_press: root.toggle_polling()
 
 			BoxLayout:
 				size_hint_x: 0.25

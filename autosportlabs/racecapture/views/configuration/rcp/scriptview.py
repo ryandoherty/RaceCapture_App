@@ -16,6 +16,8 @@ from autosportlabs.uix.toast.kivytoast import toast
 from iconbutton import IconButton, LabelIconButton
 from settingsview import SettingsMappedSpinner
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
+from autosportlabs.uix.button.widgetbuttons import LabelButton
+
 from utils import paste_clipboard, is_mobile_platform
 
 SCRIPT_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/scriptview.kv'
@@ -105,7 +107,14 @@ class LuaScriptingView(BaseConfigView):
         Clears the log file window
         '''
         self.ids.logfile.text = ''
-                        
+
+    def toggle_polling(self, *args):
+        '''
+        Toggle polling state
+        '''
+        checkbox = self.ids.poll_log
+        checkbox.active = True if checkbox.active == False else False
+               
     def enable_polling(self, instance, value):
         '''
         Enables or disables logfile polling
