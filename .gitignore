@@ -58,4 +58,4 @@ RaceCapture.App
 sentry.cfg
 
 #iOS build stuff
-install/ios/ios_requirements.txt
+ios_requirements.txt

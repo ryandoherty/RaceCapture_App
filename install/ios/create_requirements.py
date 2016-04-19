@@ -2,7 +2,15 @@
 import os
 local_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.dirname(os.path.join(local_dir, '../../'))
-os.remove(os.path.join(local_dir, 'ios_requirements.txt'))
+ios_requirements_file_path = os.path.join(root_dir, 'ios_requirements.txt')
+
+if os.path.isfile(ios_requirements_file_path):
+    os.remove(ios_requirements_file_path)
+
+exclude_list = open(os.path.join(local_dir, 'ios_pip_exclude.txt'), 'r').read().split('\n')
+req_list = open(os.path.join(root_dir, 'requirements.txt'), 'r').read().split('\n')
+
+exclude_list = [name for name in exclude_list if len(name) > 0]
 
 
 def included(package_name):
@@ -14,11 +22,7 @@ def included(package_name):
 
     return include
 
-
-ios_requirements_file = open(os.path.join(local_dir, 'ios_requirements.txt'), 'w')
-
-exclude_list = open(os.path.join(local_dir, 'ios_pip_exclude.txt'), 'r').read().split('\n')
-req_list = open(os.path.join(root_dir, 'requirements.txt'), 'r').read().split('\n')
+ios_requirements_file = open(ios_requirements_file_path, 'w')
 
 
 include_list = filter(included, req_list)
