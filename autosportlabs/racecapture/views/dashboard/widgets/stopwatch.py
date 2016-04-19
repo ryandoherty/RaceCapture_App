@@ -166,7 +166,6 @@ class PitstopTimerView(BoxLayout):
             self._toggle_exit_speed_alert(ColorScheme.get_error())
         elif self.current_speed > self.exit_speed_alert_threshold * self._SPEED_ALERT_THRESHOLD:
             self.ids.speed_rect.rect_color = ColorScheme.get_alert()
-            self.ids.speed_rect.rect_color = ColorScheme.get_alert()
             self.exit_speed_color = ColorScheme.get_dark_background_translucent()
         else:
             self.ids.speed_rect.rect_color = ColorScheme.get_happy()
