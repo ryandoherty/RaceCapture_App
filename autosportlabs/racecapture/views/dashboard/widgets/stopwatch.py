@@ -175,7 +175,8 @@ class PitstopTimerView(BoxLayout):
         '''
         Increment the current stopwatch time
         '''
-        self._current_time += self._STOPWATCH_TICK
+        if self.current_speed < self.stop_threshold_speed:
+            self._current_time += self._STOPWATCH_TICK
         self.current_time = self._format_stopwatch_time()
         self.exit_speed = '{}'.format(int(self.current_speed))
         if self.current_speed > self.stop_threshold_speed:
