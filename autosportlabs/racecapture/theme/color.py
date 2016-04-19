@@ -7,6 +7,14 @@ class ColorScheme(object):
         return get_color_from_hex("FFCC00")
 
     @staticmethod
+    def get_error():
+        return get_color_from_hex("E00000")
+
+    @staticmethod
+    def get_happy():
+        return get_color_from_hex("00E000")
+        
+    @staticmethod
     def get_primary():
         return get_color_from_hex("F44336")
 
