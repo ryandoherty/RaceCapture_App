@@ -123,6 +123,9 @@ class RaceCaptureApp(App):
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
 
+        if kivy.platform == 'ios' or kivy.platform == 'macosx':
+            kivy.resources.resource_add_path(os.path.join(os.path.dirname(os.path.realpath(__file__)), "data"))
+
         # We do this because when this app is bundled into a standalone app
         # by pyinstaller we must reference all files by their absolute paths
         # sys._MEIPASS is provided by pyinstaller
