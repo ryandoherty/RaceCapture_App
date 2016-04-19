@@ -99,7 +99,7 @@ class PitstopTimerView(BoxLayout):
     _EXIT_SPEED_CONTAINER_SIZE_HINT = 0.3
     _TIMER_WIDGET_SIZE_HINT = 0.4
     _SPEED_ALERT_THRESHOLD = 0.85
-
+    _POPUP_SIZE_HINT = (0.75, 0.8)
     #Settings
     stop_threshold_speed = NumericProperty(2.0)
     resume_threshold_speed = NumericProperty(55.0)
@@ -121,6 +121,7 @@ class PitstopTimerView(BoxLayout):
         self._popup = None
         self._current_time = 0.0
         self._flash_count = 0
+        self._currently_racing = False
         databus.addChannelListener(STOPWATCH_SPEED_CHANNEL, self.set_speed)
         databus.addChannelListener(STOPWATCH_CURRENT_LAP, self.set_current_lap)
         self.exit_speed_frame = self.ids.exit_speed_frame
@@ -189,17 +190,25 @@ class PitstopTimerView(BoxLayout):
         Clock.unschedule(self._tick_stopwatch)
         self.current_time =  STOPWATCH_NULL_TIME
 
+    def _in_race_mode(self):
+        '''
+        Return True if we think we're in 'racing mode'
+        '''
+        return self.current_speed > self.resume_threshold_speed and\
+            self.current_lap > 0
+            
     def _start_stopwatch(self):
         '''
         Starts the stopwatch timer
         '''
         if not self._popup:
-            self._popup = ModalView(size_hint=(0.75, 0.8), auto_dismiss=False)
+            self._popup = ModalView(size_hint=self._POPUP_SIZE_HINT, auto_dismiss=False)
             self._popup.add_widget(self)
         self._set_exit_speed_frame_visible(False)
         self._popup.open()
         self._current_time = 0
         self._flash_count = 0
+        self._currently_racing = False
         Clock.schedule_interval(self._tick_stopwatch, self._STOPWATCH_TICK)
     
     def _is_popup_open(self):
@@ -220,9 +229,9 @@ class PitstopTimerView(BoxLayout):
         else:
             self._popup.dismiss()
         
-    def _cancel_stopwatch(self):
+    def _finish_stopwatch(self):
         '''
-        Cancel the current stopwatch
+        Finish the current stopwatch
         '''
         self._flash_count = 0
         self.ids.speed_rect.rect_color = ColorScheme.get_dark_background_translucent()
@@ -235,15 +244,17 @@ class PitstopTimerView(BoxLayout):
         '''
         Check if we should pop-up the timer
         '''
+        if self._in_race_mode():
+            self._currently_racing = True
         if self.current_speed < self.stop_threshold_speed and\
-                self.current_lap > 0 and\
+                self._currently_racing and\
                 not self._is_popup_open():
             self._start_stopwatch()
         
         if self.current_speed > self.resume_threshold_speed and\
                 self._is_popup_open() and\
                 self._flash_count == 0:
-            self._cancel_stopwatch()
+            self._finish_stopwatch()
             
     def on_current_speed(self, instance, value):
         self.check_popup()
