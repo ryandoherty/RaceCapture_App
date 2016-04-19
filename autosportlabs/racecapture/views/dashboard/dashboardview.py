@@ -6,7 +6,7 @@ from autosportlabs.racecapture.views.dashboard.laptimeview import LaptimeView
 from autosportlabs.racecapture.views.dashboard.comboview import ComboView
 from autosportlabs.racecapture.views.dashboard.gaugeview import GaugeView
 from autosportlabs.racecapture.views.dashboard.widgets.digitalgauge import DigitalGauge
-from autosportlabs.racecapture.views.dashboard.widgets.stopwatch import StopwatchView
+from autosportlabs.racecapture.views.dashboard.widgets.stopwatch import PitstopTimerView
 from kivy.app import Builder
 from kivy.uix.screenmanager import *
 from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer
@@ -84,7 +84,7 @@ class DashboardView(Screen):
         #self._comboView = comboView
         self._screen_mgr = screenMgr
         
-        self._alert_widgets['pit_stop'] = StopwatchView(databus, 'Pit Stop')
+        self._alert_widgets['pit_stop'] = PitstopTimerView(databus, 'Pit Stop')
         
         databus.start_update()
         Clock.schedule_once(lambda dt: self._show_last_view())
