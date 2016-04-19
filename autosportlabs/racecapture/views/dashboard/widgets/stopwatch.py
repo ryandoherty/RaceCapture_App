@@ -38,7 +38,7 @@ STOPWATCH_LAYOUT='''
             halign: 'center'
             valign: 'middle'
             max_lines: 1
-            font_size: sp(150)
+            font_size: root.height * 0.38
             text: root.current_time
             on_texture: root.change_font_size()
         BoxLayout:
@@ -57,7 +57,7 @@ STOPWATCH_LAYOUT='''
                 shorten: False
                 halign: 'left'
                 max_lines: 1
-                font_size: sp(80)
+                font_size: root.height * 0.2
                 text: 'Exit Speed'
                 valign: 'middle'
                     
@@ -71,7 +71,7 @@ STOPWATCH_LAYOUT='''
                     shorten: False
                     halign: 'center'
                     max_lines: 1
-                    font_size: sp(100)
+                    font_size: root.height * 0.25
                     valign: 'middle'
                     text: root.exit_speed
 
