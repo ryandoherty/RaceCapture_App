@@ -358,6 +358,16 @@ class RcpApi:
             self.sendCommand({name: payload})
 
     def getRcpCfgCallback(self, cfg, rcpCfgJson, winCallback):
+        #Logger.info('RCPConfig: ' + str(rcpCfgJson))
+
+        #rcpCfgJson["rcpCfg"]["pwmCfg"] = {"rc": 0}
+        #rcpCfgJson["rcpCfg"]["analogCfg"] = {"rc": 0}
+        #rcpCfgJson["rcpCfg"]["timerCfg"] = {"rc": 0}
+
+        #rcpCfgJson["rcpCfg"]["capabilities"] = {"channels": {"analog": 1, "imu": 7, "can": 1}, "sampleRates":
+        #                            {"sensor": 100, "gps": 50}, "db": {"tracks": 5, "sectors": 20}}
+
+        #Logger.info('RCPConfig: ' + str(rcpCfgJson))
         cfg.fromJson(rcpCfgJson)
         winCallback(cfg)
 

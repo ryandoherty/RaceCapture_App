@@ -967,11 +967,11 @@ class ChannelCapabilities(object):
 
     def from_json_dict(self, json_dict):
         if json_dict:
-            self.analog = int(json_dict.get('analog', self.analog))
-            self.imu = int(json_dict.get('imu', self.imu))
-            self.gpio = int(json_dict.get('gpio', self.gpio))
-            self.pwm = int(json_dict.get('pwm', self.pwm))
-            self.can = int(json_dict.get('can', self.can))
+            self.analog = int(json_dict.get('analog', 0))
+            self.imu = int(json_dict.get('imu', 0))
+            self.gpio = int(json_dict.get('gpio', 0))
+            self.pwm = int(json_dict.get('pwm', 0))
+            self.can = int(json_dict.get('can', 0))
 
     def to_json_dict(self):
         return {'analog':self.analog,
@@ -1010,6 +1010,19 @@ class Capabilities(object):
     channels = ChannelCapabilities()
     sample_rates = SampleRateCapabilities()
     storage = StorageCapabilities()
+
+    @property
+    def has_analog(self):
+        # We always have at least 1 analog channel for battery
+        return self.channels.analog > 1
+
+    @property
+    def has_gpio(self):
+        return self.channels.gpio > 0
+
+    @property
+    def has_pwm(self):
+        return self.channels.pwm > 0
 
     def from_json_dict(self, json_dict):
         if json_dict:

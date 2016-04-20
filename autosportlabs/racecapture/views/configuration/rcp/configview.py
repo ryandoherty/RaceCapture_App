@@ -185,12 +185,21 @@ class ConfigView(Screen):
 
         defaultNode = attach_node('Race Tracks', None, lambda: TrackConfigView(databus=self._databus))
         attach_node('GPS', None, lambda: GPSChannelsView())
-        attach_node('Race Timing', None, lambda: LapStatsView())        
-        attach_node('Analog Sensors', None, lambda: AnalogChannelsView(channels=runtime_channels))
-        attach_node('Pulse/RPM Sensors', None, lambda: PulseChannelsView(channels=runtime_channels))
-        attach_node('Digital In/Out', None, lambda: GPIOChannelsView(channels=runtime_channels))
+        attach_node('Race Timing', None, lambda: LapStatsView())
+
+        if self.rc_config.capabilities.has_analog:
+            attach_node('Analog Sensors', None, lambda: AnalogChannelsView(channels=runtime_channels))
+
+        if self.rc_config.capabilities.has_pwm:
+            attach_node('Pulse/RPM Sensors', None, lambda: PulseChannelsView(channels=runtime_channels))
+
+        if self.rc_config.capabilities.has_gpio:
+            attach_node('Digital In/Out', None, lambda: GPIOChannelsView(channels=runtime_channels))
         attach_node('Accel/Gyro', None, lambda: ImuChannelsView(rc_api=self.rc_api))
-        attach_node('Pulse/Analog Out', None, lambda: AnalogPulseOutputChannelsView(channels=runtime_channels))
+
+        if self.rc_config.capabilities.has_pwm:
+            attach_node('Pulse/Analog Out', None, lambda: AnalogPulseOutputChannelsView(channels=runtime_channels))
+
         attach_node('CAN Bus', None, lambda: CANConfigView())
         attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
         attach_node('Wireless', None, lambda: WirelessConfigView(base_dir=self.base_dir))
