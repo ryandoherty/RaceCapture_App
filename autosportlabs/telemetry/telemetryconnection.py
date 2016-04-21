@@ -142,7 +142,7 @@ class TelemetryManager(EventDispatcher):
     # Creates new TelemetryConnection in separate thread
     def _connect(self):
         Logger.info("TelemetryManager: starting connection")
-        self.dispatch('on_connecting', "Connecting to RaceCapture/Live")
+        self.dispatch('on_connecting', "Connecting to Podium")
         self.connection = TelemetryConnection(self.host, self.port, self.device_id,
                                               self.channels, self._data_bus, self.status)
         self._connection_process = threading.Thread(target=self.connection.run)
@@ -180,7 +180,7 @@ class TelemetryManager(EventDispatcher):
             Logger.warning("TelemetryManager: authentication failed")
             self._auth_failed = True
             self.stop()
-            self.dispatch('on_auth_error', "RaceCapture/Live: invalid device id")
+            self.dispatch('on_auth_error', "Podium: invalid device id")
         elif status_code == TelemetryConnection.STATUS_DISCONNECTED:
             Logger.info("TelemetryManager: disconnected")
             self.stop()
@@ -310,7 +310,7 @@ class TelemetryConnection(asynchat.async_chat):
             self.connect((self.host, self.port))
         except:
             Logger.info("TelemetryConnection: exception connecting")
-            self._update_status("error", "RaceCapture/Live: Error connecting", self.STATUS_DISCONNECTED)
+            self._update_status("error", "Podium: Error connecting", self.STATUS_DISCONNECTED)
 
         # This starts the loop around the socket connection polling
         # 'timeout' is how long the select() or poll() functions will wait for data,
@@ -321,7 +321,7 @@ class TelemetryConnection(asynchat.async_chat):
     def handle_connect(self):
         Logger.info("TelemetryConnection: got connect")
         if not self._connected:
-            self._update_status("ok", "RaceCapture/Live connected", self.STATUS_CONNECTED)
+            self._update_status("ok", "Podium connected", self.STATUS_CONNECTED)
             self._connected = True
             self._connecting = False
             self._send_auth()
@@ -329,7 +329,7 @@ class TelemetryConnection(asynchat.async_chat):
     def handle_expt(self):
         # Something really bad happened if we're here
         Logger.error("TelemetryConnection: handle_expt, closing connection")
-        self._update_status("error", "RaceCapture/Live: unknown error", self.STATUS_DISCONNECTED)
+        self._update_status("error", "Podium: unknown error", self.STATUS_DISCONNECTED)
         self.end()
 
     def handle_close(self):
@@ -338,7 +338,7 @@ class TelemetryConnection(asynchat.async_chat):
         self._connecting = False
         self.authorized = False
         Logger.info("TelemetryConnection: got disconnect")
-        self._update_status("ok", "RaceCapture/Live disconnected", self.STATUS_DISCONNECTED)
+        self._update_status("ok", "Podium disconnected", self.STATUS_DISCONNECTED)
 
     # When the socket is open, not necessarily usable
     def handle_accept(self):
@@ -411,9 +411,9 @@ class TelemetryConnection(asynchat.async_chat):
     def _handle_msg(self, msg_object):
         if "status" in msg_object:
             if msg_object["status"] == "ok" and not self.authorized:
-                self._update_status("ok", "RaceCapture/Live authorized",
+                self._update_status("ok", "Podium authorized",
                                     self.STATUS_AUTHORIZED)
-                Logger.info("TelemetryConnection: authorized to RaceCapture/Live")
+                Logger.info("TelemetryConnection: authorized to Podium")
                 self.authorized = True
                 self._send_meta()
                 self._start_sample_timer()
@@ -422,7 +422,7 @@ class TelemetryConnection(asynchat.async_chat):
             elif not self.authorized:
                 # We failed, abort
                 Logger.info("TelemetryConnection: failed to authorize, closing")
-                self._update_status("error", "RaceCapture/Live: Auth failed",
+                self._update_status("error", "Podium: Auth failed",
                                     self.ERROR_AUTHENTICATING)
                 self.end()
         else:
