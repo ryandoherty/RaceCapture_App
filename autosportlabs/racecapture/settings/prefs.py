@@ -74,7 +74,7 @@ class UserPrefs(EventDispatcher):
 
     @property
     def datastore_location(self):
-        return self.config.get('preferences', 'dstore_path')
+        return os.path.join(self.data_dir, 'datastore.sq3')
 
     def get_gauge_config(self, gauge_id):
         return self._prefs_dict["gauge_settings"].get(gauge_id, False)
@@ -92,7 +92,6 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'show_laptimes', 1)
         self.config.setdefault('preferences', 'startup_screen', 'Home Page')
         default_user_files_dir = self.user_files_dir
-        self.config.setdefault('preferences', 'dstore_path', os.path.join(self.data_dir, 'datastore.sq3'))
         self.config.setdefault('preferences', 'config_file_dir', default_user_files_dir)
         self.config.setdefault('preferences', 'firmware_dir', default_user_files_dir)
         self.config.setdefault('preferences', 'import_datalog_dir', default_user_files_dir)
