@@ -1,11 +1,12 @@
 import kivy
+kivy.require('1.9.1')
 from autosportlabs.racecapture.views.dashboard.tachometerview import TachometerView
 from autosportlabs.racecapture.views.dashboard.rawchannelview import RawChannelView
 from autosportlabs.racecapture.views.dashboard.laptimeview import LaptimeView
 from autosportlabs.racecapture.views.dashboard.comboview import ComboView
 from autosportlabs.racecapture.views.dashboard.gaugeview import GaugeView
 from autosportlabs.racecapture.views.dashboard.widgets.digitalgauge import DigitalGauge
-kivy.require('1.9.1')
+from autosportlabs.racecapture.views.dashboard.widgets.stopwatch import PitstopTimerView
 from kivy.app import Builder
 from kivy.uix.screenmanager import *
 from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer
@@ -26,14 +27,16 @@ class DashboardView(Screen):
     _rawchannelView = None
     _laptimeView = None
     _comboView = None
+    Builder.load_file(DASHBOARD_VIEW_KV)
     
     def __init__(self, **kwargs):
-        Builder.load_file(DASHBOARD_VIEW_KV)
         super(DashboardView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
         self._databus = kwargs.get('dataBus')
         self._settings = kwargs.get('settings')
+        self._alert_widgets = {}
         self.init_view()
+
             
     def on_tracks_updated(self, trackmanager):
         pass
@@ -80,8 +83,13 @@ class DashboardView(Screen):
         self._laptimeView = laptimeView
         #self._comboView = comboView
         self._screen_mgr = screenMgr
+        
+        self._alert_widgets['pit_stop'] = PitstopTimerView(databus, 'Pit Stop')
+        
         databus.start_update()
         Clock.schedule_once(lambda dt: self._show_last_view())
+        
+        
 
     def on_nav_left(self):
         self._screen_mgr.transition=SlideTransition(direction='right')

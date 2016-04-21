@@ -1,5 +1,13 @@
+==1.5.1==
+* Do not pause timer after moving out of pit spot
+* Include changes from 1.4.6
+
+==1.5.0==
+* Add automatic pitstop timer
+
 ==1.4.6==
 * Allow complete erasing of device id field
+* Improve performance of Scripting Logview window, add button for copying log to clipboard
 
 ==1.4.5==
 * Update to Kivy 1.9.1
