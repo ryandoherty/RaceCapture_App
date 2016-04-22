@@ -146,11 +146,10 @@ class DataBus(object):
         :param listener
         :type object / callback function
         '''
-        Logger.info('DataBus: remove sample listener {}'.format(listener))
         try:
             self.sample_listeners.remove(listener)
         except Exception as e:
-            Logger.error('Could not remove sample listener {}: {}'.format(listener, e))
+            Logger.debug('Could not remove sample listener {}: {}'.format(listener, e))
         
     def remove_meta_listener(self, listener):
         '''
@@ -158,11 +157,10 @@ class DataBus(object):
         :param listener
         :type object / callback function
         '''
-        Logger.info('DataBus: remove meta listener {}'.format(listener))
         try:
             self.meta_listeners.remove(listener)
         except Exception as e:
-            Logger.error('Could not remove meta listener {}: {}'.format(listener, e))
+            Logger.debug('Could not remove meta listener {}: {}'.format(listener, e))
         
     def add_sample_listener(self, callback):
         self.sample_listeners.append(callback)
