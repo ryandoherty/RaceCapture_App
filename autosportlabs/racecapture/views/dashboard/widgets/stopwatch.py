@@ -11,6 +11,7 @@ from kivy.clock import Clock
 from autosportlabs.racecapture.views.util.viewutils import format_laptime
 from iconbutton import RoundedRect
 from autosportlabs.racecapture.theme.color import ColorScheme
+from time import time
 
 STOPWATCH_LAYOUT='''
 <PitstopTimerView>:
@@ -120,8 +121,8 @@ class PitstopTimerView(BoxLayout):
         self.title = title
         self.databus = databus
         self._popup = None
-        self._current_time = 0.0
         self._flash_count = 0
+        self._start_time = 0.0
         self._currently_racing = False
         databus.addChannelListener(STOPWATCH_SPEED_CHANNEL, self.set_speed)
         databus.addChannelListener(STOPWATCH_CURRENT_LAP, self.set_current_lap)
@@ -175,7 +176,7 @@ class PitstopTimerView(BoxLayout):
         '''
         Increment the current stopwatch time
         '''
-        self._current_time += self._STOPWATCH_TICK
+        self._current_time = time() - self._start_time
         self.current_time = self._format_stopwatch_time()
         self.exit_speed = '{}'.format(int(self.current_speed))
         if self.current_speed > self.stop_threshold_speed:
@@ -205,7 +206,8 @@ class PitstopTimerView(BoxLayout):
             self._popup.add_widget(self)
         self._set_exit_speed_frame_visible(False)
         self._popup.open()
-        self._current_time = 0
+        self._current_time = 0.0
+        self._start_time = time()
         self._flash_count = 0
         self._currently_racing = False
         Clock.schedule_interval(self._tick_stopwatch, self._STOPWATCH_TICK)
