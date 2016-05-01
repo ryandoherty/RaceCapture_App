@@ -213,7 +213,7 @@ class UserPrefs(EventDispatcher):
         '''
         try:
             return self.config.getboolean(section, option)
-        except NoOptionError:
+        except (NoOptionError, ValueError):
             return default
 
     def get_pref_float(self, section, option, default=None):
@@ -230,7 +230,7 @@ class UserPrefs(EventDispatcher):
         '''
         try:
             return self.config.getfloat(section, option)
-        except NoOptionError:
+        except (NoOptionError, ValueError):
             return default
 
     def get_pref_int(self, section, option, default=None):
@@ -247,7 +247,7 @@ class UserPrefs(EventDispatcher):
         '''
         try:
             return self.config.getint(section, option)
-        except NoOptionError:
+        except (NoOptionError, ValueError):
             return default
 
     def get_pref(self, section, option, default=None):
@@ -264,7 +264,7 @@ class UserPrefs(EventDispatcher):
         '''
         try:
             return self.config.get(section, option)
-        except NoOptionError:
+        except (NoOptionError, ValueError):
             return default
 
     def set_pref(self, section, option, value):
