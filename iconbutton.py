@@ -11,12 +11,60 @@ from kivy.properties import NumericProperty, ListProperty, StringProperty, Objec
 from fieldlabel import FieldLabel
 from math import sin, cos, pi
 from autosportlabs.racecapture.theme.color import ColorScheme 
+from kivy.clock import Clock
 
 Builder.load_file('iconbutton.kv')
 
 class IconButton(Button):
+    FADED_ALPHA = 0.1
+    BRIGHT_ALPHA = 1.0
+    FADE_STEP = 0.05
+    FADE_INTERVAL = 0.025
+    FADE_DELAY = 5.0
+    
     def __init__(self, **kwargs):
         super(IconButton, self).__init__(**kwargs)
+        self._current_alpha = None
+        self.brighten_mode = True
+        self._schedule_fade = Clock.create_trigger(self._fade_back, self.FADE_DELAY)
+        self._schedule_step = Clock.create_trigger(self._fade_step)
+    
+    def _fade_step(self, *args):
+        if self.brighten_mode == True:
+            if self._current_alpha < self.BRIGHT_ALPHA:
+                self._current_alpha += self.FADE_STEP
+                self._schedule_step()
+            
+        if self.brighten_mode == False:
+            if self._current_alpha > self.FADED_ALPHA:
+                self._current_alpha -= self.FADE_STEP
+                self._schedule_step()
+
+        color = self.color
+        self.color = [color[0], color[1], color[3], self._current_alpha]
+             
+    def _fade_back(self, *args):
+        self.fade()
+    
+    def _start_transition(self):
+        if self._current_alpha is None:
+            self._current_alpha = self.color[3]
+        self._schedule_step()
+        
+    def fade(self):
+        '''
+        Fade this button away to a shadow with low alpha value
+        '''
+        self.brighten_mode = False
+        self._start_transition()
+
+    def brighten(self):
+        '''
+        Brighten this button
+        '''        
+        self.brighten_mode = True
+        self._start_transition()
+        self._schedule_fade()
 
 class RoundedRect(BoxLayout):
     rect_color = ObjectProperty((0.5, 0.5, 0.5, 0.8))

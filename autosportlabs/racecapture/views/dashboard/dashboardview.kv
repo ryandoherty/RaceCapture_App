@@ -11,7 +11,6 @@
     			IconButton:
     				color: [1.0, 1.0, 1.0, 1.0]
     				font_size: self.height
-    				rcid: 'teleRxStatus'
     				text: ' \357\203\231'
     				size_hint_x: 0.2
     				on_release: root.on_nav_left()
@@ -24,7 +23,6 @@
     			IconButton:
     				color: [1.0, 1.0, 1.0, 1.0]
     				font_size: self.height
-    				rcid: 'teleRxStatus'
     				text: '\357\203\232 '
     				size_hint_x: 0.2
     				on_release: root.on_nav_right()
@@ -32,10 +30,11 @@
             anchor_x: 'left'
             anchor_y: 'top'
             IconButton:
+                id: preferences_button
                 size_hint_y: 0.1
                 size_hint_x: 0.1
                 text: u'\uf013'
                 halign: 'left'
-                color: [1.0, 1.0, 1.0, 0.5]
+                color: [1.0, 1.0, 1.0, 0.2]
                 on_press: root.on_preferences()
 
