@@ -6,11 +6,24 @@ from os.path import dirname, expanduser, sep
 from os import path
 
 class SettingsListener(object):
+    '''
+    Base class for listining to changes in settings / preferences
+    '''
 
     def settings_updated(self, settings):
+        '''
+        Notify if settings have been updated
+        :param settings the settings object
+        :type settings SystemSettings
+        '''
         pass
 
     def user_preferences_updated(self, user_prefs):
+        '''
+        Notify if user preferences have changed
+        :param user_prefs user preferences
+        :type UserPrefs
+        '''
         pass
 
 class SystemSettings(object):
