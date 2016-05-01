@@ -1,4 +1,6 @@
 ==1.5.3==
+* Make lap selection for analysis live in a drop-down shade that auto-dismisses, 
+  to maximize screen real-estate for small form factors.
 
 ==1.5.2==
 * Prevent app hang while transmitting telemetry if bluetooth disconnects
