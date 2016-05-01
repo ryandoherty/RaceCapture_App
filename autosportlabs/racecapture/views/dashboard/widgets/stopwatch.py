@@ -121,9 +121,9 @@ class PitstopTimerView(BoxLayout, SettingsListener):
         self._flash_count = 0
         self._start_time = 0.0
         self._currently_racing = False
-        self._pitstop_trigger_speed = 0.0
-        self._pitstop_exit_speed = 0.0
-        self._pitstop_alert_speed = 0.0
+        self._pitstop_trigger_speed = 0
+        self._pitstop_exit_speed = 0
+        self._pitstop_alert_speed = 0
         databus.addChannelListener(STOPWATCH_SPEED_CHANNEL, self.set_speed)
         databus.addChannelListener(STOPWATCH_CURRENT_LAP, self.set_current_lap)
 
@@ -202,9 +202,9 @@ class PitstopTimerView(BoxLayout, SettingsListener):
         Update runtime values from user preferences
         '''
         self._pitstop_timer_enabled = user_preferences.get_pref_bool('dashboard_preferences', 'pitstoptimer_enabled')
-        self._pitstop_trigger_speed = user_preferences.get_pref_float('dashboard_preferences', 'pitstoptimer_trigger_speed')
-        self._pitstop_exit_speed = user_preferences.get_pref_float('dashboard_preferences', 'pitstoptimer_exit_speed')
-        self._pitstop_alert_speed = user_preferences.get_pref_float('dashboard_preferences', 'pitstoptimer_alert_speed')
+        self._pitstop_trigger_speed = user_preferences.get_pref_int('dashboard_preferences', 'pitstoptimer_trigger_speed')
+        self._pitstop_exit_speed = user_preferences.get_pref_int('dashboard_preferences', 'pitstoptimer_exit_speed')
+        self._pitstop_alert_speed = user_preferences.get_pref_int('dashboard_preferences', 'pitstoptimer_alert_speed')
 
     def _start_stopwatch(self):
         '''

@@ -171,9 +171,9 @@ class UserPrefs(EventDispatcher):
         # Dashboard preferences
         self.config.adddefaultsection('dashboard_preferences')
         self.config.setdefault('dashboard_preferences', 'pitstoptimer_enabled', 1)
-        self.config.setdefault('dashboard_preferences', 'pitstoptimer_trigger_speed', 5.0)
-        self.config.setdefault('dashboard_preferences', 'pitstoptimer_alert_speed', 25.0)
-        self.config.setdefault('dashboard_preferences', 'pitstoptimer_exit_speed', 55.0)
+        self.config.setdefault('dashboard_preferences', 'pitstoptimer_trigger_speed', 5)
+        self.config.setdefault('dashboard_preferences', 'pitstoptimer_alert_speed', 25)
+        self.config.setdefault('dashboard_preferences', 'pitstoptimer_exit_speed', 55)
 
     def load(self):
         Logger.info('UserPrefs: Data Dir is: {}'.format(self.data_dir))
