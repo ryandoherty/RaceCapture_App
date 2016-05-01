@@ -1,3 +1,5 @@
+==1.5.3==
+
 ==1.5.2==
 * Prevent app hang while transmitting telemetry if bluetooth disconnects
 * Update references from RaceCapture/Live to Podium
