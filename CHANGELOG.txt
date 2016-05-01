@@ -1,4 +1,6 @@
 ==1.5.3==
+* Make pit stop timer configurable
+* Make pit stop timer time correctly on slower tablets
 
 ==1.5.2==
 * Prevent app hang while transmitting telemetry if bluetooth disconnects
