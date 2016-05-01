@@ -5,6 +5,14 @@ from kivy.utils import platform
 from os.path import dirname, expanduser, sep
 from os import path
 
+class SettingsListener(object):
+
+    def settings_updated(self, settings):
+        pass
+
+    def user_preferences_updated(self, user_prefs):
+        pass
+
 class SystemSettings(object):
     data_dir = None
     base_dir = None
@@ -12,8 +20,8 @@ class SystemSettings(object):
         self.data_dir = data_dir
         self.base_dir = base_dir
         self.systemChannels = SystemChannels(base_dir=base_dir)
-        self.runtimeChannels = RuntimeChannels(system_channels=self.systemChannels)        
-        self.userPrefs = UserPrefs(data_dir=self.get_default_data_dir(), 
+        self.runtimeChannels = RuntimeChannels(system_channels=self.systemChannels)
+        self.userPrefs = UserPrefs(data_dir=self.get_default_data_dir(),
                                    user_files_dir=self.get_default_user_files_dir())
         self.appConfig = AppConfig()
 
@@ -25,7 +33,7 @@ class SystemSettings(object):
             return activity.getExternalFilesDir(None).getPath()
         else:
             return self.data_dir
-        
+
     def get_default_user_files_dir(self):
         if platform() == 'android':
             from jnius import autoclass
@@ -40,4 +48,4 @@ class SystemSettings(object):
         else:
             return path.join(expanduser('~'), 'Documents')
 
-        
+
