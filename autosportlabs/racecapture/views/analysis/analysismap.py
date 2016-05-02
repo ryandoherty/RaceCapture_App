@@ -85,7 +85,9 @@ class AnalysisMap(AnalysisWidget):
             BoxLayout:
                 id: legend_box
                 orientation: 'vertical'
-                size_hint_x: 0.25
+                size_hint_x: None
+
+                width: min(dp(300), 0.35 * root.width)
                 BoxLayout:
                     canvas.before:
                         Color:
@@ -104,18 +106,24 @@ class AnalysisMap(AnalysisWidget):
                         size_hint_x: 0.6
                 BoxLayout:
                     size_hint_y: 0.9
-                    GridLayout:
-                        cols: 1
-                        id: legend_list
-                        padding: (sp(5), sp(5))
-                        row_default_height: root.height * 0.12
-                        row_force_default: True
-                        canvas.before:
-                            Color:
-                                rgba: ColorScheme.get_widget_translucent_background()
-                            Rectangle:
-                                pos: self.pos
-                                size: self.size    
+                    ScrollContainer:
+                        id: scroller
+                        do_scroll_x: False
+                        do_scroll_y: True
+                        GridLayout:
+                            cols: 1
+                            size_hint_y: None
+                            height: max(self.minimum_height, scroller.height)
+                            id: legend_list
+                            padding: (sp(5), sp(5))
+                            row_default_height: root.height * 0.12
+                            row_force_default: True
+                            canvas.before:
+                                Color:
+                                    rgba: ColorScheme.get_widget_translucent_background()
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
     ''')
 
     SCROLL_FACTOR = 0.15
