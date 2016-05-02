@@ -49,7 +49,7 @@ FLYIN_PANEL_LAYOUT='''
         FlyinHandle:
             canvas.before:
                 Color:
-                    rgba: (1,0,0,1)
+                    rgba: ColorScheme.get_primary()
                 Rectangle:
                     pos: self.pos
                     size: self.size
