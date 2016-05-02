@@ -403,7 +403,7 @@ class RaceCaptureApp(App):
             self._status_pump.start(self._rc_api)
 
             if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:
-                self._telemetry_connection.telemetry_enabled = True
+                self._telemetry_connection.data_connected = True
 
             if self.rc_config.loaded == False:
                 Clock.schedule_once(lambda dt: self.on_read_config(self))
@@ -429,8 +429,8 @@ class RaceCaptureApp(App):
         self.showActivity('Searching {}'.format(info))
 
     def _on_rcp_disconnect(self):
-        if self._telemetry_connection.telemetry_enabled:
-            self._telemetry_connection.telemetry_enabled = False
+        if self._telemetry_connection.data_connected:
+            self._telemetry_connection.data_connected = False
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')

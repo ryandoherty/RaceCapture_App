@@ -1,4 +1,6 @@
 ==1.5.3==
+* Make pit stop timer configurable
+* Make pit stop timer time correctly on slower tablets
 * Make lap selection for analysis live in a drop-down shade that auto-dismisses, 
   to maximize screen real-estate for small form factors.
 
