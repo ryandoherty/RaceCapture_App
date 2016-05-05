@@ -190,11 +190,11 @@ class DataBusPump(object):
         rc_api.addListener('s', self.on_sample)
         rc_api.addListener('meta', self.on_meta)
         self._running.set()
-        if not is_mobile_platform():
-            #only start the worker on desktop mode
-            t = Thread(target=self.sample_worker)
-            t.start()
-            self._sample_thread = t
+        # if not is_mobile_platform():
+        #     #only start the worker on desktop mode
+        #     t = Thread(target=self.sample_worker)
+        #     t.start()
+        #     self._sample_thread = t
 
     def stop(self):
         self._running.clear()

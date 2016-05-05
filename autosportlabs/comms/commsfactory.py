@@ -13,8 +13,12 @@ def comms_factory(port):
         from autosportlabs.comms.androidcomms import AndroidComms
         return AndroidComms(port=port)
     elif platform == 'ios':
+        from autosportlabs.comms.socket.socketconnection import SocketConnection
         from autosportlabs.comms.socket.socketcomm import SocketComm
-        return SocketComm(port=port, connection=SocketConnection())
+        return SocketComm(SocketConnection(), '192.168.0.103')
     else:
-        from autosportlabs.comms.comms import Comms
-        return Comms(port=port, connection=SerialConnection())
+        from autosportlabs.comms.socket.socketconnection import SocketConnection
+        from autosportlabs.comms.socket.socketcomm import SocketComm
+        return SocketComm(SocketConnection(), '192.168.0.103')
+        #from autosportlabs.comms.comms import Comms
+        #return Comms(port=port, connection=SerialConnection())

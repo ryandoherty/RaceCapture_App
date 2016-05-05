@@ -130,8 +130,9 @@ class RcpApi:
         try:
             self.comms.close()
             self.comms.port = None
-        except:
-            pass
+        except Exception:
+            Logger.warn('RCPAPI: Message rx worker exception: {} | {}'.format(msg, str(Exception)))
+            Logger.info(traceback.format_exc())
 
     def detect_win(self, version_info):
         self.level_2_retries = DEFAULT_LEVEL2_RETRIES
