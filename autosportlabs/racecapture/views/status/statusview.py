@@ -27,7 +27,10 @@ class StatusTitle(StatusLabel):
     pass
 
 class StatusValue(StatusLabel):
-    pass
+
+    def __init__(self, **kwargs):
+        super(StatusLabel, self).__init__(**kwargs)
+        self.shorten = False
 
 # Simple extension of Kivy's TreeViewLabel so we can add on our own properties
 # to it for easier view tracking
