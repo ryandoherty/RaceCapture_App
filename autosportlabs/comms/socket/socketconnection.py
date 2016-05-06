@@ -1,15 +1,33 @@
 from kivy.logger import Logger
 import socket
+import json
+
+PORT = 7223
 
 class SocketConnection():
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         self.socket = None
         pass
     
-    def get_available_ports(self):
+    def get_available_devices(self):
+        Logger.info("SocketConnection: listening for RC wifi...")
         # Listen for UDP beacon from RC wifi
-        return []
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        # Bind the socket to the port
+        server_address = ('0.0.0.0', PORT)
+        sock.bind(server_address)
+
+        while True:
+            data, address = sock.recvfrom(4096)
+
+            if data:
+                Logger.info("SocketConnection: got UDP data {}".format(data))
+                message = json.loads(data)
+                if message['beacon'] and message['beacon']['ip']:
+                    sock.close()
+                    return message['beacon']['ip']
 
     def isOpen(self):
         return False

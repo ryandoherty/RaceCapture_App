@@ -88,6 +88,7 @@ def connection_message_thread(connection, address, rx_queue, tx_queue, command_q
 
     Logger.debug('SocketComm: connection worker exited')
 
+
 class SocketComm():
     CONNECT_TIMEOUT = 1.0
     DEFAULT_TIMEOUT = 1.0
@@ -98,10 +99,10 @@ class SocketComm():
     _tx_queue = None
     _command_queue = None
 
-    def __init__(self, connection, ip, **kwargs):
+    def __init__(self, connection, ip):
         self._ip = ip
-        # Semi-backwards compatibility because lots of code uses 'port'
-        self.port = self._ip
+        # Semi-backwards compatibility because lots of code uses 'device'
+        self.device = self._ip
         self._connection = connection
         Logger.info('SocketComm: init')
 
@@ -117,8 +118,8 @@ class SocketComm():
         self._command_queue = command_queue
         self._connection_process = connection_thread
 
-    def get_available_ports(self):
-        return []
+    def get_available_devices(self):
+        return self._connection.get_available_devices()
 
     def isOpen(self):
         return self._connection_process is not None and self._connection_process.is_alive()
