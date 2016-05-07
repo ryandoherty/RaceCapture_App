@@ -10,9 +10,10 @@
     			orientation: 'horizontal'
     			IconButton:
     				color: [1.0, 1.0, 1.0, 1.0]
-    				font_size: self.height
+    				font_size: self.height * 1.2
     				text: ' \357\203\231'
-    				size_hint_x: 0.2
+    				size_hint_x: 0.4
+    				size_hint_y: 1.1
     				on_release: root.on_nav_left()
     			DigitalGauge:
     				rcid: 'left_bottom'
@@ -22,9 +23,10 @@
     				rcid: 'right_bottom'
     			IconButton:
     				color: [1.0, 1.0, 1.0, 1.0]
-    				font_size: self.height
+    				font_size: self.height * 1.2
     				text: '\357\203\232 '
-    				size_hint_x: 0.2
+    				size_hint_x: 0.4
+    				size_hint_y: 1.1
     				on_release: root.on_nav_right()
         AnchorLayout:
             anchor_x: 'left'
