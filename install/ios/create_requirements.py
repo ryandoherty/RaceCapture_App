@@ -10,7 +10,7 @@ blacklisted packages removed.
 
 import os
 local_dir = os.path.dirname(os.path.realpath(__file__))
-root_dir = os.path.dirname(os.path.join(local_dir, '../..'))
+root_dir = os.path.dirname(os.path.join(local_dir, '../../'))
 ios_requirements_file_path = os.path.join(root_dir, 'ios_requirements.txt')
 
 if os.path.isfile(ios_requirements_file_path):
