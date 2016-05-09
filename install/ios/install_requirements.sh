@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-echo `which pip`
-exit 1
 INSTALL_DIR="$1"
 cd "$INSTALL_DIR"
 echo "INSTALL DIR: $INSTALL_DIR \n"

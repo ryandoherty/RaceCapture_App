@@ -1,4 +1,11 @@
 #!/usr/bin/python
+
+"""
+iOS is complicated, we need to install some pip packages, but not all for various reasons
+This script takes our top level requirements.txt file and generates a new one with the
+blacklisted packages removed.
+"""
+
 import os
 local_dir = os.path.dirname(os.path.realpath(__file__))
 root_dir = os.path.dirname(os.path.join(local_dir, '../../'))
