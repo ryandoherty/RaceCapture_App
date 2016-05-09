@@ -1,6 +1,6 @@
 from kivy.logger import Logger
 
-STAY_ALIVE_TIMEOUT = 4
+KEEP_ALIVE_TIMEOUT_S = 4
 COMMAND_CLOSE = 'CLOSE'
 COMMAND_KEEP_ALIVE = 'PING'
 
