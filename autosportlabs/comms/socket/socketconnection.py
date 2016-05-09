@@ -1,17 +1,17 @@
+from kivy.logger import Logger
 
-class SerialConnection():
-    ser = None
-    
+class SocketConnection():
+
     def __init__(self, **kwargs):
         pass
     
     def get_available_ports(self):
-        pass
-                
+        return []
+
     def isOpen(self):
-        pass
-    
-    def open(self, port, timeout, writeTimeout):
+        return False
+
+    def open(self, port):
         pass
             
     def close(self):
@@ -19,6 +19,9 @@ class SerialConnection():
 
     def read(self, count):
         pass
+
+    def read_line(self):
+        return ''
     
     def write(self, data):
         pass
