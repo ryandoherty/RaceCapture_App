@@ -17,8 +17,8 @@ def comms_factory(device):
         from autosportlabs.comms.socket.socketcomm import SocketComm
         return SocketComm(SocketConnection(), device)
     else:
-        # from autosportlabs.comms.socket.socketconnection import SocketConnection
-        # from autosportlabs.comms.socket.socketcomm import SocketComm
-        # return SocketComm(SocketConnection(), device)
-        from autosportlabs.comms.comms import Comms
-        return Comms(device, SerialConnection())
+        from autosportlabs.comms.socket.socketconnection import SocketConnection
+        from autosportlabs.comms.socket.socketcomm import SocketComm
+        return SocketComm(SocketConnection(), device)
+        # from autosportlabs.comms.comms import Comms
+        # return Comms(device, SerialConnection())

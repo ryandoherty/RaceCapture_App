@@ -16,7 +16,7 @@ def connection_thread_message_reader(rx_queue, connection, should_run):
 
     while should_run.is_set():
         try:
-            msg = connection.read_line()
+            msg = connection.read(should_run)
             if msg:
                 rx_queue.put(msg)
         except:
@@ -71,7 +71,7 @@ def connection_message_thread(connection, address, rx_queue, tx_queue, command_q
                     Logger.debug('SocketComm: connection thread: got close command')
                     reader_writer_should_run.clear()
             except Empty:
-                Logger.info('SocketComm: keep alive timeout')
+                Logger.debug('SocketComm: keep alive timeout')
                 reader_writer_should_run.clear()
         Logger.debug('SocketComm: connection worker exiting')
 
@@ -82,6 +82,7 @@ def connection_message_thread(connection, address, rx_queue, tx_queue, command_q
             connection.close()
         except:
             Logger.error('SocketComm: Exception closing connection worker connection')
+            Logger.error(traceback.format_exc())
     except Exception as e:
         Logger.error('SocketComm: Exception setting up connection thread: ' + str(type(e)) + str(e))
         Logger.debug(traceback.format_exc())
@@ -99,10 +100,8 @@ class SocketComm():
     _tx_queue = None
     _command_queue = None
 
-    def __init__(self, connection, ip):
-        self._ip = ip
-        # Semi-backwards compatibility because lots of code uses 'device'
-        self.device = self._ip
+    def __init__(self, connection, device):
+        self.device = device
         self._connection = connection
         Logger.info('SocketComm: init')
 
@@ -110,7 +109,7 @@ class SocketComm():
         rx_queue = Queue.Queue()
         tx_queue = Queue.Queue(5)
         command_queue = Queue.Queue()
-        connection_thread = threading.Thread(target=connection_message_thread, args=(self._connection, self._ip,
+        connection_thread = threading.Thread(target=connection_message_thread, args=(self._connection, self.device,
                                                                                      rx_queue, tx_queue, command_queue))
         connection_thread.start()
         self._rx_queue = rx_queue
@@ -143,7 +142,7 @@ class SocketComm():
                 self._connection_process.join(self._timeout * 2)
                 Logger.debug('SocketComm: connection process joined')
             except:
-                Logger.error('SocketComm: Timeout joining connection process')
+                Logger.debug('SocketComm: Timeout joining connection process')
 
     def read_message(self):
         if not self.isOpen():
