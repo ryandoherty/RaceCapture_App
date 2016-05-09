@@ -286,7 +286,7 @@ class RcpApi:
                                         Logger.warn('RCPAPI: rx message did not match expected name ' + str(name) + '; ' + str(msgName))
                                         result = None
                                 except Exception as e:
-                                    Logger.warn('RCPAPI: Read message timeout ' + str(e))
+                                    Logger.warn('RCPAPI: Read message timeout waiting for {}'.format(name))
                                     self.recoverTimeout()
                                     retry += 1
                             if not result:

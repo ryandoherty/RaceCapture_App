@@ -6,7 +6,7 @@ from time import sleep
 import traceback
 from autosportlabs.comms.commscommon import PortNotOpenException
 
-STAY_ALIVE_TIMEOUT = 4
+KEEP_ALIVE_TIMEOUT_S = 4
 COMMAND_CLOSE = 'CLOSE'
 COMMAND_KEEP_ALIVE = 'PING'
 
