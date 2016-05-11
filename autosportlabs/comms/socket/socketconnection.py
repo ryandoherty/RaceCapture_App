@@ -1,3 +1,23 @@
+#
+# Race Capture App
+#
+# Copyright (C) 2014-2016 Autosport Labs
+#
+# This file is part of the Race Capture App
+#
+# This is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details. You should
+# have received a copy of the GNU General Public License along with
+# this code. If not, see <http://www.gnu.org/licenses/>.
+
 from kivy.logger import Logger
 import socket
 import json
@@ -6,13 +26,17 @@ PORT = 7223
 READ_TIMEOUT = 1
 SCAN_TIMEOUT = 3
 
-class SocketConnection():
+
+class SocketConnection(object):
 
     def __init__(self):
         self.socket = None
-        pass
-    
+
     def get_available_devices(self):
+        """
+        Listens for RC WiFi's UDP beacon, if found it returns the ips that the RC wifi beacon says it's available on
+        :return: List of ip addresses
+        """
         Logger.info("SocketConnection: listening for RC wifi...")
         # Listen for UDP beacon from RC wifi
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -22,7 +46,6 @@ class SocketConnection():
         server_address = ('0.0.0.0', PORT)
         sock.bind(server_address)
 
-        # Look for RC hardware for 3 seconds
         try:
             data, address = sock.recvfrom(4096)
 
@@ -38,9 +61,18 @@ class SocketConnection():
             return []
 
     def isOpen(self):
-        return False
+        """
+        Returns True or False if socket is open or not
+        :return: Boolean
+        """
+        return self.socket is not None
 
     def open(self, address):
+        """
+        Opens a socket connection to the specified address
+        :param address: IP address to connect to
+        :return: None
+        """
         # Connect to ip address here
         rc_address = (address, 7223)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,9 +80,21 @@ class SocketConnection():
         self.socket.settimeout(READ_TIMEOUT)
 
     def close(self):
+        """
+        Closes the socket connection
+        :return: None
+        """
         self.socket.close()
+        self.socket = None
 
     def read(self, keep_reading):
+        """
+        Reads data from the socket. Will continue to read until either "\r\n" is found in the data read from the
+        socket or keep_reading.is_set() returns false
+        :param keep_reading: Event object that is checked while data is read
+        :type keep_reading: threading.Event
+        :return: String or None
+        """
         msg = ''
         Logger.info("SocketConnection: reading...")
 
@@ -72,6 +116,12 @@ class SocketConnection():
                 pass
 
     def write(self, data):
+        """
+        Writes data to the socket
+        :param data: Data to write
+        :type data: String
+        :return: None
+        """
         self.socket.sendall(data)
 
     def flushInput(self):

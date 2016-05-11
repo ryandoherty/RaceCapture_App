@@ -99,6 +99,7 @@ class Comms():
     def __init__(self, device, connection):
         self.device = device
         self._connection = connection
+        self.supports_streaming = False
 
     def start_connection_process(self):
         rx_queue = multiprocessing.Queue()

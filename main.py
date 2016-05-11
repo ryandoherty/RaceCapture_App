@@ -402,7 +402,7 @@ class RaceCaptureApp(App):
     def rc_detect_win(self, version):
         if version.is_compatible_version():
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
-            self._data_bus_pump.start(self._databus, self._rc_api)
+            self._data_bus_pump.start(self._databus, self._rc_api, self._rc_api.comms.supports_streaming)
             self._status_pump.start(self._rc_api)
 
             if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:

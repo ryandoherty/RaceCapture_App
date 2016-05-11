@@ -30,6 +30,7 @@ class AndroidComms(object):
         _reader_should_run = None
         _reader_thread = None
         self._bt_conn = BTConn.createInstance();
+        self.supports_streaming = True
 
     def get_available_devices(self):
         bt_devices = self._bt_conn.getAvailableDevices()

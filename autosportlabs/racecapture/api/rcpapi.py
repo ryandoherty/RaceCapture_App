@@ -670,8 +670,7 @@ class RcpApi:
                     devices = [comms.device]
                 else:
                     devices = comms.get_available_devices()
-                    # Backwards compatibility when fetching port, convert to device
-                    last_known_device = self._settings.userPrefs.get_pref('preferences', 'last_known_port')
+                    last_known_device = self._settings.userPrefs.get_pref('preferences', 'last_known_device')
                     # if there was a last known device try this one first.
                     if last_known_device:
                         Logger.info('RCPAPI: trying last known device first: {}'.format(last_known_device))
@@ -716,7 +715,7 @@ class RcpApi:
                     Logger.info("RCPAPI: Found device version " + str(testVer) + " on port: " + str(comms.device))
                     self.detect_win(testVer)
                     self._auto_detect_event.clear()
-                    self._settings.userPrefs.set_pref('preferences', 'last_known_port', comms.device)
+                    self._settings.userPrefs.set_pref('preferences', 'last_known_device', comms.device)
                 else:
                     Logger.debug('RCPAPI: Did not find device')
                     comms.close()
