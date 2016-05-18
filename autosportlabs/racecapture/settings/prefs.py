@@ -4,6 +4,7 @@ from kivy.clock import Clock
 from kivy.config import ConfigParser
 from ConfigParser import NoOptionError
 from kivy.logger import Logger
+from kivy import platform
 import json
 import os
 from os import path
@@ -99,6 +100,9 @@ class UserPrefs(EventDispatcher):
         self.config.setdefault('preferences', 'send_telemetry', False)
         self.config.setdefault('preferences', 'last_dash_screen', 'gaugeView')
         self.config.setdefault('preferences', 'global_help', True)
+
+        if platform == 'android':
+            self.config.setdefault('preferences', 'conn_type', 'Bluetooth')
 
     def load(self):
         Logger.info('UserPrefs: Data Dir is: {}'.format(self.data_dir))

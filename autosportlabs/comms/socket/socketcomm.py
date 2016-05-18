@@ -25,6 +25,7 @@ from Queue import Empty
 from time import sleep
 import traceback
 from autosportlabs.comms.commscommon import PortNotOpenException
+from autosportlabs.util.threadutil import safe_thread_exit
 
 
 class SocketComm(object):
@@ -160,6 +161,7 @@ class SocketComm(object):
                 should_run.clear()
                 sleep(0.5)
         Logger.debug('SocketComm: connection process message reader exited')
+        safe_thread_exit()
 
     def _connection_thread_message_writer(self, tx_queue, connection, should_run):
         """This method is designed to be run in a thread, it will loop infinitely as long as should_run.is_set()
@@ -188,6 +190,7 @@ class SocketComm(object):
                 should_run.clear()
                 sleep(0.5)
         Logger.debug('SocketComm: connection thread message writer exited')
+        safe_thread_exit()
 
     def _connection_message_thread(self, connection, address, rx_queue, tx_queue, command_queue):
         """
@@ -243,4 +246,5 @@ class SocketComm(object):
             Logger.debug(traceback.format_exc())
 
         Logger.debug('SocketComm: connection worker exited')
+        safe_thread_exit()
 
