@@ -166,6 +166,7 @@ class RaceCaptureApp(App):
         parser = argparse.ArgumentParser(description='Autosport Labs Race Capture App')
         parser.add_argument('-p', '--port', help='Port', required=False)
         parser.add_argument('--telemetryhost', help='Telemetry host', required=False)
+        parser.add_argument('--conn_type', help='Connection type', required=False, choices=['bt', 'serial', 'wifi'])
 
         if sys.platform == 'win32':
             parser.add_argument('--multiprocessing-fork', required=False, action='store_true')
@@ -391,7 +392,16 @@ class RaceCaptureApp(App):
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
-        comms = comms_factory(port)
+        conn_type = self.settings.userPrefs.get_pref('preferences', 'conn_type', default=None)
+
+        cli_conn_type = self.getAppArg('conn_type')
+
+        if cli_conn_type:
+            conn_type = cli_conn_type
+
+        Logger.info("RacecaptureApp: initializing rc comms with, conn type: {}".format(conn_type))
+
+        comms = comms_factory(port, conn_type)
         rc_api = self._rc_api
         rc_api.detect_win_callback = self.rc_detect_win
         rc_api.detect_fail_callback = self.rc_detect_fail
@@ -492,6 +502,18 @@ class RaceCaptureApp(App):
                 self._telemetry_connection.telemetry_enabled = True
             else:
                 self._telemetry_connection.telemetry_enabled = False
+
+        if token == ('preferences', 'conn_type'):
+            # User changed their RC connection type
+            Logger.info("Racecaptureapp: RC connection type changed to {}, restarting comms".format(value))
+            Clock.schedule_once(lambda dt: self._restart_comms(), 0.1)
+
+    def _restart_comms(self):
+        self._data_bus_pump.stop()
+        self._status_pump.stop()
+        self._rc_api.shutdown_api()
+        self.init_rc_comms()
+
 
 if __name__ == '__main__':
 

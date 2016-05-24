@@ -4,7 +4,7 @@ from kivy.logger import Logger
 from kivy.clock import Clock
 from time import sleep
 from threading import Thread, Event
-
+from autosportlabs.util.threadutil import safe_thread_exit
 
 
 """Responsible for querying status from the RaceCapture API
@@ -44,7 +44,8 @@ class StatusPump(object):
     def stop(self):
         self._running.clear()
         try:
-            self._status_thread.join()
+            if self._status_thread:
+                self._status_thread.join()
         except Exception as e:
             Logger.warn('StatusPump: failed to join status_worker: {}'.format(e))
 
@@ -54,7 +55,8 @@ class StatusPump(object):
         while self._running.is_set():
             self._rc_api.get_status()
             sleep(self.STATUS_QUERY_INTERVAL)
-        Logger.info('StatusPump: status_worker exiting')
+        Logger.info('StatusPump: status_worker exited')
+        safe_thread_exit()
 
     def _update_all_listeners(self, status):
         for listener in self._listeners:
