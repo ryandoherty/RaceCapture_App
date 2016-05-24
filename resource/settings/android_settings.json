@@ -2,7 +2,7 @@
     {
         "type": "options",
         "title": "RaceCapture connection type",
-        "desc": "Connection type to your RaceCapture hardware",
+        "desc": "Connection type to your RaceCapture system",
         "section": "preferences",
         "key": "conn_type",
         "true": "auto",
