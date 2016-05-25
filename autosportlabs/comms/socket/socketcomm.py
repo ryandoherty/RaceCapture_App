@@ -26,6 +26,7 @@ from time import sleep
 import traceback
 from autosportlabs.comms.commscommon import PortNotOpenException
 from autosportlabs.util.threadutil import safe_thread_exit
+import socket
 
 
 class SocketComm(object):
@@ -241,6 +242,11 @@ class SocketComm(object):
             except:
                 Logger.error('SocketComm: Exception closing connection worker connection')
                 Logger.error(traceback.format_exc())
+        except socket.timeout as e:
+            Logger.error("SocketComm: got timeout connecting to {}".format(address))
+        except socket.error as e:
+            Logger.error("SocketComm: got exception connecting to {}".format(address))
+            Logger.error('SocketComm: socket error setting up connection thread: ' + str(type(e)) + str(e))
         except Exception as e:
             Logger.error('SocketComm: Exception setting up connection thread: ' + str(type(e)) + str(e))
             Logger.debug(traceback.format_exc())

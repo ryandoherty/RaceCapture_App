@@ -731,6 +731,7 @@ class RcpApi:
                 self._auto_detect_busy.clear()
                 self.removeListener("ver", on_ver_win)
                 self.sendCommandLock.release()
+                comms.device = None
                 sleep(AUTODETECT_COOLOFF_TIME)
 
         Logger.info('RCPAPI: auto_detect_worker exiting')

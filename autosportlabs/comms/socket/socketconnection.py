@@ -76,8 +76,8 @@ class SocketConnection(object):
         # Connect to ip address here
         rc_address = (address, 7223)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(rc_address)
         self.socket.settimeout(READ_TIMEOUT)
+        self.socket.connect(rc_address)
 
     def close(self):
         """
