@@ -153,7 +153,7 @@ class SocketComm(object):
 
         while should_run.is_set():
             try:
-                msg = connection.read(should_run)
+                msg = connection.read_line(should_run)
                 if msg:
                     rx_queue.put(msg)
             except:
