@@ -111,7 +111,7 @@ class SocketConnection(object):
                     msg = lines[0]
                     self._data = lines[1]
 
-                    Logger.info("SocketConnection: returning data {}".format(msg))
+                    Logger.debug("SocketConnection: returning data {}".format(msg))
                     return msg
 
             except socket.timeout:
