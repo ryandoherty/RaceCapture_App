@@ -92,6 +92,8 @@ class RaceCaptureApp(App):
 
     _status_pump = StatusPump()
 
+    _rc_connected = False
+
     # Track database manager
     trackManager = None
 
@@ -404,6 +406,7 @@ class RaceCaptureApp(App):
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
             self._data_bus_pump.start(self._databus, self._rc_api, self._rc_api.comms.supports_streaming)
             self._status_pump.start(self._rc_api)
+            self._rc_connected = True
 
             if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:
                 self._telemetry_connection.data_connected = True
@@ -432,6 +435,7 @@ class RaceCaptureApp(App):
         self.showActivity('Searching {}'.format(info))
 
     def _on_rcp_disconnect(self):
+        self._rc_connected = False
         if self._telemetry_connection.data_connected:
             self._telemetry_connection.data_connected = False
 
@@ -490,6 +494,8 @@ class RaceCaptureApp(App):
                 if self.rc_config.connectivityConfig.cellConfig.cellEnabled:
                     alertPopup('Telemetry error', "Turn off RaceCapture's telemetry module for app to stream telemetry.")
                 self._telemetry_connection.telemetry_enabled = True
+                if self._rc_connected:
+                    self._telemetry_connection.data_connected = True
             else:
                 self._telemetry_connection.telemetry_enabled = False
 
