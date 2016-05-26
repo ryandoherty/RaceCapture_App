@@ -404,9 +404,7 @@ class RaceCaptureApp(App):
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
             self._data_bus_pump.start(self._databus, self._rc_api, self._rc_api.comms.supports_streaming)
             self._status_pump.start(self._rc_api)
-
-            if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:
-                self._telemetry_connection.data_connected = True
+            self._telemetry_connection.data_connected = True
 
             if self.rc_config.loaded == False:
                 Clock.schedule_once(lambda dt: self.on_read_config(self))

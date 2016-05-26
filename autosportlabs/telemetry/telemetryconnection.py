@@ -158,6 +158,8 @@ class TelemetryManager(EventDispatcher):
                 else:
                     Logger.warning('TelemetryManager: Device id, channels missing or RCP cell enabled '
                                    'when attempting to start. Aborting.')
+        else:
+            Logger.warning('TelemetryManager: self._should_connect is false, not connecting')
 
     # Creates new TelemetryConnection in separate thread
     def _connect(self):
