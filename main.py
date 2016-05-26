@@ -406,9 +406,6 @@ class RaceCaptureApp(App):
             self._status_pump.start(self._rc_api)
             self._telemetry_connection.data_connected = True
 
-            if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:
-                self._telemetry_connection.data_connected = True
-
             if self.rc_config.loaded == False:
                 Clock.schedule_once(lambda dt: self.on_read_config(self))
             else:
@@ -491,7 +488,6 @@ class RaceCaptureApp(App):
                 if self.rc_config.connectivityConfig.cellConfig.cellEnabled:
                     alertPopup('Telemetry error', "Turn off RaceCapture's telemetry module for app to stream telemetry.")
                 self._telemetry_connection.telemetry_enabled = True
-                self._telemetry_connection.data_connected = True
             else:
                 self._telemetry_connection.telemetry_enabled = False
 
