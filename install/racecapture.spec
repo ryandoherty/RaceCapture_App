@@ -4,9 +4,9 @@
 # RaceCapture folder and children. If we add kv or ttf files which are not to go in the distribution
 # (or add any other file types that are required) then these will need to be manually
 # enumerated in this file. CLR 2014-05-26
-from kivy.tools.packaging.pyinstaller_hooks import install_hooks
 import os
-install_hooks(globals())
+import sys
+from kivy.deps import sdl2, glew
 
 def addDataFiles():
     allFiles = Tree('..//')
@@ -18,33 +18,33 @@ def addDataFiles():
     return extraDatas
 
 a = Analysis(['..//main.py'],
-             pathex=['..//'],
-             hiddenimports=['pygments.lexers.python.PythonLexer'],
-             runtime_hooks=None)
+    pathex=['..//'],
+    hiddenimports=['pygments.lexers.python.PythonLexer'],
+    runtime_hooks=None)
 a.datas += addDataFiles()
 pyz = PYZ(a.pure)
 exe = EXE(pyz,
-          a.scripts,
-          #[('v', None, 'OPTION')],
-          exclude_binaries=True,
-          name='racecapture' + ('.exe' if sys.platform == 'win32' else ''),
-          icon='..//resource//images//app_icon_128x128.ico',
-		  version='temp_win_versioninfo.txt',
-          debug=False,
-          strip=None,
-          upx=True,
-          console=False )
+    a.scripts,
+    #[('v', None, 'OPTION')],
+    exclude_binaries=True,
+    name='racecapture' + ('.exe' if sys.platform == 'win32' else ''),
+    icon='..//resource//images//app_icon_128x128.ico',
+    version='temp_win_versioninfo.txt',
+    debug=False,
+    strip=None,
+    upx=True,
+    console=False )
 
 coll = COLLECT(exe,
-			   Tree([f for f in os.environ.get('KIVY_SDL2_PATH', '').split(';') if 'bin' in f][0]),
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=None,
-               upx=True,
-               name='racecapture')
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    *[Tree(p) for p in (sdl2.dep_bins + glew.dep_bins)],
+    strip=None,
+    upx=True,
+    name='racecapture')
 
 if sys.platform == 'darwin':
-     app = BUNDLE(coll,
-                  name='racecapture.app',
-                  icon='resource//race_capture_icon_large.icns')
+    app = BUNDLE(coll,
+        name='racecapture.app',
+        icon='resource//race_capture_icon_large.icns')
