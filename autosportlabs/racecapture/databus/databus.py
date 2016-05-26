@@ -200,7 +200,7 @@ class DataBusPump(object):
     def __init__(self, **kwargs):
         super(DataBusPump, self).__init__(**kwargs)
 
-    def start(self, data_bus, rc_api):
+    def start(self, data_bus, rc_api, streaming_supported):
         if self._running.is_set():
             # since we're already running, simply
             # request updated metadata
@@ -212,8 +212,9 @@ class DataBusPump(object):
         rc_api.addListener('s', self.on_sample)
         rc_api.addListener('meta', self.on_meta)
         self._running.set()
-        if not is_mobile_platform():
-            #only start the worker on desktop mode
+
+        # Only BT supports auto-streaming data, the rest we have to poll
+        if not streaming_supported:
             t = Thread(target=self.sample_worker)
             t.start()
             self._sample_thread = t

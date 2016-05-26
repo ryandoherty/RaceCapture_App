@@ -4,6 +4,7 @@ from serial.tools import list_ports
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 from kivy.logger import Logger
 
+
 class SerialConnection():
     DEFAULT_WRITE_TIMEOUT = 3
     DEFAULT_READ_TIMEOUT = 1
@@ -15,19 +16,18 @@ class SerialConnection():
     def __init__(self, **kwargs):
         pass
 
-    def get_available_ports(self):
-        Logger.debug("SerialConnection: getting available ports")
-        ports = [x[0] for x in list_ports.comports()]
-        ports.sort()
-        filtered_ports = filter(lambda port: not port.startswith('/dev/ttyUSB') and not port.startswith('/dev/ttyS') and not port.startswith('/dev/cu.Bluetooth-Incoming-Port'), ports)
-        return filtered_ports
+    def get_available_devices(self):
+        Logger.debug("SerialConnection: getting available devices")
+        devices = [x[0] for x in list_ports.comports()]
+        devices.sort()
+        filtered_devices = filter(lambda device: not device.startswith('/dev/ttyUSB') and not device.startswith('/dev/ttyS') and not device.startswith('/dev/cu.Bluetooth-Incoming-Port'), devices)
+        return filtered_devices
 
     def isOpen(self):
         return self.ser != None
 
-    def open(self, port):
-        self.ser = serial.Serial(port, timeout=self.timeout,
-                            write_timeout = self.writeTimeout)
+    def open(self, device):
+        self.ser = serial.Serial(device, timeout=self.timeout, write_timeout=self.writeTimeout)
 
     def close(self):
         if self.ser != None:
@@ -61,7 +61,6 @@ class SerialConnection():
             return self.ser.write(data)
         except SerialException as e:
             raise CommsErrorException(cause=e)
-
 
     def flushInput(self):
         try:

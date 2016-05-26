@@ -8,13 +8,14 @@ else:
 
 __all__ = ('comms_factory')
 
-def comms_factory(port):
+def comms_factory(device):
     if platform == 'android':
         from autosportlabs.comms.androidcomms import AndroidComms
-        return AndroidComms(port=port)
+        return AndroidComms(device)
     elif platform == 'ios':
-        print('iOS comms not implemented yet')
-        return None
+        from autosportlabs.comms.socket.socketconnection import SocketConnection
+        from autosportlabs.comms.socket.socketcomm import SocketComm
+        return SocketComm(SocketConnection(), device)
     else:
-        from autosportlabs.comms.comms import Comms        
-        return Comms(port=port, connection=SerialConnection())
+        from autosportlabs.comms.comms import Comms
+        return Comms(device, SerialConnection())

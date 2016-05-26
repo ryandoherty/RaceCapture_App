@@ -123,6 +123,9 @@ class RaceCaptureApp(App):
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
 
+        if kivy.platform == 'ios' or kivy.platform == 'macosx':
+            kivy.resources.resource_add_path(os.path.join(os.path.dirname(os.path.realpath(__file__)), "data"))
+
         # We do this because when this app is bundled into a standalone app
         # by pyinstaller we must reference all files by their absolute paths
         # sys._MEIPASS is provided by pyinstaller
@@ -399,7 +402,7 @@ class RaceCaptureApp(App):
     def rc_detect_win(self, version):
         if version.is_compatible_version():
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
-            self._data_bus_pump.start(self._databus, self._rc_api)
+            self._data_bus_pump.start(self._databus, self._rc_api, self._rc_api.comms.supports_streaming)
             self._status_pump.start(self._rc_api)
 
             if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:

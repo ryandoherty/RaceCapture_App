@@ -129,9 +129,10 @@ class RcpApi:
         Logger.info('RCPAPI: shutting down comms')
         try:
             self.comms.close()
-            self.comms.port = None
-        except:
-            pass
+            self.comms.device = None
+        except Exception:
+            Logger.warn('RCPAPI: Message rx worker exception: {} | {}'.format(msg, str(Exception)))
+            Logger.info(traceback.format_exc())
 
     def detect_win(self, version_info):
         self.level_2_retries = DEFAULT_LEVEL2_RETRIES
@@ -657,7 +658,6 @@ class RcpApi:
                 self.sendCommandLock.acquire()
                 self.addListener("ver", on_ver_win)
 
-
                 comms = self.comms
                 if comms and comms.isOpen():
                     comms.close()
@@ -666,28 +666,28 @@ class RcpApi:
                 version_result_event = Event()
                 version_result_event.clear()
 
-                if comms.port:
-                    ports = [comms.port]
+                if comms.device:
+                    devices = [comms.device]
                 else:
-                    ports = comms.get_available_ports()
-                    last_known_port = self._settings.userPrefs.get_pref('preferences', 'last_known_port')
-                    # if there was a last known port try this one first.
-                    if last_known_port:
-                        Logger.info('RCPAPI: trying last known port first: {}'.format(last_known_port))
+                    devices = comms.get_available_devices()
+                    last_known_device = self._settings.userPrefs.get_pref('preferences', 'last_known_device')
+                    # if there was a last known device try this one first.
+                    if last_known_device:
+                        Logger.info('RCPAPI: trying last known device first: {}'.format(last_known_device))
                         # ensure we remove it from the existing list
                         try:
-                            ports.remove(last_known_port)
+                            devices.remove(last_known_device)
                         except ValueError:
                             pass
-                        ports = [last_known_port] + ports
-                    Logger.debug('RCPAPI: Searching for device on all ports')
+                        devices = [last_known_device] + devices
+                    Logger.debug('RCPAPI: Searching for device')
 
                 testVer = VersionConfig()
-                for p in ports:
+                for device in devices:
                     try:
-                        Logger.debug('RCPAPI: Trying ' + str(p))
-                        if self.detect_activity_callback: self.detect_activity_callback(str(p))
-                        comms.port = p
+                        Logger.debug('RCPAPI: Trying ' + str(device))
+                        if self.detect_activity_callback: self.detect_activity_callback(str(device))
+                        comms.device = device
                         comms.open()
                         self.sendGetVersion()
                         version_result_event.wait(1)
@@ -698,23 +698,24 @@ class RcpApi:
                                 break  # we found something!
                         else:
                             try:
-                                Logger.info('RCPAPI: Giving up on ' + str(p))
+                                Logger.info('RCPAPI: Giving up on ' + str(device))
                                 comms.close()
                             finally:
                                 pass
 
                     except Exception as detail:
-                        Logger.error('RCPAPI: Not found on ' + str(p) + " " + str(detail))
+                        Logger.error('RCPAPI: Not found on ' + str(device) + " " + str(detail))
+                        Logger.error(traceback.format_exc())
                         try:
                             comms.close()
                         finally:
                             pass
 
                 if version_result.version_json != None:
-                    Logger.info("RCPAPI: Found device version " + str(testVer) + " on port: " + str(comms.port))
+                    Logger.info("RCPAPI: Found device version " + str(testVer) + " on port: " + str(comms.device))
                     self.detect_win(testVer)
                     self._auto_detect_event.clear()
-                    self._settings.userPrefs.set_pref('preferences', 'last_known_port', comms.port)
+                    self._settings.userPrefs.set_pref('preferences', 'last_known_device', comms.device)
                 else:
                     Logger.debug('RCPAPI: Did not find device')
                     comms.close()
@@ -724,7 +725,7 @@ class RcpApi:
                 Logger.error('RCPAPI: Error running auto detect: ' + str(e))
                 Logger.debug(traceback.format_exc())
             finally:
-                Logger.debug("RCPAPI: auto detect finished. port=" + str(comms.port))
+                Logger.debug("RCPAPI: auto detect finished. port=" + str(comms.device))
                 self._auto_detect_busy.clear()
                 self.removeListener("ver", on_ver_win)
                 self.sendCommandLock.release()
