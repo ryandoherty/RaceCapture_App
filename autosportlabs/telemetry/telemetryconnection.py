@@ -27,6 +27,7 @@ class TelemetryManager(EventDispatcher):
     device_id = StringProperty(None)
     cell_enabled = BooleanProperty(False)
     telemetry_enabled = BooleanProperty(False)
+    data_connected = BooleanProperty(False)
 
     def __init__(self, data_bus, device_id=None, host=None, port=None, **kwargs):
         self.host = 'telemetry.podium.live'
@@ -76,9 +77,8 @@ class TelemetryManager(EventDispatcher):
     # Event handler for when self.channels changes, don't restart connection b/c
     # the TelemetryConnection object will handle new channels
     def on_channels(self, instance, value):
-        Logger.debug("TelemetryManager: Got channels")
-
-        if self.telemetry_enabled:
+        if self.telemetry_enabled and value is not None:
+            Logger.info("TelemetryManager: Got channels")
             self.start()
 
     # Event handler for when self.device_id changes, need to restart connection
@@ -98,7 +98,7 @@ class TelemetryManager(EventDispatcher):
             self.start()
 
     def on_cell_enabled(self, instance, value):
-        Logger.debug("TelemetryManager: on_cell_enabled: " + str(value))
+        Logger.info("TelemetryManager: on_cell_enabled: " + str(value))
         if value:
             self._user_stopped()
         else:
@@ -106,10 +106,18 @@ class TelemetryManager(EventDispatcher):
             self.start()
 
     def on_telemetry_enabled(self, instance, value):
-        Logger.debug("TelemetryManager: on_telemetry_enabled: " + str(value))
+        Logger.info("TelemetryManager: on_telemetry_enabled: " + str(value))
         if value:
             self.start()
         else:
+            self._user_stopped()
+
+    def on_data_connected(self, instance, value):
+        Logger.info('TelemetryManager: on_data_connected: {}'.format(value))
+        if value:
+            self.start()
+        else:
+            self.channels = None
             self._user_stopped()
 
     # Event handler for when config is pulled from RCP
@@ -122,12 +130,24 @@ class TelemetryManager(EventDispatcher):
         self.cell_enabled = config.connectivityConfig.cellConfig.cellEnabled
         self.device_id = config.connectivityConfig.telemetryConfig.deviceId
 
+    @property
+    def _should_connect(self):
+        '''
+        checks if the conditions are correct for initiating a telemetry connection
+        :return True if a connection should be made
+        '''
+        return self.data_connected and\
+            self.telemetry_enabled and\
+            not self.cell_enabled and\
+            self.device_id != "" and\
+            self.channels is not None
+
     # Starts connection, checks to see if requirements are met
     def start(self):
         Logger.info("TelemetryManager: start() telemetry_enabled: " + str(self.telemetry_enabled) + " cell_enabled: " + str(self.cell_enabled))
         self._auth_failed = False
 
-        if self.telemetry_enabled and not self.cell_enabled and self.device_id != "" and self.channels is not None:
+        if self._should_connect:
             if self._connection_process and not self._connection_process.is_alive():
                 Logger.info("TelemetryManager: connection process is dead")
                 self._connect()
@@ -138,6 +158,8 @@ class TelemetryManager(EventDispatcher):
                 else:
                     Logger.warning('TelemetryManager: Device id, channels missing or RCP cell enabled '
                                    'when attempting to start. Aborting.')
+        else:
+            Logger.warning('TelemetryManager: self._should_connect is false, not connecting')
 
     # Creates new TelemetryConnection in separate thread
     def _connect(self):
@@ -165,7 +187,6 @@ class TelemetryManager(EventDispatcher):
 
     def _user_stopped(self):
         self.dispatch('on_disconnected', '')
-        self.channels = None
         self.stop()
 
     # Status function that receives events from TelemetryConnection thread
@@ -187,7 +208,7 @@ class TelemetryManager(EventDispatcher):
             if not self._auth_failed:
                 self.dispatch('on_disconnected', msg)
 
-            if self.telemetry_enabled and not self.cell_enabled and not self._auth_failed:
+            if self._should_connect and not self._auth_failed:
                 wait = self.RETRY_WAIT_START if self._retry_count == 0 else \
                     min(self.RETRY_WAIT_MAX_TIME, (math.pow(self.RETRY_MULTIPLIER, self._retry_count) *
                                                    self.RETRY_WAIT_START))
