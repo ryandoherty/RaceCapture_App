@@ -887,11 +887,49 @@ class TelemetryConfig(object):
         telCfgJson['bgStream'] = 1 if self.backgroundStreaming else 0
         return telCfgJson
 
+class WifiConfig(object):
+
+    def __init__(self):
+        self.enabled = False
+
+        self.client_mode_enabled = False
+        self.client_ssid = ''
+        self.client_password = ''
+
+        self.ap_mode_enabled = False
+        self.ap_ssid = ''
+        self.ap_password = ''
+        self.ap_channel = 1
+        self.ap_encryption = ''
+
+    def from_json(self, json_config):
+        pass
+
+    def to_json(self):
+        wifi_config = {'enabled': self.enabled,
+                       'client': {
+                           'ssid': self.client_ssid,
+                           'enabled': self.client_mode_enabled,
+                           'password': self.client_password
+                           },
+                       'ap': {
+                           'enabled': self.ap_mode_enabled,
+                           'ssid': self.ap_ssid,
+                           'password': self.ap_password,
+                           'encryption': self.ap_encryption,
+                           'channel': self.ap_channel
+                       }
+                       }
+
+        return wifi_config
+
+
 class ConnectivityConfig(object):
     stale = False
     bluetoothConfig = BluetoothConfig()
     cellConfig = CellConfig()
     telemetryConfig = TelemetryConfig()
+    wifi_config = WifiConfig()
 
     def fromJson(self, connCfgJson):
         btCfgJson = connCfgJson.get('btCfg')
@@ -905,12 +943,20 @@ class ConnectivityConfig(object):
         telCfgJson = connCfgJson.get('telCfg')
         if telCfgJson:
             self.telemetryConfig.fromJson(telCfgJson)
+
+        wifi_cfg_json = connCfgJson.get('wifiCfg')
+
+        if wifi_cfg_json:
+            self.wifi_config.from_json(wifi_cfg_json)
+
         self.stale = False
 
     def toJson(self):
         connCfgJson = {'btCfg' : self.bluetoothConfig.toJson(),
                        'cellCfg' : self.cellConfig.toJson(),
-                       'telCfg' : self.telemetryConfig.toJson()}
+                       'telCfg' : self.telemetryConfig.toJson(),
+                       'wifiCfg': self.wifi_config.to_json()
+                       }
 
         return {'connCfg':connCfgJson}
 

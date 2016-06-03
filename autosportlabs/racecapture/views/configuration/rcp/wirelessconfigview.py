@@ -2,6 +2,7 @@ import kivy
 kivy.require('1.9.1')
 import os
 from kivy.app import Builder
+from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 import json
@@ -11,6 +12,7 @@ from valuefield import ValueField
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
+from kivy.modules import inspector
 
 WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
@@ -27,17 +29,32 @@ class WirelessConfigView(BaseConfigView):
     def __init__(self, **kwargs):
         Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
         super(WirelessConfigView, self).__init__(**kwargs)
+        inspector.create_inspector(Window, self)
         self.register_event_type('on_config_updated')
         self.base_dir = kwargs.get('base_dir')
 
-        btEnable = kvFind(self, 'rcid', 'btEnable') 
+        btEnable = kvFind(self, 'rcid', 'btEnable')
         btEnable.bind(on_setting=self.on_bt_enable)
         btEnable.setControl(SettingsSwitch())
-        
-        #btConfig = kvFind(self, 'rcid', 'btconfig')
-        #btConfig.bind(on_setting=self.on_bt_configure)
-        #btConfig.setControl(SettingsButton(text='Configure', disabled=True))
-        
+
+        wifi_switch = self.ids.wifi_enabled
+        wifi_switch.bind(on_setting=self.on_wifi_enable)
+        wifi_switch.setControl(SettingsSwitch())
+
+        wifi_client_switch = self.ids.client_mode
+        wifi_client_switch.bind(on_setting=self.on_client_mode_enable)
+        wifi_client_switch.setControl(SettingsSwitch())
+
+        wifi_ap_switch = self.ids.ap_mode
+        wifi_ap_switch.bind(on_setting=self.on_ap_mode_enable)
+        wifi_ap_switch.setControl(SettingsSwitch())
+
+        ap_encryption = self.ids.ap_encryption
+        ap_encryption.bind(on_setting=self.on_ap_encryption)
+        encryption_spinner = SettingsMappedSpinner()
+        self.load_ap_encryption_spinner(encryption_spinner)
+        ap_encryption.setControl(encryption_spinner)
+
         cellEnable = kvFind(self, 'rcid', 'cellEnable')
         cellEnable.bind(on_setting=self.on_cell_enable)
         cellEnable.setControl(SettingsSwitch())
@@ -48,10 +65,37 @@ class WirelessConfigView(BaseConfigView):
         self.loadApnSettingsSpinner(apnSpinner)
         self.apnSpinner = apnSpinner
         cellProvider.setControl(apnSpinner)
-    
+
         self.apnHostField = kvFind(self, 'rcid', 'apnHost')
         self.apnUserField = kvFind(self, 'rcid', 'apnUser')
         self.apnPassField = kvFind(self, 'rcid', 'apnPass')
+
+    def on_ap_encryption(self, instance, value):
+        pass
+
+    def on_client_ssid(self, instance, value):
+        pass
+
+    def on_ap_password(self, instance, value):
+        pass
+
+    def on_ap_ssid(self, instance, value):
+        pass
+
+    def on_client_password(self, instance, value):
+        pass
+
+    def on_ap_mode_enable(self, instance, value):
+        pass
+
+    def on_client_mode_enable(self, instance, value):
+        pass
+
+    def on_wifi_enable(self, instance, value):
+        if self.connectivityConfig:
+            self.connectivityConfig.wifi_config.enabled = value
+            self.connectivityConfig.stale = True
+            self.dispatch('on_modified')
 
     def setCustomApnFieldsDisabled(self, disabled):
         self.apnHostField.disabled = disabled
@@ -69,8 +113,7 @@ class WirelessConfigView(BaseConfigView):
             
         self.update_controls_state()
         self.setCustomApnFieldsDisabled(knownProvider)
-        
-    
+
     def on_cell_enable(self, instance, value):
         if self.connectivityConfig:
             self.connectivityConfig.cellConfig.cellEnabled = value
@@ -110,7 +153,18 @@ class WirelessConfigView(BaseConfigView):
             if apnName == name:
                 return providers[apnName]
         return None
-    
+
+    def load_ap_encryption_spinner(self, spinner):
+        json_data = open(os.path.join(self.base_dir, 'resource', 'settings', 'ap_encryption.json'))
+        encryption_info = json.load(json_data)
+
+        encryption_types = {}
+
+        for name in encryption_info['types']:
+            encryption_types[name] = name
+
+        spinner.setValueMap(encryption_types, 'WPA2')
+
     def loadApnSettingsSpinner(self, spinner):
         try:
             json_data = open(os.path.join(self.base_dir, 'resource', 'settings', 'cell_providers.json'))
@@ -150,16 +204,13 @@ class WirelessConfigView(BaseConfigView):
 
         kvFind(self, 'rcid', 'btEnable').setValue(bluetoothEnabled)
         kvFind(self, 'rcid', 'cellEnable').setValue(cellEnabled)
-        
+
         self.apnHostField.text = connectivityConfig.cellConfig.apnHost
         self.apnUserField.text = connectivityConfig.cellConfig.apnUser
         self.apnPassField.text = connectivityConfig.cellConfig.apnPass
-        
+
         self.connectivityConfig = connectivityConfig
-            
+
         existingApnName = self.update_controls_state()
         if existingApnName:
             self.apnSpinner.text = existingApnName
-
-
-        
