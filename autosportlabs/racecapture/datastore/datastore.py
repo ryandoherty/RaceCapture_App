@@ -230,6 +230,7 @@ class Filter(object):
     @add_combop
     def group(self, filterchain):
         self._cmd_seq += '({})'.format(str(filterchain).strip())
+        self.params = self.params + filterchain.params
         return self
 
 
@@ -730,12 +731,12 @@ class DataStore(object):
         
     def get_channel_average(self, channel, sessions=None):
         c = self._conn.cursor()
-        params = [channel]
+        params = []
 
         if sessions is not None:
             params = params + sessions
 
-        base_sql = "SELECT AVG(?) from datapoint " + self._session_select_clause(sessions)
+        base_sql = "SELECT AVG({}) from datapoint ".format(self._scrub_sql_value(channel)) + self._session_select_clause(sessions)
         c.execute(base_sql, params)
         res = c.fetchone()
         average = None if res == None else res[0]

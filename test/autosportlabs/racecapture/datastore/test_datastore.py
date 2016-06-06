@@ -51,34 +51,38 @@ class DataStoreTest(unittest.TestCase):
     def test_basic_filter(self):
         f = Filter().lt('LapCount', 1)
 
-        expected_output = 'datapoint.LapCount < 1'
+        expected_output = 'datapoint.LapCount < ?'
         filter_text = str(f).strip()
 
         self.assertSequenceEqual(filter_text, expected_output)
+        self.assertListEqual(f.params, [1])
 
     def test_not_equal_filter(self):
         f = Filter().neq('LapCount', 1)
         
-        expected_output = 'datapoint.LapCount != 1'
+        expected_output = 'datapoint.LapCount != ?'
         filter_text = str(f).strip()
         
         self.assertSequenceEqual(filter_text, expected_output)
+        self.assertListEqual(f.params, [1])
         
     def test_chained_filter(self):
         f = Filter().lt('LapCount', 1).gt('Coolant', 212).or_().eq('RPM', 9001)
 
-        expected_output = 'datapoint.LapCount < 1 AND datapoint.Coolant > 212 OR datapoint.RPM = 9001'
+        expected_output = 'datapoint.LapCount < ? AND datapoint.Coolant > ? OR datapoint.RPM = ?'
         filter_text = str(f).strip()
 
         self.assertSequenceEqual(filter_text, expected_output)
+        self.assertListEqual(f.params, [1, 212, 9001])
 
     def test_grouped_filter(self):
         f = Filter().lt('LapCount', 1).group(Filter().gt('Coolant', 212).or_().gt('RPM', 9000))
 
-        expected_output = 'datapoint.LapCount < 1 AND (datapoint.Coolant > 212 OR datapoint.RPM > 9000)'
+        expected_output = 'datapoint.LapCount < ? AND (datapoint.Coolant > ? OR datapoint.RPM > ?)'
         filter_text = str(f).strip()
 
         self.assertSequenceEqual(filter_text, expected_output)
+        self.assertListEqual(f.params, [1, 212, 9000])
 
     def test_dataset_columns(self):
         f = Filter().lt('LapCount', 1)
