@@ -9,25 +9,30 @@
         do_scroll_x: False
         GridLayout:
             id: wireless_settings
-            row_default_height: root.height * 0.1
+            row_default_height: dp(40)
             size_hint_y: None
+            spacing: [0, dp(10)]
+            padding: [0, 0, 0, dp(20)]
             height: max(self.minimum_height, scroller.height)
             cols: 1
-            spacing: [dp(10),dp(10)]
-            padding: [dp(5),dp(5)]
+            rows_minimum: {14: dp(80), 17: dp(80)}
             HSeparator:
                 text: 'Bluetooth'
             SettingsView:
                 rcid: 'btEnable'
                 label_text: 'Bluetooth'
                 help_text: 'If the Bluetooth module is connected, enable it here'
+                size_hint_y: 1.0
             HSeparator:
                 text: 'WiFi'
             SettingsView:
                 id: wifi_enabled
                 label_text: 'WiFi Module'
-            HSeparator:
+            Label:
+                text_size: self.size
+                halign: 'center'
                 text: 'Client Mode Configuration'
+                font_size: dp(26)
             Label:
                 text: 'Use this mode to setup the wifi module to connect [b]to[/b] an existing wireless network or a GoPro. If the network is a GoPro, you must enable Access Point mode and connect your phone or tablet via the RaceCapture network.'
                 markup: True
@@ -37,6 +42,7 @@
                 label_text: 'Client Mode'
             GridLayout:
                 spacing: (dp(30), dp(5))
+                padding: (dp(20), 0)
                 cols: 2
                 FieldLabel:
                     text: 'SSID'
@@ -47,6 +53,7 @@
                     on_text: root.on_client_ssid(*args)
             GridLayout:
                 spacing: (dp(30), dp(5))
+                padding: (dp(20), 0)
                 cols: 2
                 FieldLabel:
                     text: 'Password'
@@ -55,8 +62,11 @@
                     id: client_password
                     disabled: False
                     on_text: root.on_client_password(*args)
-            HSeparator:
+            Label:
                 text: 'Access Point Mode Configuration'
+                text_size: self.size
+                halign: 'center'
+                font_size: dp(26)
             Label:
                 text: 'Use this mode to create a wireless network for your phone or table to connect to.'
                 markup: True
@@ -66,6 +76,7 @@
                 label_text: 'Access Point Mode'
             GridLayout:
                 spacing: (dp(30), dp(5))
+                padding: (dp(20), 0)
                 cols: 2
                 FieldLabel:
                     text: 'SSID'
@@ -76,6 +87,7 @@
                     on_text: root.on_ap_ssid(*args)
             GridLayout:
                 spacing: (dp(30), dp(5))
+                padding: (dp(20), 0)
                 cols: 2
                 FieldLabel:
                     text: 'Password'
@@ -87,6 +99,7 @@
             SettingsView:
                 id: ap_encryption
                 label_text: 'Encryption'
+                size_hint_y: 0.5
             HSeparator:
                 text: 'Cellular Configuration'
             SettingsView:
@@ -100,10 +113,15 @@
                 rcid: 'cellprovider'
                 label_text: 'Cellular Provider'
                 help_text: 'Select the cellular provider, or specify custom APN settings'
-            HSeparator:
+            Label:
                 text: 'Custom Cellular Settings'
+                text_size: self.size
+                halign: 'center'
+                font_size: dp(26)
             GridLayout:
                 cols: 2
+                padding: (dp(20), 0)
+                spacing: (dp(30), dp(5))
                 FieldLabel:
                     text: 'APN Host'
                     halign: 'right'
@@ -113,6 +131,8 @@
                     on_text: root.on_apn_host(*args)
             GridLayout:
                 cols: 2
+                spacing: (dp(30), dp(5))
+                padding: (dp(20), 0)
                 FieldLabel:
                     halign: 'right'
                     text: 'APN User Name'
@@ -123,6 +143,8 @@
                     on_text: root.on_apn_user(*args)
             GridLayout:
                 cols: 2
+                padding: (dp(20), 0)
+                spacing: (dp(30), dp(5))
                 FieldLabel:
                     halign: 'right'
                     text: 'APN Password'
