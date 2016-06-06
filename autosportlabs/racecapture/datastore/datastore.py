@@ -903,7 +903,7 @@ class DataStore(object):
         #Put together the smoothing map
         for ch in channels:
             sr = self.get_channel_smoothing(ch)
-            smoothing_map[ch] = sr
+            smoothing_map[self._scrub_sql_value(ch)] = sr
 
         #add the session_id to the smoothing map with a smoothing rate
         #of 0
