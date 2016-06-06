@@ -3,6 +3,7 @@ from mock import patch
 import mock
 import socket
 from autosportlabs.telemetry.telemetryconnection import TelemetryConnection, TelemetryManager
+from autosportlabs.util.threadutil import ThreadSafeDict
 import asyncore
 import json
 import random
@@ -17,11 +18,10 @@ class TelemetryConnectionTest(unittest.TestCase):
         self.port = 8080
         self.device_id = 'DFDS44'
 
-        self.meta = {
-            'foo': mock.Mock(units="F", sampleRate="10", min=0, max=100),
-            'bar': mock.Mock(units="C", sampleRate="1", min=-100, max=200),
-            'baz': mock.Mock(units="C", sampleRate="1", min=-100, max=200)
-        }
+        self.meta = ThreadSafeDict()
+        self.meta['foo'] = mock.Mock(units="F", sampleRate="10", min=0, max=100)
+        self.meta['bar'] = mock.Mock(units="C", sampleRate="1", min=-100, max=200)
+        self.meta['baz'] = mock.Mock(units="C", sampleRate="1", min=-100, max=200)
 
         # Mock's constructor treats 'name' in a special way, it won't return a string
         self.meta['foo'].configure_mock(name='foo')
@@ -139,9 +139,8 @@ class TelemetryConnectionTest(unittest.TestCase):
 
     @patch('threading.Timer')
     def test_sends_bitmask(self, timer_mock, asyncore_loop_mock):
-        sample = {
-            'bar': 3.0
-        }
+        sample = ThreadSafeDict()
+        sample['bar'] = 3.0
 
         bitmask = ''
 
@@ -166,8 +165,8 @@ class TelemetryConnectionTest(unittest.TestCase):
 
     @patch('threading.Timer')
     def test_sends_multiple_bitmasks(self, timer_mock, asyncore_loop_mock):
-        sample = {}
-        meta = {}
+        sample = ThreadSafeDict()
+        meta = ThreadSafeDict()
 
         for i in range(1, 40):
             meta['sensor' + str(i)] = mock.Mock(units="F", sampleRate="10",
