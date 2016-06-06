@@ -46,6 +46,7 @@ class TelemetryManagerTest(unittest.TestCase):
         })
 
         telemetry_manager.telemetry_enabled = True
+        telemetry_manager.data_connected = True
 
         args, kwargs = mock_telemetry_connection.call_args
         host_arg, port_arg, device_id_arg, meta_arg, bus_arg, status_arg = args
@@ -67,6 +68,7 @@ class TelemetryManagerTest(unittest.TestCase):
 
         telemetry_manager = TelemetryManager(data_bus, device_id=device_id, host=host, port=port,
                                              telemetry_enabled=True)
+        telemetry_manager.data_connected = True
         telemetry_manager._on_meta({
             'Foo': 'bar',
             'Bar': 'baz',
