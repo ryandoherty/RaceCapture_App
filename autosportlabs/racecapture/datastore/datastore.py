@@ -91,6 +91,18 @@ def _smooth_dataset(dset, smoothing_rate):
 
     return new_dset
 
+
+def _scrub_sql_value(value):
+    """
+    Takes a string and strips it of all non-alphanumeric characters, making it safe for use in a SQL query for things
+    like a column name or table name. Not to be confused with traditional SQL escaping with backslashes or
+    parameterized queries
+    :param value: String
+    :return: String
+    """
+    return ''.join([char for char in value if char.isalnum()])
+
+
 class DataSet(object):
     def __init__(self, cursor, smoothing_map=None):
         self._cur = cursor
@@ -355,15 +367,13 @@ class DataStore(object):
 
         self._conn.commit()
 
-    def _scrub_sql_value(self,value):
-        return ''.join(chr for chr in value if chr.isalnum())
-    
+
     def _add_extra_indexes(self, channels):
         extra_indexes = []
         for c in channels:
             c = str(c)
             if c in self.EXTRA_INDEX_CHANNELS:
-                extra_indexes.append(self._scrub_sql_value(c))
+                extra_indexes.append(_scrub_sql_value(c))
         
         for index_channel in extra_indexes:
             self._conn.execute("""CREATE INDEX {}_index_id on datapoint({})""".format(index_channel, index_channel))
@@ -373,7 +383,7 @@ class DataStore(object):
             #Extend the datapoint table to include the channel as a
             #new field
             self._conn.execute("""ALTER TABLE datapoint
-            ADD {} REAL""".format(self._scrub_sql_value(channel.name)))
+            ADD {} REAL""".format(_scrub_sql_value(channel.name)))
 
             #Add the channel to the 'channel' table
             self._conn.execute("""INSERT INTO channel (name, units, min_value, max_value, smoothing)
@@ -444,7 +454,7 @@ class DataStore(object):
             #list we built up in the previous iteration
     
             #Put together an insert statement containing the column names
-            base_sql = "INSERT INTO datapoint ({}) VALUES({});".format(','.join(['sample_id'] + [self._scrub_sql_value(x.name) for x in channels]),
+            base_sql = "INSERT INTO datapoint ({}) VALUES({});".format(','.join(['sample_id'] + [_scrub_sql_value(x.name) for x in channels]),
                                                                        ','.join(['?'] * (len(extrap_vals) + 1)))
             cursor.execute(base_sql, extrap_vals)
             self._conn.commit()
@@ -685,7 +695,7 @@ class DataStore(object):
         newdata_gen = self._desparsified_data_generator(data_file, warnings=warnings, progress_cb=progress_cb)
 
         #Put together an insert statement containing the column names
-        datapoint_sql = "INSERT INTO datapoint ({}) VALUES ({});".format(','.join(['sample_id'] + [ self._scrub_sql_value(x.name) for x in headers]),
+        datapoint_sql = "INSERT INTO datapoint ({}) VALUES ({});".format(','.join(['sample_id'] + [ _scrub_sql_value(x.name) for x in headers]),
                                                                          ','.join(['?'] * (len(headers) + 1)))
 
         #Relatively static insert statement for sample table
@@ -736,7 +746,7 @@ class DataStore(object):
         if sessions is not None:
             params = params + sessions
 
-        base_sql = "SELECT AVG({}) from datapoint ".format(self._scrub_sql_value(channel)) + self._session_select_clause(sessions)
+        base_sql = "SELECT AVG({}) from datapoint ".format(_scrub_sql_value(channel)) + self._session_select_clause(sessions)
         c.execute(base_sql, params)
         res = c.fetchone()
         average = None if res == None else res[0]
@@ -746,7 +756,7 @@ class DataStore(object):
         sql = ''
         if type(extra_channels) == list:
             for channel in extra_channels:
-                sql += ',{}'.format(self._scrub_sql_value(channel))
+                sql += ',{}'.format(_scrub_sql_value(channel))
         return sql
 
     def _get_channel_aggregate(self, aggregate, channel, sessions=None, extra_channels=None, exclude_zero=True):
@@ -756,11 +766,11 @@ class DataStore(object):
         if sessions is not None:
             params = params + sessions
 
-        base_sql = "SELECT {}({}) {} from datapoint {} {};".format(aggregate, self._scrub_sql_value(channel),
+        base_sql = "SELECT {}({}) {} from datapoint {} {};".format(aggregate, _scrub_sql_value(channel),
                                                                  self._extra_channels(extra_channels),
                                                                  self._session_select_clause(sessions),
                                                                  '{} {} > 0'.format('AND' if sessions else 'WHERE',
-                                                                                    self._scrub_sql_value(channel))
+                                                                                    _scrub_sql_value(channel))
                                                                    if exclude_zero else '')
 
         c.execute(base_sql, params)
@@ -848,10 +858,10 @@ class DataStore(object):
         #If there are no channels, or if a '*' is passed, select all
         #of the channels
         if len(channels) == 0 or '*' in channels:
-            channels = [self._scrub_sql_value(x.chan_name) for x in self._channels]
+            channels = [_scrub_sql_value(x.chan_name) for x in self._channels]
 
         for ch in channels:
-            chanst = str(self._scrub_sql_value(ch))
+            chanst = str(_scrub_sql_value(ch))
             tbl_prefix = 'datapoint.'
             alias = ' as {}'.format(chanst)
             columns.append(tbl_prefix+chanst+alias)
@@ -903,7 +913,7 @@ class DataStore(object):
         #Put together the smoothing map
         for ch in channels:
             sr = self.get_channel_smoothing(ch)
-            smoothing_map[self._scrub_sql_value(ch)] = sr
+            smoothing_map[_scrub_sql_value(ch)] = sr
 
         #add the session_id to the smoothing map with a smoothing rate
         #of 0
@@ -964,7 +974,7 @@ class DataStore(object):
         cursor = self._conn.cursor()
         channels_to_update = [x for x in self._channels if channels is None or x.name in channels]
         for channel in channels_to_update:
-            name = self._scrub_sql_value(channel.name)
+            name = _scrub_sql_value(channel.name)
             min_max = cursor.execute('SELECT COALESCE(MIN({}), 0), COALESCE(MAX({}), 0) FROM datapoint;'.format(name, name))
             record = min_max.fetchone()
             datapoint_min_value = record[0]
