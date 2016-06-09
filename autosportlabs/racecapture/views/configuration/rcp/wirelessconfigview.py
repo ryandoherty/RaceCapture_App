@@ -57,6 +57,12 @@ class WirelessConfigView(BaseConfigView):
         self.load_ap_encryption_spinner(encryption_spinner)
         ap_encryption.setControl(encryption_spinner)
 
+        ap_channel = self.ids.ap_channel
+        ap_channel.bind(on_setting=self.on_ap_channel)
+        channel_spinner = SettingsMappedSpinner()
+        self.build_ap_channel_spinner(channel_spinner)
+        ap_channel.setControl(channel_spinner)
+
         cellEnable = kvFind(self, 'rcid', 'cellEnable')
         cellEnable.bind(on_setting=self.on_cell_enable)
         cellEnable.setControl(SettingsSwitch())
@@ -72,8 +78,14 @@ class WirelessConfigView(BaseConfigView):
         self.apnUserField = kvFind(self, 'rcid', 'apnUser')
         self.apnPassField = kvFind(self, 'rcid', 'apnPass')
 
+    def on_ap_channel(self, instance, value):
+        if self.wifi_config:
+            self.wifi_config.ap_channel = int(value)
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
+
     def on_ap_encryption(self, instance, value):
-        Logger.debug("WirelessConfigView: got new AP encryption: {}".format(value))
+        Logger.info("WirelessConfigView: got new AP encryption: {}".format(value))
         if self.wifi_config:
             self.wifi_config.ap_encryption = value
             self.wifi_config.stale = True
@@ -178,16 +190,20 @@ class WirelessConfigView(BaseConfigView):
                 return providers[apnName]
         return None
 
+    def build_ap_channel_spinner(self, spinner):
+        channel_map = {}
+
+        for i in range(1, 12, 1):
+            i = str(i)
+            channel_map[i] = i
+
+        spinner.setValueMap(channel_map, "1", sort_key=lambda value: int(value))
+
     def load_ap_encryption_spinner(self, spinner):
         json_data = open(os.path.join(self.base_dir, 'resource', 'settings', 'ap_encryption.json'))
         encryption_json = json.load(json_data)
 
-        encryption_types = {}
-
-        for name in encryption_json['types']:
-            encryption_types[encryption_json['types'][name]] = name
-
-        spinner.setValueMap(encryption_types, 'WPA2')
+        spinner.setValueMap(encryption_json['types'], 'WPA2')
 
     def loadApnSettingsSpinner(self, spinner):
         try:
@@ -235,8 +251,9 @@ class WirelessConfigView(BaseConfigView):
 
         if wifi_config.ap_encryption != "":
             self.ids.ap_encryption.setValue(wifi_config.ap_encryption)
-        else:
-            self.ids.ap_encryption.setValue("none")
+
+        if wifi_config.ap_channel:
+            self.ids.ap_channel.setValue(str(wifi_config.ap_channel))
 
         self.wifi_config = wifi_config
 
