@@ -216,10 +216,10 @@ class DataBusPump(object):
         self._running.set()
 
         # Only BT supports auto-streaming data, the rest we have to poll
-        if not streaming_supported:
-            t = Thread(target=self.sample_worker)
-            t.start()
-            self._sample_thread = t
+        # if not streaming_supported:
+        #     t = Thread(target=self.sample_worker)
+        #     t.start()
+        #     self._sample_thread = t
 
     def stop(self):
         self._running.clear()

@@ -887,33 +887,53 @@ class TelemetryConfig(object):
         telCfgJson['bgStream'] = 1 if self.backgroundStreaming else 0
         return telCfgJson
 
+
 class WifiConfig(object):
 
-    def __init__(self):
-        self.enabled = False
 
-        self.client_mode_enabled = False
+    def __init__(self):
+        self.active = False
+
+        self.client_mode_active = False
         self.client_ssid = ''
         self.client_password = ''
 
-        self.ap_mode_enabled = False
+        self.ap_mode_active = False
         self.ap_ssid = ''
         self.ap_password = ''
         self.ap_channel = 1
         self.ap_encryption = ''
+        self.stale = False
 
     def from_json(self, json_config):
-        pass
+        Logger.debug("RCPConfig: got WiFi config: {}".format(json_config))
+        self.active = json_config.get('active', self.active)
+
+        client_config = json_config.get('client', False)
+
+        if client_config:
+            self.client_mode_active = client_config.get('active', self.client_mode_active)
+            self.client_ssid = client_config.get('ssid', self.client_ssid)
+            self.client_password = client_config.get('password', self.client_password)
+
+        ap_config = json_config.get('ap', False)
+
+        if ap_config:
+            self.ap_mode_active = ap_config.get('active', self.ap_mode_active)
+            self.ap_ssid = ap_config.get('ssid', self.ap_ssid)
+            self.ap_password = ap_config.get('password', self.ap_password)
+            self.ap_channel = ap_config.get('channel', self.ap_channel)
+            self.ap_encryption = ap_config.get('encryption', self.ap_encryption)
 
     def to_json(self):
-        wifi_config = {'enabled': self.enabled,
+        wifi_config = {'active': self.active,
                        'client': {
                            'ssid': self.client_ssid,
-                           'enabled': self.client_mode_enabled,
+                           'active': self.client_mode_active,
                            'password': self.client_password
                            },
                        'ap': {
-                           'enabled': self.ap_mode_enabled,
+                           'active': self.ap_mode_active,
                            'ssid': self.ap_ssid,
                            'password': self.ap_password,
                            'encryption': self.ap_encryption,
@@ -929,7 +949,6 @@ class ConnectivityConfig(object):
     bluetoothConfig = BluetoothConfig()
     cellConfig = CellConfig()
     telemetryConfig = TelemetryConfig()
-    wifi_config = WifiConfig()
 
     def fromJson(self, connCfgJson):
         btCfgJson = connCfgJson.get('btCfg')
@@ -944,18 +963,12 @@ class ConnectivityConfig(object):
         if telCfgJson:
             self.telemetryConfig.fromJson(telCfgJson)
 
-        wifi_cfg_json = connCfgJson.get('wifiCfg')
-
-        if wifi_cfg_json:
-            self.wifi_config.from_json(wifi_cfg_json)
-
         self.stale = False
 
     def toJson(self):
         connCfgJson = {'btCfg' : self.bluetoothConfig.toJson(),
                        'cellCfg' : self.cellConfig.toJson(),
-                       'telCfg' : self.telemetryConfig.toJson(),
-                       'wifiCfg': self.wifi_config.to_json()
+                       'telCfg' : self.telemetryConfig.toJson()
                        }
 
         return {'connCfg':connCfgJson}
@@ -1092,6 +1105,7 @@ class RcpConfig(object):
         self.pwmConfig = PwmConfig()
         self.trackConfig = TrackConfig()
         self.connectivityConfig = ConnectivityConfig()
+        self.wifi_config = WifiConfig()
         self.canConfig = CanConfig()
         self.obd2Config = Obd2Config()
         self.scriptConfig = LuaScript()
@@ -1108,6 +1122,7 @@ class RcpConfig(object):
                 self.pwmConfig.stale or
                 self.trackConfig.stale or
                 self.connectivityConfig.stale or
+                self.wifi_config.stale or
                 self.canConfig.stale or
                 self.obd2Config.stale or
                 self.scriptConfig.stale or
@@ -1174,6 +1189,10 @@ class RcpConfig(object):
                 connectivtyCfgJson = rcpJson.get('connCfg', None)
                 if connectivtyCfgJson:
                     self.connectivityConfig.fromJson(connectivtyCfgJson)
+
+                wifi_config_json = rcpJson.get('wifiCfg', None)
+                if wifi_config_json:
+                    self.wifi_config.from_json(wifi_config_json)
 
                 canCfgJson = rcpJson.get('canCfg', None)
                 if canCfgJson:

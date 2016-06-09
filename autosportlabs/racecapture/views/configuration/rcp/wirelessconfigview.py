@@ -13,6 +13,7 @@ from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.modules import inspector
+from kivy.logger import Logger
 
 WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
@@ -21,6 +22,7 @@ class WirelessConfigView(BaseConfigView):
     apnSpinner = None
     cellProviderInfo = None
     connectivityConfig = None
+    wifi_config = None
     apnHostField = None
     apnUserField = None
     apnPassField = None
@@ -71,30 +73,52 @@ class WirelessConfigView(BaseConfigView):
         self.apnPassField = kvFind(self, 'rcid', 'apnPass')
 
     def on_ap_encryption(self, instance, value):
-        pass
+        Logger.debug("WirelessConfigView: got new AP encryption: {}".format(value))
+        if self.wifi_config:
+            self.wifi_config.ap_encryption = value
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
 
     def on_client_ssid(self, instance, value):
-        pass
+        if self.wifi_config:
+            self.wifi_config.client_ssid = value
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
 
     def on_ap_password(self, instance, value):
-        pass
+        if self.wifi_config:
+            self.wifi_config.ap_password = value
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
 
     def on_ap_ssid(self, instance, value):
-        pass
+        if self.wifi_config:
+            self.wifi_config.ap_ssid = value
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
 
     def on_client_password(self, instance, value):
-        pass
+        if self.wifi_config:
+            self.wifi_config.client_password = value
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
 
     def on_ap_mode_enable(self, instance, value):
-        pass
+        if self.wifi_config:
+            self.wifi_config.ap_mode_enabled = value
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
 
     def on_client_mode_enable(self, instance, value):
-        pass
+        if self.wifi_config:
+            self.wifi_config.client_mode_enabled = value
+            self.wifi_config.stale = True
+            self.dispatch('on_modified')
 
     def on_wifi_enable(self, instance, value):
-        if self.connectivityConfig:
-            self.connectivityConfig.wifi_config.enabled = value
-            self.connectivityConfig.stale = True
+        if self.wifi_config:
+            self.wifi_config.active = value
+            self.wifi_config.stale = True
             self.dispatch('on_modified')
 
     def setCustomApnFieldsDisabled(self, disabled):
@@ -156,12 +180,12 @@ class WirelessConfigView(BaseConfigView):
 
     def load_ap_encryption_spinner(self, spinner):
         json_data = open(os.path.join(self.base_dir, 'resource', 'settings', 'ap_encryption.json'))
-        encryption_info = json.load(json_data)
+        encryption_json = json.load(json_data)
 
         encryption_types = {}
 
-        for name in encryption_info['types']:
-            encryption_types[name] = name
+        for name in encryption_json['types']:
+            encryption_types[encryption_json['types'][name]] = name
 
         spinner.setValueMap(encryption_types, 'WPA2')
 
@@ -195,7 +219,27 @@ class WirelessConfigView(BaseConfigView):
                     break
             self.setCustomApnFieldsDisabled(customFieldsDisabled)
             return existingApnName
-                
+
+    def _update_wifi_config(self, rcpCfg):
+        wifi_config = rcpCfg.wifi_config
+
+        self.ids.wifi_enabled.setValue(wifi_config.active)
+
+        self.ids.client_mode.setValue(wifi_config.client_mode_active)
+        self.ids.client_ssid.text = wifi_config.client_ssid
+        self.ids.client_password.text = wifi_config.client_password
+
+        self.ids.ap_mode.setValue(wifi_config.ap_mode_active)
+        self.ids.ap_ssid.text = wifi_config.ap_ssid
+        self.ids.ap_password.text = wifi_config.ap_password
+
+        if wifi_config.ap_encryption != "":
+            self.ids.ap_encryption.setValue(wifi_config.ap_encryption)
+        else:
+            self.ids.ap_encryption.setValue("none")
+
+        self.wifi_config = wifi_config
+
     def on_config_updated(self, rcpCfg):
         connectivityConfig = rcpCfg.connectivityConfig
         
@@ -214,3 +258,5 @@ class WirelessConfigView(BaseConfigView):
         existingApnName = self.update_controls_state()
         if existingApnName:
             self.apnSpinner.text = existingApnName
+
+        self._update_wifi_config(rcpCfg)
