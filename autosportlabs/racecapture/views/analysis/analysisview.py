@@ -27,14 +27,17 @@ from kivy.clock import Clock
 from kivy.uix.widget import Widget
 from kivy.uix.popup import Popup
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import Screen
 from kivy.properties import ObjectProperty
+from kivy.core.window import Window
 from autosportlabs.racecapture.views.analysis.analysisdata import CachingAnalysisDatastore
 from autosportlabs.racecapture.views.analysis.analysismap import AnalysisMap
 from autosportlabs.racecapture.views.analysis.channelvaluesview import ChannelValuesView
 from autosportlabs.racecapture.views.analysis.addstreamview import AddStreamView
 from autosportlabs.racecapture.views.analysis.sessionbrowser import SessionBrowser
+from autosportlabs.racecapture.views.analysis.flyinpanel import FlyinPanel
 from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent, SourceRef
 from autosportlabs.racecapture.views.analysis.linechart import LineChart
 from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
@@ -46,6 +49,7 @@ from autosportlabs.help.helpmanager import HelpInfo
 import traceback
 
 ANALYSIS_VIEW_KV = 'autosportlabs/racecapture/views/analysis/analysisview.kv'
+
 
 class AnalysisView(Screen):
     SUGGESTED_CHART_CHANNELS = ['Speed']
@@ -69,7 +73,27 @@ class AnalysisView(Screen):
         self.ids.channelvalues.color_sequence = self._color_sequence
         self.ids.mainchart.color_sequence = self._color_sequence
         self.stream_connecting = False
+        Window.bind(mouse_pos=self.on_mouse_pos)
+        Window.bind(on_motion=self.on_motion)        
         self.init_view()
+
+    def on_motion(self, instance, event, motion_event):
+        flyin = self.ids.laps_flyin
+        if self.collide_point(motion_event.x, motion_event.y):
+            if not flyin.flyin_collide_point(motion_event.x, motion_event.y):
+                flyin.schedule_hide()
+        
+    def on_mouse_pos(self, x, pos):
+        flyin = self.ids.laps_flyin
+        x = pos[0]
+        y = pos[1]
+        self_collide = self.collide_point(x, y)
+        flyin_collide = flyin.flyin_collide_point(x, y)
+        laps_selected = self.ids.sessions_view.selected_count > 0
+        
+        if self_collide and not flyin_collide and laps_selected:
+            flyin.schedule_hide()
+        return False
 
     def on_sessions(self, instance, value):
         self.ids.channelvalues.sessions = value
@@ -190,7 +214,6 @@ class AnalysisView(Screen):
         self.ids.analysismap.datastore = self._datastore
         Clock.schedule_once(lambda dt: HelpInfo.help_popup('beta_analysis_welcome', self, arrow_pos='right_mid'), 0.5)
 
-
     def popup_dismissed(self, *args):
         if self.stream_connecting:
             return True
@@ -200,3 +223,4 @@ class AnalysisView(Screen):
         if self._popup is not None:
             self._popup.dismiss()
             self._popup = None
+

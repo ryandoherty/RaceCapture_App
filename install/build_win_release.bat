@@ -1,36 +1,22 @@
-ECHO botstrapping Kivy @ %kivy_portable_root%
+rem @echo off
+if %1.==. goto nover
+del dist /f/s/q
+del build /f/s/q
+rem Add the version string to the actual binary
+set str=%1
+set str=%str:.=,%
+powershell -inputformat none -Command "(gc win_versioninfo.txt) -replace '!REALVER!', '%str%' | Out-File -encoding ASCII temp_win_versioninfo.txt"
+pyinstaller -y racecapture.spec
 
 
-IF DEFINED kivy_paths_initialized (GOTO :runkivy)
+"C:\Program Files (x86)\NSIS\makensis.exe" -DVERSION_STRING="%1" raceCaptureApp.nsi
 
-ECHO Setting Environment Variables:
-ECHO #################################
-
-set GST_REGISTRY=%kivy_portable_root%\gstreamer\registry.bin
-ECHO GST_REGISTRY
-ECHO %GST_REGISTRY%
-ECHO ---------------
-
-set GST_PLUGIN_PATH=%kivy_portable_root%\gstreamer\lib\gstreamer-1.0
-ECHO GST_PLUGIN_PATH:
-ECHO %GST_PLUGIN_PATH%
-ECHO ---------------
-
-set PATH=%kivy_portable_root%;%kivy_portable_root%\Python27;%kivy_portable_root%\tools;%kivy_portable_root%\Python27\Scripts;%kivy_portable_root%\gstreamer\bin;%kivy_portable_root%\MinGW\bin;%PATH%
-ECHO PATH:
-ECHO %PATH%
-ECHO ----------------------------------
-
-set PKG_CONFIG_PATH=%kivy_portable_root%\gstreamer\lib\pkgconfig;%PKG_CONFIG_PATH%
-set PYTHONPATH=%kivy_portable_root%\kivy;%PYTHONPATH%
-ECHO PYTHONPATH:
-ECHO %PYTHONPATH%
-ECHO ----------------------------------
-
-SET kivy_paths_initialized=1
-ECHO ##################################
-
-
-:runkivy
-
-buildwininstall.bat %1
+goto end
+:nover
+echo Please specify version number as parameter, e.g.:
+echo.   
+echo   %0 1.0.0
+echo.
+echo Note that the version number must be three segments.
+:end
+del temp_win_versioninfo.txt /q
