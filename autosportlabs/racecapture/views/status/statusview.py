@@ -27,7 +27,10 @@ class StatusTitle(StatusLabel):
     pass
 
 class StatusValue(StatusLabel):
-    pass
+
+    def __init__(self, **kwargs):
+        super(StatusLabel, self).__init__(**kwargs)
+        self.shorten = False
 
 # Simple extension of Kivy's TreeViewLabel so we can add on our own properties
 # to it for easier view tracking
@@ -239,6 +242,7 @@ class StatusView(Screen):
         self._add_item('IMEI', imei)
         self._add_item('Signal strength', signal_strength)
         self._add_item('Phone Number', number)
+        self._add_item('Network Status', status['state'].capitalize())
 
     def render_bt(self):
         status = self.status['bt']

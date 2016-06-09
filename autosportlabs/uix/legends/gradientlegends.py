@@ -137,13 +137,13 @@ class LapLegend(BoxLayout):
     spacing: sp(5)
     FieldLabel:
         id: lap
-        size_hint_x: 0.7
+        size_hint_x: 0.8
         halign: 'right'
         valign: 'middle'
         text: '{} :: {}'.format(root.lap, root.session)
     ColorLegend:
         id: legend
-        size_hint_x: 0.3
+        size_hint_x: 0.2
         bar_color: root.color    
     ''')
     color = ListProperty([1.0, 1.0, 1.0, 1.0])
