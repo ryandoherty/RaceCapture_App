@@ -946,19 +946,31 @@ class DataStore(object):
         laps = []
         c = self._conn.cursor()
         for row in c.execute('''SELECT DISTINCT sample.session_id AS session_id, 
-                                datapoint.CurrentLap AS CurrentLap, 
-                                max(datapoint.ElapsedTime) AS ElapsedTime
+                                datapoint.CurrentLap AS CurrentLap,
+                                LapTime
                                 FROM sample
                                 JOIN datapoint ON datapoint.sample_id=sample.id
-                                WHERE datapoint.CurrentLap > 0
                                 AND sample.session_id = ?
-                                GROUP BY CurrentLap, session_id
-                                ORDER BY datapoint.CurrentLap ASC;''',
+                                GROUP BY LapCount, session_id
+                                ORDER BY datapoint.LapCount ASC;''',
                                 (session_id,)):
-            laps.append(Lap(session_id=row[0], lap=row[1], lap_time=row[2]))
+            laps.append(Lap(session_id=row[0], lap=row[1]-1, lap_time=row[2]))
+
+        # Figure out if there are samples beyond the last lap
+        extra_lap_query = '''SELECT COUNT(*) FROM sample JOIN datapoint ON datapoint.sample_id=sample.id
+                             AND sample.session_id = ? WHERE datapoint.CurrentLap > ? LIMIT 1'''
+
+        # If there are samples beyond the last actual timed lap (crossed start/finish), add that lap to the end
+        # so users can view that data if needed
+        if len(laps) > 0:
+            c = self._conn.cursor()
+
+            for row in c.execute(extra_lap_query, [session_id, laps[-1].lap]):
+                laps.append(Lap(session_id=session_id, lap=(laps[-1].lap+1), lap_time=None))
+                break
+
         return laps
-                
-        
+
     def update_session(self, session):
         self._conn.execute("""UPDATE session SET name=?, notes=?, date=? WHERE id=?;""", (session.name, session.notes, unix_time(datetime.datetime.now()), session.session_id ,))
         self._conn.commit()
