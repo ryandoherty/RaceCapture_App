@@ -117,13 +117,13 @@ class WirelessConfigView(BaseConfigView):
 
     def on_ap_mode_enable(self, instance, value):
         if self.wifi_config:
-            self.wifi_config.ap_mode_enabled = value
+            self.wifi_config.ap_mode_active = value
             self.wifi_config.stale = True
             self.dispatch('on_modified')
 
     def on_client_mode_enable(self, instance, value):
         if self.wifi_config:
-            self.wifi_config.client_mode_enabled = value
+            self.wifi_config.client_mode_active = value
             self.wifi_config.stale = True
             self.dispatch('on_modified')
 
