@@ -31,6 +31,7 @@ class SocketConnection(object):
 
     def __init__(self):
         self.socket = None
+        self._data = ''
 
     def get_available_devices(self):
         """
@@ -76,8 +77,8 @@ class SocketConnection(object):
         # Connect to ip address here
         rc_address = (address, 7223)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(rc_address)
         self.socket.settimeout(READ_TIMEOUT)
+        self.socket.connect(rc_address)
 
     def close(self):
         """
@@ -87,7 +88,7 @@ class SocketConnection(object):
         self.socket.close()
         self.socket = None
 
-    def read(self, keep_reading):
+    def read_line(self, keep_reading):
         """
         Reads data from the socket. Will continue to read until either "\r\n" is found in the data read from the
         socket or keep_reading.is_set() returns false
@@ -95,7 +96,6 @@ class SocketConnection(object):
         :type keep_reading: threading.Event
         :return: String or None
         """
-        msg = ''
         Logger.info("SocketConnection: reading...")
 
         while keep_reading.is_set():
@@ -104,14 +104,16 @@ class SocketConnection(object):
                 if data == '':
                     return None
 
-                msg += data
+                self._data += data
 
-                if msg[-2:] == '\r\n':
-                    if msg != '':
-                        Logger.info("SocketConnection: returning data {}".format(msg))
-                        return msg
-                    else:
-                        return None
+                if '\r\n' in self._data:
+                    lines = self._data.split('\r\n', 1)
+                    msg = lines[0]
+                    self._data = lines[1]
+
+                    Logger.debug("SocketConnection: returning data {}".format(msg))
+                    return msg
+
             except socket.timeout:
                 pass
 

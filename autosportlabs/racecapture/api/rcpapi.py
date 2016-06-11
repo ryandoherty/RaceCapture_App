@@ -6,6 +6,7 @@ from time import sleep
 from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
+from autosportlabs.util.threadutil import safe_thread_exit, ThreadSafeDict
 from functools import partial
 from kivy.clock import Clock
 from kivy.logger import Logger
@@ -113,7 +114,6 @@ class RcpApi:
         t.start()
         self._cmd_sequence_thread = t
 
-
     def init_api(self, comms):
         self.comms = comms
         self._start_message_rx_worker()
@@ -204,6 +204,7 @@ class RcpApi:
                 else:
                     sleep(0.25)
 
+        safe_thread_exit()
         Logger.info("RCPAPI: msg_rx_worker exiting")
 
     def rcpCmdComplete(self, msgReply):
@@ -325,6 +326,7 @@ class RcpApi:
                 Logger.error('RCPAPI: Execute command exception ' + str(e))
 
         Logger.info('RCPAPI: cmd_sequence_worker exiting')
+        safe_thread_exit()
 
     def sendCommand(self, cmd):
         try:
@@ -729,6 +731,8 @@ class RcpApi:
                 self._auto_detect_busy.clear()
                 self.removeListener("ver", on_ver_win)
                 self.sendCommandLock.release()
+                comms.device = None
                 sleep(AUTODETECT_COOLOFF_TIME)
 
         Logger.info('RCPAPI: auto_detect_worker exiting')
+        safe_thread_exit()

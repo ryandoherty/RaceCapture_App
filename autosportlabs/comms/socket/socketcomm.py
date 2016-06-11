@@ -25,6 +25,8 @@ from Queue import Empty
 from time import sleep
 import traceback
 from autosportlabs.comms.commscommon import PortNotOpenException
+from autosportlabs.util.threadutil import safe_thread_exit
+import socket
 
 
 class SocketComm(object):
@@ -151,7 +153,7 @@ class SocketComm(object):
 
         while should_run.is_set():
             try:
-                msg = connection.read(should_run)
+                msg = connection.read_line(should_run)
                 if msg:
                     rx_queue.put(msg)
             except:
@@ -160,6 +162,7 @@ class SocketComm(object):
                 should_run.clear()
                 sleep(0.5)
         Logger.debug('SocketComm: connection process message reader exited')
+        safe_thread_exit()
 
     def _connection_thread_message_writer(self, tx_queue, connection, should_run):
         """This method is designed to be run in a thread, it will loop infinitely as long as should_run.is_set()
@@ -188,6 +191,7 @@ class SocketComm(object):
                 should_run.clear()
                 sleep(0.5)
         Logger.debug('SocketComm: connection thread message writer exited')
+        safe_thread_exit()
 
     def _connection_message_thread(self, connection, address, rx_queue, tx_queue, command_queue):
         """
@@ -238,9 +242,15 @@ class SocketComm(object):
             except:
                 Logger.error('SocketComm: Exception closing connection worker connection')
                 Logger.error(traceback.format_exc())
+        except socket.timeout as e:
+            Logger.error("SocketComm: got timeout connecting to {}".format(address))
+        except socket.error as e:
+            Logger.error("SocketComm: got exception connecting to {}".format(address))
+            Logger.error('SocketComm: socket error setting up connection thread: ' + str(type(e)) + str(e))
         except Exception as e:
             Logger.error('SocketComm: Exception setting up connection thread: ' + str(type(e)) + str(e))
             Logger.debug(traceback.format_exc())
 
         Logger.debug('SocketComm: connection worker exited')
+        safe_thread_exit()
 
