@@ -12,7 +12,6 @@ from valuefield import ValueField
 from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
-from kivy.modules import inspector
 from kivy.logger import Logger
 
 WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
