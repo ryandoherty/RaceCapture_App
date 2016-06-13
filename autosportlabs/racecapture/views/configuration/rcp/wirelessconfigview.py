@@ -30,7 +30,6 @@ class WirelessConfigView(BaseConfigView):
     def __init__(self, **kwargs):
         Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
         super(WirelessConfigView, self).__init__(**kwargs)
-        inspector.create_inspector(Window, self)
         self.register_event_type('on_config_updated')
         self.base_dir = kwargs.get('base_dir')
 
