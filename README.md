@@ -49,22 +49,18 @@ See requirements.txt for full list of requirements
 
 The script will create the .App file and .dmg for distribution.
 
-## installation (Win7)
+## installation (Win7/8/10)
 
-1. Install kivy via pip - instructions https://kivy.org/docs/installation/installation-windows.html
-1. Install [virtualenv]: `pip install virtualenv`
-1. Create a virtual environment (perhaps in this directory): `virtualenv _ve`
-1. Activate the virtualenv: `_ve\Scripts\activate`
-1. Install pip requirements: `pip install -r requirements.txt` (if this crashes you installed the py3.3 version of Kivy, doughball)
+1. Install x86 2.7.x Python and kivy via instuctions https://kivy.org/docs/installation/installation-windows.html
+1. Navigate to the RaceCapture source directory
+1. Install RaceCapture requirements: `pip install -r requirements.txt`
 
-## running (Win7)
+## running (Win7/8/10)
 
-    Launch kivy environment by launching kivy-2.7.bat in installation folder
-    Navigate to the RaceCapture source directory
-    kivy main.py
-	Note: If you get an error doing this ("cannot find text provider") then you might be like me and be unable to run RaceCapture inside a virtualenv for some reason. Try performing the above steps without the virtual env part.
+1. Navigate to the RaceCapture source directory
+1. Launch RaceCapture `python main.py`
 
-## dev installation (Eclipse on Win7, but probably applies to Eclipse on any platform)
+## IDE installation (Eclipse on Win7, but probably applies to Eclipse on any platform)
 
 1. Do the "installation" instructions above
 1. Download [Eclipse] (https://www.eclipse.org/downloads/)
@@ -75,24 +71,13 @@ The script will create the .App file and .dmg for distribution.
 1. Right-click the project...Properties...pyDev-PYTHONPATH...External Libraries - Add source folder, add my_kivy_install_folder\kivy
 1. Run the project
 
-## Preparing to build installers (Win7)
+## Create installer (Win7/8/10)
 
-1. `kivy` (to get paths set up)
-1. activate the virtualenv: `_ve\Scripts\activate`
-1. Install [PYInstaller] (http://www.pyinstaller.org) `pip install pyinstaller`
-1. Install [PyWin32] (http://sourceforge.net/projects/pywin32/files/) `pip install pywin`
-1. Try `pyinstaller --version` - should return "2.1" or similar
+1. Prepare dev installation (above)
 1. Install [nullsoft scriptable install system] (http://nsis.sourceforge.net/Download) stable version (currently 2.46)
-1. Open (from your Kivy folder) `\Python27\Lib\site-packages\pygments\lexers\__init__.py` and add a line "from pygments.lexers.agile import PythonLexer" near the top. Yes, I know this is bad form. It's to fix an error ("AttributeError: 'module' object has no attribute 'PythonLexer'") where PyInstaller failed to find an import and I couldn't work out how to force it. You would think that this could be forced by creating a hook-pygments.lexers.py file with hiddenimports = ['agile'] in it, but you'd be wrong as this file already exists in the default PyInstaller hooks and it doesn't fix this problem. -CLR 2014-05-29
-
-## Creating installer for current version (Win7)
-
-1. Go into RaceCapture_App folder
-1. Activate the virtualenv: `_ve\Scripts\activate`
-1. `kivy` (to get paths set up)
-1. cd install
-1. `buildwininstall.bat` - deletes old build folders, builds installer and tries to run the package (to run manually use `dist\racecapture\racecapture`)
-
+1. Navigate command line to install subfolder of RaceCapture app directory
+1. build_win_release.bat <major>.<minor>.<bugfix>
+ 
 ## dev installation (Linux - Ubuntu)
 
 1. Install kivy 1.9.1 via pip

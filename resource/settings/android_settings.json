@@ -1,0 +1,11 @@
+[
+    {
+        "type": "options",
+        "title": "RaceCapture connection type",
+        "desc": "Connection type to your RaceCapture system",
+        "section": "preferences",
+        "key": "conn_type",
+        "true": "auto",
+        "options": ["Bluetooth", "WiFi"]
+    }
+]

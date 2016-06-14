@@ -1,3 +1,31 @@
+==1.6.0==
+* Change analysis view to query LapTime and CurrentLap channels
+
+==1.5.3==
+* Make pit stop timer configurable
+* Make pit stop timer time correctly on slower tablets
+* Make lap selection for analysis live in a drop-down shade that auto-dismisses, 
+  to maximize screen real-estate for small form factors.
+* Fix raw channels view font size being too big when few channels are configured (#98)
+* Wrap text in status screen instead of clip (#905)
+* Add network status to status page
+* Make dashboard nav arrows bigger
+
+==1.5.2==
+* Prevent app hang while transmitting telemetry if bluetooth disconnects
+* Update references from RaceCapture/Live to Podium
+
+==1.5.1==
+* Do not pause timer after moving out of pit spot
+* Include changes from 1.4.6
+
+==1.5.0==
+* Add automatic pitstop timer
+
+==1.4.6==
+* Allow complete erasing of device id field
+* Improve performance of Scripting Logview window, add button for copying log to clipboard
+
 ==1.4.5==
 * Update to Kivy 1.9.1
 * Improve ability to select items in scrolling window when in touch screen environments

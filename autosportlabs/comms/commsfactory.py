@@ -1,20 +1,36 @@
 from kivy import platform
-if platform == 'android':
-    pass
-elif platform == 'ios':
-    from autosportlabs.comms.socket.socketconnection import SocketConnection
-else:
-    from autosportlabs.comms.serial.serialconnection import SerialConnection
 
-__all__ = ('comms_factory')
+__all__ = 'comms_factory'
 
-def comms_factory(port):
-    if platform == 'android':
-        from autosportlabs.comms.androidcomms import AndroidComms
-        return AndroidComms(port=port)
-    elif platform == 'ios':
-        print('iOS comms not implemented yet')
-        return None
+
+def comms_factory(device, conn_type):
+    # Connection type can be overridden by user or for testing purposes
+    if conn_type is not None:
+        if conn_type == 'bluetooth':
+            return android_comm(device)
+        if conn_type == 'wifi':
+            return socket_comm(device)
     else:
-        from autosportlabs.comms.comms import Comms        
-        return Comms(port=port, connection=SerialConnection())
+        if platform == 'android':
+            return android_comm(device)
+        elif platform == 'ios':
+            return socket_comm(device)
+        else:
+            return serial_comm(device)
+
+
+def socket_comm(device):
+    from autosportlabs.comms.socket.socketconnection import SocketConnection
+    from autosportlabs.comms.socket.socketcomm import SocketComm
+    return SocketComm(SocketConnection(), device)
+
+
+def serial_comm(device):
+    from autosportlabs.comms.serial.serialconnection import SerialConnection
+    from autosportlabs.comms.comms import Comms
+    return Comms(device, SerialConnection())
+
+
+def android_comm(device):
+    from autosportlabs.comms.androidcomms import AndroidComms
+    return AndroidComms(device)

@@ -1,0 +1,7 @@
+.git
+.buildozer
+.idea
+test
+install/osx
+install/build
+install/dist

@@ -41,11 +41,11 @@ def connection_process_message_writer(tx_queue, connection, should_run):
             sleep(0.5)
     Logger.debug('Comms: connection process message writer exited')
 
-def connection_message_process(connection, port, rx_queue, tx_queue, command_queue):
+def connection_message_process(connection, device, rx_queue, tx_queue, command_queue):
     Logger.debug('Comms: connection process starting')
 
     try:
-        connection.open(port)
+        connection.open(device)
         connection.flushInput()
         connection.flushOutput()
 
@@ -89,39 +89,38 @@ class Comms():
     DEFAULT_TIMEOUT = 1.0
     QUEUE_FULL_TIMEOUT = 1.0
     _timeout = DEFAULT_TIMEOUT
-    port = None
+    device = None
     _connection = None
     _connection_process = None
     _rx_queue = None
     _tx_queue = None
     _command_queue = None
 
-
-    def __init__(self, **kwargs):
-        self.port = kwargs.get('port')
-        self._connection = kwargs.get('connection')
+    def __init__(self, device, connection):
+        self.device = device
+        self._connection = connection
+        self.supports_streaming = False
 
     def start_connection_process(self):
         rx_queue = multiprocessing.Queue()
         tx_queue = multiprocessing.Queue(5)
         command_queue = multiprocessing.Queue()
-        connection_process = multiprocessing.Process(target=connection_message_process, args=(self._connection, self.port, rx_queue, tx_queue, command_queue))
+        connection_process = multiprocessing.Process(target=connection_message_process, args=(self._connection, self.device, rx_queue, tx_queue, command_queue))
         connection_process.start()
         self._rx_queue = rx_queue
         self._tx_queue = tx_queue
         self._command_queue = command_queue
         self._connection_process = connection_process
 
-
-    def get_available_ports(self):
-        return self._connection.get_available_ports()
+    def get_available_devices(self):
+        return self._connection.get_available_devices()
 
     def isOpen(self):
         return self._connection_process != None and self._connection_process.is_alive()
 
     def open(self):
         connection = self._connection
-        Logger.info('Comms: Opening connection ' + str(self.port))
+        Logger.info('Comms: Opening connection ' + str(self.device))
         self.start_connection_process()
 
     def keep_alive(self):

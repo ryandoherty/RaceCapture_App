@@ -56,3 +56,6 @@ RaceCapture.App
 
 #Crash reporting
 sentry.cfg
+
+#iOS build stuff
+ios_requirements.txt

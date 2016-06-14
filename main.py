@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.4.5"
+__version__ = "1.5.3"
 import sys
 import os
 
@@ -123,6 +123,9 @@ class RaceCaptureApp(App):
     def __init__(self, **kwargs):
         super(RaceCaptureApp, self).__init__(**kwargs)
 
+        if kivy.platform == 'ios' or kivy.platform == 'macosx':
+            kivy.resources.resource_add_path(os.path.join(os.path.dirname(os.path.realpath(__file__)), "data"))
+
         # We do this because when this app is bundled into a standalone app
         # by pyinstaller we must reference all files by their absolute paths
         # sys._MEIPASS is provided by pyinstaller
@@ -163,6 +166,7 @@ class RaceCaptureApp(App):
         parser = argparse.ArgumentParser(description='Autosport Labs Race Capture App')
         parser.add_argument('-p', '--port', help='Port', required=False)
         parser.add_argument('--telemetryhost', help='Telemetry host', required=False)
+        parser.add_argument('--conn_type', help='Connection type', required=False, choices=['bt', 'serial', 'wifi'])
 
         if sys.platform == 'win32':
             parser.add_argument('--multiprocessing-fork', required=False, action='store_true')
@@ -187,34 +191,6 @@ class RaceCaptureApp(App):
 
     def _serial_warning(self):
         alertPopup('Warning', 'Command failed. Ensure you have selected a correct serial port')
-
-    # Logfile
-    def on_poll_logfile(self, instance):
-        try:
-            self._rc_api.getLogfile()
-        except:
-            pass
-
-
-    def on_set_logfile_level(self, instance, level):
-        try:
-            self._rc_api.setLogfileLevel(level, None, self.on_set_logfile_level_error)
-        except:
-            logging.exception('')
-            self._serial_warning()
-
-    def on_set_logfile_level_error(self, detail):
-        alertPopup('Error', 'Error Setting Logfile Level:\n\n' + str(detail))
-
-    # Run Script
-    def on_run_script(self, instance):
-        self._rc_api.runScript(self.on_run_script_complete, self.on_run_script_error)
-
-    def on_run_script_complete(self, result):
-        Logger.info('RaceCaptureApp: run script complete: ' + str(result))
-
-    def on_run_script_error(self, detail):
-        alertPopup('Error Running', 'Error Running Script:\n\n' + str(detail))
 
     # Write Configuration
     def on_write_config(self, instance, *args):
@@ -310,10 +286,6 @@ class RaceCaptureApp(App):
                                 track_manager=self.trackManager)
         config_view.bind(on_read_config=self.on_read_config)
         config_view.bind(on_write_config=self.on_write_config)
-        config_view.bind(on_run_script=self.on_run_script)
-        config_view.bind(on_poll_logfile=self.on_poll_logfile)
-        config_view.bind(on_set_logfile_level=self.on_set_logfile_level)
-        self._rc_api.addListener('logfile', lambda value: Clock.schedule_once(lambda dt: config_view.on_logfile(value)))
         self.config_listeners.append(config_view)
         self.tracks_listeners.append(config_view)
         return config_view
@@ -420,7 +392,16 @@ class RaceCaptureApp(App):
 
     def init_rc_comms(self):
         port = self.getAppArg('port')
-        comms = comms_factory(port)
+        conn_type = self.settings.userPrefs.get_pref('preferences', 'conn_type', default=None)
+
+        cli_conn_type = self.getAppArg('conn_type')
+
+        if cli_conn_type:
+            conn_type = cli_conn_type
+
+        Logger.info("RacecaptureApp: initializing rc comms with, conn type: {}".format(conn_type))
+
+        comms = comms_factory(port, conn_type)
         rc_api = self._rc_api
         rc_api.detect_win_callback = self.rc_detect_win
         rc_api.detect_fail_callback = self.rc_detect_fail
@@ -431,11 +412,9 @@ class RaceCaptureApp(App):
     def rc_detect_win(self, version):
         if version.is_compatible_version():
             self.showStatus("{} v{}.{}.{}".format(version.friendlyName, version.major, version.minor, version.bugfix), False)
-            self._data_bus_pump.start(self._databus, self._rc_api)
+            self._data_bus_pump.start(self._databus, self._rc_api, self._rc_api.comms.supports_streaming)
             self._status_pump.start(self._rc_api)
-
-            if self.settings.userPrefs.get_pref('preferences', 'send_telemetry') == "1" and self._telemetry_connection:
-                self._telemetry_connection.telemetry_enabled = True
+            self._telemetry_connection.data_connected = True
 
             if self.rc_config.loaded == False:
                 Clock.schedule_once(lambda dt: self.on_read_config(self))
@@ -461,8 +440,8 @@ class RaceCaptureApp(App):
         self.showActivity('Searching {}'.format(info))
 
     def _on_rcp_disconnect(self):
-        if self._telemetry_connection.telemetry_enabled:
-            self._telemetry_connection.telemetry_enabled = False
+        if self._telemetry_connection.data_connected:
+            self._telemetry_connection.data_connected = False
 
     def open_settings(self, *largs):
         self.switchMainView('preferences')
@@ -521,6 +500,18 @@ class RaceCaptureApp(App):
                 self._telemetry_connection.telemetry_enabled = True
             else:
                 self._telemetry_connection.telemetry_enabled = False
+
+        if token == ('preferences', 'conn_type'):
+            # User changed their RC connection type
+            Logger.info("Racecaptureapp: RC connection type changed to {}, restarting comms".format(value))
+            Clock.schedule_once(lambda dt: self._restart_comms(), 0.1)
+
+    def _restart_comms(self):
+        self._data_bus_pump.stop()
+        self._status_pump.stop()
+        self._rc_api.shutdown_api()
+        self.init_rc_comms()
+
 
 if __name__ == '__main__':
 

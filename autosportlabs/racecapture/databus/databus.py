@@ -140,6 +140,28 @@ class DataBus(object):
         except:
             pass
 
+    def remove_sample_listener(self, listener):
+        '''
+        Remove the specified sample listener
+        :param listener
+        :type object / callback function
+        '''
+        try:
+            self.sample_listeners.remove(listener)
+        except Exception as e:
+            Logger.debug('Could not remove sample listener {}: {}'.format(listener, e))
+        
+    def remove_meta_listener(self, listener):
+        '''
+        Remove the specified meta listener
+        :param listener
+        :type object / callback function
+        '''
+        try:
+            self.meta_listeners.remove(listener)
+        except Exception as e:
+            Logger.debug('Could not remove meta listener {}: {}'.format(listener, e))
+        
     def add_sample_listener(self, callback):
         self.sample_listeners.append(callback)
 
@@ -178,7 +200,7 @@ class DataBusPump(object):
     def __init__(self, **kwargs):
         super(DataBusPump, self).__init__(**kwargs)
 
-    def start(self, data_bus, rc_api):
+    def start(self, data_bus, rc_api, streaming_supported):
         if self._running.is_set():
             # since we're already running, simply
             # request updated metadata
@@ -190,8 +212,9 @@ class DataBusPump(object):
         rc_api.addListener('s', self.on_sample)
         rc_api.addListener('meta', self.on_meta)
         self._running.set()
-        if not is_mobile_platform():
-            #only start the worker on desktop mode
+
+        # Only BT supports auto-streaming data, the rest we have to poll
+        if not streaming_supported:
             t = Thread(target=self.sample_worker)
             t.start()
             self._sample_thread = t

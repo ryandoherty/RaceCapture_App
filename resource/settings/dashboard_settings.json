@@ -1,0 +1,35 @@
+[
+    {
+        "type": "title",
+        "title": "Pit Stop Timer"
+    },
+    {
+        "type": "bool",
+        "title": "Enable Pit Stop Timer",
+        "desc": "Enable a pit stop timer that activates upon a speed threshold. Must have lapping mode enabled",
+        "section": "dashboard_preferences",
+        "key": "pitstoptimer_enabled"
+    },
+    {
+    	"type": "numeric",
+    	"title": "Pit stop timer activation threshold",
+    	"desc": "Activates the timer when the speed drops under this threshold",
+    	"section": "dashboard_preferences",
+    	"key": "pitstoptimer_trigger_speed"
+    },
+    {
+        "type": "numeric",
+        "title": "Pit lane speed limit",
+        "desc": "Pit stop timer will alert driver if speed exceeds threshold.",
+        "section": "dashboard_preferences",
+        "key": "pitstoptimer_alert_speed"
+    },
+    {
+        "type": "numeric",
+        "title": "Pit stop timer exit speed",
+        "desc": "Pit stop timer will stop above this threshold, indicating back on race track",
+        "section": "dashboard_preferences",
+        "key": "pitstoptimer_exit_speed"
+    }
+    
+]
