@@ -902,7 +902,7 @@ class WifiConfig(object):
         self.ap_ssid = ''
         self.ap_password = ''
         self.ap_channel = 1
-        self.ap_encryption = ''
+        self.ap_encryption = 'none'
         self.stale = False
 
     def from_json(self, json_config):

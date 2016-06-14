@@ -34,7 +34,7 @@
                 text: 'Client Mode Configuration'
                 font_size: dp(26)
             Label:
-                text: 'Use this mode to setup the wifi module to connect [b]to[/b] an existing wireless network or a GoPro. If the network is a GoPro, you must enable Access Point mode and connect your phone or tablet via the RaceCapture network.'
+                text: 'Use this mode to setup the wifi module to connect [b]to[/b] an existing wireless network.'
                 markup: True
                 text_size: (self.parent.width, None)
                 padding: [dp(20), 0]
@@ -80,20 +80,22 @@
                 FieldLabel:
                     text: 'SSID'
                     halign: 'right'
-                ValueField:
+                BetterTextInput:
                     id: ap_ssid
                     disabled: False
                     on_text: root.on_ap_ssid(*args)
+                    max_chars: 24
             GridLayout:
                 spacing: (dp(30), dp(5))
                 cols: 2
                 FieldLabel:
                     text: 'Password'
                     halign: 'right'
-                ValueField:
+                BetterTextInput:
                     id: ap_password
                     disabled: False
                     on_text: root.on_ap_password(*args)
+                    max_chars: 24
             SettingsView:
                 id: ap_channel
                 label_text: 'Channel'

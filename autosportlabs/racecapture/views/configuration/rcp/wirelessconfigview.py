@@ -13,6 +13,7 @@ from utils import *
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.logger import Logger
+from autosportlabs.uix.bettertextinput import BetterTextInput
 
 WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
@@ -96,6 +97,7 @@ class WirelessConfigView(BaseConfigView):
             self.dispatch('on_modified')
 
     def on_ap_password(self, instance, value):
+        Logger.info("WirelessConfig: got ap passowrd")
         if self.wifi_config:
             self.wifi_config.ap_password = value
             self.wifi_config.stale = True
