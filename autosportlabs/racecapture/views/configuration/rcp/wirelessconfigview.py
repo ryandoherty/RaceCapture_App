@@ -97,7 +97,6 @@ class WirelessConfigView(BaseConfigView):
             self.dispatch('on_modified')
 
     def on_ap_password(self, instance, value):
-        Logger.info("WirelessConfig: got ap passowrd")
         if self.wifi_config:
             self.wifi_config.ap_password = value
             self.wifi_config.stale = True
