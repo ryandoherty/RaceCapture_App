@@ -1,0 +1,8 @@
+{
+  "types": {
+    "none": "None",
+    "wpa": "WPA",
+    "wpa2": "WPA2",
+    "wpa/wpa2": "WPA/WPA2"
+  }
+}

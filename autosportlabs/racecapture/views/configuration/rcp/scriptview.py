@@ -32,7 +32,7 @@ class LogLevelSpinner(SettingsMappedSpinner):
     '''
     def __init__(self, **kwargs):    
         super(LogLevelSpinner, self).__init__(**kwargs)
-        self.setValueMap({3: 'Error', 6: 'Info', 7:'Debug', 8:'Trace'}, 6)
+        self.setValueMap({3: 'Error', 6: 'Info', 7:'Debug', 8:'Trace'}, 'Info')
         self.text = 'Info'
 
 class LuaScriptingView(BaseConfigView):
