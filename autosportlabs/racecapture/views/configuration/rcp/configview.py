@@ -154,6 +154,7 @@ class ConfigView(Screen):
             except Exception as detail:
                 alertPopup('Error', 'Error loading screen ' + str(node.text) + ':\n\n' + str(detail))
                 Logger.error("ConfigView: Error selecting configuration view " + str(node.text))
+                Logger.error("ConfigView: {}".format(detail))
 
         def on_select_node(instance, value):
             # ensure that any keyboard is released
