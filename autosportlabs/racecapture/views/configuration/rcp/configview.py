@@ -199,8 +199,13 @@ class ConfigView(Screen):
         attach_node('CAN Bus', None, lambda: CANConfigView())
         attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
         attach_node('Wireless', None, lambda: WirelessConfigView(base_dir=self.base_dir))
-        attach_node('Telemetry', None, lambda: TelemetryConfigView())
-        attach_node('Scripting', None, lambda: create_scripting_view())
+
+        if self.rc_config.capabilities.has_cellular:
+            attach_node('Telemetry', None, lambda: TelemetryConfigView())
+
+        if self.rc_config.capabilities.has_script:
+            attach_node('Scripting', None, lambda: create_scripting_view())
+
         if FIRMWARE_UPDATABLE:
             attach_node('Firmware', None, lambda: FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
 
