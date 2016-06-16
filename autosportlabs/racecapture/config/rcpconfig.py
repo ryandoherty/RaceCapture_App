@@ -1020,12 +1020,12 @@ class VersionConfig(object):
 class ChannelCapabilities(object):
 
     def __init__(self):
-        self.analog = 0
-        self.imu = 0
-        self.gpio = 0
-        self.timer = 0
-        self.pwm = 0
-        self.can = 0
+        self.analog = 7
+        self.imu = 6
+        self.gpio = 3
+        self.timer = 3
+        self.pwm = 3
+        self.can = 2
 
     def from_json_dict(self, json_dict):
         if json_dict:
@@ -1040,8 +1040,8 @@ class ChannelCapabilities(object):
 class SampleRateCapabilities(object):
 
     def __init__(self):
-        self.sensor = 0
-        self.gps = 0
+        self.sensor = 1000
+        self.gps = 50
 
     def from_json_dict(self, json_dict):
         if json_dict:
@@ -1052,8 +1052,8 @@ class SampleRateCapabilities(object):
 class StorageCapabilities(object):
 
     def __init__(self):
-        self.tracks = 0
-        self.script = 0
+        self.tracks = 200
+        self.script = 100000
 
     def from_json_dict(self, json_dict):
         if json_dict:
@@ -1064,10 +1064,10 @@ class StorageCapabilities(object):
 class LinksCapabilities(object):
 
     def __init__(self):
-        self.bluetooth = False
-        self.cellular = False
-        self.wifi = False
-        self.usb = False
+        self.bluetooth = True
+        self.cellular = True
+        self.wifi = True
+        self.usb = True
 
     def from_json_dict(self, json_dict):
         self.bluetooth = json_dict.get('bluetooth', self.bluetooth)
@@ -1116,6 +1116,10 @@ class Capabilities(object):
     @property
     def has_wifi(self):
         return self.links.wifi
+
+    @property
+    def has_bluetooth(self):
+        return self.links.bluetooth
 
     def from_json_dict(self, json_dict):
         capabilities = json_dict.get('capabilities')

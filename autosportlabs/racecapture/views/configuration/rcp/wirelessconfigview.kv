@@ -7,150 +7,168 @@
         id: scroller
         size_hint_y: 1
         do_scroll_x: False
-        GridLayout:
+        StackLayout:
             id: wireless_settings
-            row_default_height: dp(40)
-            size_hint_y: None
-            spacing: [0, dp(10)]
-            padding: [dp(20), dp(20)]
             height: max(self.minimum_height, scroller.height)
-            cols: 1
-            rows_minimum: {14: dp(80), 15: dp(80), 18: dp(80)}
-            HSeparator:
-                text: 'Bluetooth'
-            SettingsView:
-                rcid: 'btEnable'
-                label_text: 'Bluetooth'
-                help_text: 'If the Bluetooth module is connected, enable it here'
-                size_hint_y: 1.0
-            HSeparator:
-                text: 'WiFi'
-            SettingsView:
-                id: wifi_enabled
-                label_text: 'WiFi Module'
-            Label:
-                text_size: self.size
-                halign: 'center'
-                text: 'Client Mode Configuration'
-                font_size: dp(26)
-            Label:
-                text: 'Use this mode to setup the wifi module to connect [b]to[/b] an existing wireless network.'
-                markup: True
-                text_size: (self.parent.width, None)
-                padding: [dp(20), 0]
-            SettingsView:
-                id: client_mode
-                label_text: 'Client Mode'
+            size_hint: [1, None]
+            spacing: [0, dp(20)]
+            padding: dp(20)
             GridLayout:
-                spacing: (dp(30), dp(5))
-                cols: 2
-                FieldLabel:
-                    text: 'SSID'
-                    halign: 'right'
-                ValueField:
-                    id: client_ssid
-                    disabled: False
-                    on_text: root.on_client_ssid(*args)
-            GridLayout:
-                spacing: (dp(30), dp(5))
-                cols: 2
-                FieldLabel:
-                    text: 'Password'
-                    halign: 'right'
-                ValueField:
-                    id: client_password
-                    disabled: False
-                    on_text: root.on_client_password(*args)
-            Label:
-                text: 'Access Point Mode Configuration'
-                text_size: self.size
-                halign: 'center'
-                font_size: dp(26)
-            Label:
-                text: 'Use this mode to create a wireless network for your phone or table to connect to.'
-                markup: True
-                text_size: (self.parent.width, None)
-                padding: [dp(20), 0]
-            SettingsView:
-                id: ap_mode
-                label_text: 'Access Point Mode'
-            GridLayout:
-                spacing: (dp(30), dp(5))
-                cols: 2
-                FieldLabel:
-                    text: 'SSID'
-                    halign: 'right'
-                BetterTextInput:
-                    id: ap_ssid
-                    disabled: False
-                    on_text: root.on_ap_ssid(*args)
-                    max_chars: 24
-            GridLayout:
-                spacing: (dp(30), dp(5))
-                cols: 2
-                FieldLabel:
-                    text: 'Password'
-                    halign: 'right'
-                BetterTextInput:
-                    id: ap_password
-                    disabled: False
-                    on_text: root.on_ap_password(*args)
-                    max_chars: 24
-            SettingsView:
-                id: ap_channel
-                label_text: 'Channel'
-                size_hint_y: 0.5
-            SettingsView:
-                id: ap_encryption
-                label_text: 'Encryption'
-                size_hint_y: 0.5
-            HSeparator:
-                text: 'Cellular Configuration'
-            SettingsView:
-                size_hint_y: 0.20
-                rcid: 'cellEnable'
-                label_text: 'Cellular Module'
-                help_text: 'Enable if the Real-time telemetry module is installed'
-
-            SettingsView:
-                size_hint_y: 0.5
-                rcid: 'cellprovider'
-                label_text: 'Cellular Provider'
-                help_text: 'Select the cellular provider, or specify custom APN settings'
-            Label:
-                text: 'Custom Cellular Settings'
-                text_size: self.size
-                halign: 'center'
-                font_size: dp(26)
-            GridLayout:
-                cols: 2
-                spacing: (dp(30), dp(5))
-                FieldLabel:
-                    text: 'APN Host'
-                    halign: 'right'
-                ValueField:
-                    rcid: 'apnHost'
-                    disabled: True
-                    on_text: root.on_apn_host(*args)
-            GridLayout:
-                cols: 2
-                spacing: (dp(30), dp(5))
-                FieldLabel:
-                    halign: 'right'
-                    text: 'APN User Name'
-                ValueField:
-                    rcid: 'apnUser'
+                id: bluetooth
+                cols: 1
+                spacing: [0, dp(20)]
+                row_default_height: dp(40)
+                size_hint: [1, None]
+                height: self.minimum_height
+                HSeparator:
+                    size_hint_y: 0.5
+                    text: 'Bluetooth'
+                SettingsView:
+                    rcid: 'btEnable'
+                    label_text: 'Bluetooth'
+                    help_text: 'If the Bluetooth module is connected, enable it here'
                     size_hint_y: 1
-                    disabled: True
-                    on_text: root.on_apn_user(*args)
             GridLayout:
-                cols: 2
-                spacing: (dp(30), dp(5))
-                FieldLabel:
-                    halign: 'right'
-                    text: 'APN Password'
-                ValueField:
-                    rcid: 'apnPass'
-                    disabled: True
-                    size_hint_y: 1
-                    on_text: root.on_apn_pass(*args)
+                id: wifi
+                cols: 1
+                spacing: [0, dp(20)]
+                row_default_height: dp(40)
+                size_hint: [1, None]
+                height: self.minimum_height
+                HSeparator:
+                    text: 'WiFi'
+                SettingsView:
+                    id: wifi_enabled
+                    label_text: 'WiFi Module'
+                Label:
+                    text_size: self.size
+                    halign: 'center'
+                    text: 'Client Mode Configuration'
+                    font_size: dp(26)
+                Label:
+                    text: 'Use this mode to setup the wifi module to connect [b]to[/b] an existing wireless network.'
+                    markup: True
+                    text_size: (self.parent.width, None)
+                    padding: [dp(20), 0]
+                SettingsView:
+                    id: client_mode
+                    label_text: 'Client Mode'
+                GridLayout:
+                    spacing: (dp(30), dp(5))
+                    cols: 2
+                    FieldLabel:
+                        text: 'SSID'
+                        halign: 'right'
+                    ValueField:
+                        id: client_ssid
+                        disabled: False
+                        on_text: root.on_client_ssid(*args)
+                GridLayout:
+                    spacing: (dp(30), dp(5))
+                    cols: 2
+                    FieldLabel:
+                        text: 'Password'
+                        halign: 'right'
+                    ValueField:
+                        id: client_password
+                        disabled: False
+                        on_text: root.on_client_password(*args)
+                Label:
+                    text: 'Access Point Mode Configuration'
+                    text_size: self.size
+                    halign: 'center'
+                    font_size: dp(26)
+                Label:
+                    text: 'Use this mode to create a wireless network for your phone or table to connect to.'
+                    markup: True
+                    text_size: (self.parent.width, None)
+                    padding: [dp(20), 0]
+                SettingsView:
+                    id: ap_mode
+                    label_text: 'Access Point Mode'
+                GridLayout:
+                    spacing: (dp(30), dp(5))
+                    cols: 2
+                    FieldLabel:
+                        text: 'SSID'
+                        halign: 'right'
+                    BetterTextInput:
+                        id: ap_ssid
+                        disabled: False
+                        on_text: root.on_ap_ssid(*args)
+                        max_chars: 24
+                GridLayout:
+                    spacing: (dp(30), dp(5))
+                    cols: 2
+                    FieldLabel:
+                        text: 'Password'
+                        halign: 'right'
+                    BetterTextInput:
+                        id: ap_password
+                        disabled: False
+                        on_text: root.on_ap_password(*args)
+                        max_chars: 24
+                SettingsView:
+                    id: ap_channel
+                    label_text: 'Channel'
+                    height: dp(160)
+                SettingsView:
+                    id: ap_encryption
+                    label_text: 'Encryption'
+                    size_hint_y: 0.5
+            GridLayout:
+                id: cellular
+                cols: 1
+                spacing: [0, dp(20)]
+                row_default_height: dp(40)
+                size_hint: [1, None]
+                height: self.minimum_height
+                HSeparator:
+                    text: 'Cellular Configuration'
+                SettingsView:
+                    size_hint_y: 0.20
+                    rcid: 'cellEnable'
+                    label_text: 'Cellular Module'
+                    help_text: 'Enable if the Real-time telemetry module is installed'
+                SettingsView:
+                    size_hint_y: 0.5
+                    rcid: 'cellprovider'
+                    label_text: 'Cellular Provider'
+                    help_text: 'Select the cellular provider, or specify custom APN settings'
+                Label:
+                    text: 'Custom Cellular Settings'
+                    text_size: self.size
+                    halign: 'center'
+                    font_size: dp(26)
+                GridLayout:
+                    cols: 2
+                    spacing: (dp(30), dp(5))
+                    FieldLabel:
+                        text: 'APN Host'
+                        halign: 'right'
+                    ValueField:
+                        rcid: 'apnHost'
+                        disabled: True
+                        on_text: root.on_apn_host(*args)
+                GridLayout:
+                    cols: 2
+                    spacing: (dp(30), dp(5))
+                    FieldLabel:
+                        halign: 'right'
+                        text: 'APN User Name'
+                    ValueField:
+                        rcid: 'apnUser'
+                        size_hint_y: 1
+                        disabled: True
+                        on_text: root.on_apn_user(*args)
+                GridLayout:
+                    cols: 2
+                    spacing: (dp(30), dp(5))
+                    FieldLabel:
+                        halign: 'right'
+                        text: 'APN Password'
+                    ValueField:
+                        rcid: 'apnPass'
+                        disabled: True
+                        size_hint_y: 1
+                        on_text: root.on_apn_pass(*args)

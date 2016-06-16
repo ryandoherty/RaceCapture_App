@@ -14,6 +14,7 @@ from autosportlabs.racecapture.views.configuration.baseconfigview import BaseCon
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.logger import Logger
 from autosportlabs.uix.bettertextinput import BetterTextInput
+from kivy.modules import inspector
 
 WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
@@ -31,12 +32,18 @@ class WirelessConfigView(BaseConfigView):
     def __init__(self, **kwargs):
         Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
         super(WirelessConfigView, self).__init__(**kwargs)
+
+        Logger.info("WirelessConfigView: minimum_height: {}".format(self.ids.wireless_settings.minimum_height))
+        self.ids.wireless_settings.minimum_height = 900
+
         self.register_event_type('on_config_updated')
         self.base_dir = kwargs.get('base_dir')
+        self.rcp_capabilities = None
 
         btEnable = kvFind(self, 'rcid', 'btEnable')
         btEnable.bind(on_setting=self.on_bt_enable)
         btEnable.setControl(SettingsSwitch())
+        inspector.create_inspector(Window, btEnable)
 
         wifi_switch = self.ids.wifi_enabled
         wifi_switch.bind(on_setting=self.on_wifi_enable)
@@ -256,23 +263,34 @@ class WirelessConfigView(BaseConfigView):
 
         self.wifi_config = wifi_config
 
+    def _hide_unavailable_settings(self, capabilities):
+        if not capabilities.has_bluetooth:
+            self.ids.wireless_settings.remove_widget(self.ids.bluetooth)
+
+        # if not capabilities.has_cellular:
+        #     self.ids.wireless_settings.remove_widget(self.ids.cellular)
+
     def on_config_updated(self, rcpCfg):
         connectivityConfig = rcpCfg.connectivityConfig
-        
-        bluetoothEnabled = connectivityConfig.bluetoothConfig.btEnabled
-        cellEnabled = connectivityConfig.cellConfig.cellEnabled
-
-        kvFind(self, 'rcid', 'btEnable').setValue(bluetoothEnabled)
-        kvFind(self, 'rcid', 'cellEnable').setValue(cellEnabled)
-
-        self.apnHostField.text = connectivityConfig.cellConfig.apnHost
-        self.apnUserField.text = connectivityConfig.cellConfig.apnUser
-        self.apnPassField.text = connectivityConfig.cellConfig.apnPass
-
         self.connectivityConfig = connectivityConfig
+        self.rcp_capabilities = rcpCfg.capabilities
 
-        existingApnName = self.update_controls_state()
-        if existingApnName:
-            self.apnSpinner.text = existingApnName
+        self._hide_unavailable_settings(self.rcp_capabilities)
 
-        self._update_wifi_config(rcpCfg)
+        if self.rcp_capabilities.has_bluetooth:
+            bluetoothEnabled = connectivityConfig.bluetoothConfig.btEnabled
+            kvFind(self, 'rcid', 'btEnable').setValue(bluetoothEnabled)
+
+        if self.rcp_capabilities.has_cellular:
+            cellEnabled = connectivityConfig.cellConfig.cellEnabled
+            kvFind(self, 'rcid', 'cellEnable').setValue(cellEnabled)
+            self.apnHostField.text = connectivityConfig.cellConfig.apnHost
+            self.apnUserField.text = connectivityConfig.cellConfig.apnUser
+            self.apnPassField.text = connectivityConfig.cellConfig.apnPass
+
+            existingApnName = self.update_controls_state()
+            if existingApnName:
+                self.apnSpinner.text = existingApnName
+
+        if self.rcp_capabilities.has_wifi:
+            self._update_wifi_config(rcpCfg)
