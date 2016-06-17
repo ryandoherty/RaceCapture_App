@@ -1029,12 +1029,12 @@ class ChannelCapabilities(object):
 
     def from_json_dict(self, json_dict):
         if json_dict:
-            self.analog = int(json_dict.get('analog', self.analog))
-            self.imu = int(json_dict.get('imu', self.imu))
-            self.gpio = int(json_dict.get('gpio', self.gpio))
-            self.pwm = int(json_dict.get('pwm', self.pwm))
-            self.can = int(json_dict.get('can', self.can))
-            self.timer = int(json_dict.get('timer', self.timer))
+            self.analog = int(json_dict.get('analog', 0))
+            self.imu = int(json_dict.get('imu', 0))
+            self.gpio = int(json_dict.get('gpio', 0))
+            self.pwm = int(json_dict.get('pwm', 0))
+            self.can = int(json_dict.get('can', 0))
+            self.timer = int(json_dict.get('timer', 0))
 
 
 class SampleRateCapabilities(object):
@@ -1045,8 +1045,8 @@ class SampleRateCapabilities(object):
 
     def from_json_dict(self, json_dict):
         if json_dict:
-            self.sensor = json_dict.get('sensor', self.sensor)
-            self.gps = json_dict.get('gps', self.gps)
+            self.sensor = json_dict.get('sensor', 0)
+            self.gps = json_dict.get('gps', 0)
 
 
 class StorageCapabilities(object):
@@ -1057,8 +1057,8 @@ class StorageCapabilities(object):
 
     def from_json_dict(self, json_dict):
         if json_dict:
-            self.tracks = json_dict.get('tracks', self.tracks)
-            self.script = json_dict.get('script', self.script)
+            self.tracks = json_dict.get('tracks', 0)
+            self.script = json_dict.get('script', False)
 
 
 class LinksCapabilities(object):
@@ -1070,10 +1070,11 @@ class LinksCapabilities(object):
         self.usb = True
 
     def from_json_dict(self, json_dict):
-        self.bluetooth = json_dict.get('bluetooth', self.bluetooth)
-        self.cellular = json_dict.get('cellular', self.cellular)
-        self.wifi = json_dict.get('wifi', self.wifi)
-        self.usb = json_dict.get('usb', self.usb)
+        Logger.info("LinksCapabilities: {}".format(json_dict))
+        self.bluetooth = json_dict.get('bluetooth', False)
+        self.cellular = json_dict.get('cellular', False)
+        self.wifi = json_dict.get('wifi', False)
+        self.usb = json_dict.get('usb', False)
 
 
 class Capabilities(object):
@@ -1122,21 +1123,20 @@ class Capabilities(object):
         return self.links.bluetooth
 
     def from_json_dict(self, json_dict):
-        capabilities = json_dict.get('capabilities')
-        if capabilities:
-            channels = capabilities.get('channels')
+        if json_dict:
+            channels = json_dict.get('channels')
             if channels:
                 self.channels.from_json_dict(channels)
 
-            sample_rates = capabilities.get('sampleRates')
+            sample_rates = json_dict.get('sampleRates')
             if sample_rates:
                 self.sample_rates.from_json_dict(sample_rates)
 
-            storage = capabilities.get('db')
+            storage = json_dict.get('db')
             if storage:
                 self.storage.from_json_dict(storage)
 
-            links = capabilities.get('links')
+            links = json_dict.get('links')
             if links:
                 self.links.from_json_dict(links)
 
@@ -1203,7 +1203,9 @@ class RcpConfig(object):
                 if versionJson:
                     self.versionConfig.fromJson(versionJson)
 
-                self.capabilities.from_json_dict(rcpJson.get('capabilities'))
+                capabilities = rcpJson.get('capabilities', None)
+                if capabilities:
+                    self.capabilities.from_json_dict(capabilities)
 
                 analogCfgJson = rcpJson.get('analogCfg', None)
                 if analogCfgJson:

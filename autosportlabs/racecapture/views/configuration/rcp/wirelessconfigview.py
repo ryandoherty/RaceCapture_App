@@ -1,296 +1,66 @@
 import kivy
 kivy.require('1.9.1')
-import os
 from kivy.app import Builder
 from kivy.core.window import Window
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-import json
-from settingsview import SettingsView, SettingsSwitch, SettingsButton, SettingsMappedSpinner
-from autosportlabs.widgets.separator import HLineSeparator
-from valuefield import ValueField
-from utils import *
+from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.logger import Logger
-from autosportlabs.uix.bettertextinput import BetterTextInput
-from kivy.modules import inspector
+from autosportlabs.racecapture.views.configuration.rcp.wireless.bluetoothconfigview import BluetoothConfigView
+from autosportlabs.racecapture.views.configuration.rcp.wireless.cellularconfigview import CellularConfigView
+from autosportlabs.racecapture.views.configuration.rcp.wireless.wificonfigview import WifiConfigView
+from autosportlabs.racecapture.config.rcpconfig import Capabilities
+
 
 WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
+
 class WirelessConfigView(BaseConfigView):
-    customApnLabel = 'Custom APN'
-    apnSpinner = None
-    cellProviderInfo = None
-    connectivityConfig = None
-    wifi_config = None
-    apnHostField = None
-    apnUserField = None
-    apnPassField = None
-    base_dir = None
-    
-    def __init__(self, **kwargs):
+
+    def __init__(self, base_dir, **kwargs):
         Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
         super(WirelessConfigView, self).__init__(**kwargs)
 
-        Logger.info("WirelessConfigView: minimum_height: {}".format(self.ids.wireless_settings.minimum_height))
-        self.ids.wireless_settings.minimum_height = 900
-
         self.register_event_type('on_config_updated')
-        self.base_dir = kwargs.get('base_dir')
-        self.rcp_capabilities = None
+        self.base_dir = base_dir
+        self.rcp_capabilities = Capabilities()
+        self.rcp_config = None
+        self._views = []
 
-        btEnable = kvFind(self, 'rcid', 'btEnable')
-        btEnable.bind(on_setting=self.on_bt_enable)
-        btEnable.setControl(SettingsSwitch())
-        inspector.create_inspector(Window, btEnable)
+        self._render()
+        self._attach_event_handlers()
 
-        wifi_switch = self.ids.wifi_enabled
-        wifi_switch.bind(on_setting=self.on_wifi_enable)
-        wifi_switch.setControl(SettingsSwitch())
+    def _render(self):
+        if not self.rcp_capabilities or (self.rcp_capabilities and self.rcp_capabilities.has_bluetooth):
+            bluetooth_view = BluetoothConfigView(self.rcp_config)
+            self.ids.wireless_settings.add_widget(bluetooth_view, index=0)
+            self._views.append(bluetooth_view)
 
-        wifi_client_switch = self.ids.client_mode
-        wifi_client_switch.bind(on_setting=self.on_client_mode_enable)
-        wifi_client_switch.setControl(SettingsSwitch())
+        # if not self.rcp_capabilities or (self.rcp_capabilities and self.rcp_capabilities.has_wifi):
+        #     wifi_view = WifiConfigView(self.base_dir)
+        #     self.ids.wireless_settings.add_widget(wifi_view, index=0)
+        #     self._views.append(wifi_view)
+        #
+        # if not self.rcp_capabilities or (self.rcp_capabilities and self.rcp_capabilities.has_cellular):
+        #     cellular_view = CellularConfigView(self.base_dir)
+        #     self.ids.wireless_settings.add_widget(cellular_view, index=0)
+        #     self._views.append(cellular_view)
 
-        wifi_ap_switch = self.ids.ap_mode
-        wifi_ap_switch.bind(on_setting=self.on_ap_mode_enable)
-        wifi_ap_switch.setControl(SettingsSwitch())
+    def _attach_event_handlers(self):
+        for view in self._views:
+            view.bind(on_modified=self._on_views_modified)
 
-        ap_encryption = self.ids.ap_encryption
-        ap_encryption.bind(on_setting=self.on_ap_encryption)
-        encryption_spinner = SettingsMappedSpinner()
-        self.load_ap_encryption_spinner(encryption_spinner)
-        ap_encryption.setControl(encryption_spinner)
+    def on_config_updated(self, config):
+        # Just destroy everything, re-render
+        self.rcp_config = config
+        self._update_view_configs()
 
-        ap_channel = self.ids.ap_channel
-        ap_channel.bind(on_setting=self.on_ap_channel)
-        channel_spinner = SettingsMappedSpinner()
-        self.build_ap_channel_spinner(channel_spinner)
-        ap_channel.setControl(channel_spinner)
+    def _update_view_configs(self):
+        for view in self._views:
+            view.config_updated(self.rcp_config)
 
-        cellEnable = kvFind(self, 'rcid', 'cellEnable')
-        cellEnable.bind(on_setting=self.on_cell_enable)
-        cellEnable.setControl(SettingsSwitch())
+    def _on_views_modified(self, instance, value):
+        self.dispatch('on_modified')
 
-        cellProvider = kvFind(self, 'rcid', 'cellprovider')
-        cellProvider.bind(on_setting=self.on_cell_provider)
-        apnSpinner = SettingsMappedSpinner()
-        self.loadApnSettingsSpinner(apnSpinner)
-        self.apnSpinner = apnSpinner
-        cellProvider.setControl(apnSpinner)
-
-        self.apnHostField = kvFind(self, 'rcid', 'apnHost')
-        self.apnUserField = kvFind(self, 'rcid', 'apnUser')
-        self.apnPassField = kvFind(self, 'rcid', 'apnPass')
-
-    def on_ap_channel(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.ap_channel = int(value)
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_ap_encryption(self, instance, value):
-        Logger.info("WirelessConfigView: got new AP encryption: {}".format(value))
-        if self.wifi_config:
-            self.wifi_config.ap_encryption = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_client_ssid(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.client_ssid = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_ap_password(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.ap_password = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_ap_ssid(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.ap_ssid = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_client_password(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.client_password = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_ap_mode_enable(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.ap_mode_active = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_client_mode_enable(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.client_mode_active = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def on_wifi_enable(self, instance, value):
-        if self.wifi_config:
-            self.wifi_config.active = value
-            self.wifi_config.stale = True
-            self.dispatch('on_modified')
-
-    def setCustomApnFieldsDisabled(self, disabled):
-        self.apnHostField.disabled = disabled
-        self.apnUserField.disabled = disabled
-        self.apnPassField.disabled = disabled
-        
-    def on_cell_provider(self, instance, value):
-        apnSetting = self.getApnSettingByName(value)
-        knownProvider = False
-        if apnSetting:
-            self.apnHostField.text = apnSetting['apn_host']
-            self.apnUserField.text = apnSetting['apn_user']
-            self.apnPassField.text = apnSetting['apn_pass']
-            knownProvider = True
-            
-        self.update_controls_state()
-        self.setCustomApnFieldsDisabled(knownProvider)
-
-    def on_cell_enable(self, instance, value):
-        if self.connectivityConfig:
-            self.connectivityConfig.cellConfig.cellEnabled = value
-            self.connectivityConfig.stale = True
-            self.dispatch('on_modified')
-                
-    def on_bt_configure(self, instance, value):
-        pass
-    
-    def on_bt_enable(self, instance, value):
-        if self.connectivityConfig:
-            self.connectivityConfig.bluetoothConfig.btEnabled = value
-            self.connectivityConfig.stale = True
-            self.dispatch('on_modified')
-                        
-    def on_apn_host(self, instance, value):
-        if self.connectivityConfig:
-            self.connectivityConfig.cellConfig.apnHost = value
-            self.connectivityConfig.stale = True
-            self.dispatch('on_modified')
-                        
-    def on_apn_user(self, instance, value):
-        if self.connectivityConfig:
-            self.connectivityConfig.cellConfig.apnUser = value
-            self.connectivityConfig.stale = True
-            self.dispatch('on_modified')
-                        
-    def on_apn_pass(self, instance, value):
-        if self.connectivityConfig:
-            self.connectivityConfig.cellConfig.apnPass = value
-            self.connectivityConfig.stale = True
-            self.dispatch('on_modified')
-                        
-    def getApnSettingByName(self, name):
-        providers = self.cellProviderInfo['cellProviders']
-        for apnName in providers:
-            if apnName == name:
-                return providers[apnName]
-        return None
-
-    def build_ap_channel_spinner(self, spinner):
-        channel_map = {}
-
-        for i in range(1, 12, 1):
-            i = str(i)
-            channel_map[i] = i
-
-        spinner.setValueMap(channel_map, "1", sort_key=lambda value: int(value))
-
-    def load_ap_encryption_spinner(self, spinner):
-        json_data = open(os.path.join(self.base_dir, 'resource', 'settings', 'ap_encryption.json'))
-        encryption_json = json.load(json_data)
-
-        spinner.setValueMap(encryption_json['types'], 'WPA2')
-
-    def loadApnSettingsSpinner(self, spinner):
-        try:
-            json_data = open(os.path.join(self.base_dir, 'resource', 'settings', 'cell_providers.json'))
-            cellProviderInfo = json.load(json_data)
-            apnMap = {}
-            apnMap['custom'] = self.customApnLabel
-
-            for name in cellProviderInfo['cellProviders']:
-                apnMap[name] = name
-                    
-            spinner.setValueMap(apnMap, self.customApnLabel)
-            self.cellProviderInfo = cellProviderInfo
-        except Exception as detail:
-            print('Error loading cell providers ' + str(detail))
-        
-    def update_controls_state(self):
-        if self.connectivityConfig:
-            cellProviderInfo = self.cellProviderInfo
-            existingApnName = self.customApnLabel
-            customFieldsDisabled = False
-            cellConfig = self.connectivityConfig.cellConfig
-            providers = cellProviderInfo['cellProviders']
-            for name in providers:
-                apnInfo = providers[name]
-                if  apnInfo['apn_host'] == cellConfig.apnHost and apnInfo['apn_user'] == cellConfig.apnUser and apnInfo['apn_pass'] == cellConfig.apnPass:
-                    existingApnName = name
-                    customFieldsDisabled = True
-                    break
-            self.setCustomApnFieldsDisabled(customFieldsDisabled)
-            return existingApnName
-
-    def _update_wifi_config(self, rcpCfg):
-        wifi_config = rcpCfg.wifi_config
-
-        self.ids.wifi_enabled.setValue(wifi_config.active)
-
-        self.ids.client_mode.setValue(wifi_config.client_mode_active)
-        self.ids.client_ssid.text = wifi_config.client_ssid
-        self.ids.client_password.text = wifi_config.client_password
-
-        self.ids.ap_mode.setValue(wifi_config.ap_mode_active)
-        self.ids.ap_ssid.text = wifi_config.ap_ssid
-        self.ids.ap_password.text = wifi_config.ap_password
-
-        if wifi_config.ap_encryption != "":
-            self.ids.ap_encryption.setValue(wifi_config.ap_encryption)
-
-        if wifi_config.ap_channel:
-            self.ids.ap_channel.setValue(str(wifi_config.ap_channel))
-
-        self.wifi_config = wifi_config
-
-    def _hide_unavailable_settings(self, capabilities):
-        if not capabilities.has_bluetooth:
-            self.ids.wireless_settings.remove_widget(self.ids.bluetooth)
-
-        # if not capabilities.has_cellular:
-        #     self.ids.wireless_settings.remove_widget(self.ids.cellular)
-
-    def on_config_updated(self, rcpCfg):
-        connectivityConfig = rcpCfg.connectivityConfig
-        self.connectivityConfig = connectivityConfig
-        self.rcp_capabilities = rcpCfg.capabilities
-
-        self._hide_unavailable_settings(self.rcp_capabilities)
-
-        if self.rcp_capabilities.has_bluetooth:
-            bluetoothEnabled = connectivityConfig.bluetoothConfig.btEnabled
-            kvFind(self, 'rcid', 'btEnable').setValue(bluetoothEnabled)
-
-        if self.rcp_capabilities.has_cellular:
-            cellEnabled = connectivityConfig.cellConfig.cellEnabled
-            kvFind(self, 'rcid', 'cellEnable').setValue(cellEnabled)
-            self.apnHostField.text = connectivityConfig.cellConfig.apnHost
-            self.apnUserField.text = connectivityConfig.cellConfig.apnUser
-            self.apnPassField.text = connectivityConfig.cellConfig.apnPass
-
-            existingApnName = self.update_controls_state()
-            if existingApnName:
-                self.apnSpinner.text = existingApnName
-
-        if self.rcp_capabilities.has_wifi:
-            self._update_wifi_config(rcpCfg)
+    def on_modified(self, *args):
+        self.dispatch('on_modified')

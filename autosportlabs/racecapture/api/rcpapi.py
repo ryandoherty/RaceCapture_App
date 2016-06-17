@@ -370,6 +370,8 @@ class RcpApi:
         def query_available_configs(capabilities_dict):
             Logger.info("RCPAPI: got capabilities: {}".format(capabilities_dict))
 
+            capabilities_dict = capabilities_dict.get('capabilities')
+
             capabilities = Capabilities()
             capabilities.from_json_dict(capabilities_dict)
 
