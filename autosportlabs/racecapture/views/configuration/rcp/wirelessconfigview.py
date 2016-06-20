@@ -43,7 +43,7 @@ class WirelessConfigView(BaseConfigView):
             self._views.append(wifi_view)
 
         if not self.rcp_capabilities or (self.rcp_capabilities and self.rcp_capabilities.has_cellular):
-            cellular_view = CellularConfigView(self.base_dir)
+            cellular_view = CellularConfigView(self.base_dir, self.rcp_config)
             self.ids.wireless_settings.add_widget(cellular_view, index=0)
             self._views.append(cellular_view)
 

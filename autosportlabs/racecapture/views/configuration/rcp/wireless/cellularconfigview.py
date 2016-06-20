@@ -12,28 +12,20 @@ CELLULAR_CONFIG_VIEW = 'autosportlabs/racecapture/views/configuration/rcp/wirele
 
 class CellularConfigView(GridLayout):
 
-    def __init__(self, base_dir, **kwargs):
+    def __init__(self, base_dir, config, **kwargs):
         Builder.load_file(CELLULAR_CONFIG_VIEW)
         super(CellularConfigView, self).__init__(**kwargs)
         self.connectivityConfig = None
         self.base_dir = base_dir
         self.customApnLabel = 'Custom APN'
         self.register_event_type('on_modified')
-
-        cellEnable = kvFind(self, 'rcid', 'cellEnable')
-        cellEnable.setControl(SettingsSwitch())
-        cellEnable.control.bind(on_value=self.on_cell_change)
-
-        cellProvider = kvFind(self, 'rcid', 'cellprovider')
-        cellProvider.bind(on_setting=self.on_cell_provider)
-        apnSpinner = SettingsMappedSpinner()
-        self.loadApnSettingsSpinner(apnSpinner)
-        self.apnSpinner = apnSpinner
-        cellProvider.setControl(apnSpinner)
+        self.apnSpinner = None
 
         self.apnHostField = kvFind(self, 'rcid', 'apnHost')
         self.apnUserField = kvFind(self, 'rcid', 'apnUser')
         self.apnPassField = kvFind(self, 'rcid', 'apnPass')
+
+        self.config_updated(config)
 
     def setCustomApnFieldsDisabled(self, disabled):
         self.apnHostField.disabled = disabled
@@ -114,15 +106,28 @@ class CellularConfigView(GridLayout):
             self.setCustomApnFieldsDisabled(customFieldsDisabled)
             return existingApnName
 
-    def on_config_updated(self, rcpCfg):
-        cellEnabled = rcpCfg.connectivityConfig.cellConfig.cellEnabled
-        kvFind(self, 'rcid', 'cellEnable').setValue(cellEnabled)
+    def config_updated(self, rcpCfg):
+        Logger.info("CellularConfig: got new config: {}".format(rcpCfg.connectivityConfig.cellConfig.toJson()))
+
+        cellEnable = kvFind(self, 'rcid', 'cellEnable')
+        cellEnable.setControl(SettingsSwitch(active=rcpCfg.connectivityConfig.cellConfig.cellEnabled))
+        cellEnable.control.bind(active=self.on_cell_change)
+
+        cellProvider = kvFind(self, 'rcid', 'cellprovider')
+        cellProvider.bind(on_setting=self.on_cell_provider)
+        apnSpinner = SettingsMappedSpinner()
+
+        self.loadApnSettingsSpinner(apnSpinner)
+        self.apnSpinner = apnSpinner
+        cellProvider.setControl(apnSpinner)
+
         self.apnHostField.text = rcpCfg.connectivityConfig.cellConfig.apnHost
         self.apnUserField.text = rcpCfg.connectivityConfig.cellConfig.apnUser
         self.apnPassField.text = rcpCfg.connectivityConfig.cellConfig.apnPass
 
         existingApnName = self.update_controls_state()
         if existingApnName:
+            Logger.info("CellularConfig: existing apn name: {}".format(existingApnName))
             self.apnSpinner.text = existingApnName
 
         self.connectivityConfig = rcpCfg.connectivityConfig

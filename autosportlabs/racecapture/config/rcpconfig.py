@@ -1136,9 +1136,12 @@ class Capabilities(object):
             if storage:
                 self.storage.from_json_dict(storage)
 
+            # If there is no links object, this is old firmware, which only supports BT & Cell
             links = json_dict.get('links')
             if links:
                 self.links.from_json_dict(links)
+            else:
+                self.links.from_json_dict({'bluetooth': True, 'cellular': True})
 
 
 class RcpConfig(object):
