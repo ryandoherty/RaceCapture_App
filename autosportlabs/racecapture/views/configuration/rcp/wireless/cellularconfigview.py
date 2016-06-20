@@ -21,8 +21,8 @@ class CellularConfigView(GridLayout):
         self.register_event_type('on_modified')
 
         cellEnable = kvFind(self, 'rcid', 'cellEnable')
-        cellEnable.bind(on_setting=self.on_cell_enable)
         cellEnable.setControl(SettingsSwitch())
+        cellEnable.control.bind(on_value=self.on_cell_change)
 
         cellProvider = kvFind(self, 'rcid', 'cellprovider')
         cellProvider.bind(on_setting=self.on_cell_provider)
@@ -92,7 +92,7 @@ class CellularConfigView(GridLayout):
         self.update_controls_state()
         self.setCustomApnFieldsDisabled(knownProvider)
 
-    def on_cell_enable(self, instance, value):
+    def on_cell_change(self, instance, value):
         if self.connectivityConfig:
             self.connectivityConfig.cellConfig.cellEnabled = value
             self.connectivityConfig.stale = True
@@ -124,6 +124,8 @@ class CellularConfigView(GridLayout):
         existingApnName = self.update_controls_state()
         if existingApnName:
             self.apnSpinner.text = existingApnName
+
+        self.connectivityConfig = rcpCfg.connectivityConfig
 
     def on_modified(self):
         pass

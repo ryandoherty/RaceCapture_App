@@ -21,16 +21,16 @@ class WifiConfigView(GridLayout):
         self.register_event_type('on_modified')
 
         wifi_switch = self.ids.wifi_enabled
-        wifi_switch.bind(on_setting=self.on_wifi_enable)
         wifi_switch.setControl(SettingsSwitch())
+        wifi_switch.control.bind(on_value=self.on_wifi_enable_change)
 
         wifi_client_switch = self.ids.client_mode
-        wifi_client_switch.bind(on_setting=self.on_client_mode_enable)
         wifi_client_switch.setControl(SettingsSwitch())
+        wifi_client_switch.control.bind(on_value=self.on_client_mode_enable_change)
 
         wifi_ap_switch = self.ids.ap_mode
-        wifi_ap_switch.bind(on_setting=self.on_ap_mode_enable)
         wifi_ap_switch.setControl(SettingsSwitch())
+        wifi_ap_switch.control.bind(on_value=self.on_ap_mode_enable_change)
 
         ap_encryption = self.ids.ap_encryption
         ap_encryption.bind(on_setting=self.on_ap_encryption)
@@ -81,19 +81,19 @@ class WifiConfigView(GridLayout):
             self.wifi_config.stale = True
             self.dispatch('on_modified')
 
-    def on_ap_mode_enable(self, instance, value):
+    def on_ap_mode_enable_change(self, instance, value):
         if self.wifi_config:
             self.wifi_config.ap_mode_active = value
             self.wifi_config.stale = True
             self.dispatch('on_modified')
 
-    def on_client_mode_enable(self, instance, value):
+    def on_client_mode_enable_change(self, instance, value):
         if self.wifi_config:
             self.wifi_config.client_mode_active = value
             self.wifi_config.stale = True
             self.dispatch('on_modified')
 
-    def on_wifi_enable(self, instance, value):
+    def on_wifi_enable_change(self, instance, value):
         if self.wifi_config:
             self.wifi_config.active = value
             self.wifi_config.stale = True
@@ -114,7 +114,7 @@ class WifiConfigView(GridLayout):
 
         spinner.setValueMap(encryption_json['types'], 'WPA2')
 
-    def on_config_updated(self, rcpCfg):
+    def config_updated(self, rcpCfg):
 
         wifi_config = rcpCfg.wifi_config
 
