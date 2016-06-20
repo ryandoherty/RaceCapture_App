@@ -170,7 +170,12 @@ class RcpApi:
                 if msg:
                     # clean incoming string, and drop illegal characters
                     msg = unicode(msg, errors='ignore')
-                    Logger.debug('RCPAPI: Rx: ' + str(msg))
+
+                    if 's' in msg:
+                        Logger.trace('RCPAPI: Rx: ' + str(msg))
+                    else:
+                        Logger.debug('RCPAPI: Rx: ' + str(msg))
+
                     msgJson = json.loads(msg, strict=False)
                     Clock.schedule_once(lambda dt: self.on_rx(True))
                     error_count = 0
@@ -338,7 +343,10 @@ class RcpApi:
 
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
 
-            Logger.debug('RCPAPI: Tx: ' + cmdStr)
+            if "s" in cmd:
+                Logger.trace('RCPAPI: Tx: ' + cmdStr)
+            else:
+                Logger.debug('RCPAPI: Tx: ' + cmdStr)
             comms.write_message(cmdStr)
         except Exception:
             self.recover_connection()

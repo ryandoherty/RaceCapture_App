@@ -16,23 +16,25 @@ class BluetoothConfigView(GridLayout):
         Builder.load_file(BLUETOOTH_CONFIG_VIEW)
         super(BluetoothConfigView, self).__init__(**kwargs)
 
+        self.config = None
         self.register_event_type('on_modified')
 
-        bluetooth_enabled = self.ids.bt_enable
-        bluetooth_enabled.setControl(SettingsSwitch())
-        bluetooth_enabled.control.bind(on_value=self.on_bluetooth_enabled_change)
-
-        self.config = config
+        self.config_updated(config)
 
     def on_bluetooth_enabled_change(self, instance, value):
-        if self.config and self.config.connectivityConfig:
+        if self.config:
             self.config.connectivityConfig.bluetoothConfig.btEnabled = value
             self.config.connectivityConfig.stale = True
             self.dispatch('on_modified')
 
     def config_updated(self, config):
         self.config = config
-        self.ids.bt_enable.control.active = self.config.connectivityConfig.bluetoothConfig.btEnabled
+
+        value = self.config.connectivityConfig.bluetoothConfig.btEnabled if config else False
+
+        bluetooth_enabled = self.ids.bt_enable
+        bluetooth_enabled.setControl(SettingsSwitch(active=value))
+        bluetooth_enabled.control.bind(active=self.on_bluetooth_enabled_change)
 
     def on_modified(self):
         pass

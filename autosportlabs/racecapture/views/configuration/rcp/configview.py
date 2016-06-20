@@ -191,7 +191,7 @@ class ConfigView(Screen):
 
         attach_node('CAN Bus', None, lambda: CANConfigView())
         attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
-        attach_node('Wireless', None, lambda: WirelessConfigView(self.base_dir))
+        attach_node('Wireless', None, lambda: WirelessConfigView(self.base_dir, self.rc_config, self.rc_config.capabilities))
 
         if self.rc_config.capabilities.has_cellular:
             attach_node('Telemetry', None, lambda: TelemetryConfigView())

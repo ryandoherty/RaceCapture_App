@@ -17,14 +17,15 @@ WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wir
 
 class WirelessConfigView(BaseConfigView):
 
-    def __init__(self, base_dir, **kwargs):
+    def __init__(self, base_dir, config, capabilities, **kwargs):
         Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
         super(WirelessConfigView, self).__init__(**kwargs)
 
         self.register_event_type('on_config_updated')
+        self.register_event_type('on_config_modified')
         self.base_dir = base_dir
-        self.rcp_capabilities = Capabilities()
-        self.rcp_config = None
+        self.rcp_capabilities = capabilities
+        self.rcp_config = config
         self._views = []
 
         self._render()
@@ -37,14 +38,14 @@ class WirelessConfigView(BaseConfigView):
             self._views.append(bluetooth_view)
 
         if not self.rcp_capabilities or (self.rcp_capabilities and self.rcp_capabilities.has_wifi):
-            wifi_view = WifiConfigView(self.base_dir)
+            wifi_view = WifiConfigView(self.base_dir, self.rcp_config)
             self.ids.wireless_settings.add_widget(wifi_view, index=0)
             self._views.append(wifi_view)
 
-        # if not self.rcp_capabilities or (self.rcp_capabilities and self.rcp_capabilities.has_cellular):
-        #     cellular_view = CellularConfigView(self.base_dir)
-        #     self.ids.wireless_settings.add_widget(cellular_view, index=0)
-        #     self._views.append(cellular_view)
+        if not self.rcp_capabilities or (self.rcp_capabilities and self.rcp_capabilities.has_cellular):
+            cellular_view = CellularConfigView(self.base_dir)
+            self.ids.wireless_settings.add_widget(cellular_view, index=0)
+            self._views.append(cellular_view)
 
     def _attach_event_handlers(self):
         for view in self._views:
@@ -59,8 +60,9 @@ class WirelessConfigView(BaseConfigView):
         for view in self._views:
             view.config_updated(self.rcp_config)
 
-    def _on_views_modified(self, instance, value):
-        self.dispatch('on_modified')
+    def _on_views_modified(self, *args):
+        Logger.debug("Got view modified")
+        self.dispatch('on_config_modified')
 
-    def on_modified(self, *args):
-        self.dispatch('on_modified')
+    def on_config_modified(self, *args):
+        pass
