@@ -107,7 +107,6 @@ class CellularConfigView(GridLayout):
             return existingApnName
 
     def config_updated(self, rcpCfg):
-        Logger.info("CellularConfig: got new config: {}".format(rcpCfg.connectivityConfig.cellConfig.toJson()))
 
         cellEnable = kvFind(self, 'rcid', 'cellEnable')
         cellEnable.setControl(SettingsSwitch(active=rcpCfg.connectivityConfig.cellConfig.cellEnabled))
@@ -127,7 +126,6 @@ class CellularConfigView(GridLayout):
 
         existingApnName = self.update_controls_state()
         if existingApnName:
-            Logger.info("CellularConfig: existing apn name: {}".format(existingApnName))
             self.apnSpinner.text = existingApnName
 
         self.connectivityConfig = rcpCfg.connectivityConfig

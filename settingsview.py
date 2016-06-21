@@ -114,7 +114,7 @@ class SettingsView(RelativeLayout):
         
     def setControl(self, widget):
         if self.control:
-            self.remove_widget(self.control)
+            self.ids.control.remove_widget(self.control)
 
         widget.size_hint_y=1.0
         kvFind(self, 'rcid', 'control').add_widget(widget)

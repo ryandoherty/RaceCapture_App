@@ -83,6 +83,9 @@ class ConfigView(Screen):
         self.register_event_type('on_read_config')
         self.register_event_type('on_write_config')
 
+        self._sn = ''
+        self.ids.menu.bind(selected_node=self.on_select_node)
+
     def on_config_written(self, *args):
         self.writeStale = False
 
@@ -99,8 +102,29 @@ class ConfigView(Screen):
         self.update_runtime_channels(runtime_channels)
 
     def on_config_updated(self, config):
-        self.rc_config = config
-        self.update_config_views()
+        if config.versionConfig.serial != self._sn:
+            # New device, redraw
+            # Our config object is the same object with new values, so we need to copy our value
+            self._sn = copy(config.versionConfig.serial)
+            self._clear()
+            self.init_screen()
+        else:
+            self.rc_config = config
+            self.update_config_views()
+
+    def _clear(self):
+        nodes = []
+
+        # Building an array because if we remove while iterating we end up skipping things
+        for node in self.ids.menu.iterate_all_nodes():
+            nodes.append(node)
+
+        for node in nodes:
+            self.ids.menu.remove_node(node)
+
+        self.ids.menu.clear_widgets()
+        del(self.configViews[:])
+        self.ids.content.clear_widgets()
 
     def on_track_manager(self, instance, value):
         self.update_tracks()
@@ -131,32 +155,6 @@ class ConfigView(Screen):
 
     def createConfigViews(self):
         tree = self.ids.menu
-
-        def create_tree(text):
-            return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))
-
-        def show_node(node):
-            view = node.view
-            if not view:
-                view = node.view_builder()
-                self.configViews.append(view)
-                view.bind(on_config_modified=self.on_config_modified)
-                node.view = view
-                if self.loaded:
-                    if self.rc_config:
-                        view.dispatch('on_config_updated', self.rc_config)
-                    if self.track_manager:
-                        view.dispatch('on_tracks_updated', self.track_manager)
-            Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
-
-        def on_select_node(instance, value):
-            # ensure that any keyboard is released
-            try:
-                self.ids.content.get_parent_window().release_keyboard()
-            except:
-                pass
-            self.ids.content.clear_widgets()
-            Clock.schedule_once(lambda dt: show_node(value))
 
         def attach_node(text, n, view_builder):
             label = LinkedTreeViewLabel(text=text)
@@ -202,12 +200,36 @@ class ConfigView(Screen):
         if FIRMWARE_UPDATABLE:
             attach_node('Firmware', None, lambda: FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
 
-        tree.bind(selected_node=on_select_node)
         tree.select_node(defaultNode)
 
         self.update_runtime_channels(runtime_channels)
         self.update_tracks()
         self.loaded = True
+
+    def show_node(self, node):
+        view = node.view
+        if not view:
+            view = node.view_builder()
+            self.configViews.append(view)
+            view.bind(on_config_modified=self.on_config_modified)
+            node.view = view
+            if self.loaded:
+                if self.rc_config:
+                    view.dispatch('on_config_updated', self.rc_config)
+                if self.track_manager:
+                    view.dispatch('on_tracks_updated', self.track_manager)
+        Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
+
+    def on_select_node(self, instance, value):
+        if not value:
+            return
+        # ensure that any keyboard is released
+        try:
+            self.ids.content.get_parent_window().release_keyboard()
+        except:
+            pass
+        self.ids.content.clear_widgets()
+        Clock.schedule_once(lambda dt: self.show_node(value))
 
     def updateControls(self):
         Logger.debug("ConfigView: data is stale: " + str(self.writeStale))

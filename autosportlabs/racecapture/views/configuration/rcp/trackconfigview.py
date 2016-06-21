@@ -379,8 +379,11 @@ class ManualTrackConfigScreen(Screen):
         
         self.trackCfg = trackCfg
         self.updateTrackViewState()
-            
+
+
 class TrackConfigView(BaseConfigView):
+
+    Builder.load_file(TRACK_CONFIG_VIEW_KV)
     trackCfg = None
     trackDb = None
     
@@ -390,7 +393,6 @@ class TrackConfigView(BaseConfigView):
     _databus = None
     
     def __init__(self, **kwargs):
-        Builder.load_file(TRACK_CONFIG_VIEW_KV)
         super(TrackConfigView, self).__init__(**kwargs)
         self._databus = kwargs.get('databus')
         self.register_event_type('on_config_updated')
