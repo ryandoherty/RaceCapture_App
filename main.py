@@ -441,6 +441,7 @@ class RaceCaptureApp(App):
         self.showActivity('Searching {}'.format(info))
 
     def _on_rcp_disconnect(self):
+        self.rc_config.loaded = False
         if self._telemetry_connection.data_connected:
             self._telemetry_connection.data_connected = False
 
