@@ -22,9 +22,9 @@ class CANBaudRateSpinner(SettingsMappedSpinner):
 class CANConfigView(BaseConfigView):
     can_config = None
     can_settings = []
-    
+    Builder.load_file(CAN_CONFIG_VIEW_KV)
+
     def __init__(self, **kwargs):    
-        Builder.load_file(CAN_CONFIG_VIEW_KV)
         super(CANConfigView, self).__init__(**kwargs)
         
         self.register_event_type('on_config_updated')    

@@ -31,9 +31,9 @@ else:
 class FirmwareUpdateView(BaseConfigView):
     progress_gauge = ObjectProperty(None)
     _settings = None
-    
+    Builder.load_file(FIRMWARE_UPDATE_VIEW_KV)
+
     def __init__(self, **kwargs):
-        Builder.load_file(FIRMWARE_UPDATE_VIEW_KV)
         super(FirmwareUpdateView, self).__init__(**kwargs)
         self._settings = kwargs.get('settings', None)
         self.register_event_type('on_config_updated')

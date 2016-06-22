@@ -16,9 +16,9 @@ WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wir
 
 
 class WirelessConfigView(BaseConfigView):
+    Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
 
     def __init__(self, base_dir, config, capabilities, **kwargs):
-        Builder.load_file(WIRELESS_CONFIG_VIEW_KV)
         super(WirelessConfigView, self).__init__(**kwargs)
 
         self.register_event_type('on_config_updated')

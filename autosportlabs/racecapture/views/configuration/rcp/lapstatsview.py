@@ -15,9 +15,9 @@ LAPSTATS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/lapstatsvi
 class LapStatsView(BaseConfigView):
     lap_config = None
     gps_config = None
-    
+    Builder.load_file(LAPSTATS_VIEW_KV)
+
     def __init__(self, **kwargs):
-        Builder.load_file(LAPSTATS_VIEW_KV)            
         super(LapStatsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         self.ids.lapstats.setControl(SettingsSwitch())
