@@ -1036,6 +1036,16 @@ class ChannelCapabilities(object):
             self.can = int(json_dict.get('can', 0))
             self.timer = int(json_dict.get('timer', 0))
 
+    def to_json_dict(self):
+        return {
+            "analog": self.analog,
+            "imu": self.imu,
+            "gpio": self.gpio,
+            "pwm": self.pwm,
+            "can": self.can,
+            "timer": self.timer
+        }
+
 
 class SampleRateCapabilities(object):
 
@@ -1048,6 +1058,12 @@ class SampleRateCapabilities(object):
             self.sensor = json_dict.get('sensor', 0)
             self.gps = json_dict.get('gps', 0)
 
+    def to_json_dict(self):
+        return {
+            "sensor": self.sensor,
+            "gps": self.gps
+        }
+
 
 class StorageCapabilities(object):
 
@@ -1059,6 +1075,12 @@ class StorageCapabilities(object):
         if json_dict:
             self.tracks = json_dict.get('tracks', 0)
             self.script = json_dict.get('script', False)
+
+    def to_json_dict(self):
+        return {
+            "tracks": self.tracks,
+            "script": self.script
+        }
 
 
 class LinksCapabilities(object):
@@ -1075,6 +1097,14 @@ class LinksCapabilities(object):
         self.cellular = json_dict.get('cellular', False)
         self.wifi = json_dict.get('wifi', False)
         self.usb = json_dict.get('usb', False)
+
+    def to_json_dict(self):
+        return {
+            "bluetooth": self.bluetooth,
+            "cellular": self.cellular,
+            "wifi": self.wifi,
+            "usb": self.usb
+        }
 
 
 class Capabilities(object):
@@ -1142,6 +1172,14 @@ class Capabilities(object):
                 self.links.from_json_dict(links)
             else:
                 self.links.from_json_dict({'bluetooth': True, 'cellular': True})
+
+    def to_json_dict(self):
+        return {
+            "channels": self.channels.to_json_dict(),
+            "db": self.storage.to_json_dict(),
+            "sampleRates": self.sample_rates.to_json_dict(),
+            "links": self.links.to_json_dict()
+        }
 
 
 class RcpConfig(object):
