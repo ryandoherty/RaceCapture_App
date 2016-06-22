@@ -14,9 +14,9 @@ TELEMETRY_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/te
 
 class TelemetryConfigView(BaseConfigView):
     connectivityConfig = None
+    Builder.load_file(TELEMETRY_CONFIG_VIEW_KV)
 
     def __init__(self, **kwargs):    
-        Builder.load_file(TELEMETRY_CONFIG_VIEW_KV)
         super(TelemetryConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
     
