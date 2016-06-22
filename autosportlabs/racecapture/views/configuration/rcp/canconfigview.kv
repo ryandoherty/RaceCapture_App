@@ -2,7 +2,6 @@
 
 
 <CANBaudRateSettings>:
-	size_hint_y: 0.4
 	label_text: 'CAN Baud Rate'
 	help_text: ''
 
@@ -30,10 +29,12 @@
 		text: 'Specify the baud rate for the available CAN interfaces'
 		
 	GridLayout:
-		size_hint_y: 0.3
 		cols: 1
 		id: can_bauds
 		orientation: 'vertical'
+		row_default_height: dp(40)
+		row_force_default: True
+		spacing: dp(20)
 	
 
 
