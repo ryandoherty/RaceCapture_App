@@ -1020,7 +1020,7 @@ class VersionConfig(object):
 class ChannelCapabilities(object):
 
     def __init__(self):
-        self.analog = 7
+        self.analog = 8
         self.imu = 6
         self.gpio = 3
         self.timer = 3
