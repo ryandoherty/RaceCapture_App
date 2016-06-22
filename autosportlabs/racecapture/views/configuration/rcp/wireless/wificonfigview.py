@@ -7,11 +7,100 @@ import os, json
 from settingsview import SettingsView, SettingsSwitch, SettingsButton, SettingsMappedSpinner
 from autosportlabs.uix.bettertextinput import BetterTextInput
 
-WIFI_CONFIG_VIEW = 'autosportlabs/racecapture/views/configuration/rcp/wireless/wificonfigview.kv'
+Builder.load_string('''
+
+<WifiConfigView>:
+    id: wifi
+    cols: 1
+    spacing: [0, dp(20)]
+    row_default_height: dp(40)
+    size_hint: [1, None]
+    height: self.minimum_height
+    HSeparator:
+        text: 'WiFi'
+    SettingsView:
+        id: wifi_enabled
+        label_text: 'WiFi Module'
+    Label:
+        text_size: self.size
+        halign: 'center'
+        text: 'Client Mode Configuration'
+        font_size: dp(26)
+    Label:
+        text: 'Use this mode to setup the wifi module to connect [b]to[/b] an existing wireless network.'
+        markup: True
+        text_size: (self.parent.width, None)
+        padding: [dp(20), 0]
+    SettingsView:
+        id: client_mode
+        label_text: 'Client Mode'
+    GridLayout:
+        spacing: (dp(30), dp(5))
+        cols: 2
+        FieldLabel:
+            text: 'SSID'
+            halign: 'right'
+        ValueField:
+            id: client_ssid
+            disabled: False
+            on_text: root.on_client_ssid(*args)
+    GridLayout:
+        spacing: (dp(30), dp(5))
+        cols: 2
+        FieldLabel:
+            text: 'Password'
+            halign: 'right'
+        ValueField:
+            id: client_password
+            disabled: False
+            on_text: root.on_client_password(*args)
+    Label:
+        text: 'Access Point Mode Configuration'
+        text_size: self.size
+        halign: 'center'
+        font_size: dp(26)
+    Label:
+        text: 'Use this mode to create a wireless network for your phone or table to connect to.'
+        markup: True
+        text_size: (self.parent.width, None)
+        padding: [dp(20), 0]
+    SettingsView:
+        id: ap_mode
+        label_text: 'Access Point Mode'
+    GridLayout:
+        spacing: (dp(30), dp(5))
+        cols: 2
+        FieldLabel:
+            text: 'SSID'
+            halign: 'right'
+        BetterTextInput:
+            id: ap_ssid
+            disabled: False
+            on_text: root.on_ap_ssid(*args)
+            max_chars: 24
+    GridLayout:
+        spacing: (dp(30), dp(5))
+        cols: 2
+        FieldLabel:
+            text: 'Password'
+            halign: 'right'
+        BetterTextInput:
+            id: ap_password
+            disabled: False
+            on_text: root.on_ap_password(*args)
+            max_chars: 24
+    SettingsView:
+        id: ap_channel
+        label_text: 'Channel'
+        height: dp(160)
+    SettingsView:
+        id: ap_encryption
+        label_text: 'Encryption'
+        size_hint_y: 0.5
+''')
 
 
 class WifiConfigView(GridLayout):
-    Builder.load_file(WIFI_CONFIG_VIEW)
 
     def __init__(self, base_dir, config, **kwargs):
         super(WifiConfigView, self).__init__(**kwargs)

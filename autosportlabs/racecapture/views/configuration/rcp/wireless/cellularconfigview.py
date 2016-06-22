@@ -8,11 +8,67 @@ import json
 from utils import *
 from settingsview import SettingsSwitch, SettingsMappedSpinner
 
-CELLULAR_CONFIG_VIEW = 'autosportlabs/racecapture/views/configuration/rcp/wireless/cellularconfigview.kv'
+Builder.load_string('''
+<CellularConfigView>:
+    id: cellular
+    cols: 1
+    spacing: [0, dp(20)]
+    row_default_height: dp(40)
+    size_hint: [1, None]
+    height: self.minimum_height
+    HSeparator:
+        text: 'Cellular Configuration'
+    SettingsView:
+        size_hint_y: 0.20
+        rcid: 'cellEnable'
+        label_text: 'Cellular Module'
+        help_text: 'Enable if the Real-time telemetry module is installed'
+    SettingsView:
+        size_hint_y: 0.5
+        rcid: 'cellprovider'
+        label_text: 'Cellular Provider'
+        help_text: 'Select the cellular provider, or specify custom APN settings'
+    Label:
+        text: 'Custom Cellular Settings'
+        text_size: self.size
+        halign: 'center'
+        font_size: dp(26)
+    GridLayout:
+        cols: 2
+        spacing: (dp(30), dp(5))
+        FieldLabel:
+            text: 'APN Host'
+            halign: 'right'
+        ValueField:
+            rcid: 'apnHost'
+            disabled: True
+            on_text: root.on_apn_host(*args)
+    GridLayout:
+        cols: 2
+        spacing: (dp(30), dp(5))
+        FieldLabel:
+            halign: 'right'
+            text: 'APN User Name'
+        ValueField:
+            rcid: 'apnUser'
+            size_hint_y: 1
+            disabled: True
+            on_text: root.on_apn_user(*args)
+    GridLayout:
+        cols: 2
+        spacing: (dp(30), dp(5))
+        FieldLabel:
+            halign: 'right'
+            text: 'APN Password'
+        ValueField:
+            rcid: 'apnPass'
+            disabled: True
+            size_hint_y: 1
+            on_text: root.on_apn_pass(*args)
+''')
 
 
 class CellularConfigView(GridLayout):
-    Builder.load_file(CELLULAR_CONFIG_VIEW)
 
     def __init__(self, base_dir, config, **kwargs):
         super(CellularConfigView, self).__init__(**kwargs)

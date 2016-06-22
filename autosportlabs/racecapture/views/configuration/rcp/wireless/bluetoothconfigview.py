@@ -7,13 +7,28 @@ from kivy.logger import Logger
 from settingsview import SettingsView,SettingsSwitch
 from autosportlabs.widgets.separator import HLineSeparator
 
-BLUETOOTH_CONFIG_VIEW = 'autosportlabs/racecapture/views/configuration/rcp/wireless/bluetoothconfigview.kv'
+Builder.load_string('''
+<BluetoothConfigView>
+    id: bluetooth
+    cols: 1
+    spacing: [0, dp(20)]
+    row_default_height: dp(40)
+    size_hint: [1, None]
+    height: self.minimum_height
+    HSeparator:
+        size_hint_y: 0.5
+        text: 'Bluetooth'
+    SettingsView:
+        id: bt_enable
+        label_text: 'Bluetooth'
+        help_text: 'If the Bluetooth module is connected, enable it here'
+        size_hint_y: 1
+''')
 
 
 class BluetoothConfigView(GridLayout):
 
     def __init__(self, config, **kwargs):
-        Builder.load_file(BLUETOOTH_CONFIG_VIEW)
         super(BluetoothConfigView, self).__init__(**kwargs)
 
         self.config = None
