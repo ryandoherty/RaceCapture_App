@@ -61,6 +61,7 @@ class WirelessConfigView(BaseConfigView):
             view.config_updated(self.rcp_config)
 
     def _on_views_modified(self, *args):
+        Logger.debug("WirelessConfigView: _on_views_modified args: {}".format(args))
         Logger.debug("Got view modified")
         self.dispatch('on_config_modified')
 

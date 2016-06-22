@@ -91,18 +91,21 @@ class CellularConfigView(GridLayout):
 
     def on_apn_host(self, instance, value):
         if self.connectivityConfig:
+            Logger.info("CellularConfigView: got new apn host")
             self.connectivityConfig.cellConfig.apnHost = value
             self.connectivityConfig.stale = True
             self.dispatch('on_modified')
 
     def on_apn_user(self, instance, value):
-        if self.connectivityConfig:
+        if self.connectivityConfig and value != self.connectivityConfig.cellConfig.apnUser:
+            Logger.info("CellularConfigView: got new apn user")
             self.connectivityConfig.cellConfig.apnUser = value
             self.connectivityConfig.stale = True
             self.dispatch('on_modified')
 
     def on_apn_pass(self, instance, value):
-        if self.connectivityConfig:
+        if self.connectivityConfig and value != self.connectivityConfig.cellConfig.apnPass:
+            Logger.info("CellularConfigView: got new apn pass")
             self.connectivityConfig.cellConfig.apnPass = value
             self.connectivityConfig.stale = True
             self.dispatch('on_modified')
@@ -143,6 +146,7 @@ class CellularConfigView(GridLayout):
 
     def on_cell_change(self, instance, value):
         if self.connectivityConfig:
+            Logger.info("CellularConfigView: got new cell enabled change")
             self.connectivityConfig.cellConfig.cellEnabled = value
             self.connectivityConfig.stale = True
             self.dispatch('on_modified')
