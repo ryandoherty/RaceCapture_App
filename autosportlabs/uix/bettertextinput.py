@@ -2,9 +2,10 @@ import kivy
 kivy.require('1.9.1')
 
 from kivy.uix.textinput import TextInput
+from valuefield import ValueField
 
 
-class BetterTextInput(TextInput):
+class BetterTextInput(ValueField):
 
     max_chars = 200000
 

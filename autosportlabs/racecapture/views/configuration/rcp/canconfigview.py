@@ -8,8 +8,6 @@ from kivy.app import Builder
 from utils import *
 from settingsview import SettingsView
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
-from kivy.modules import inspector
-from kivy.core.window import Window
 
 CAN_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/canconfigview.kv'
 
@@ -33,8 +31,7 @@ class CANConfigView(BaseConfigView):
         btEnable = self.ids.can_enabled 
         btEnable.bind(on_setting=self.on_can_enabled)
         btEnable.setControl(SettingsSwitch())
-        inspector.create_inspector(Window, self.ids.can_enabled)
-                
+
     def on_can_enabled(self, instance, value):
         if self.can_config:
             self.can_config.enabled = value
