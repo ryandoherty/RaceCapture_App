@@ -3,6 +3,7 @@ import kivy
 kivy.require('1.9.1')
 
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.accordion import Accordion, AccordionItem
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.metrics import dp
@@ -35,7 +36,7 @@ class BaseChannelView(BoxLayout):
             self.dispatch('on_modified', self.channelConfig)
 
         
-class BaseConfigView(BoxLayout):
+class BaseConfigView(GridLayout):
     channels = None
     rc_api = None
     def __init__(self, **kwargs):    
@@ -45,6 +46,8 @@ class BaseConfigView(BoxLayout):
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_modified')
         self.register_event_type('on_config_modified')
+        self.orientation = 'vertical'
+        self.cols = 1
         
     def on_modified(self, *args):
         self.dispatch('on_config_modified', *args)

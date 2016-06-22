@@ -8,6 +8,8 @@ from kivy.app import Builder
 from utils import *
 from settingsview import SettingsView
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
+from kivy.modules import inspector
+from kivy.core.window import Window
 
 CAN_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/canconfigview.kv'
 
@@ -17,7 +19,7 @@ class CANBaudRateSettings(SettingsView):
 class CANBaudRateSpinner(SettingsMappedSpinner):
     def __init__(self, **kwargs):    
         super(CANBaudRateSpinner, self).__init__(**kwargs)
-        self.setValueMap({50000: '50K Baud', 100000: '100K Baud', 125000: '125K Baud', 250000:'250K Baud', 500000:'500K Baud', 1000000:'1M Baud'}, 500000)
+        self.setValueMap({50000: '50K Baud', 100000: '100K Baud', 125000: '125K Baud', 250000:'250K Baud', 500000:'500K Baud', 1000000:'1M Baud'}, '500000')
     
 class CANConfigView(BaseConfigView):
     can_config = None
@@ -31,6 +33,7 @@ class CANConfigView(BaseConfigView):
         btEnable = self.ids.can_enabled 
         btEnable.bind(on_setting=self.on_can_enabled)
         btEnable.setControl(SettingsSwitch())
+        inspector.create_inspector(Window, self.ids.can_enabled)
                 
     def on_can_enabled(self, instance, value):
         if self.can_config:

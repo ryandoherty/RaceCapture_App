@@ -47,7 +47,9 @@ class LinkedTreeViewLabel(TreeViewLabel):
     view = None
     view_builder = None
 
+
 class ConfigView(Screen):
+    Builder.load_file(CONFIG_VIEW_KV)
     # file save/load
     loaded = BooleanProperty(False)
     loadfile = ObjectProperty(None)
@@ -66,7 +68,6 @@ class ConfigView(Screen):
     _databus = None
 
     def __init__(self, **kwargs):
-        Builder.load_file(CONFIG_VIEW_KV)
         super(ConfigView, self).__init__(**kwargs)
 
         self._databus = kwargs.get('databus')
@@ -154,9 +155,9 @@ class ConfigView(Screen):
             Clock.schedule_once(lambda dt: self.init_screen())
 
     def createConfigViews(self):
-        tree = self.ids.menu
 
         def attach_node(text, n, view_builder):
+            tree = self.ids.menu
             label = LinkedTreeViewLabel(text=text)
             label.view_builder = view_builder
             label.color_selected = ColorScheme.get_dark_primary()
@@ -200,7 +201,7 @@ class ConfigView(Screen):
         if FIRMWARE_UPDATABLE:
             attach_node('Firmware', None, lambda: FirmwareUpdateView(rc_api=self.rc_api, settings=self._settings))
 
-        tree.select_node(defaultNode)
+        self.ids.menu.select_node(defaultNode)
 
         self.update_runtime_channels(runtime_channels)
         self.update_tracks()

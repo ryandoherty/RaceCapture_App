@@ -3,7 +3,8 @@ kivy.require('1.9.1')
 from kivy.app import Builder
 from kivy.uix.gridlayout import GridLayout
 from kivy.logger import Logger
-import os, json
+import os
+import json
 from utils import *
 from settingsview import SettingsSwitch, SettingsMappedSpinner
 
@@ -11,9 +12,9 @@ CELLULAR_CONFIG_VIEW = 'autosportlabs/racecapture/views/configuration/rcp/wirele
 
 
 class CellularConfigView(GridLayout):
+    Builder.load_file(CELLULAR_CONFIG_VIEW)
 
     def __init__(self, base_dir, config, **kwargs):
-        Builder.load_file(CELLULAR_CONFIG_VIEW)
         super(CellularConfigView, self).__init__(**kwargs)
         self.connectivityConfig = None
         self.base_dir = base_dir

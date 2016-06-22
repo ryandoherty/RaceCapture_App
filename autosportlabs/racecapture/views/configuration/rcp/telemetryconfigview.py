@@ -20,14 +20,14 @@ class TelemetryConfigView(BaseConfigView):
         super(TelemetryConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
     
-        deviceId = kvFind(self, 'rcid', 'deviceId') 
+        deviceId = kvFind(self, 'rcid', 'deviceId')
         deviceId.bind(on_setting=self.on_device_id)
         deviceId.setControl(SettingsTextField())
-        
+
         bgStream = kvFind(self, 'rcid', 'bgStream')
         bgStream.bind(on_setting=self.on_bg_stream)
         bgStream.setControl(SettingsSwitch())
-        
+
     def on_device_id(self, instance, value):
         if self.connectivityConfig:
             value = strip_whitespace(value)
@@ -40,13 +40,12 @@ class TelemetryConfigView(BaseConfigView):
                 self.dispatch('on_modified')
                 instance.clear_error()
 
-
     def on_bg_stream(self, instance, value):
         if self.connectivityConfig:
             self.connectivityConfig.telemetryConfig.backgroundStreaming = value
             self.connectivityConfig.stale = True
             self.dispatch('on_modified')
-                
+
     def on_config_updated(self, rcpCfg):
         connectivityConfig = rcpCfg.connectivityConfig
         kvFind(self, 'rcid', 'bgStream').setValue(connectivityConfig.telemetryConfig.backgroundStreaming)

@@ -2,13 +2,15 @@
 
 
 <CANBaudRateSettings>:
-	size_hint_y: 0.2
+	size_hint_y: 0.4
 	label_text: 'CAN Baud Rate'
 	help_text: ''
 
 <CANConfigView>:
 	spacing: dp(20)
 	orientation: 'vertical'
+	row_default_height: dp(40)
+	id: cansettings
 	HSeparator:
 		size_hint_y: 0.05
 		text: 'CAN bus Configuration'
@@ -27,8 +29,9 @@
 		size_hint_y: 0.05
 		text: 'Specify the baud rate for the available CAN interfaces'
 		
-	BoxLayout:
-		size_hint_y: 0.65	
+	GridLayout:
+		size_hint_y: 0.3
+		cols: 1
 		id: can_bauds
 		orientation: 'vertical'
 	

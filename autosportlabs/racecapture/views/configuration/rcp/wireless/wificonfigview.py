@@ -11,9 +11,9 @@ WIFI_CONFIG_VIEW = 'autosportlabs/racecapture/views/configuration/rcp/wireless/w
 
 
 class WifiConfigView(GridLayout):
+    Builder.load_file(WIFI_CONFIG_VIEW)
 
     def __init__(self, base_dir, config, **kwargs):
-        Builder.load_file(WIFI_CONFIG_VIEW)
         super(WifiConfigView, self).__init__(**kwargs)
         self.wifi_config = config.wifi_config if config else None
         self.base_dir = base_dir

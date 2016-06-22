@@ -30,7 +30,7 @@ class BluetoothConfigView(GridLayout):
     def config_updated(self, config):
         self.config = config
 
-        value = self.config.connectivityConfig.bluetoothConfig.btEnabled if config else False
+        value = self.config.connectivityConfig.bluetoothConfig.btEnabled
 
         bluetooth_enabled = self.ids.bt_enable
         bluetooth_enabled.setControl(SettingsSwitch(active=value))
