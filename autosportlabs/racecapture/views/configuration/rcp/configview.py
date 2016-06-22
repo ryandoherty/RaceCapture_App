@@ -102,9 +102,9 @@ class ConfigView(Screen):
     def on_channels_updated(self, runtime_channels):
         self.update_runtime_channels(runtime_channels)
 
-    def on_config_updated(self, config):
-        if config.versionConfig.serial != self._sn:
-            # New device, redraw
+    def on_config_updated(self, config, force_reload=False):
+        if config.versionConfig.serial != self._sn or force_reload:
+            # New device or we need to redraw, reload everything
             # Our config object is the same object with new values, so we need to copy our value
             self._sn = copy(config.versionConfig.serial)
             self._clear()
@@ -309,7 +309,7 @@ class ConfigView(Screen):
                     rcpConfigJsonString = stream.read()
                     self.rc_config.fromJsonString(rcpConfigJsonString)
                     self.rc_config.stale = True
-                    self.update_config_views()
+                    self.on_config_updated(self.rc_config, force_reload=True)
                     self.on_config_modified()
             else:
                 alertPopup('Error Loading', 'No config file selected')
