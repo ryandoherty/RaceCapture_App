@@ -379,6 +379,7 @@ class RcpApi:
                               RcpCmd('obd2Cfg', self.getObd2Cfg),
                               RcpCmd('scriptCfg', self.getScript),
                               RcpCmd('connCfg', self.getConnectivityCfg),
+                              RcpCmd('wifiCfg', self.get_wifi_config),
                               RcpCmd('trackDb', self.getTrackDb)
                            ]
 
@@ -448,6 +449,10 @@ class RcpApi:
         trackDb = cfg.trackDb
         if trackDb.stale:
             self.sequenceWriteTrackDb(trackDb.toJson(), cmdSequence)
+
+        wifi_config = cfg.wifi_config
+        if wifi_config.stale:
+            cmdSequence.append(RcpCmd('setWifiCfg', self.set_wifi_config, wifi_config.to_json()))
 
         cmdSequence.append(RcpCmd('flashCfg', self.sendFlashConfig))
 
@@ -526,6 +531,12 @@ class RcpApi:
 
     def setConnectivityCfg(self, connCfg):
         self.sendSet('setConnCfg', connCfg)
+
+    def get_wifi_config(self):
+        self.sendGet('getWifiCfg', None)
+
+    def set_wifi_config(self, wifi_config):
+        self.sendSet('setWifiCfg', wifi_config)
 
     def getScript(self):
         self.sendGet('getScriptCfg', None)

@@ -1,3 +1,6 @@
+==1.6.0==
+* Change analysis view to query LapTime and CurrentLap channels
+
 ==1.5.3==
 * Make pit stop timer configurable
 * Make pit stop timer time correctly on slower tablets
