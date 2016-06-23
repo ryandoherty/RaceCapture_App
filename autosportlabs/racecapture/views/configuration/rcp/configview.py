@@ -85,6 +85,10 @@ class ConfigView(Screen):
         self.register_event_type('on_write_config')
 
         self._sn = ''
+
+        if self.rc_config:
+            self._sn = self.rc_config.versionConfig.serial
+
         self.ids.menu.bind(selected_node=self.on_select_node)
 
     def on_config_written(self, *args):
