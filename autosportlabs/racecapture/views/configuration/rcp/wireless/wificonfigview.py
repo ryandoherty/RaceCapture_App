@@ -6,6 +6,7 @@ from kivy.logger import Logger
 import os, json
 from settingsview import SettingsView, SettingsSwitch, SettingsButton, SettingsMappedSpinner
 from autosportlabs.uix.bettertextinput import BetterTextInput
+from autosportlabs.uix.baselabel import BaseLabel
 
 Builder.load_string('''
 
@@ -21,12 +22,12 @@ Builder.load_string('''
     SettingsView:
         id: wifi_enabled
         label_text: 'WiFi Module'
-    Label:
+    BaseLabel:
         text_size: self.size
         halign: 'center'
         text: 'Client Mode Configuration'
         font_size: dp(26)
-    Label:
+    BaseLabel:
         text: 'Use this mode to setup the wifi module to connect [b]to[/b] an existing wireless network.'
         markup: True
         text_size: (self.parent.width, None)
@@ -54,12 +55,12 @@ Builder.load_string('''
             id: client_password
             disabled: False
             on_text: root.on_client_password(*args)
-    Label:
+    BaseLabel:
         text: 'Access Point Mode Configuration'
         text_size: self.size
         halign: 'center'
         font_size: dp(26)
-    Label:
+    BaseLabel:
         text: 'Use this mode to create a wireless network for your phone or table to connect to.'
         markup: True
         text_size: (self.parent.width, None)
