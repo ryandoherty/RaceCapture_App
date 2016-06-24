@@ -21,7 +21,6 @@ from autosportlabs.racecapture.datastore import DataStore, Filter, timing
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from kivy.logger import Logger
 from kivy.clock import Clock
-import Queue
 
 class ChannelStats(object):
     def __init__(self, **kwargs):
@@ -48,7 +47,6 @@ class CachingAnalysisDatastore(DataStore):
 
     def __init__(self, **kwargs):
         super(CachingAnalysisDatastore, self).__init__(**kwargs)
-        self.query_queue = Queue.Queue()
         self._channel_data_cache = {}
         self._session_location_cache = {}
 
@@ -93,13 +91,6 @@ class CachingAnalysisDatastore(DataStore):
 
         Clock.schedule_once(lambda dt: callback(channel_data))
 
-    def queue_query(self, item, immediate=False):
-        if immediate:
-            item.get_function(item)
-        else:
-            self.query_queue.put(item)
-
-
     def get_channel_data(self, source_ref, channels, callback):
         '''
         Retrieve channel data for the specified source (session / lap combo).
@@ -124,22 +115,19 @@ class CachingAnalysisDatastore(DataStore):
         '''
         Retrieve cached or query Location data as appropriate.
         '''
-        source_key = str(source_ref)
-        cache = self._session_location_cache.get(source_key)
-        if cache == None:
-            session = source_ref.session
-            lap = source_ref.lap
-            f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("CurrentLap", lap)
-            dataset = self.query(sessions=[session],
-                                            channels=["Latitude", "Longitude"],
-                                            data_filter=f)
-            records = dataset.fetch_records()
-            cache = []
-            for r in records:
-                lat = r[1]
-                lon = r[2]
-                cache.append(GeoPoint.fromPoint(lat, lon))
-            self._session_location_cache[source_key] = cache
+        session = source_ref.session
+        lap = source_ref.lap
+        f = Filter().neq('Latitude', 0).and_().neq('Longitude', 0).eq("CurrentLap", lap)
+        dataset = self.query(sessions=[session],
+                                        channels=["Latitude", "Longitude"],
+                                        data_filter=f)
+        records = dataset.fetch_records()
+        cache = []
+        for r in records:
+            lat = r[1]
+            lon = r[2]
+            cache.append(GeoPoint.fromPoint(lat, lon))
+        self._session_location_cache[str(source_ref)] = cache
 
         Clock.schedule_once(lambda dt: callback(cache))
 
