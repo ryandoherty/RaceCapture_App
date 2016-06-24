@@ -44,16 +44,6 @@ class ChannelData(object):
         self.max = kwargs.get('max', 0)
         self.source = kwargs.get('source', None)
 
-class ChannelDataParams(object):
-    '''
-    Parameters for querying channel data
-    '''
-    def __init__(self, get_function, source_ref, channels, callback):
-        self.get_function = get_function
-        self.source_ref = source_ref
-        self.channels = channels
-        self.callback = callback
-
 class CachingAnalysisDatastore(DataStore):
 
     def __init__(self, **kwargs):
