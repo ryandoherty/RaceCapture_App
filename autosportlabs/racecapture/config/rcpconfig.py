@@ -149,28 +149,35 @@ class AnalogChannel(BaseChannel):
         json_dict['map'] = self.scalingMap.toJson()
         return json_dict
 
-ANALOG_CHANNEL_COUNT = 8
+DEFAULT_ANALOG_CHANNEL_COUNT = 8
 
 class AnalogConfig(object):
     def __init__(self, **kwargs):
-        self.channelCount = ANALOG_CHANNEL_COUNT
+        self.channelCount = DEFAULT_ANALOG_CHANNEL_COUNT
         self.channels = []
+        self.build_channels()
 
-        for i in range (self.channelCount):
-            self.channels.append(AnalogChannel())
+    def fromJson(self, analogCfgJson, capabilities=None):
+        if capabilities:
+            self.channelCount = capabilities.channels.analog
+            self.build_channels()
 
-    def fromJson(self, analogCfgJson):
-        for i in range (self.channelCount):
+        for i in range(self.channelCount):
             analogChannelJson = analogCfgJson.get(str(i), None)
             if analogChannelJson:
                 self.channels[i].fromJson(analogChannelJson)
 
     def toJson(self):
         analogCfgJson = {}
-        for i in range(ANALOG_CHANNEL_COUNT):
+        for i in range(self.channelCount):
             analogChannel = self.channels[i]
             analogCfgJson[str(i)] = analogChannel.toJson()
         return {'analogCfg':analogCfgJson}
+
+    def build_channels(self):
+        self.channels = []
+        for i in range (self.channelCount):
+            self.channels.append(AnalogChannel())
 
     @property
     def stale(self):
@@ -1118,7 +1125,7 @@ class Capabilities(object):
     @property
     def has_analog(self):
         # We always have at least 1 analog channel for battery
-        return self.channels.analog > 1
+        return self.channels.analog > 0
 
     @property
     def has_gpio(self):
@@ -1250,7 +1257,7 @@ class RcpConfig(object):
 
                 analogCfgJson = rcpJson.get('analogCfg', None)
                 if analogCfgJson:
-                    self.analogConfig.fromJson(analogCfgJson)
+                    self.analogConfig.fromJson(analogCfgJson, capabilities=self.capabilities)
 
                 timerCfgJson = rcpJson.get('timerCfg', None)
                 if timerCfgJson:
