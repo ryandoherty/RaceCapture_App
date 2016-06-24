@@ -440,7 +440,7 @@ class RcpApi:
                 cmdSequence.append(RcpCmd('setImuCfg', self.setImuCfg, imuChannel.toJson(), i))
 
         analogCfg = cfg.analogConfig
-        for i in range(ANALOG_CHANNEL_COUNT):
+        for i in range(cfg.analogConfig.channelCount):
             analogChannel = analogCfg.channels[i]
             if analogChannel.stale:
                 cmdSequence.append(RcpCmd('setAnalogCfg', self.setAnalogCfg, analogChannel.toJson(), i))

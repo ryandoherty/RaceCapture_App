@@ -12,6 +12,7 @@
             row_default_height: dp(40)
             size_hint: [1, None]
             height: self.minimum_height
+            id: content
             HSeparator:
                 text: 'Telemetry Configuration'
                 halign: 'left'
@@ -20,15 +21,5 @@
                 id: device_id
                 label_text: 'Telemetry Device Id'
                 help_text: 'Enter the telemetry Device Id provided by race-capture.com'
-
             HLineSeparator:
                 size_hint_y: 0.05
-
-            SettingsView:
-                rcid: 'bgStream'
-                label_text: 'Background Streaming'
-                help_text: 'Stream real-time telemetry continuously in the background'
-            HelpLabel:
-                text: 'When disabled, telemetry is synchronized with SD logging.'
-                halign: 'left'
-

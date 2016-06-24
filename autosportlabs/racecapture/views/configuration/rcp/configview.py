@@ -1,21 +1,17 @@
 import os
-import traceback
+
 import kivy
-from time import sleep
+
 kivy.require('1.9.1')
-from kivy.uix.boxlayout import BoxLayout
 from kivy.app import Builder
-from utils import *
-from copy import *
-from kivy.metrics import dp, sp
-from kivy.uix.treeview import TreeView, TreeViewLabel
+from kivy.uix.treeview import TreeViewLabel
 from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen
 from kivy.clock import Clock
 from kivy import platform
 from kivy.logger import Logger
-from autosportlabs.widgets.scrollcontainer import ScrollContainer
+
 FIRMWARE_UPDATABLE = not (platform == 'android' or platform == 'ios')
 
 from autosportlabs.racecapture.views.configuration.rcp.analogchannelsview import *
@@ -28,7 +24,7 @@ from autosportlabs.racecapture.views.configuration.rcp.pwmchannelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.trackconfigview import *
 from autosportlabs.racecapture.views.configuration.rcp.obd2channelsview import *
 from autosportlabs.racecapture.views.configuration.rcp.canconfigview import *
-from autosportlabs.racecapture.views.configuration.rcp.telemetryconfigview import *
+from autosportlabs.racecapture.views.configuration.rcp.telemetry.telemetryconfigview import *
 from autosportlabs.racecapture.views.configuration.rcp.wirelessconfigview import *
 from autosportlabs.racecapture.views.configuration.rcp.scriptview import *
 if FIRMWARE_UPDATABLE:
@@ -196,8 +192,7 @@ class ConfigView(Screen):
         attach_node('OBDII', None, lambda: OBD2ChannelsView(channels=runtime_channels, base_dir=self.base_dir))
         attach_node('Wireless', None, lambda: WirelessConfigView(self.base_dir, self.rc_config, self.rc_config.capabilities))
 
-        if self.rc_config.capabilities.has_cellular:
-            attach_node('Telemetry', None, lambda: TelemetryConfigView())
+        attach_node('Telemetry', None, lambda: TelemetryConfigView(self.rc_config.capabilities))
 
         if self.rc_config.capabilities.has_script:
             attach_node('Scripting', None, lambda: create_scripting_view())
