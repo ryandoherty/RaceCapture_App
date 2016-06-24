@@ -162,8 +162,8 @@ class AnalysisView(Screen):
         sessions_view = self.ids.sessions_view
         if len(sessions_view.selected_laps) == 0:
             best_lap = self._datastore.get_channel_min('LapTime', [new_session_id], ['LapCount'])
-            best_lap = best_lap[1]
-            if best_lap:
+            best_lap_id = best_lap[1]
+            if best_lap_id:
                 Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
                 main_chart = self.ids.mainchart
                 main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
