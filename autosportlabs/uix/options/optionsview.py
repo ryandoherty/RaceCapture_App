@@ -27,6 +27,20 @@ from autosportlabs.racecapture.theme.color import ColorScheme
 from iconbutton import IconButton
 
 
+class BaseOptionsScreen(Screen):
+    '''
+    A base class for a customization screen. This can be extended when adding the next option screen
+    '''
+    def __init__(self, params, values, **kwargs):
+        super(BaseOptionsScreen, self).__init__(**kwargs)
+        self.initialized = False
+        self.params = params
+        self.values = values
+        self.register_event_type('on_modified')
+
+    def on_modified(self):
+        pass
+
 class OptionsView(BoxLayout):
     '''
     The main customization view which manages the various customization screens

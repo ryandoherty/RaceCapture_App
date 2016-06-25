@@ -33,7 +33,7 @@ from autosportlabs.racecapture.datastore import Filter
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from iconbutton import IconButton, LabelIconButton
 from autosportlabs.uix.legends.gradientlegends import GradientLapLegend, LapLegend
-from autosportlabs.uix.options.optionsview import OptionsView
+from autosportlabs.uix.options.optionsview import OptionsView, BaseOptionsScreen
 
 # The scaling we use while we zoom
 ANALYSIS_MAP_ZOOM_SCALE = 1.1
@@ -409,20 +409,6 @@ class CustomizeValues(object):
         self.heatmap_channel = heatmap_channel
         self.track_id = track_id
 
-class BaseCustomizeMapView(Screen):
-    '''
-    A base class for a customization screen. This can be extended when adding the next option screen
-    '''
-    def __init__(self, params, values, **kwargs):
-        super(BaseCustomizeMapView, self).__init__(**kwargs)
-        self.initialized = False
-        self.params = params
-        self.values = values
-        self.register_event_type('on_modified')
-
-    def on_modified(self):
-        pass
-
 class HeatmapButton(LabelIconButton):
     Builder.load_string('''
 <HeatmapButton>:
@@ -441,7 +427,7 @@ class TrackmapButton(LabelIconButton):
     icon: u'\uf018'    
     ''')
 
-class CustomizeHeatmapView(BaseCustomizeMapView):
+class CustomizeHeatmapView(BaseOptionsScreen):
     '''
     The customization view for customizing the heatmap options
     '''
@@ -487,7 +473,7 @@ class CustomizeHeatmapView(BaseCustomizeMapView):
         if modified:
             self.dispatch('on_modified')
 
-class CustomizeTrackView(BaseCustomizeMapView):
+class CustomizeTrackView(BaseOptionsScreen):
     '''
     The customization view for selecting a track to display
     '''

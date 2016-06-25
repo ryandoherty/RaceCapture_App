@@ -17,15 +17,11 @@
 # See the GNU General Public License for more details. You should
 # have received a copy of the GNU General Public License along with
 # this code. If not, see <http://www.gnu.org/licenses/>.
-from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget
-from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
-from autosportlabs.uix.color.colorsequence import ColorSequence
-from autosportlabs.racecapture.datastore import Filter
-from autosportlabs.racecapture.views.analysis.analysisdata import ChannelData
-from autosportlabs.uix.progressspinner import ProgressSpinner
 
 from installfix_garden_graph import Graph, LinePlot, SmoothLinePlot
+from iconbutton import IconButton, LabelIconButton
 from kivy.app import Builder
+from kivy.uix.popup import Popup
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
@@ -33,6 +29,14 @@ from collections import OrderedDict
 from  kivy.metrics import MetricsBase
 from kivy.logger import Logger
 import bisect
+
+from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnalysisWidget
+from autosportlabs.racecapture.views.analysis.markerevent import MarkerEvent
+from autosportlabs.uix.color.colorsequence import ColorSequence
+from autosportlabs.racecapture.datastore import Filter
+from autosportlabs.racecapture.views.analysis.analysisdata import ChannelData
+from autosportlabs.uix.progressspinner import ProgressSpinner
+from autosportlabs.uix.options.optionsview import OptionsView, BaseOptionsScreen
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 
@@ -55,6 +59,13 @@ class ChannelPlot(object):
 
     def __str__(self):
         return "{}_{}".format(str(self.sourceref), self.channel)
+
+class LineChartMode(object):
+    '''
+    Describes the supported display modes for the chart
+    '''
+    time = 1
+    distance = 2
 
 class LineChart(ChannelAnalysisWidget):
     '''
@@ -85,6 +96,7 @@ class LineChart(ChannelAnalysisWidget):
         self.current_x = 0
         self.current_offset = 0
         self.marker_pct = 0
+        self.line_chart_mode = LineChartMode.time
 
     def on_touch_down(self, touch):
         x, y = touch.x, touch.y
@@ -339,3 +351,96 @@ class LineChart(ChannelAnalysisWidget):
             # clone the incoming list of channels and pass it to the handler
             Clock.schedule_once(lambda dt: self._add_channels_results_time(channels[:], results))
         self.datastore.get_channel_data(source_ref, ['Interval', 'Distance'] + channels, get_results)
+        
+    
+    def _customized(self, instance, values):
+        pass
+    
+    def on_options(self, *args):
+        params = CustomizeParams(settings=self.settings, datastore=self.datastore)
+        values = CustomizeValues(self.channels_selected, self.line_chart_mode)
+
+        content = OptionsView(values)
+        content.add_options_screen(CustomizeChannelsView(name='Channels', params=params, values=values), ChannelsOptionsButton())
+        content.add_options_screen(CustomizeChartView(name='Chart', params=params, values=values), ChartOptionsButton())
+
+        popup = Popup(title="Customize Chart", content=content, size_hint=(0.7, 0.7))
+        content.bind(on_customized=self._customized)
+        content.bind(on_close=lambda *args:popup.dismiss())
+        popup.open()
+    
+class CustomizeParams(object):
+    '''
+    A container class for holding multiple parameter for customization dialog
+    '''
+    def __init__(self, settings, datastore,  **kwargs):
+        self.settings = settings
+        self.datastore = datastore
+
+class CustomizeValues(object):
+    '''
+    A container class for holding customization values
+    '''
+    def __init__(self, current_channels, line_chart_mode, **kwargs):
+        self.current_channels = current_channels
+        self.line_chart_mode = line_chart_mode
+
+class ChannelsOptionsButton(LabelIconButton):
+    Builder.load_string('''
+<ChannelsOptionsButton>:
+    title: 'Channels'
+    icon_size: self.height * .9
+    title_font_size: self.height * 0.6
+    icon: u'\uf06d'    
+    ''')
+
+class ChartOptionsButton(LabelIconButton):
+    Builder.load_string('''
+<ChartOptionsButton>:
+    title: 'Chart'
+    icon_size: self.height * .9
+    title_font_size: self.height * 0.6
+    icon: u'\uf018'    
+    ''')
+
+class CustomizeChartView(BaseOptionsScreen):
+    '''
+    The customization view for customizing the chart options
+    '''
+    Builder.load_string('''
+<CustomizeChartView>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'customize chart'
+    ''')
+
+
+    def __init__(self, params, values, **kwargs):
+        super(CustomizeChartView, self).__init__(params, values, **kwargs)
+
+    def on_enter(self):
+        if self.initialized == False:
+            pass
+
+
+class CustomizeChannelsView(BaseOptionsScreen):
+    '''
+    The customization view for customizing the channels
+    '''
+    Builder.load_string('''
+<CustomizeChannelsView>:
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'customize channel'
+    ''')
+
+
+    def __init__(self, params, values, **kwargs):
+        super(CustomizeChannelsView, self).__init__(params, values, **kwargs)
+
+    def on_enter(self):
+        if self.initialized == False:
+            pass
+
