@@ -265,6 +265,10 @@ class LineChart(ChannelAnalysisWidget):
             for channel in channels:
                 chart = self.ids.chart
                 channel_data_values = query_data[channel]
+                channel_data = channel_data_values.values
+                #If we queried a channel that has no sample results, skip adding the plot
+                if len(channel_data) == 0 or channel_data[0] is None:
+                    continue
 
                 key = channel_data_values.channel + str(channel_data_values.source)
                 plot = SmoothLinePlot(color=self.color_sequence.get_color(key))
@@ -286,7 +290,6 @@ class LineChart(ChannelAnalysisWidget):
                 else:
                     interval = 1
                 start_time = time_data[0]
-                channel_data = channel_data_values.values
                 while sample_index < sample_count:
                     sample = channel_data[sample_index]
                     time = time_data[sample_index] - start_time
@@ -346,7 +349,7 @@ class LineChart(ChannelAnalysisWidget):
         finally:
             ProgressSpinner.decrement_refcount()
 
-    def add_channels(self, channels, source_ref):
+    def _add_unselected_channels(self, channels, source_ref):
         ProgressSpinner.increment_refcount()
         def get_results(results):
             # clone the incoming list of channels and pass it to the handler
