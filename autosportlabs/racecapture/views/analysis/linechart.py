@@ -360,7 +360,7 @@ class LineChart(ChannelAnalysisWidget):
     
     def on_options(self, *args):
         params = CustomizeParams(settings=self.settings, datastore=self.datastore)
-        values = CustomizeValues(self.selected_channels, self.line_chart_mode)
+        values = CustomizeValues(list(self.selected_channels), self.line_chart_mode)
 
         content = OptionsView(values)
         content.add_options_screen(CustomizeChannelsScreen(name='Channels', params=params, values=values), ChannelsOptionsButton())
