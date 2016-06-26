@@ -72,7 +72,11 @@ class ChannelValueView(BoxLayout):
 
     @value.setter
     def value(self, value):
-        self.value_view.value = float(value)
+        try:
+            value = float(value)
+            self.value_view.value = value
+        except:
+            self.value_view.value = None
 
     @property
     def color(self):
@@ -163,7 +167,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
         channels[channel_data_values.channel] = channel_data_values
         self._refresh_channels()
 
-    def add_channels(self, channels, source_ref):
+    def _add_unselected_channels(self, channels, source_ref):
         def get_results(results):
             Clock.schedule_once(lambda dt: self._add_channels_results(channels, results))
 

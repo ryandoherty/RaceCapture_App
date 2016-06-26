@@ -29,6 +29,7 @@ from kivy.metrics import dp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.listview import ListView, ListItemButton
 from kivy.uix.screenmanager import Screen, SwapTransition
+from kivy.uix.button import ButtonBehavior
 from utils import kvFind
 from kivy.adapters.listadapter import ListAdapter
 from iconbutton import IconButton
@@ -60,18 +61,18 @@ KV_FILE="""
                 cols: 1
 
 <BaseChannelSelection>:
-    canvas.before:
-        Color:
-            rgba: ColorScheme.get_dark_background_translucent()
-        Rectangle:
-            pos: self.pos
-            size: self.size
     spacing: sp(5)
     padding: [0, 0, 0, sp(5)]
     size_hint_y: None
     orientation: 'horizontal'
 
 <CurrentChannel>:
+    canvas.before:
+        Color:
+            rgba: ColorScheme.get_primary() #[0.5, 0.0, 0.0, 0.5]
+        Rectangle:
+            pos: self.pos
+            size: self.size
     FieldLabel:
         halign: 'center'
         id: name
@@ -84,16 +85,19 @@ KV_FILE="""
         on_release: root.on_delete()
 
 <AddChannel>:
+    canvas.before:
+        Color:
+            rgba: ColorScheme.get_dark_background_translucent()
+        Rectangle:
+            pos: self.pos
+            size: self.size
     FieldLabel:
         id: name
         halign: 'center'
         size_hint_x: 0.9
         font_size: root.height * 0.6
-    IconButton:
+    BoxLayout:
         size_hint_x: 0.1
-        size_hint_y: 0.9
-        text: u'\uf0fe'
-        on_release: root.on_add()
 """
     
 class CustomizeChannelsView(BoxLayout):
@@ -101,15 +105,17 @@ class CustomizeChannelsView(BoxLayout):
 
     def __init__(self, **kwargs):
         super(CustomizeChannelsView, self).__init__(**kwargs)
-        self._current_channel_widgets = {}
+        self._channel_widgets = {}
         self.register_event_type('on_channels_customized')
         self.datastore = kwargs.get('datastore')
         self._current_channels = kwargs.get('current_channels')
         self._refresh_channel_list()
         
     def _refresh_channel_list(self):
-        self.refresh_channels(self._current_channels)
-        self.add_channels(self._current_channels)
+        grid = self.ids.current_channels
+        grid.clear_widgets()        
+        self._add_selected_channels(self._current_channels)
+        self._add_unselected_channels(self._current_channels)
 
     def _get_available_channel_names(self):
         available_channels = self.datastore.channel_list
@@ -119,7 +125,7 @@ class CustomizeChannelsView(BoxLayout):
     def on_delete_channel(self, instance, name):
         try:
             grid = self.ids.current_channels
-            widget = self._current_channel_widgets.get(name)
+            widget = self._channel_widgets.get(name)
             grid.remove_widget(widget)
             self._current_channels.remove(name)
             self._refresh_channel_list()
@@ -132,21 +138,20 @@ class CustomizeChannelsView(BoxLayout):
         self._refresh_channel_list()
         self.dispatch('on_channels_customized', self._current_channels)
 
-    def refresh_channels(self, current_channels):
+    def _add_selected_channels(self, current_channels):
         grid = self.ids.current_channels
-        grid.clear_widgets()
-        self._current_channel_widgets.clear()
-        for channel in current_channels:
+        self._channel_widgets.clear()
+        for channel in sorted(current_channels):
             current_channel = CurrentChannel(channel = channel)
             current_channel.bind(on_delete_channel=self.on_delete_channel)
             grid.add_widget(current_channel)
-            self._current_channel_widgets[channel] = current_channel
+            self._channel_widgets[channel] = current_channel
 
-    def add_channels(self, current_channels):
+    def _add_unselected_channels(self, current_channels):
         available_channels = self._get_available_channel_names()
         add_channels = [c for c in available_channels if c not in current_channels]
         grid = self.ids.current_channels
-        for channel in add_channels:
+        for channel in sorted(add_channels):
             add_channel = AddChannel(channel = channel)
             add_channel.bind(on_add_channel=self.on_add_channel)
             grid.add_widget(add_channel)
@@ -175,7 +180,7 @@ class CurrentChannel(BaseChannelSelection):
     def on_delete(self):
         self.dispatch('on_delete_channel', self.channel)
 
-class AddChannel(BaseChannelSelection):
+class AddChannel(ButtonBehavior, BaseChannelSelection):
     channel = None
 
     def __init__(self, **kwargs):
@@ -184,6 +189,9 @@ class AddChannel(BaseChannelSelection):
         self.register_event_type('on_add_channel')
         self.ids.name.text = self.channel
 
+    def on_release(self, *args):
+        self.dispatch('on_add_channel', self.channel)
+        
     def on_modified(self, *args):
         pass
 

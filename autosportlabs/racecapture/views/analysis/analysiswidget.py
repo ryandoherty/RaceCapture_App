@@ -125,7 +125,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
         if len(self.selected_channels) == 0:
             self.merge_selected_channels(self.DEFAULT_CHANNELS)
         else:
-            self.add_channels(self.selected_channels, source_ref)
+            self._add_unselected_channels(self.selected_channels, source_ref)
 
     def on_lap_removed(self, source_ref):
         for channel in self.selected_channels:
@@ -135,7 +135,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
     def on_channel_selected(self, value):
         pass
 
-    def add_channels(self, channels, source_ref):
+    def _add_unselected_channels(self, channels, source_ref):
         '''
         Override this to add a channel / lap reference combo to the view
         '''
@@ -155,7 +155,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
 
     def _add_channels_all_laps(self, channels):
         for source_ref in self.selected_laps.itervalues():
-            self.add_channels(channels, source_ref)
+            self._add_unselected_channels(channels, source_ref)
 
     def _remove_channel_all_laps(self, channel):
         for k, v in self.selected_laps.iteritems():
