@@ -105,7 +105,7 @@ class CurrentChannel(BoxLayout):
         self.register_event_type('on_modified')
         self.ids.name.text = self.channel
 
-    def on_modified(self):
+    def on_modified(self, *args):
         pass
                 
     def on_delete_channel(self, channel):
@@ -144,8 +144,8 @@ class CurrentChannelsView(Screen):
             Logger.error('Error deleting channel ' + name + ': ' + str(name))
         
     
-    def on_modified(self, instance, name):
-        print("modified " + name)   
+    def on_modified(self, *args):
+        pass
         
     def on_confirm_customize(self, *args):
         pass

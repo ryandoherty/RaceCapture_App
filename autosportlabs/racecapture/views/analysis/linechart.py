@@ -37,6 +37,7 @@ from autosportlabs.racecapture.datastore import Filter
 from autosportlabs.racecapture.views.analysis.analysisdata import ChannelData
 from autosportlabs.uix.progressspinner import ProgressSpinner
 from autosportlabs.uix.options.optionsview import OptionsView, BaseOptionsScreen
+from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 
@@ -351,24 +352,26 @@ class LineChart(ChannelAnalysisWidget):
             # clone the incoming list of channels and pass it to the handler
             Clock.schedule_once(lambda dt: self._add_channels_results_time(channels[:], results))
         self.datastore.get_channel_data(source_ref, ['Interval', 'Distance'] + channels, get_results)
-        
     
     def _customized(self, instance, values):
-        pass
+        updated_channels = values.current_channels
+        self.select_channels(updated_channels)
+        self.dispatch('on_channel_selected', updated_channels)
     
     def on_options(self, *args):
         params = CustomizeParams(settings=self.settings, datastore=self.datastore)
-        values = CustomizeValues(self.channels_selected, self.line_chart_mode)
+        values = CustomizeValues(self.selected_channels, self.line_chart_mode)
 
         content = OptionsView(values)
-        content.add_options_screen(CustomizeChannelsView(name='Channels', params=params, values=values), ChannelsOptionsButton())
-        content.add_options_screen(CustomizeChartView(name='Chart', params=params, values=values), ChartOptionsButton())
+        content.add_options_screen(CustomizeChannelsScreen(name='Channels', params=params, values=values), ChannelsOptionsButton())
+        content.add_options_screen(CustomizeChartScreen(name='Chart', params=params, values=values), ChartOptionsButton())
 
         popup = Popup(title="Customize Chart", content=content, size_hint=(0.7, 0.7))
         content.bind(on_customized=self._customized)
         content.bind(on_close=lambda *args:popup.dismiss())
         popup.open()
-    
+            
+        
 class CustomizeParams(object):
     '''
     A container class for holding multiple parameter for customization dialog
@@ -403,43 +406,45 @@ class ChartOptionsButton(LabelIconButton):
     icon: u'\uf018'    
     ''')
 
-class CustomizeChartView(BaseOptionsScreen):
+class CustomizeChartScreen(BaseOptionsScreen):
     '''
     The customization view for customizing the chart options
     '''
     Builder.load_string('''
-<CustomizeChartView>:
+<CustomizeChartScreen>:
     BoxLayout:
         orientation: 'vertical'
         Label:
             text: 'customize chart'
     ''')
 
-
     def __init__(self, params, values, **kwargs):
-        super(CustomizeChartView, self).__init__(params, values, **kwargs)
+        super(CustomizeChartScreen, self).__init__(params, values, **kwargs)
 
     def on_enter(self):
         if self.initialized == False:
             pass
 
-
-class CustomizeChannelsView(BaseOptionsScreen):
+class CustomizeChannelsScreen(BaseOptionsScreen):
     '''
     The customization view for customizing the channels
     '''
     Builder.load_string('''
-<CustomizeChannelsView>:
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: 'customize channel'
+<CustomizeChannelsScreen>:
     ''')
 
-
     def __init__(self, params, values, **kwargs):
-        super(CustomizeChannelsView, self).__init__(params, values, **kwargs)
-
+        super(CustomizeChannelsScreen, self).__init__(params, values, **kwargs)
+        self.values = values
+        content = CustomizeChannelsView(settings=params.settings, datastore=params.datastore, current_channels=values.current_channels)
+        content.bind(on_channels_customized=self.on_modified)
+        self.add_widget(content)
+                
+                
+    def on_modified(self, *args):
+        self.values.current_channels = args[1]
+        super(CustomizeChannelsScreen, self).on_modified(*args)
+        
     def on_enter(self):
         if self.initialized == False:
             pass

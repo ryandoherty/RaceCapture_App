@@ -33,14 +33,17 @@ class BaseOptionsScreen(Screen):
     '''
     def __init__(self, params, values, **kwargs):
         super(BaseOptionsScreen, self).__init__(**kwargs)
+        self.register_event_type('on_screen_modified')
         self.initialized = False
         self.params = params
         self.values = values
-        self.register_event_type('on_modified')
 
-    def on_modified(self):
+    def on_modified(self, *args):
+        self.dispatch('on_screen_modified', args)
+
+    def on_screen_modified(self, *args):
         pass
-
+    
 class OptionsView(BoxLayout):
     '''
     The main customization view which manages the various customization screens
@@ -92,7 +95,7 @@ class OptionsView(BoxLayout):
         self.values = values
 
     def add_options_screen(self, screen, button):
-        screen.bind(on_modified=self.on_modified)
+        screen.bind(on_screen_modified=self.on_modified)
         self.ids.screens.add_widget(screen)
         button.bind(on_press=lambda x: self.on_option(screen.name))
         self.ids.options.add_widget(button)
@@ -110,7 +113,7 @@ class OptionsView(BoxLayout):
     def cancel(self):
         self.dispatch('on_close')
 
-    def on_modified(self, instance):
+    def on_modified(self, *args):
         self.ids.confirm.disabled = False
 
     def on_option(self, option):
