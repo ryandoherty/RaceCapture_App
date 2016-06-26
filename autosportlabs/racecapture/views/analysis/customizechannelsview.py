@@ -69,7 +69,7 @@ KV_FILE="""
 <CurrentChannel>:
     canvas.before:
         Color:
-            rgba: ColorScheme.get_primary() #[0.5, 0.0, 0.0, 0.5]
+            rgba: ColorScheme.get_primary()
         Rectangle:
             pos: self.pos
             size: self.size

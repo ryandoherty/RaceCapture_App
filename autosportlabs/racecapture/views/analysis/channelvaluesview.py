@@ -149,7 +149,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
         for key in iter(sorted(self._channel_stat_widgets.iterkeys())):
             channels_grid.add_widget(self._channel_stat_widgets[key])
 
-    def _add_channels_results(self, channels, channel_data):
+    def _add_channels_results_distance(self, channels, channel_data):
         for channel in channels:
             self._add_channel_results(channel, channel_data)
 
@@ -169,7 +169,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
 
     def _add_unselected_channels(self, channels, source_ref):
         def get_results(results):
-            Clock.schedule_once(lambda dt: self._add_channels_results(channels, results))
+            Clock.schedule_once(lambda dt: self._add_channels_results_distance(channels, results))
 
         self.datastore.get_channel_data(source_ref, channels, get_results)
     
