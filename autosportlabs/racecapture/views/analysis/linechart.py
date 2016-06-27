@@ -19,9 +19,9 @@
 # this code. If not, see <http://www.gnu.org/licenses/>.
 
 from installfix_garden_graph import Graph, LinePlot, SmoothLinePlot
-from iconbutton import IconButton, LabelIconButton
 from kivy.app import Builder
 from kivy.uix.popup import Popup
+from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
@@ -42,6 +42,9 @@ from autosportlabs.racecapture.views.analysis.customizechannelsview import Custo
 from autosportlabs.uix.button.widgetbuttons import LabelButton
 from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.uix.toast.kivytoast import toast
+from fieldlabel import FieldLabel
+from iconbutton import IconButton, LabelIconButton
+from autosportlabs.racecapture.views.util.viewutils import format_laptime
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 
@@ -96,6 +99,8 @@ class LineChart(ChannelAnalysisWidget):
         self.marker_pct = 0
         self.line_chart_mode = LineChartMode.distance
         self._channel_plots = {}
+        self._marker_label = FieldLabel(text='')
+        self.add_widget(self._marker_label)
 
     def add_option_buttons(self):
         '''
@@ -191,6 +196,13 @@ class LineChart(ChannelAnalysisWidget):
         self.marker_pct = pct
         data_index = self.current_offset + (pct * (self.current_x - self.current_offset))
         self.ids.chart.marker_x = data_index
+        self._marker_label.pos=(x, y - self.height / 2)
+        if self.line_chart_mode == LineChartMode.time:
+            marker_value = format_laptime((data_index * .001)/60)
+        else:
+            marker_value = '{:.2f}'.format(data_index)
+        self._marker_label.text = marker_value 
+
         for channel_plot in self._channel_plots.itervalues():
             try:
                 value_index = bisect.bisect_right(channel_plot.chart_x_index.keys(), data_index)
