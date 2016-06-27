@@ -74,7 +74,7 @@ class AnalysisView(Screen):
         self.ids.mainchart.color_sequence = self._color_sequence
         self.stream_connecting = False
         Window.bind(mouse_pos=self.on_mouse_pos)
-        Window.bind(on_motion=self.on_motion)        
+        Window.bind(on_motion=self.on_motion)
         self.init_view()
 
     def on_motion(self, instance, event, motion_event):
@@ -82,7 +82,7 @@ class AnalysisView(Screen):
         if self.collide_point(motion_event.x, motion_event.y):
             if not flyin.flyin_collide_point(motion_event.x, motion_event.y):
                 flyin.schedule_hide()
-        
+
     def on_mouse_pos(self, x, pos):
         flyin = self.ids.laps_flyin
         x = pos[0]
@@ -90,7 +90,7 @@ class AnalysisView(Screen):
         self_collide = self.collide_point(x, y)
         flyin_collide = flyin.flyin_collide_point(x, y)
         laps_selected = self.ids.sessions_view.selected_count > 0
-        
+
         if self_collide and not flyin_collide and laps_selected:
             flyin.schedule_hide()
         return False
@@ -139,11 +139,11 @@ class AnalysisView(Screen):
         new_track = analysis_map.select_map(lat_avg, lon_avg)
 
         if current_track != new_track:
-            #if a new track is selected, then
-            #unselect all laps for all other sessions
+            # if a new track is selected, then
+            # unselect all laps for all other sessions
             sessions_view = self.ids.sessions_view
             sessions_view.deselect_other_laps(session)
-        
+
 
     def open_datastore(self):
         pass
@@ -162,8 +162,8 @@ class AnalysisView(Screen):
         sessions_view = self.ids.sessions_view
         if len(sessions_view.selected_laps) == 0:
             best_lap = self._datastore.get_channel_min('LapTime', [new_session_id], ['LapCount'])
-            if best_lap:
-                best_lap_id = best_lap[1]
+            best_lap_id = best_lap[1]
+            if best_lap_id:
                 Logger.info('AnalysisView: Convenience selected a suggested session {} / lap {}'.format(new_session_id, best_lap_id))
                 main_chart = self.ids.mainchart
                 main_chart.select_channels(AnalysisView.SUGGESTED_CHART_CHANNELS)
