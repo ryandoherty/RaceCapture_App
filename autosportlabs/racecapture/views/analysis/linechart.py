@@ -26,7 +26,7 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from collections import OrderedDict
-from  kivy.metrics import MetricsBase
+from  kivy.metrics import MetricsBase, sp
 from kivy.logger import Logger
 import bisect
 import copy
@@ -77,6 +77,8 @@ class LineChart(ChannelAnalysisWidget):
     ZOOM_SCALING = 0.01
     TOUCH_ZOOM_SCALING = 0.000001
     MAX_SAMPLES_TO_DISPALY = 1000
+    MARKER_LABEL_WIDTH = sp(45)
+    MARKER_LABEL_WIDTH_TIME = sp(80)
 
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
@@ -196,13 +198,18 @@ class LineChart(ChannelAnalysisWidget):
         self.marker_pct = pct
         data_index = self.current_offset + (pct * (self.current_x - self.current_offset))
         self.ids.chart.marker_x = data_index
-        self._marker_label.pos=(x, y - self.height / 2)
-        if self.line_chart_mode == LineChartMode.time:
-            marker_value = format_laptime((data_index * .001)/60)
-        else:
-            marker_value = '{:.2f}'.format(data_index)
-        self._marker_label.text = marker_value 
 
+        #Label marker that follows marker position
+        marker_x = x
+        if self.line_chart_mode == LineChartMode.time:
+            marker_x -= self.MARKER_LABEL_WIDTH_TIME if self.width - marker_x < self.MARKER_LABEL_WIDTH_TIME else 0
+            marker_value = format_laptime(data_index * 0.000016666)
+        else:
+            marker_x -= self.MARKER_LABEL_WIDTH if self.width - marker_x < self.MARKER_LABEL_WIDTH else 0
+            marker_value = '{:.2f}'.format(data_index)
+        self._marker_label.pos=(marker_x, y - self.height / 2)
+        self._marker_label.text = marker_value 
+        
         for channel_plot in self._channel_plots.itervalues():
             try:
                 value_index = bisect.bisect_right(channel_plot.chart_x_index.keys(), data_index)
