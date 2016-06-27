@@ -23,25 +23,16 @@ import kivy
 kivy.require('1.9.1')
 from kivy.logger import Logger
 from kivy.app import Builder
-from kivy.clock import Clock
-from kivy.uix.popup import Popup
-from kivy.metrics import dp
+from kivy.metrics import sp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.listview import ListView, ListItemButton
 from kivy.uix.screenmanager import Screen, SwapTransition
-from kivy.uix.button import ButtonBehavior
-from utils import kvFind
-from kivy.adapters.listadapter import ListAdapter
-from iconbutton import IconButton
-from autosportlabs.uix.button.featurebutton import FeatureButton
-from autosportlabs.racecapture.views.util.alertview import alertPopup
-from autosportlabs.racecapture.views.file.loaddialogview import LoadDialog
-from autosportlabs.racecapture.views.file.savedialogview import SaveDialog
-from autosportlabs.racecapture.views.channels.channelselectview import ChannelSelectorView
-from autosportlabs.widgets.scrollcontainer import ScrollContainer
+from kivy.properties import ListProperty, BooleanProperty
 from iconbutton import IconButton
 from fieldlabel import FieldLabel
-
+from autosportlabs.widgets.scrollcontainer import ScrollContainer
+from autosportlabs.racecapture.theme.color import ColorScheme
+from autosportlabs.uix.button.widgetbuttons import LabelButton
 KV_FILE="""
 <CustomizeChannelsView>:
     BoxLayout:
@@ -60,45 +51,67 @@ KV_FILE="""
                 height: max(self.minimum_height, scroller.height)
                 cols: 1
 
-<BaseChannelSelection>:
+<ChannelSelection>:
     spacing: sp(5)
     padding: [0, 0, 0, sp(5)]
     size_hint_y: None
     orientation: 'horizontal'
 
-<CurrentChannel>:
     canvas.before:
         Color:
-            rgba: ColorScheme.get_primary()
+            rgba: root.highlight_color
         Rectangle:
             pos: self.pos
             size: self.size
-    FieldLabel:
+    LabelButton:
         halign: 'center'
         id: name
         size_hint_x: 0.9
         font_size: root.height * 0.6
+        on_press: root.on_label_add()
     IconButton:
         size_hint_x: 0.1
         size_hint_y: 0.9
-        text: '\357\200\224'
-        on_release: root.on_delete()
-
-<AddChannel>:
-    canvas.before:
-        Color:
-            rgba: ColorScheme.get_dark_background_translucent()
-        Rectangle:
-            pos: self.pos
-            size: self.size
-    FieldLabel:
-        id: name
-        halign: 'center'
-        size_hint_x: 0.9
-        font_size: root.height * 0.6
-    BoxLayout:
-        size_hint_x: 0.1
+        text: ''
+        id: action_button
+        on_release: root.on_action()
 """
+
+class ChannelSelection(BoxLayout):
+    highlight_color = ListProperty(ColorScheme.get_dark_background_translucent())
+    current_channel = BooleanProperty(False)
+
+    def __init__(self, **kwargs):
+        super(ChannelSelection, self).__init__(**kwargs)
+        self.channel = kwargs.get('channel')
+        self.register_event_type('on_delete_channel')
+        self.register_event_type('on_add_channel')
+        self.ids.name.text = self.channel
+
+    def on_label_add(self, *args):
+        if self.current_channel == False:
+            self.dispatch('on_add_channel', self.channel)
+
+    def on_delete_channel(self, *args):
+        pass
+
+    def on_add_channel(self, *args):
+        pass
+
+    def on_current_channel(self, instance, value):
+        icon = ''
+        if value == True:
+            icon = '\357\200\224'
+            self.highlight_color = ColorScheme.get_primary()
+        else:
+            self.highlight_color = ColorScheme.get_dark_background_translucent()
+        self.ids.action_button.text = icon
+
+    def on_action(self, *args):
+        if self.current_channel == True:
+            self.dispatch('on_delete_channel', self.channel)
+        else:
+            self.dispatch('on_add_channel', self.channel)
     
 class CustomizeChannelsView(BoxLayout):
     Builder.load_string(KV_FILE)
@@ -113,7 +126,8 @@ class CustomizeChannelsView(BoxLayout):
         
     def _refresh_channel_list(self):
         grid = self.ids.current_channels
-        grid.clear_widgets()        
+        grid.clear_widgets()
+        self._channel_widgets.clear()
         self._add_selected_channels(self._current_channels)
         self._add_unselected_channels(self._current_channels)
 
@@ -131,19 +145,21 @@ class CustomizeChannelsView(BoxLayout):
             self._refresh_channel_list()
             self.dispatch('on_channels_customized', self._current_channels)
         except Exception as e:
-            Logger.error('Error deleting channel ' + name + ': ' + str(name))
+            Logger.error('Error deleting channel ' + name + ': ' + str(name) + ' ' + str(e))
 
     def on_add_channel(self, instance, name):
         self._current_channels.append(name)
-        self._refresh_channel_list()
+        instance.current_channel = True
+        self._channel_widgets[name] = instance
         self.dispatch('on_channels_customized', self._current_channels)
 
     def _add_selected_channels(self, current_channels):
         grid = self.ids.current_channels
-        self._channel_widgets.clear()
         for channel in sorted(current_channels):
-            current_channel = CurrentChannel(channel = channel)
+            current_channel = ChannelSelection(channel = channel)
+            current_channel.current_channel = True
             current_channel.bind(on_delete_channel=self.on_delete_channel)
+            current_channel.bind(on_add_channel=self.on_add_channel)
             grid.add_widget(current_channel)
             self._channel_widgets[channel] = current_channel
 
@@ -152,51 +168,14 @@ class CustomizeChannelsView(BoxLayout):
         add_channels = [c for c in available_channels if c not in current_channels]
         grid = self.ids.current_channels
         for channel in sorted(add_channels):
-            add_channel = AddChannel(channel = channel)
+            add_channel = ChannelSelection(channel = channel)
+            add_channel.current_channel = False
             add_channel.bind(on_add_channel=self.on_add_channel)
+            add_channel.bind(on_delete_channel=self.on_delete_channel)
             grid.add_widget(add_channel)
 
     def on_channels_customized(self, *args):
         pass
     
-class BaseChannelSelection(BoxLayout):
-    pass
 
-class CurrentChannel(BaseChannelSelection):
-    channel = None
-
-    def __init__(self, **kwargs):
-        super(CurrentChannel, self).__init__(**kwargs)
-        self.channel = kwargs.get('channel')
-        self.register_event_type('on_delete_channel')
-        self.ids.name.text = self.channel
-
-    def on_modified(self, *args):
-        pass
-                
-    def on_delete_channel(self, channel):
-        pass
-    
-    def on_delete(self):
-        self.dispatch('on_delete_channel', self.channel)
-
-class AddChannel(ButtonBehavior, BaseChannelSelection):
-    channel = None
-
-    def __init__(self, **kwargs):
-        super(AddChannel, self).__init__(**kwargs)
-        self.channel = kwargs.get('channel')
-        self.register_event_type('on_add_channel')
-        self.ids.name.text = self.channel
-
-    def on_release(self, *args):
-        self.dispatch('on_add_channel', self.channel)
         
-    def on_modified(self, *args):
-        pass
-
-    def on_add_channel(self, channel):
-        pass
-
-    def on_add(self):
-        self.dispatch('on_add_channel', self.channel)
