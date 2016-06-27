@@ -28,7 +28,7 @@
     AnchorLayout:
         FieldLabel:
             halign: 'center'
-            text: '' if root.laps_selected and root.channels_selected else "Select a channel to view data" if root.laps_selected else "Select a lap to view data"
+            text: '' if root.laps_selected and root.channels_selected else "Select a channel to view data" if root.laps_selected else "Select a session to view data"
             color: ColorScheme.get_dark_primary_text()
             font_size: self.height * 0.2
 	Graph:
