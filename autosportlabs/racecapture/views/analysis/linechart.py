@@ -190,7 +190,7 @@ class LineChart(ChannelAnalysisWidget):
 
     def on_marker(self, marker_event):
         pass
-        
+
     def dispatch_marker(self, x, y):
         mouse_x = x - self.pos[0]
         width = self.size[0]
@@ -199,7 +199,7 @@ class LineChart(ChannelAnalysisWidget):
         data_index = self.current_offset + (pct * (self.current_x - self.current_offset))
         self.ids.chart.marker_x = data_index
 
-        #Label marker that follows marker position
+        # Label marker that follows marker position
         marker_x = x
         if self.line_chart_mode == LineChartMode.time:
             marker_x -= self.MARKER_LABEL_WIDTH_TIME if self.width - marker_x < self.MARKER_LABEL_WIDTH_TIME else 0
@@ -207,9 +207,9 @@ class LineChart(ChannelAnalysisWidget):
         else:
             marker_x -= self.MARKER_LABEL_WIDTH if self.width - marker_x < self.MARKER_LABEL_WIDTH else 0
             marker_value = '{:.2f}'.format(data_index)
-        self._marker_label.pos=(marker_x, y - self.height / 2)
-        self._marker_label.text = marker_value 
-        
+        self._marker_label.pos = (marker_x, y - self.height / 2)
+        self._marker_label.text = marker_value
+
         for channel_plot in self._channel_plots.itervalues():
             try:
                 value_index = bisect.bisect_right(channel_plot.chart_x_index.keys(), data_index)
@@ -308,7 +308,7 @@ class LineChart(ChannelAnalysisWidget):
                 chart = self.ids.chart
                 channel_data_values = query_data[channel]
                 channel_data = channel_data_values.values
-                #If we queried a channel that has no sample results, skip adding the plot
+                # If we queried a channel that has no sample results, skip adding the plot
                 if len(channel_data) == 0 or channel_data[0] is None:
                     continue
 
@@ -341,7 +341,7 @@ class LineChart(ChannelAnalysisWidget):
                 plot.ymax = channel_data_values.max
                 plot.points = points
                 self._channel_plots[str(channel_plot)] = channel_plot
-                
+
                 # sync max chart x dimension
                 self._update_max_chart_x()
         finally:
@@ -400,9 +400,9 @@ class LineChart(ChannelAnalysisWidget):
                 Clock.schedule_once(lambda dt: self._add_channels_results_time(channels[:], results))
             else:
                 Logger.error('LineChart: Unknown line chart mode ' + str(self.line_chart_mode))
-                
+
         self.datastore.get_channel_data(source_ref, ['Interval', 'Distance'] + channels, get_results)
-        
+
     def _redraw_plots(self):
         selected_channels = self.selected_channels
         for channel in selected_channels:
@@ -410,13 +410,13 @@ class LineChart(ChannelAnalysisWidget):
         self._add_channels_all_laps(selected_channels)
 
     def _customized(self, instance, values):
-        #Update selected channels
+        # Update selected channels
         updated_channels = values.current_channels
         if self.selected_channels != updated_channels:
             self.select_channels(updated_channels)
             self.dispatch('on_channel_selected', updated_channels)
-        
-        #update plot mode
+
+        # update plot mode
         if self.line_chart_mode != values.line_chart_mode:
             self.line_chart_mode = values.line_chart_mode
             self._refresh_chart_mode_toggle()
@@ -434,13 +434,13 @@ class LineChart(ChannelAnalysisWidget):
         content.bind(on_customized=self._customized)
         content.bind(on_close=lambda *args:popup.dismiss())
         popup.open()
-            
-        
+
+
 class CustomizeParams(object):
     '''
     A container class for holding multiple parameter for customization dialog
     '''
-    def __init__(self, settings, datastore,  **kwargs):
+    def __init__(self, settings, datastore, **kwargs):
         self.settings = settings
         self.datastore = datastore
 
@@ -515,12 +515,12 @@ class CustomizeChartScreen(BaseOptionsScreen):
         if self.initialized == False:
             self._update_plot_type_view(self.values.line_chart_mode)
             self.initialized = True
-        
+
     def _update_plot_type(self, plot_type):
         if self.initialized:
             self.values.line_chart_mode = plot_type
             self.dispatch('on_screen_modified', self.values)
-    
+
     def _update_plot_type_view(self, plot_type):
         if plot_type == LineChartMode.distance:
             self.ids.plot_time.active = False
@@ -530,17 +530,17 @@ class CustomizeChartScreen(BaseOptionsScreen):
             self.ids.plot_time.active = True
         else:
             Logger.error("CustomizeChartScreen: Unknown plot plot_type: {}".format(plot_type))
-             
+
     def on_label_plot_distance(self):
         self._update_plot_type_view(LineChartMode.distance)
-        
+
     def on_label_plot_time(self):
         self._update_plot_type_view(LineChartMode.time)
-        
+
     def on_plot_type_time(self):
         if self.ids.plot_time.active:
             self._update_plot_type(LineChartMode.time)
-    
+
     def on_plot_type_distance(self):
         if self.ids.plot_distance.active:
             self._update_plot_type(LineChartMode.distance)
@@ -557,15 +557,15 @@ class CustomizeChannelsScreen(BaseOptionsScreen):
         super(CustomizeChannelsScreen, self).__init__(params, values, **kwargs)
         self.params = params
         self.values = values
-                
-                
+
+
     def on_modified(self, *args):
         self.values.current_channels = args[1]
         super(CustomizeChannelsScreen, self).on_modified(*args)
-        
+
     def on_enter(self):
         if self.initialized == False:
-            content = CustomizeChannelsView(settings=self.params.settings, datastore=self.params.datastore, current_channels=self.values.current_channels)
+            content = CustomizeChannelsView(datastore=self.params.datastore, current_channels=self.values.current_channels)
             content.bind(on_channels_customized=self.on_modified)
             self.add_widget(content)
             self.initialized = True

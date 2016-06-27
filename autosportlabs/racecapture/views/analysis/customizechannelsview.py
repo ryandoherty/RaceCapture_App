@@ -15,8 +15,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # See the GNU General Public License for more details. You should
-#have received a copy of the GNU General Public License along with
-#this code. If not, see <http://www.gnu.org/licenses/>.
+# have received a copy of the GNU General Public License along with
+# this code. If not, see <http://www.gnu.org/licenses/>.
 import os
 from threading import Thread
 import kivy
@@ -33,7 +33,7 @@ from fieldlabel import FieldLabel
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from autosportlabs.racecapture.theme.color import ColorScheme
 from autosportlabs.uix.button.widgetbuttons import LabelButton
-KV_FILE="""
+KV_FILE = """
 <CustomizeChannelsView>:
     BoxLayout:
         orientation: 'vertical'
@@ -112,18 +112,18 @@ class ChannelSelection(BoxLayout):
             self.dispatch('on_delete_channel', self.channel)
         else:
             self.dispatch('on_add_channel', self.channel)
-    
+
 class CustomizeChannelsView(BoxLayout):
     Builder.load_string(KV_FILE)
 
-    def __init__(self, **kwargs):
+    def __init__(self, datastore, current_channels, **kwargs):
         super(CustomizeChannelsView, self).__init__(**kwargs)
         self._channel_widgets = {}
         self.register_event_type('on_channels_customized')
-        self.datastore = kwargs.get('datastore')
-        self._current_channels = kwargs.get('current_channels')
+        self.datastore = datastore
+        self._current_channels = current_channels
         self._refresh_channel_list()
-        
+
     def _refresh_channel_list(self):
         grid = self.ids.current_channels
         grid.clear_widgets()
@@ -156,7 +156,7 @@ class CustomizeChannelsView(BoxLayout):
     def _add_selected_channels(self, current_channels):
         grid = self.ids.current_channels
         for channel in sorted(current_channels):
-            current_channel = ChannelSelection(channel = channel)
+            current_channel = ChannelSelection(channel=channel)
             current_channel.current_channel = True
             current_channel.bind(on_delete_channel=self.on_delete_channel)
             current_channel.bind(on_add_channel=self.on_add_channel)
@@ -168,7 +168,7 @@ class CustomizeChannelsView(BoxLayout):
         add_channels = [c for c in available_channels if c not in current_channels]
         grid = self.ids.current_channels
         for channel in sorted(add_channels):
-            add_channel = ChannelSelection(channel = channel)
+            add_channel = ChannelSelection(channel=channel)
             add_channel.current_channel = False
             add_channel.bind(on_add_channel=self.on_add_channel)
             add_channel.bind(on_delete_channel=self.on_delete_channel)
@@ -176,6 +176,5 @@ class CustomizeChannelsView(BoxLayout):
 
     def on_channels_customized(self, *args):
         pass
-    
 
-        
+
