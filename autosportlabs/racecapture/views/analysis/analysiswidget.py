@@ -28,6 +28,7 @@ from autosportlabs.racecapture.views.channels.channelselectview import ChannelSe
 from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from kivy.uix.popup import Popup
+from kivy.uix.stacklayout import StackLayout
 from kivy.properties import BooleanProperty, ObjectProperty
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 

@@ -40,6 +40,8 @@ from autosportlabs.uix.progressspinner import ProgressSpinner
 from autosportlabs.uix.options.optionsview import OptionsView, BaseOptionsScreen
 from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 from autosportlabs.uix.button.widgetbuttons import LabelButton
+from autosportlabs.racecapture.theme.color import ColorScheme
+from autosportlabs.uix.toast.kivytoast import toast
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/linechart.kv')
 
@@ -94,6 +96,31 @@ class LineChart(ChannelAnalysisWidget):
         self.marker_pct = 0
         self.line_chart_mode = LineChartMode.distance
         self._channel_plots = {}
+
+    def add_option_buttons(self):
+        '''
+        Add additional buttons needed by this widget
+        '''
+        self.chart_mode_toggle_button = IconButton(size_hint_x=0.1, on_press=self.on_toggle_chart_mode)
+        self.append_option_button(self.chart_mode_toggle_button)
+        self._refresh_chart_mode_toggle()
+
+    def _refresh_chart_mode_toggle(self):
+        if self.line_chart_mode == LineChartMode.distance:
+            self.chart_mode_toggle_button.text = u'\uf178'
+        else:
+            self.chart_mode_toggle_button.text = u'\uf017'
+
+    def on_toggle_chart_mode(self, *args):
+        if self.line_chart_mode == LineChartMode.distance:
+            self.line_chart_mode = LineChartMode.time
+            toast('Time')
+        else:
+            self.line_chart_mode = LineChartMode.distance
+            toast('Distance')
+
+        self._redraw_plots()
+        self._refresh_chart_mode_toggle()
 
     def on_touch_down(self, touch):
         x, y = touch.x, touch.y
@@ -357,6 +384,12 @@ class LineChart(ChannelAnalysisWidget):
                 
         self.datastore.get_channel_data(source_ref, ['Interval', 'Distance'] + channels, get_results)
         
+    def _redraw_plots(self):
+        selected_channels = self.selected_channels
+        for channel in selected_channels:
+            self._remove_channel_all_laps(channel)
+        self._add_channels_all_laps(selected_channels)
+
     def _customized(self, instance, values):
         #Update selected channels
         updated_channels = values.current_channels
@@ -367,12 +400,9 @@ class LineChart(ChannelAnalysisWidget):
         #update plot mode
         if self.line_chart_mode != values.line_chart_mode:
             self.line_chart_mode = values.line_chart_mode
-            selected_channels = self.selected_channels
-            for channel in selected_channels:
-                self._remove_channel_all_laps(channel)
-            
-            self._add_channels_all_laps(selected_channels)
-    
+            self._refresh_chart_mode_toggle()
+            self._redraw_plots()
+
     def on_options(self, *args):
         params = CustomizeParams(settings=self.settings, datastore=self.datastore)
         values = CustomizeValues(list(self.selected_channels), self.line_chart_mode)
