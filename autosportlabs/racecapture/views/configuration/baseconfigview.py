@@ -94,7 +94,7 @@ class BaseMultiChannelConfigView(BaseConfigView):
         sv.add_widget(accordion)
         self._accordion = accordion
         self.add_widget(sv)
-        self._min_height = 600
+        self._min_height = 0
         
     def update_channel_editors(self, channel_count, max_sample_rate):
         accordion = self._accordion

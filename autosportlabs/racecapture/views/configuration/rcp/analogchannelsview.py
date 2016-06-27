@@ -28,6 +28,7 @@ class AnalogChannelsView(BaseMultiChannelConfigView):
         super(AnalogChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Analog '
         self.accordion_item_height = dp(80)
+        self._min_height = 350
         
             
     def channel_builder(self, index, max_sample_rate):
