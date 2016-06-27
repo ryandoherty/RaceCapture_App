@@ -465,13 +465,13 @@ class CustomizeHeatmapView(BaseOptionsScreen):
         modified = self.values.heatmap_channel != value
         self.values.heatmap_channel = value
         if modified:
-            self.dispatch('on_modified')
+            self.dispatch('on_screen_modified')
 
     def channel_cleared(self, *args):
         modified = self.values.heatmap_channel == None
         self.values.heatmap_channel = None
         if modified:
-            self.dispatch('on_modified')
+            self.dispatch('on_screen_modified')
 
 class CustomizeTrackView(BaseOptionsScreen):
     '''
@@ -497,4 +497,4 @@ class CustomizeTrackView(BaseOptionsScreen):
     def track_selected(self, instance, value):
         if type(value) is set:
             self.values.track_id = None if len(value) == 0 else next(iter(value))
-        self.dispatch('on_modified')
+        self.dispatch('on_screen_modified')

@@ -93,12 +93,17 @@ class OptionsView(BoxLayout):
         screen_manager = self.ids.screens
         screen_manager.transition = SwapTransition()
         self.values = values
+        self.buttons = {}
 
     def add_options_screen(self, screen, button):
         screen.bind(on_screen_modified=self.on_modified)
         self.ids.screens.add_widget(screen)
         button.bind(on_press=lambda x: self.on_option(screen.name))
         self.ids.options.add_widget(button)
+        button.tile_color = ColorScheme.get_dark_accent() \
+            if len(self.buttons.values()) > 0 else \
+            ColorScheme.get_accent() 
+        self.buttons[screen.name] = button
 
     def on_customized(self, values):
         pass
@@ -118,3 +123,10 @@ class OptionsView(BoxLayout):
 
     def on_option(self, option):
         self.ids.screens.current = option
+        for name in self.buttons.keys():
+            button = self.buttons[name]
+            if name == option:
+                button.tile_color = ColorScheme.get_accent()
+            else:
+                button.tile_color = ColorScheme.get_dark_accent()
+            

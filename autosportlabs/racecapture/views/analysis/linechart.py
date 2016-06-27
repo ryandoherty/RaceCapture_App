@@ -439,7 +439,7 @@ class ChannelsOptionsButton(LabelIconButton):
     title: 'Channels'
     icon_size: self.height * .9
     title_font_size: self.height * 0.6
-    icon: u'\uf06d'    
+    icon: u'\uf03a'    
     ''')
 
 class ChartOptionsButton(LabelIconButton):
@@ -448,7 +448,7 @@ class ChartOptionsButton(LabelIconButton):
     title: 'Chart'
     icon_size: self.height * .9
     title_font_size: self.height * 0.6
-    icon: u'\uf018'    
+    icon: u'\uf080'    
     ''')
 
 class CustomizeChartScreen(BaseOptionsScreen):
