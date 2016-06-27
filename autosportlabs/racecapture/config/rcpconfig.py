@@ -149,28 +149,35 @@ class AnalogChannel(BaseChannel):
         json_dict['map'] = self.scalingMap.toJson()
         return json_dict
 
-ANALOG_CHANNEL_COUNT = 8
+DEFAULT_ANALOG_CHANNEL_COUNT = 8
 
 class AnalogConfig(object):
     def __init__(self, **kwargs):
-        self.channelCount = ANALOG_CHANNEL_COUNT
+        self.channelCount = DEFAULT_ANALOG_CHANNEL_COUNT
         self.channels = []
+        self.build_channels()
 
-        for i in range (self.channelCount):
-            self.channels.append(AnalogChannel())
+    def fromJson(self, analogCfgJson, capabilities=None):
+        if capabilities:
+            self.channelCount = capabilities.channels.analog
+            self.build_channels()
 
-    def fromJson(self, analogCfgJson):
-        for i in range (self.channelCount):
+        for i in range(self.channelCount):
             analogChannelJson = analogCfgJson.get(str(i), None)
             if analogChannelJson:
                 self.channels[i].fromJson(analogChannelJson)
 
     def toJson(self):
         analogCfgJson = {}
-        for i in range(ANALOG_CHANNEL_COUNT):
+        for i in range(self.channelCount):
             analogChannel = self.channels[i]
             analogCfgJson[str(i)] = analogChannel.toJson()
         return {'analogCfg':analogCfgJson}
+
+    def build_channels(self):
+        self.channels = []
+        for i in range (self.channelCount):
+            self.channels.append(AnalogChannel())
 
     @property
     def stale(self):
@@ -902,7 +909,7 @@ class WifiConfig(object):
         self.ap_ssid = ''
         self.ap_password = ''
         self.ap_channel = 1
-        self.ap_encryption = 'none'
+        self.ap_encryption = 'None'
         self.stale = False
 
     def from_json(self, json_config):
@@ -1016,59 +1023,141 @@ class VersionConfig(object):
         '''
         return self.major > 0 and len(self.name) > 0 and len(self.serial) > 0
 
+
 class ChannelCapabilities(object):
-    analog = 8
-    imu = 6
-    gpio = 3
-    timer = 3
-    pwm = 4
-    can = 2
+
+    def __init__(self):
+        self.analog = 8
+        self.imu = 6
+        self.gpio = 3
+        self.timer = 3
+        self.pwm = 3
+        self.can = 2
 
     def from_json_dict(self, json_dict):
         if json_dict:
-            self.analog = int(json_dict.get('analog', self.analog))
-            self.imu = int(json_dict.get('imu', self.imu))
-            self.gpio = int(json_dict.get('gpio', self.gpio))
-            self.pwm = int(json_dict.get('pwm', self.pwm))
-            self.can = int(json_dict.get('can', self.can))
+            self.analog = int(json_dict.get('analog', 0))
+            self.imu = int(json_dict.get('imu', 0))
+            self.gpio = int(json_dict.get('gpio', 0))
+            self.pwm = int(json_dict.get('pwm', 0))
+            self.can = int(json_dict.get('can', 0))
+            self.timer = int(json_dict.get('timer', 0))
 
     def to_json_dict(self):
-        return {'analog':self.analog,
-                'imu':self.imu,
-                'gpio':self.gpio,
-                'timer':self.timer,
-                'pwm':self.pwm,
-                'can':self.can
-                }
+        return {
+            "analog": self.analog,
+            "imu": self.imu,
+            "gpio": self.gpio,
+            "pwm": self.pwm,
+            "can": self.can,
+            "timer": self.timer
+        }
+
 
 class SampleRateCapabilities(object):
-    sensor = 1000
-    gps = 50
+
+    def __init__(self):
+        self.sensor = 1000
+        self.gps = 50
 
     def from_json_dict(self, json_dict):
         if json_dict:
-            self.sensor = json_dict.get('sensor', self.sensor)
-            self.gps = json_dict.get('gps', self.gps)
+            self.sensor = json_dict.get('sensor', 0)
+            self.gps = json_dict.get('gps', 0)
 
     def to_json_dict(self):
-        return {'gps': self.gps, 'sensor':self.sensor}
+        return {
+            "sensor": self.sensor,
+            "gps": self.gps
+        }
 
-class StorageCapabilities():
-    tracks = 240
-    script = 10240
+
+class StorageCapabilities(object):
+
+    def __init__(self):
+        self.tracks = 200
+        self.script = 100000
 
     def from_json_dict(self, json_dict):
         if json_dict:
-            self.tracks = json_dict.get('tracks', self.tracks)
-            self.script = json_dict.get('script', self.script)
+            self.tracks = json_dict.get('tracks', 0)
+            self.script = json_dict.get('script', False)
 
     def to_json_dict(self):
-        return {'tracks': self.tracks, 'script': self.script}
+        return {
+            "tracks": self.tracks,
+            "script": self.script
+        }
+
+
+class LinksCapabilities(object):
+
+    def __init__(self):
+        self.bluetooth = True
+        self.cellular = True
+        self.wifi = True
+        self.usb = True
+
+    def from_json_dict(self, json_dict):
+        Logger.info("LinksCapabilities: {}".format(json_dict))
+        self.bluetooth = json_dict.get('bluetooth', False)
+        self.cellular = json_dict.get('cellular', False)
+        self.wifi = json_dict.get('wifi', False)
+        self.usb = json_dict.get('usb', False)
+
+    def to_json_dict(self):
+        return {
+            "bluetooth": self.bluetooth,
+            "cellular": self.cellular,
+            "wifi": self.wifi,
+            "usb": self.usb
+        }
+
 
 class Capabilities(object):
-    channels = ChannelCapabilities()
-    sample_rates = SampleRateCapabilities()
-    storage = StorageCapabilities()
+
+    def __init__(self):
+        self.channels = ChannelCapabilities()
+        self.sample_rates = SampleRateCapabilities()
+        self.storage = StorageCapabilities()
+        self.links = LinksCapabilities()
+
+    @property
+    def has_analog(self):
+        # We always have at least 1 analog channel for battery
+        return self.channels.analog > 0
+
+    @property
+    def has_gpio(self):
+        return self.channels.gpio > 0
+
+    @property
+    def has_pwm(self):
+        return self.channels.pwm > 0
+
+    @property
+    def has_script(self):
+        return self.storage.script > 0
+
+    @property
+    def has_timer(self):
+        return self.channels.timer > 0
+
+    @property
+    def has_pwm(self):
+        return self.channels.pwm > 0
+
+    @property
+    def has_cellular(self):
+        return self.links.cellular
+
+    @property
+    def has_wifi(self):
+        return self.links.wifi
+
+    @property
+    def has_bluetooth(self):
+        return self.links.bluetooth
 
     def from_json_dict(self, json_dict):
         if json_dict:
@@ -1084,11 +1173,21 @@ class Capabilities(object):
             if storage:
                 self.storage.from_json_dict(storage)
 
+            # If there is no links object, this is old firmware, which only supports BT & Cell
+            links = json_dict.get('links')
+            if links:
+                self.links.from_json_dict(links)
+            else:
+                self.links.from_json_dict({'bluetooth': True, 'cellular': True})
+
     def to_json_dict(self):
-        return {'channels': self.channels.to_json_dict(),
-                'sampleRates': self.sample_rates.to_json_dict(),
-                'db': self.storage.to_json_dict()
-                }
+        return {
+            "channels": self.channels.to_json_dict(),
+            "db": self.storage.to_json_dict(),
+            "sampleRates": self.sample_rates.to_json_dict(),
+            "links": self.links.to_json_dict()
+        }
+
 
 class RcpConfig(object):
     loaded = False
@@ -1152,11 +1251,13 @@ class RcpConfig(object):
                 if versionJson:
                     self.versionConfig.fromJson(versionJson)
 
-                self.capabilities.from_json_dict(rcpJson.get('capabilities'))
+                capabilities = rcpJson.get('capabilities', None)
+                if capabilities:
+                    self.capabilities.from_json_dict(capabilities)
 
                 analogCfgJson = rcpJson.get('analogCfg', None)
                 if analogCfgJson:
-                    self.analogConfig.fromJson(analogCfgJson)
+                    self.analogConfig.fromJson(analogCfgJson, capabilities=self.capabilities)
 
                 timerCfgJson = rcpJson.get('timerCfg', None)
                 if timerCfgJson:

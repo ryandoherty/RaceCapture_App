@@ -19,13 +19,16 @@ from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble,
 from kivy.metrics import dp
 
 ANALOG_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/analogchannelsview.kv'
-        
+
+
 class AnalogChannelsView(BaseMultiChannelConfigView):
+    Builder.load_file(ANALOG_CHANNELS_VIEW_KV)
+
     def __init__(self, **kwargs):
-        Builder.load_file(ANALOG_CHANNELS_VIEW_KV)
         super(AnalogChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Analog '
         self.accordion_item_height = dp(80)
+        self._min_height = 350
         
             
     def channel_builder(self, index, max_sample_rate):

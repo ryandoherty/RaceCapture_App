@@ -109,9 +109,9 @@ class ImuChannelsView(BaseConfigView):
     editors = []
     imu_cfg = None
     channelLabels = {0:'X', 1:'Y', 2:'Z', 3:'Yaw',4:'Pitch',5:'Roll',6:'Compass'}
+    Builder.load_file(IMU_CHANNELS_VIEW_KV)
 
     def __init__(self, **kwargs):
-        Builder.load_file(IMU_CHANNELS_VIEW_KV)
         super(ImuChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
 

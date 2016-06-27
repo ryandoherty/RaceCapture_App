@@ -229,6 +229,7 @@ class RaceCaptureApp(App):
 
     def on_read_config_error(self, detail):
         alertPopup('Error Reading', 'Could not read configuration:\n\n' + str(detail))
+        Logger.error("Main: {}".format(str(detail)))
 
     def on_tracks_updated(self, track_manager):
         for view in self.tracks_listeners:

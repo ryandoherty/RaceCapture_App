@@ -14,9 +14,12 @@ from autosportlabs.racecapture.views.configuration.baseconfigview import BaseMul
 
 ANALOG_PULSE_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/pwmchannelsview.kv'
 
+
 class AnalogPulseOutputChannelsView(BaseMultiChannelConfigView):
+
+    Builder.load_file(ANALOG_PULSE_CHANNELS_VIEW_KV)
+
     def __init__(self, **kwargs):
-        Builder.load_file(ANALOG_PULSE_CHANNELS_VIEW_KV)
         super(AnalogPulseOutputChannelsView, self).__init__(**kwargs)
         self.channel_title = 'Pulse / Analog Output '
         self.accordion_item_height = dp(100)

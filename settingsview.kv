@@ -3,9 +3,9 @@
 <SettingsView>:
     BoxLayout:
         rcid: 'fieldContainer'
-        orientation: 'vertical'
+        orientation: 'horizontal'
         BoxLayout:
-            orientation: 'horizontal'
+            orientation: 'vertical'
             spacing: 5
             FieldLabel:
                 size_hint: (0.65, 1.0)
@@ -13,18 +13,19 @@
                 halign: 'right'
                 font_size: sp(24)
                 text: ''
-            BoxLayout:
-                size_hint: (0.35, 1.0)
-                orientation: 'vertical'
+            TextWidget:
+                rcid: 'helpLabel'
                 halign: 'left'
-                spacing: 5
-                AnchorLayout:
-                    rcid: 'control'
-        TextWidget:
-            rcid: 'helpLabel'
+                text: ''
+                color: [0.6, 0.6, 0.6, 1.0]
+        BoxLayout:
+            size_hint: (0.35, 1.0)
+            orientation: 'vertical'
             halign: 'left'
-            text: ''
-            color: [0.6, 0.6, 0.6, 1.0]
+            spacing: 5
+            AnchorLayout:
+                rcid: 'control'
+                id: control
 
 
 <SettingsMappedSpinner>:
@@ -43,5 +44,5 @@
 	
 <SettingsTextField>:
 	rcid: 'settingsCtrl'
-	size_hint: (1.0, 0.3)
+	size_hint: (1.0, 0.2)
 	on_text: root.on_text(*args)
