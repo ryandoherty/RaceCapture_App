@@ -25,16 +25,16 @@
                 StackLayout:
                         canvas.before:
                                 Color:
-                                        rgba:  ColorScheme.get_widget_translucent_background()
-                                        Rectangle:
-                                                pos: self.pos
-                                                size: self.size
+                                        rgba: ColorScheme.get_widget_translucent_background()
+                                Rectangle:
+                                        pos: self.pos
+                                        size: self.size
                         id: options_bar
                         orientation: 'lr-tb'
-                        size_hint: (0.5, 0.1)
+                        size_hint: (0.3, 0.1)
                         spacing: sp(5)
                         IconButton:
                                 id: options
-                                size_hint_x: 0.1
+                                size_hint_x: 0.15
                                 text: u'\uf013'
                                 on_press: root.on_options()

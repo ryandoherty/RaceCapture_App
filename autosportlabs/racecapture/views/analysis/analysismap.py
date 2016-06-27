@@ -149,7 +149,7 @@ class AnalysisMap(AnalysisWidget):
         '''
         Add additional buttons needed by this widget
         '''
-        self.append_option_button(IconButton(size_hint_x=0.1, text=u'\uf0b2', on_press=self.on_center_map))
+        self.append_option_button(IconButton(size_hint_x=0.15, text=u'\uf0b2', on_press=self.on_center_map))
 
     def on_center_map(self, *args):
         '''

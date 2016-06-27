@@ -101,7 +101,7 @@ class LineChart(ChannelAnalysisWidget):
         '''
         Add additional buttons needed by this widget
         '''
-        self.chart_mode_toggle_button = IconButton(size_hint_x=0.1, on_press=self.on_toggle_chart_mode)
+        self.chart_mode_toggle_button = IconButton(size_hint_x=0.15, on_press=self.on_toggle_chart_mode)
         self.append_option_button(self.chart_mode_toggle_button)
         self._refresh_chart_mode_toggle()
 
