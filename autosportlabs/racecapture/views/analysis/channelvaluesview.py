@@ -15,8 +15,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # See the GNU General Public License for more details. You should
-#have received a copy of the GNU General Public License along with
-#this code. If not, see <http://www.gnu.org/licenses/>.
+# have received a copy of the GNU General Public License along with
+# this code. If not, see <http://www.gnu.org/licenses/>.
 import kivy
 kivy.require('1.9.1')
 from kivy.logger import Logger
@@ -32,7 +32,7 @@ from autosportlabs.racecapture.views.analysis.analysiswidget import ChannelAnaly
 from autosportlabs.uix.gauge.bargraphgauge import BarGraphGauge
 
 Builder.load_file('autosportlabs/racecapture/views/analysis/channelvaluesview.kv')
-    
+
 class ChannelValueView(BoxLayout):
 
     def __init__(self, **kwargs):
@@ -75,7 +75,7 @@ class ChannelValueView(BoxLayout):
         try:
             value = float(value)
             self.value_view.value = value
-        except:
+        except TypeError:
             self.value_view.value = None
 
     @property
@@ -126,7 +126,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
                 except IndexError:
                     value = values[len(values) - 1]
                 widget.value = value
-                
+
 
     def _refresh_channels(self):
         channels_grid = self.ids.channel_values
@@ -144,7 +144,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
                 view.minval = channel_data.min
                 view.maxval = channel_data.max
                 self._channel_stat_widgets[key] = view
-                
+
         channels_grid.clear_widgets()
         for key in iter(sorted(self._channel_stat_widgets.iterkeys())):
             channels_grid.add_widget(self._channel_stat_widgets[key])
@@ -162,7 +162,7 @@ class ChannelValuesView(ChannelAnalysisWidget):
         source_key = str(channel_data_values.source)
         channels = self.channel_stats.get(source_key)
         if not channels:
-            channels = {} #looks like we're adding it for the first time for this source
+            channels = {}  # looks like we're adding it for the first time for this source
             self.channel_stats[source_key] = channels
         channels[channel_data_values.channel] = channel_data_values
         self._refresh_channels()
@@ -172,14 +172,13 @@ class ChannelValuesView(ChannelAnalysisWidget):
             Clock.schedule_once(lambda dt: self._add_channels_results_distance(channels, results))
 
         self.datastore.get_channel_data(source_ref, channels, get_results)
-    
+
     def refresh_view(self):
         self._refresh_channels()
-        
+
     def remove_channel(self, channel, source_ref):
         source_key = str(source_ref)
         channels = self.channel_stats.get(source_key)
         channels.pop(channel, None)
 
-                
-                
+
