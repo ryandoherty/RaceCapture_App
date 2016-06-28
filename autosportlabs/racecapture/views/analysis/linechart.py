@@ -66,8 +66,21 @@ class LineChartMode(object):
     '''
     Describes the supported display modes for the chart
     '''
-    time = 1
-    distance = 2
+    TIME = 1
+    DISTANCE = 2
+
+    #conversion factor for milliseconds to minutes
+    MS_TO_MINUTES = 0.000016666
+    
+    @staticmethod
+    def format_value(mode, value):
+        # Label marker that follows marker position
+        if mode == LineChartMode.TIME:
+            return format_laptime(value * LineChartMode.MS_TO_MINUTES)
+        elif mode == LineChartMode.DISTANCE:
+            return '{:.2f}'.format(value)
+        else:
+            return '---'
 
 class LineChart(ChannelAnalysisWidget):
     '''
@@ -77,8 +90,6 @@ class LineChart(ChannelAnalysisWidget):
     ZOOM_SCALING = 0.01
     TOUCH_ZOOM_SCALING = 0.000001
     MAX_SAMPLES_TO_DISPALY = 1000
-    MARKER_LABEL_WIDTH = sp(45)
-    MARKER_LABEL_WIDTH_TIME = sp(80)
 
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
@@ -99,10 +110,8 @@ class LineChart(ChannelAnalysisWidget):
         self.current_x = 0
         self.current_offset = 0
         self.marker_pct = 0
-        self.line_chart_mode = LineChartMode.distance
+        self.line_chart_mode = LineChartMode.DISTANCE
         self._channel_plots = {}
-        self._marker_label = FieldLabel(text='')
-        self.add_widget(self._marker_label)
 
     def add_option_buttons(self):
         '''
@@ -110,20 +119,22 @@ class LineChart(ChannelAnalysisWidget):
         '''
         self.chart_mode_toggle_button = IconButton(size_hint_x=0.15, on_press=self.on_toggle_chart_mode)
         self.append_option_button(self.chart_mode_toggle_button)
+        self.x_axis_value_label = LabelButton(size_hint_x=0.3, on_press=self.on_toggle_chart_mode)
+        self.append_option_button(self.x_axis_value_label)
         self._refresh_chart_mode_toggle()
 
     def _refresh_chart_mode_toggle(self):
-        if self.line_chart_mode == LineChartMode.distance:
+        if self.line_chart_mode == LineChartMode.DISTANCE:
             self.chart_mode_toggle_button.text = u'\uf178'
         else:
             self.chart_mode_toggle_button.text = u'\uf017'
 
     def on_toggle_chart_mode(self, *args):
-        if self.line_chart_mode == LineChartMode.distance:
-            self.line_chart_mode = LineChartMode.time
+        if self.line_chart_mode == LineChartMode.DISTANCE:
+            self.line_chart_mode = LineChartMode.TIME
             toast('Time')
         else:
-            self.line_chart_mode = LineChartMode.distance
+            self.line_chart_mode = LineChartMode.DISTANCE
             toast('Distance')
 
         self._redraw_plots()
@@ -191,25 +202,38 @@ class LineChart(ChannelAnalysisWidget):
     def on_marker(self, marker_event):
         pass
 
-    def dispatch_marker(self, x, y):
+    def _get_adjusted_offset(self):
+        '''
+        Convert the current marker percent (percent across the graph) to 
+        the x axis data value
+        '''
+        return self.current_offset + (self.marker_pct * (self.current_x - self.current_offset))
+
+    def _update_x_marker_value(self):
+        '''
+        Update the value of the marker distance / time widget based on the current marker percent
+        '''
+        marker_x = self._get_adjusted_offset()
+        self.x_axis_value_label.text = LineChartMode.format_value(self.line_chart_mode, marker_x)
+    
+    def _update_marker_pct(self, x, y):
+        '''
+        Synchronize the marker percent based on the x / y screen position
+        '''
         mouse_x = x - self.pos[0]
         width = self.size[0]
         pct = mouse_x / width
         self.marker_pct = pct
-        data_index = self.current_offset + (pct * (self.current_x - self.current_offset))
+        
+    def _dispatch_marker(self, x, y):
+        '''
+        Update the marker and notify parent about marker selection
+        '''
+        data_index = self._get_adjusted_offset()
         self.ids.chart.marker_x = data_index
 
-        # Label marker that follows marker position
-        marker_x = x
-        if self.line_chart_mode == LineChartMode.time:
-            marker_x -= self.MARKER_LABEL_WIDTH_TIME if self.width - marker_x < self.MARKER_LABEL_WIDTH_TIME else 0
-            marker_value = format_laptime(data_index * 0.000016666)
-        else:
-            marker_x -= self.MARKER_LABEL_WIDTH if self.width - marker_x < self.MARKER_LABEL_WIDTH else 0
-            marker_value = '{:.2f}'.format(data_index)
-        self._marker_label.pos = (marker_x, y - self.height / 2)
-        self._marker_label.text = marker_value
-
+        self._update_x_marker_value()
+        
         for channel_plot in self._channel_plots.itervalues():
             try:
                 value_index = bisect.bisect_right(channel_plot.chart_x_index.keys(), data_index)
@@ -226,7 +250,8 @@ class LineChart(ChannelAnalysisWidget):
             touches = len(self._touches)
             if touches == 1:
                 # regular dragging / updating marker
-                self.dispatch_marker(x, y)
+                self._update_marker_pct(x,y)            
+                self._dispatch_marker(x, y)
             elif touches == 2:
                 zoom_scaling = self.max_x * self.TOUCH_ZOOM_SCALING
                 # handle pinch zoom
@@ -265,7 +290,8 @@ class LineChart(ChannelAnalysisWidget):
         if not self.collide_point(pos[0], pos[1]):
             return False
 
-        self.dispatch_marker(pos[0] * self.metrics_base.density, pos[1] * self.metrics_base.density)
+        self._update_marker_pct(pos[0],pos[1])            
+        self._dispatch_marker(pos[0] * self.metrics_base.density, pos[1] * self.metrics_base.density)
 
     def remove_channel(self, channel, source_ref):
         remove = []
@@ -344,6 +370,7 @@ class LineChart(ChannelAnalysisWidget):
 
                 # sync max chart x dimension
                 self._update_max_chart_x()
+                self._update_x_marker_value()
         finally:
             ProgressSpinner.decrement_refcount()
 
@@ -387,6 +414,8 @@ class LineChart(ChannelAnalysisWidget):
 
                 # sync max chart distances
                 self._update_max_chart_x()
+                self._update_x_marker_value()
+                
         finally:
             ProgressSpinner.decrement_refcount()
 
@@ -394,9 +423,9 @@ class LineChart(ChannelAnalysisWidget):
         ProgressSpinner.increment_refcount()
         def get_results(results):
             # clone the incoming list of channels and pass it to the handler
-            if self.line_chart_mode == LineChartMode.distance:
+            if self.line_chart_mode == LineChartMode.DISTANCE:
                 Clock.schedule_once(lambda dt: self._add_channels_results_distance(channels[:], results))
-            elif self.line_chart_mode == LineChartMode.time:
+            elif self.line_chart_mode == LineChartMode.TIME:
                 Clock.schedule_once(lambda dt: self._add_channels_results_time(channels[:], results))
             else:
                 Logger.error('LineChart: Unknown line chart mode ' + str(self.line_chart_mode))
@@ -453,6 +482,9 @@ class CustomizeValues(object):
         self.line_chart_mode = line_chart_mode
 
 class ChannelsOptionsButton(LabelIconButton):
+    '''
+    Button for Configuring channels
+    '''
     Builder.load_string('''
 <ChannelsOptionsButton>:
     title: 'Channels'
@@ -462,6 +494,9 @@ class ChannelsOptionsButton(LabelIconButton):
     ''')
 
 class ChartOptionsButton(LabelIconButton):
+    '''
+    Button for configuring chart options
+    '''
     Builder.load_string('''
 <ChartOptionsButton>:
     title: 'Chart'
@@ -472,7 +507,7 @@ class ChartOptionsButton(LabelIconButton):
 
 class CustomizeChartScreen(BaseOptionsScreen):
     '''
-    The customization view for customizing the chart options
+    The customization view for customizing the various chart options
     '''
     Builder.load_string('''
 <CustomizeChartScreen>:
@@ -522,32 +557,32 @@ class CustomizeChartScreen(BaseOptionsScreen):
             self.dispatch('on_screen_modified', self.values)
 
     def _update_plot_type_view(self, plot_type):
-        if plot_type == LineChartMode.distance:
+        if plot_type == LineChartMode.DISTANCE:
             self.ids.plot_time.active = False
             self.ids.plot_distance.active = True
-        elif plot_type == LineChartMode.time:
+        elif plot_type == LineChartMode.TIME:
             self.ids.plot_distance.active = False
             self.ids.plot_time.active = True
         else:
             Logger.error("CustomizeChartScreen: Unknown plot plot_type: {}".format(plot_type))
 
     def on_label_plot_distance(self):
-        self._update_plot_type_view(LineChartMode.distance)
+        self._update_plot_type_view(LineChartMode.DISTANCE)
 
     def on_label_plot_time(self):
-        self._update_plot_type_view(LineChartMode.time)
+        self._update_plot_type_view(LineChartMode.TIME)
 
     def on_plot_type_time(self):
         if self.ids.plot_time.active:
-            self._update_plot_type(LineChartMode.time)
+            self._update_plot_type(LineChartMode.TIME)
 
     def on_plot_type_distance(self):
         if self.ids.plot_distance.active:
-            self._update_plot_type(LineChartMode.distance)
+            self._update_plot_type(LineChartMode.DISTANCE)
 
 class CustomizeChannelsScreen(BaseOptionsScreen):
     '''
-    The customization view for customizing the channels
+    The customization view for customizing the selected channels
     '''
     Builder.load_string('''
 <CustomizeChannelsScreen>:
