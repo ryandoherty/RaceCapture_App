@@ -1,0 +1,25 @@
+#:kivy 1.9.1
+
+<TelemetryConfigView>:
+	StackLayout:
+        height: self.minimum_height
+        size_hint: [1, None]
+        spacing: [0, dp(20)]
+        padding: [dp(20), 0]
+        GridLayout:
+            cols: 1
+            spacing: [0, dp(20)]
+            row_default_height: dp(40)
+            size_hint: [1, None]
+            height: self.minimum_height
+            id: content
+            HSeparator:
+                text: 'Telemetry Configuration'
+                halign: 'left'
+            SettingsView:
+                rcid: 'deviceId'
+                id: device_id
+                label_text: 'Telemetry Device Id'
+                help_text: 'Enter the telemetry Device Id provided by race-capture.com'
+            HLineSeparator:
+                size_hint_y: 0.05

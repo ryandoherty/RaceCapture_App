@@ -8,6 +8,7 @@ class ValueField(TextInput):
     def __init__(self, *args, **kwargs):
         self.next = kwargs.pop('next', None)
         self.multiline = False
+        self.font_size = '20sp'
         super(ValueField, self).__init__(*args, **kwargs)
 
     def on_focus(self, instance, value):

@@ -7,6 +7,7 @@ from threading import Thread, RLock, Event
 from autosportlabs.racecapture.config.rcpconfig import *
 from autosportlabs.comms.commscommon import PortNotOpenException, CommsErrorException
 from autosportlabs.util.threadutil import safe_thread_exit, ThreadSafeDict
+from autosportlabs.racecapture.config.rcpconfig import Capabilities
 from functools import partial
 from kivy.clock import Clock
 from kivy.logger import Logger
@@ -169,7 +170,12 @@ class RcpApi:
                 if msg:
                     # clean incoming string, and drop illegal characters
                     msg = unicode(msg, errors='ignore')
-                    Logger.debug('RCPAPI: Rx: ' + str(msg))
+
+                    if 's' in msg:
+                        Logger.trace('RCPAPI: Rx: ' + str(msg))
+                    else:
+                        Logger.debug('RCPAPI: Rx: ' + str(msg))
+
                     msgJson = json.loads(msg, strict=False)
                     Clock.schedule_once(lambda dt: self.on_rx(True))
                     error_count = 0
@@ -313,7 +319,7 @@ class RcpApi:
                     self.recover_connection()
                 except Exception as detail:
                     Logger.error('RCPAPI: Command sequence exception: ' + str(detail))
-                    Logger.debug(traceback.format_exc())
+                    Logger.error(traceback.format_exc())
                     failCallback(detail)
                     self.recover_connection()
 
@@ -337,7 +343,10 @@ class RcpApi:
 
             cmdStr = json.dumps(cmd, separators=(',', ':')) + '\r'
 
-            Logger.debug('RCPAPI: Tx: ' + cmdStr)
+            if "s" in cmd:
+                Logger.trace('RCPAPI: Tx: ' + cmdStr)
+            else:
+                Logger.debug('RCPAPI: Tx: ' + cmdStr)
             comms.write_message(cmdStr)
         except Exception:
             self.recover_connection()
@@ -365,25 +374,49 @@ class RcpApi:
         winCallback(cfg)
 
     def getRcpCfg(self, cfg, winCallback, failCallback):
-        cmdSequence = [       RcpCmd('ver', self.sendGetVersion),
-                              RcpCmd('capabilities', self.getCapabilities),
-                              RcpCmd('analogCfg', self.getAnalogCfg),
-                              RcpCmd('imuCfg', self.getImuCfg),
-                              RcpCmd('gpsCfg', self.getGpsCfg),
-                              RcpCmd('lapCfg', self.getLapCfg),
-                              RcpCmd('timerCfg', self.getTimerCfg),
-                              RcpCmd('gpioCfg', self.getGpioCfg),
-                              RcpCmd('pwmCfg', self.getPwmCfg),
-                              RcpCmd('trackCfg', self.getTrackCfg),
-                              RcpCmd('canCfg', self.getCanCfg),
-                              RcpCmd('obd2Cfg', self.getObd2Cfg),
-                              RcpCmd('scriptCfg', self.getScript),
-                              RcpCmd('connCfg', self.getConnectivityCfg),
-                              RcpCmd('wifiCfg', self.get_wifi_config),
-                              RcpCmd('trackDb', self.getTrackDb)
+
+        def query_available_configs(capabilities_dict):
+            Logger.info("RCPAPI: got capabilities: {}".format(capabilities_dict))
+
+            capabilities_dict = capabilities_dict.get('capabilities')
+
+            capabilities = Capabilities()
+            capabilities.from_json_dict(capabilities_dict)
+
+            cmdSequence = [RcpCmd('ver', self.sendGetVersion),
+                           RcpCmd('capabilities', self.getCapabilities),
+                           RcpCmd('imuCfg', self.getImuCfg),
+                           RcpCmd('gpsCfg', self.getGpsCfg),
+                           RcpCmd('lapCfg', self.getLapCfg),
+                           RcpCmd('trackCfg', self.getTrackCfg),
+                           RcpCmd('canCfg', self.getCanCfg),
+                           RcpCmd('obd2Cfg', self.getObd2Cfg),
+                           RcpCmd('connCfg', self.getConnectivityCfg),
+                           RcpCmd('trackDb', self.getTrackDb)
                            ]
 
-        self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)
+            if capabilities.has_script:
+                cmdSequence.append(RcpCmd('scriptCfg', self.getScript))
+
+            if capabilities.has_analog:
+                cmdSequence.append(RcpCmd('analogCfg', self.getAnalogCfg))
+
+            if capabilities.has_timer:
+                cmdSequence.append(RcpCmd('timerCfg', self.getTimerCfg))
+
+            if capabilities.has_gpio:
+                cmdSequence.append(RcpCmd('gpioCfg', self.getGpioCfg))
+
+            if capabilities.has_pwm:
+                cmdSequence.append(RcpCmd('pwmCfg', self.getPwmCfg))
+
+            if capabilities.has_wifi:
+                cmdSequence.append(RcpCmd('wifiCfg', self.get_wifi_config))
+
+            self._queue_multiple(cmdSequence, 'rcpCfg', lambda rcpJson: self.getRcpCfgCallback(cfg, rcpJson, winCallback), failCallback)
+
+        # First we need to get capabilities, then figure out what to query
+        self.executeSingle(RcpCmd('capabilities', self.getCapabilities), query_available_configs, failCallback)
 
     def writeRcpCfg(self, cfg, winCallback=None, failCallback=None):
         cmdSequence = []
@@ -407,7 +440,7 @@ class RcpApi:
                 cmdSequence.append(RcpCmd('setImuCfg', self.setImuCfg, imuChannel.toJson(), i))
 
         analogCfg = cfg.analogConfig
-        for i in range(ANALOG_CHANNEL_COUNT):
+        for i in range(cfg.analogConfig.channelCount):
             analogChannel = analogCfg.channels[i]
             if analogChannel.stale:
                 cmdSequence.append(RcpCmd('setAnalogCfg', self.setAnalogCfg, analogChannel.toJson(), i))

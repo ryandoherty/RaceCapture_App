@@ -59,7 +59,7 @@ class SettingsMappedSpinner(MappedSpinner):
         pass
 
     def setValue(self, value):
-        self.setFromValue(value)
+        self.setFromValue(str(value))
     
     def on_text(self, instance, value):
         if not value == self.lastValue: #eh.. prevent double firing of event. is there a better way?
@@ -113,6 +113,9 @@ class SettingsView(RelativeLayout):
         label.text = value
         
     def setControl(self, widget):
+        if self.control:
+            self.ids.control.remove_widget(self.control)
+
         widget.size_hint_y=1.0
         kvFind(self, 'rcid', 'control').add_widget(widget)
         widget.bind(on_control=self.on_control)

@@ -17,21 +17,21 @@ class CANBaudRateSettings(SettingsView):
 class CANBaudRateSpinner(SettingsMappedSpinner):
     def __init__(self, **kwargs):    
         super(CANBaudRateSpinner, self).__init__(**kwargs)
-        self.setValueMap({50000: '50K Baud', 100000: '100K Baud', 125000: '125K Baud', 250000:'250K Baud', 500000:'500K Baud', 1000000:'1M Baud'}, 500000)
+        self.setValueMap({50000: '50K Baud', 100000: '100K Baud', 125000: '125K Baud', 250000:'250K Baud', 500000:'500K Baud', 1000000:'1M Baud'}, '500000')
     
 class CANConfigView(BaseConfigView):
     can_config = None
     can_settings = []
-    
+    Builder.load_file(CAN_CONFIG_VIEW_KV)
+
     def __init__(self, **kwargs):    
-        Builder.load_file(CAN_CONFIG_VIEW_KV)
         super(CANConfigView, self).__init__(**kwargs)
         
         self.register_event_type('on_config_updated')    
         btEnable = self.ids.can_enabled 
         btEnable.bind(on_setting=self.on_can_enabled)
         btEnable.setControl(SettingsSwitch())
-                
+
     def on_can_enabled(self, instance, value):
         if self.can_config:
             self.can_config.enabled = value

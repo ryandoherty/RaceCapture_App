@@ -3,7 +3,9 @@ import kivy
 kivy.require('1.9.1')
 
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.accordion import Accordion, AccordionItem
+from kivy.logger import Logger
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from kivy.metrics import dp
 from utils import *
@@ -35,7 +37,7 @@ class BaseChannelView(BoxLayout):
             self.dispatch('on_modified', self.channelConfig)
 
         
-class BaseConfigView(BoxLayout):
+class BaseConfigView(GridLayout):
     channels = None
     rc_api = None
     def __init__(self, **kwargs):    
@@ -45,6 +47,8 @@ class BaseConfigView(BoxLayout):
         self.register_event_type('on_tracks_updated')
         self.register_event_type('on_modified')
         self.register_event_type('on_config_modified')
+        self.orientation = 'vertical'
+        self.cols = 1
         
     def on_modified(self, *args):
         self.dispatch('on_config_modified', *args)
@@ -85,17 +89,18 @@ class BaseMultiChannelConfigView(BaseConfigView):
     def __init__(self, **kwargs):    
         super(BaseMultiChannelConfigView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')        
-        accordion = Accordion(orientation='vertical', size_hint=(1.0, None))        
+        accordion = Accordion(orientation='vertical', size_hint=(1.0, None))
         sv = ScrollContainer(size_hint=(1.0,1.0), do_scroll_x=False)
         sv.add_widget(accordion)
         self._accordion = accordion
         self.add_widget(sv)
+        self._min_height = 0
         
     def update_channel_editors(self, channel_count, max_sample_rate):
         accordion = self._accordion
         if self._channel_count != channel_count:
             self._channel_editors = []
-            accordion.height = self.accordion_item_height * channel_count
+            accordion.height = max((self.accordion_item_height * channel_count), self._min_height)
             title = self.channel_title
             for i in range(channel_count):
                 channel = LazyloadAccordionItem(title=title + str(i + 1), builder=self.channel_builder, channel_index=i, max_sample_rate=max_sample_rate)

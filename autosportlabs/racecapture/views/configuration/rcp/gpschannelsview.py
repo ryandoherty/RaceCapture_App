@@ -14,9 +14,9 @@ GPS_CHANNELS_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/gpscha
 class GPSChannelsView(BaseConfigView):
     gpsConfig = None
     lap_config = None
-    
+    Builder.load_file(GPS_CHANNELS_VIEW_KV)
+
     def __init__(self, **kwargs):
-        Builder.load_file(GPS_CHANNELS_VIEW_KV)            
         super(GPSChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         self.ids.sr.bind(on_sample_rate = self.on_sample_rate)

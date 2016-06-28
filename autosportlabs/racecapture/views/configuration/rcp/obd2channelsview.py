@@ -69,9 +69,9 @@ class OBD2ChannelsView(BaseConfigView):
     obd2_grid = None
     obd2_settings = None
     base_dir = None
-    
+    Builder.load_file(OBD2_CHANNELS_VIEW_KV)
+
     def __init__(self, **kwargs):
-        Builder.load_file(OBD2_CHANNELS_VIEW_KV)
         super(OBD2ChannelsView, self).__init__(**kwargs)
         self.register_event_type('on_config_updated')
         self.obd2_grid = self.ids.obd2grid
