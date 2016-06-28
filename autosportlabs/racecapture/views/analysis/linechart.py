@@ -74,6 +74,13 @@ class LineChartMode(object):
     
     @staticmethod
     def format_value(mode, value):
+        '''
+        Format the value based on the specified mode
+        :param mode the LineChartMode value 
+        :type enum
+        :param value the value to format
+        :type float
+        '''
         # Label marker that follows marker position
         if mode == LineChartMode.TIME:
             return format_laptime(value * LineChartMode.MS_TO_MINUTES)
@@ -89,7 +96,7 @@ class LineChart(ChannelAnalysisWidget):
     color_sequence = ObjectProperty(None)
     ZOOM_SCALING = 0.01
     TOUCH_ZOOM_SCALING = 0.000001
-    MAX_SAMPLES_TO_DISPALY = 1000
+    MAX_SAMPLES_TO_DISPLAY = 1000
 
     def __init__(self, **kwargs):
         super(LineChart, self).__init__(**kwargs)
@@ -352,7 +359,7 @@ class LineChart(ChannelAnalysisWidget):
                 sample_index = 0
                 time_data = time_data_values.values
                 sample_count = len(time_data)
-                interval = max(1, int(sample_count / self.MAX_SAMPLES_TO_DISPALY))
+                interval = max(1, int(sample_count / self.MAX_SAMPLES_TO_DISPLAY))
                 Logger.info('LineChart: plot interval {}'.format(interval))
                 start_time = time_data[0]
                 while sample_index < sample_count:
@@ -397,7 +404,7 @@ class LineChart(ChannelAnalysisWidget):
                 distance_data = distance_data_values.values
                 channel_data = channel_data_values.values
                 sample_count = len(distance_data)
-                interval = max(1, int(sample_count / self.MAX_SAMPLES_TO_DISPALY))
+                interval = max(1, int(sample_count / self.MAX_SAMPLES_TO_DISPLAY))
                 Logger.info('LineChart: plot interval {}'.format(interval))
                 while sample_index < sample_count:
                     sample = channel_data[sample_index]
