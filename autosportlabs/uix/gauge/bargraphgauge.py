@@ -17,7 +17,7 @@ Builder.load_file('autosportlabs/uix/gauge/bargraphgauge.kv')
 class BarGraphGauge(AnchorLayout):    
     minval = NumericProperty(0)
     maxval = NumericProperty(100)
-    value = NumericProperty(0)
+    value = NumericProperty(0, allownone=True)
     color = ListProperty([1, 1, 1, 0.5])
     
     def __init__(self, **kwargs):
@@ -35,10 +35,14 @@ class BarGraphGauge(AnchorLayout):
     def _refresh_value(self):
         stencil = self.ids.stencil
         value = self.value
-        minval = self.minval
-        maxval = self.maxval
-        channel_range = (maxval - minval)
-        pct = 0 if channel_range == 0 else ((value - minval) / channel_range) 
-        width = self.width * pct
+        width = 0
+        if value is None:
+            value = '- - -'
+        else:
+            minval = self.minval
+            maxval = self.maxval
+            channel_range = (maxval - minval)
+            pct = 0 if channel_range == 0 else ((value - minval) / channel_range) 
+            width = self.width * pct
         stencil.width = width
         self.ids.value.text = str(value)

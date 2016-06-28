@@ -17,7 +17,6 @@
 				size_hint: 1.0, 0.1
 				anchor_x: 'left'
 				anchor_y: 'center'
-
 				Image:
 					source: 'resource/images/app_icon_menu.png'
 					size_hint_x: None	
@@ -31,25 +30,25 @@
 					font_name: 'resource/fonts/ASL_regular.ttf'
 					pos_hint: {'center_y':0.57}
 					text: 'Welcome To RaceCapture'
-		GridLayout:
+		BoxLayout:
+			size_hint_x: 0.7
+			orientation: 'vertical'
 			padding: [self.height * 0.05, self.height * 0.05]
-			spacing: self.height * 0.025
-			rows: 2
-			cols: 2
+			spacing: dp(15)
 			FeatureButton:
 				icon: '\357\203\244'
-				title: 'Dashboard'
+				title: 'Race'
 				on_press: root.show_view('dash')
-			FeatureButton:
-				icon: '\357\202\200'
-				title: 'Analysis'
-				on_press: root.show_view('analysis')				
-			FeatureButton:
-				icon: '\357\202\205'
-				title: 'Configuration'
-				on_press: root.show_view('config')
-			FeatureButton:
-				icon: '\357\200\230'
-				title: 'Race Tracks'
-				on_press: root.show_view('tracks')
-			
+            GridLayout:
+            	rows: 1
+				spacing: dp(15)
+				height: dp(200)
+				size_hint_y: None
+                FeatureButton:
+                    icon: '\357\202\200'
+                    title: 'Analysis'
+                    on_press: root.show_view('analysis')
+                FeatureButton:
+                    icon: '\357\202\205'
+                    title: 'Configuration'
+                    on_press: root.show_view('config')

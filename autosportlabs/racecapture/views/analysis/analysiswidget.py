@@ -28,6 +28,7 @@ from autosportlabs.racecapture.views.channels.channelselectview import ChannelSe
 from autosportlabs.racecapture.views.analysis.customizechannelsview import CustomizeChannelsView
 from autosportlabs.racecapture.views.analysis.markerevent import SourceRef
 from kivy.uix.popup import Popup
+from kivy.uix.stacklayout import StackLayout
 from kivy.properties import BooleanProperty, ObjectProperty
 Builder.load_file('autosportlabs/racecapture/views/analysis/analysiswidget.kv')
 
@@ -115,27 +116,27 @@ class ChannelAnalysisWidget(AnalysisWidget):
     def __init__(self, **kwargs):
         super(ChannelAnalysisWidget, self).__init__(**kwargs)
         self._popup = None
-        self._selected_channels = []
+        self.selected_channels = []
         self.register_event_type('on_channel_selected')
 
     def on_sessions(self, instance, value):
         self.refresh_view()
 
     def on_lap_added(self, source_ref):
-        if len(self._selected_channels) == 0:
+        if len(self.selected_channels) == 0:
             self.merge_selected_channels(self.DEFAULT_CHANNELS)
         else:
-            self.add_channels(self._selected_channels, source_ref)
+            self._add_unselected_channels(self.selected_channels, source_ref)
 
     def on_lap_removed(self, source_ref):
-        for channel in self._selected_channels:
+        for channel in self.selected_channels:
             self.remove_channel(channel, source_ref)
         self.refresh_view()
 
     def on_channel_selected(self, value):
         pass
 
-    def add_channels(self, channels, source_ref):
+    def _add_unselected_channels(self, channels, source_ref):
         '''
         Override this to add a channel / lap reference combo to the view
         '''
@@ -155,7 +156,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
 
     def _add_channels_all_laps(self, channels):
         for source_ref in self.selected_laps.itervalues():
-            self.add_channels(channels, source_ref)
+            self._add_unselected_channels(channels, source_ref)
 
     def _remove_channel_all_laps(self, channel):
         for k, v in self.selected_laps.iteritems():
@@ -163,7 +164,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
         self.refresh_view()
 
     def merge_selected_channels(self, updated_channels):
-        current = self._selected_channels
+        current = self.selected_channels
         removed = [c for c in current if c not in updated_channels]
         added = [c for c in updated_channels if c not in current]
 
@@ -174,7 +175,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
         for c in added:
             current.append(c)
         self._add_channels_all_laps(added)
-        self.channels_selected = bool(self._selected_channels)
+        self.channels_selected = bool(self.selected_channels)
 
     def select_channels(self, selected_channels):
         self.merge_selected_channels(selected_channels)
@@ -188,7 +189,7 @@ class ChannelAnalysisWidget(AnalysisWidget):
         self.show_customize_dialog()
 
     def show_customize_dialog(self):
-        content = CustomizeChannelsView(settings=self.settings, datastore=self.datastore, current_channels=self._selected_channels)
+        content = CustomizeChannelsView(datastore=self.datastore, current_channels=self.selected_channels)
         content.bind(on_channels_customized=self._channels_customized)
 
         popup = Popup(title="Customize Channels", content=content, size_hint=(0.7, 0.7))
