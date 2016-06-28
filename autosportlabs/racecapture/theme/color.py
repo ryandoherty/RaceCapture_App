@@ -31,6 +31,10 @@ class ColorScheme(object):
         return get_color_from_hex("00BCD4")
     
     @staticmethod
+    def get_dark_accent():
+        return get_color_from_hex("006775")
+    
+    @staticmethod
     def get_dark_primary_text():
         return get_color_from_hex("212121")
     

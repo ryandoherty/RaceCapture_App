@@ -33,6 +33,7 @@ from autosportlabs.racecapture.datastore import Filter
 from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from iconbutton import IconButton, LabelIconButton
 from autosportlabs.uix.legends.gradientlegends import GradientLapLegend, LapLegend
+from autosportlabs.uix.options.optionsview import OptionsView, BaseOptionsScreen
 
 # The scaling we use while we zoom
 ANALYSIS_MAP_ZOOM_SCALE = 1.1
@@ -148,7 +149,7 @@ class AnalysisMap(AnalysisWidget):
         '''
         Add additional buttons needed by this widget
         '''
-        self.append_option_button(IconButton(text=u'\uf0b2', on_press=self.on_center_map))
+        self.append_option_button(IconButton(size_hint_x=0.15, text=u'\uf0b2', on_press=self.on_center_map))
 
     def on_center_map(self, *args):
         '''
@@ -213,10 +214,15 @@ class AnalysisMap(AnalysisWidget):
         '''
         Display the customization dialog for this widget
         '''
+
         current_track_id = None if self.track == None else self.track.track_id
-        content = CustomizeMapView(params=CustomizeParams(settings=self.settings, datastore=self.datastore, track_manager=self.track_manager),
-                                   values=CustomizeValues(heatmap_channel=self.heatmap_channel, track_id=current_track_id)
-                                   )
+        params = CustomizeParams(settings=self.settings, datastore=self.datastore, track_manager=self.track_manager)
+        values = CustomizeValues(heatmap_channel=self.heatmap_channel, track_id=current_track_id)
+
+        content = OptionsView(values)
+        content.add_options_screen(CustomizeHeatmapView(name='heat', params=params, values=values), HeatmapButton())
+        content.add_options_screen(CustomizeTrackView(name='track', params=params, values=values), TrackmapButton())
+
         popup = Popup(title="Customize Track Map", content=content, size_hint=(0.7, 0.7))
         content.bind(on_customized=self._customized)
         content.bind(on_close=lambda *args:popup.dismiss())
@@ -265,7 +271,7 @@ class AnalysisMap(AnalysisWidget):
         point = GeoPoint.fromPoint(latitude, longitude)
         track = self.track_manager.find_nearby_track(point)
         if self.track != track:
-            #only update the trackmap if it's changing
+            # only update the trackmap if it's changing
             self._select_track(track)
         return track
 
@@ -403,20 +409,6 @@ class CustomizeValues(object):
         self.heatmap_channel = heatmap_channel
         self.track_id = track_id
 
-class BaseCustomizeMapView(Screen):
-    '''
-    A base class for a customization screen. This can be extended when adding the next option screen
-    '''
-    def __init__(self, params, values, **kwargs):
-        super(BaseCustomizeMapView, self).__init__(**kwargs)
-        self.initialized = False
-        self.params = params
-        self.values = values
-        self.register_event_type('on_modified')
-
-    def on_modified(self):
-        pass
-
 class HeatmapButton(LabelIconButton):
     Builder.load_string('''
 <HeatmapButton>:
@@ -435,7 +427,7 @@ class TrackmapButton(LabelIconButton):
     icon: u'\uf018'    
     ''')
 
-class CustomizeHeatmapView(BaseCustomizeMapView):
+class CustomizeHeatmapView(BaseOptionsScreen):
     '''
     The customization view for customizing the heatmap options
     '''
@@ -473,15 +465,15 @@ class CustomizeHeatmapView(BaseCustomizeMapView):
         modified = self.values.heatmap_channel != value
         self.values.heatmap_channel = value
         if modified:
-            self.dispatch('on_modified')
+            self.dispatch('on_screen_modified')
 
     def channel_cleared(self, *args):
         modified = self.values.heatmap_channel == None
         self.values.heatmap_channel = None
         if modified:
-            self.dispatch('on_modified')
+            self.dispatch('on_screen_modified')
 
-class CustomizeTrackView(BaseCustomizeMapView):
+class CustomizeTrackView(BaseOptionsScreen):
     '''
     The customization view for selecting a track to display
     '''
@@ -505,94 +497,4 @@ class CustomizeTrackView(BaseCustomizeMapView):
     def track_selected(self, instance, value):
         if type(value) is set:
             self.values.track_id = None if len(value) == 0 else next(iter(value))
-        self.dispatch('on_modified')
-
-class CustomizeMapView(BoxLayout):
-    '''
-    The main customization view which manages the various customization screens
-    '''
-    Builder.load_string('''
-<CustomizeMapView>:
-    orientation: 'vertical'
-    BoxLayout:
-        size_hint_y: 0.9
-        orientation: 'horizontal'
-        ScrollContainer:
-            size_hint_x: 0.3
-            id: scroller
-            do_scroll_x:False
-            do_scroll_y:True
-            GridLayout:
-                padding: (sp(10), sp(10))
-                spacing: sp(10)
-                id: options
-                row_default_height: root.height * 0.12
-                row_force_default: True
-                size_hint_y: None
-                height: max(self.minimum_height, scroller.height)
-                cols: 1
-        ScreenManager:
-            id: screens
-            size_hint_x: 0.7
-    BoxLayout:
-        size_hint_y: 0.1
-        orientation: 'horizontal'
-        IconButton:
-            id: confirm
-            disabled: True
-            text: u'\uf00c'
-            on_release: root.confirm()
-        IconButton:
-            color: ColorScheme.get_primary()
-            id: go_back
-            text: u'\uf00d'
-            on_release: root.cancel()    
-    ''')
-
-    def __init__(self, params, values, **kwargs):
-        super(CustomizeMapView, self).__init__(**kwargs)
-        self.values = values
-        self.register_event_type('on_customized')
-        self.register_event_type('on_close')
-
-        screen_manager = self.ids.screens
-        screen_manager.transition = SwapTransition()
-
-        customize_heatmap_view = CustomizeHeatmapView(name='heat', params=params, values=values)
-        customize_heatmap_view.bind(on_modified=self.on_modified)
-
-        customize_track_view = CustomizeTrackView(name='track', params=params, values=values)
-        customize_track_view.bind(on_modified=self.on_modified)
-
-        self.customize_heatmap_view = customize_heatmap_view
-        self.customize_track_view = customize_track_view
-
-        screen_manager.add_widget(customize_heatmap_view)
-        screen_manager.add_widget(customize_track_view)
-
-        heatmap_option = HeatmapButton()
-        heatmap_option.bind(on_press=lambda x: self.on_option('heat'))
-        self.ids.options.add_widget(heatmap_option)
-
-        trackmap_option = TrackmapButton()
-        self.ids.options.add_widget(trackmap_option)
-        trackmap_option.bind(on_press=lambda x: self.on_option('track'))
-
-    def on_customized(self, values):
-        pass
-
-    def on_close(self):
-        pass
-
-    def confirm(self):
-        self.dispatch('on_customized', self.values)
-        self.dispatch('on_close')
-
-    def cancel(self):
-        self.dispatch('on_close')
-
-    def on_modified(self, instance):
-        self.ids.confirm.disabled = False
-
-    def on_option(self, option):
-        self.ids.screens.current = option
+        self.dispatch('on_screen_modified')
