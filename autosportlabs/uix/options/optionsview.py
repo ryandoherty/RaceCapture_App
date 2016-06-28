@@ -26,6 +26,42 @@ from autosportlabs.widgets.scrollcontainer import ScrollContainer
 from autosportlabs.racecapture.theme.color import ColorScheme
 from iconbutton import IconButton
 
+'''
+Provides a framework for a general purpose, multi page options screen that can be displayed
+in a popup.
+
+To use, create one or more screen objects that extend BaseOptionsScreen. 
+For each screen, create a LabelIconButton widget to match. 
+
+* Create an object representing the params, which holds references to resources the screens need
+to perform their operations, like connections to databases, config and settings. You define this.
+
+* Create an object representing the current values, which holds the values the screens will manipulate
+
+* For each screen, pass the params/value object to each screen as you create them.
+
+* Create the OptionsView, passing the same values object you passed above.
+
+* Add the screens in order they should appear, using add_options_screen(screen, button)
+
+* Create a Popup, and bind the on_customized event to your own handler.
+If the screen values were customized and confirmed by the user, 
+the on_customized event will be fired. 
+
+Example code:
+
+params = CustomizeParams(settings=self.settings, datastore=self.datastore)
+values = CustomizeValues(list(self.selected_channels), self.line_chart_mode)
+
+content = OptionsView(values)
+content.add_options_screen(CustomizeChannelsScreen(name='Channels', params=params, values=values), ChannelsOptionsButton())
+content.add_options_screen(CustomizeChartScreen(name='Chart', params=params, values=values), ChartOptionsButton())
+
+popup = Popup(title="Customize Chart", content=content, size_hint=(0.7, 0.7))
+content.bind(on_customized=self._customized)
+content.bind(on_close=lambda *args:popup.dismiss())
+popup.open()
+'''
 
 class BaseOptionsScreen(Screen):
     '''
@@ -98,7 +134,7 @@ class OptionsView(BoxLayout):
     def add_options_screen(self, screen, button):
         screen.bind(on_screen_modified=self.on_modified)
         self.ids.screens.add_widget(screen)
-        button.bind(on_press=lambda x: self.on_option(screen.name))
+        button.bind(on_press=lambda x: self._on_option(screen.name))
         self.ids.options.add_widget(button)
         button.tile_color = ColorScheme.get_dark_accent() \
             if len(self.buttons.values()) > 0 else \
@@ -121,7 +157,7 @@ class OptionsView(BoxLayout):
     def on_modified(self, *args):
         self.ids.confirm.disabled = False
 
-    def on_option(self, option):
+    def _on_option(self, option):
         self.ids.screens.current = option
         for name in self.buttons.keys():
             button = self.buttons[name]
