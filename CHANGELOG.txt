@@ -1,5 +1,7 @@
 ==1.5.4==
+* Allow switching analysis by time or distance
 * Change analysis view to query LapTime and CurrentLap channels
+* Remove top level RaceTracks screen and menu item to avoid confusion during configuration
 
 ==1.5.3==
 * Make pit stop timer configurable
