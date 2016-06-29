@@ -50,7 +50,7 @@ class LinearGauge(BoxLayout):
 
         self.bind(pos=self.update_all, size=self.update_all)
 
-    def update_all(self, *args):
+    def update_all(self):
         '''
         Update all positions and sizes for graphics in widgets.
         '''
@@ -154,7 +154,7 @@ class TachometerGauge(CustomizableGauge):
         :param instance the widget instance
         :type instance Widget
         :param value the value of the widget
-        :type float
+        :type value float
         '''
         try:
             value = self.value
