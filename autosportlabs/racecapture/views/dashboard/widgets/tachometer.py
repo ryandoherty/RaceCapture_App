@@ -50,7 +50,7 @@ class LinearGauge(BoxLayout):
 
         self.bind(pos=self.update_all, size=self.update_all)
 
-    def update_all(self):
+    def update_all(self, *args):
         '''
         Update all positions and sizes for graphics in widgets.
         '''
@@ -78,7 +78,7 @@ class LinearGauge(BoxLayout):
         :param instance the widget instance
         :type instance Widget
         :param value the value of the widget
-        :type float
+        :type value float
         '''
         x = self.pos[0]
         y = self.pos[1]
