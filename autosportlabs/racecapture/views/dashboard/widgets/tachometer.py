@@ -156,22 +156,22 @@ class TachometerGauge(CustomizableGauge):
         :param value the value of the widget
         :type value float
         '''
-        try:
-            value = self.value
+        gauge_value = 0
+        value = self.value
+        if value:
             min_value = self.min
             max_value = self.max
-            railed_value = value
-            if railed_value > max_value:
-                railed_value = max_value
-            if railed_value < min_value:
-                railed_value = min_value
+            # rail value to min/max values
+            if value > max_value:
+                value = max_value
+            if value < min_value:
+                value = min_value
 
             value_range = max_value - min_value
-            offset = railed_value - min_value
-            self.ids.gauge.value = offset * 100 / value_range
-        except Exception as e:
-            # Only log error vs potentially flooding crash handler
-            Logger.error('TachometerGauge: error setting gauge value {}'.format(e))
+            if value_range > 0:
+                offset = value - min_value
+                gauge_value = offset * 100 / value_range
+        self.ids.gauge.value = gauge_value
 
         return super(TachometerGauge, self).on_value(instance, value)
 
