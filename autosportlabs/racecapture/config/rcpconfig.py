@@ -2,6 +2,7 @@ import json
 from copy import copy
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from kivy.logger import Logger
+from distutils.version import StrictVersion
 
 RCP_COMPATIBLE_MAJOR_VERSION = 2
 RCP_MINIMUM_MINOR_VERSION = 8
@@ -1006,12 +1007,18 @@ class StorageCapabilities():
     def to_json_dict(self):
         return {'tracks': self.tracks, 'script': self.script}
 
+
 class Capabilities(object):
+    MIN_BT_CONFIG_VERSION = "2.9.0"
+
     channels = ChannelCapabilities()
     sample_rates = SampleRateCapabilities()
     storage = StorageCapabilities()
 
-    def from_json_dict(self, json_dict):
+    def __init__(self):
+        self.bluetooth_config = True
+
+    def from_json_dict(self, json_dict, version_config=None):
         if json_dict:
             channels = json_dict.get('channels')
             if channels:
@@ -1024,6 +1031,13 @@ class Capabilities(object):
             storage = json_dict.get('db')
             if storage:
                 self.storage.from_json_dict(storage)
+
+        if version_config:
+            min_bt_config_version = StrictVersion(self.MIN_BT_CONFIG_VERSION)
+
+            rcp_version = StrictVersion(version_config.version_string())
+
+            self.bluetooth_config = rcp_version >= min_bt_config_version
 
     def to_json_dict(self):
         return {'channels': self.channels.to_json_dict(),
@@ -1091,7 +1105,7 @@ class RcpConfig(object):
                 if versionJson:
                     self.versionConfig.fromJson(versionJson)
 
-                self.capabilities.from_json_dict(rcpJson.get('capabilities'))
+                self.capabilities.from_json_dict(rcpJson.get('capabilities'), version_config=self.versionConfig)
 
                 analogCfgJson = rcpJson.get('analogCfg', None)
                 if analogCfgJson:

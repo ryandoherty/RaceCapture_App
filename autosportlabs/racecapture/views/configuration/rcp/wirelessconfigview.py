@@ -4,6 +4,7 @@ import os
 from kivy.app import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
+from kivy.metrics import dp
 import json
 from settingsview import SettingsView, SettingsSwitch, SettingsButton, SettingsMappedSpinner
 from autosportlabs.widgets.separator import HLineSeparator
@@ -34,9 +35,9 @@ class WirelessConfigView(BaseConfigView):
         btEnable.bind(on_setting=self.on_bt_enable)
         btEnable.setControl(SettingsSwitch())
         
-        #btConfig = kvFind(self, 'rcid', 'btconfig')
-        #btConfig.bind(on_setting=self.on_bt_configure)
-        #btConfig.setControl(SettingsButton(text='Configure', disabled=True))
+        btConfig = kvFind(self, 'rcid', 'btconfig')
+        btConfig.bind(on_setting=self.on_bt_configure)
+        btConfig.setControl(SettingsButton(text='Configure', size=()))
         
         cellEnable = kvFind(self, 'rcid', 'cellEnable')
         cellEnable.bind(on_setting=self.on_cell_enable)
