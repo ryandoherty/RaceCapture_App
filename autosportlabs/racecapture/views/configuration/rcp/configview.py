@@ -136,24 +136,24 @@ class ConfigView(Screen):
             return tree.add_node(LinkedTreeViewLabel(text=text, is_open=True, no_selection=True))
 
         def show_node(node):
-            try:
-                view = node.view
-                if not view:
-                    view = node.view_builder()
-                    self.configViews.append(view)
-                    view.bind(on_config_modified=self.on_config_modified)
-                    node.view = view
-                    if self.loaded:
-                        if self.rc_config:
-                            view.dispatch('on_config_updated', self.rc_config)
-                        if self.track_manager:
-                            view.dispatch('on_tracks_updated', self.track_manager)
-                Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
+            # try:
+            view = node.view
+            if not view:
+                view = node.view_builder()
+                self.configViews.append(view)
+                view.bind(on_config_modified=self.on_config_modified)
+                node.view = view
+                if self.loaded:
+                    if self.rc_config:
+                        view.dispatch('on_config_updated', self.rc_config)
+                    if self.track_manager:
+                        view.dispatch('on_tracks_updated', self.track_manager)
+            Clock.schedule_once(lambda dt: self.ids.content.add_widget(view))
 
 
-            except Exception as detail:
-                alertPopup('Error', 'Error loading screen ' + str(node.text) + ':\n\n' + str(detail))
-                Logger.error("ConfigView: Error selecting configuration view " + str(node.text))
+            # except Exception as detail:
+            #     alertPopup('Error', 'Error loading screen ' + str(node.text) + ':\n\n' + str(detail))
+            #     Logger.error("ConfigView: Error selecting configuration view " + str(node.text))
 
         def on_select_node(instance, value):
             # ensure that any keyboard is released

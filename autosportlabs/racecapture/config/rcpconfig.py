@@ -842,14 +842,14 @@ class BluetoothConfig(object):
 
     def fromJson(self, btCfgJson):
         self.btEnabled = btCfgJson['btEn'] == 1
-        self.name = btCfgJson.get('name', self.name)
         self.passKey = btCfgJson.get('pass', self.passKey)
+        self.name = btCfgJson.get('name', self.name)
 
     def toJson(self):
         btCfgJson = {}
         btCfgJson['btEn'] = 1 if self.btEnabled else 0
-        btCfgJson['name'] = self.name
         btCfgJson['passKey'] = self.passKey
+        btCfgJson['name'] = self.name
         return btCfgJson
 
 class CellConfig(object):
@@ -1032,6 +1032,9 @@ class Capabilities(object):
             if storage:
                 self.storage.from_json_dict(storage)
 
+        # For select features/capabilities we need to check RCP version because
+        # the capability wasn't added to the API. Not ideal, but let's at least
+        # insulate other code from inspecting the version string
         if version_config:
             min_bt_config_version = StrictVersion(self.MIN_BT_CONFIG_VERSION)
 
