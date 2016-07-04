@@ -11,27 +11,13 @@
 <HomePageView>:
 	BoxLayout:
 		orientation: 'horizontal'
+		AnchorLayout:
+			anchor_x: 'center'
+			anchor_y: 'center'
+			Image:
+                size_hint: (0.7, 0.7)
+				source: 'resource/images/app_icon_512x512.png'
 		BoxLayout:
-			orientation: 'vertical'
-			AnchorLayout:
-				size_hint: 1.0, 0.1
-				anchor_x: 'left'
-				anchor_y: 'center'
-				Image:
-					source: 'resource/images/app_icon_menu.png'
-					size_hint_x: None	
-			HLineSeparator:
-				size_hint_y: 0.05
-			FloatLayout:
-				size_hint_y: 0.80
-				Label:
-					size_hint_y: None
-					font_size: self.height * 0.40
-					font_name: 'resource/fonts/ASL_regular.ttf'
-					pos_hint: {'center_y':0.57}
-					text: 'Welcome To RaceCapture'
-		BoxLayout:
-			size_hint_x: 0.7
 			orientation: 'vertical'
 			padding: [self.height * 0.05, self.height * 0.05]
 			spacing: dp(15)
