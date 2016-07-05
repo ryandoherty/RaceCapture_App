@@ -58,7 +58,7 @@ class WirelessConfigView(BaseConfigView):
         btEnable.bind(on_setting=self.on_bt_enable)
         btEnable.setControl(SettingsSwitch())
         
-        btConfig = kvFind(self, 'rcid', 'btconfig')
+        btConfig = self.ids.btconfig
         btConfig.bind(on_setting=self.on_bt_configure)
         btConfig.setControl(SettingsButton(text='Advanced'))
         
@@ -224,4 +224,3 @@ class WirelessConfigView(BaseConfigView):
         existingApnName = self.update_controls_state()
         if existingApnName:
             self.apnSpinner.text = existingApnName
-

@@ -848,7 +848,7 @@ class BluetoothConfig(object):
     def toJson(self):
         btCfgJson = {}
         btCfgJson['btEn'] = 1 if self.btEnabled else 0
-        btCfgJson['passKey'] = self.passKey
+        btCfgJson['pass'] = self.passKey
         btCfgJson['name'] = self.name
         return btCfgJson
 
