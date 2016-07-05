@@ -3,7 +3,6 @@ from mock import patch
 import mock
 import socket
 from autosportlabs.telemetry.telemetryconnection import TelemetryConnection, TelemetryManager
-from autosportlabs.util.threadutil import ThreadSafeDict
 import asyncore
 import json
 import random
@@ -18,7 +17,7 @@ class TelemetryConnectionTest(unittest.TestCase):
         self.port = 8080
         self.device_id = 'DFDS44'
 
-        self.meta = ThreadSafeDict()
+        self.meta = {}
         self.meta['foo'] = mock.Mock(units="F", sampleRate="10", min=0, max=100)
         self.meta['bar'] = mock.Mock(units="C", sampleRate="1", min=-100, max=200)
         self.meta['baz'] = mock.Mock(units="C", sampleRate="1", min=-100, max=200)
@@ -139,7 +138,7 @@ class TelemetryConnectionTest(unittest.TestCase):
 
     @patch('threading.Timer')
     def test_sends_bitmask(self, timer_mock, asyncore_loop_mock):
-        sample = ThreadSafeDict()
+        sample = {}
         sample['bar'] = 3.0
 
         bitmask = ''
@@ -161,12 +160,12 @@ class TelemetryConnectionTest(unittest.TestCase):
 
         message_json = json.loads(message)
 
-        self.assertEqual(bitmask, message_json["s"]["d"][len(message_json["s"]["d"])-1])
+        self.assertEqual(bitmask, message_json["s"]["d"][len(message_json["s"]["d"]) - 1])
 
     @patch('threading.Timer')
     def test_sends_multiple_bitmasks(self, timer_mock, asyncore_loop_mock):
-        sample = ThreadSafeDict()
-        meta = ThreadSafeDict()
+        sample = {}
+        meta = {}
 
         for i in range(1, 40):
             meta['sensor' + str(i)] = mock.Mock(units="F", sampleRate="10",
@@ -206,19 +205,18 @@ class TelemetryConnectionTest(unittest.TestCase):
         message, = args
 
         message_json = json.loads(message)
-
-        self.assertEqual(19, message_json["s"]["d"][len(message_json["s"]["d"])-1])
-        self.assertEqual(1479378921, message_json["s"]["d"][len(message_json["s"]["d"])-2])
+        self.assertEqual(19, message_json["s"]["d"][len(message_json["s"]["d"]) - 1])
+        self.assertEqual(1479378921, message_json["s"]["d"][len(message_json["s"]["d"]) - 2])
 
     @patch('threading.Timer')
     def resends_meta(self, timer_mock, asyncore_loop_mock):
         meta = {}
 
         for i in range(1, 5):
-            meta['sensor'+str(i)] = mock.Mock(units="F", sampleRate="10",
-                                              min=random.randint(-100,0),
-                                              max=random.randint(0,100))
-            meta['sensor'+str(i)].configure_mock(name='sensor'+str(i))
+            meta['sensor' + str(i)] = mock.Mock(units="F", sampleRate="10",
+                                              min=random.randint(-100, 0),
+                                              max=random.randint(0, 100))
+            meta['sensor' + str(i)].configure_mock(name='sensor' + str(i))
 
         self.telemetry_connection._on_meta(meta)
 
