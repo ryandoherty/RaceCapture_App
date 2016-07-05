@@ -1,5 +1,6 @@
 ==1.6.0===
 * Add dashboard view navigation with 'left'/'right' keyboard keys
+* Advanced bluetooth configuration allows for setting name and passkey
 
 ==1.5.4==
 * Allow switching analysis by time or distance
