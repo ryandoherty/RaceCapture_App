@@ -174,25 +174,25 @@ class TelemetryConnectionTest(unittest.TestCase):
             meta['sensor' + str(i)].configure_mock(name='sensor' + str(i))
 
         # Manually doing this to aid debugging if this test breaks
-        sample['sensor2'] = random.randint(-50, 50)  #
-        sample['sensor3'] = random.randint(-50, 50)  #
-        sample['sensor4'] = random.randint(-50, 50)  #
-        sample['sensor5'] = random.randint(-50, 50)  #
-        sample['sensor6'] = random.randint(-50, 50)  #
-        sample['sensor7'] = random.randint(-50, 50)  #
-        sample['sensor8'] = random.randint(-50, 50)  #
-        sample['sensor10'] = random.randint(-50, 50)  #
-        sample['sensor11'] = random.randint(-50, 50)  #
-        sample['sensor12'] = random.randint(-50, 50)  #
-        sample['sensor21'] = random.randint(-50, 50)  #
-        sample['sensor25'] = random.randint(-50, 50)  #
-        sample['sensor26'] = random.randint(-50, 50)  #
-        sample['sensor29'] = random.randint(-50, 50)  #
-        sample['sensor33'] = random.randint(-50, 50)  #
-        sample['sensor35'] = random.randint(-50, 50)  #
-        sample['sensor37'] = random.randint(-50, 50)  #
-        sample['sensor38'] = random.randint(-50, 50)  #
-        sample['sensor39'] = random.randint(-50, 50)  #
+        sample['sensor2'] = random.randint(-50, 50)
+        sample['sensor3'] = random.randint(-50, 50)
+        sample['sensor4'] = random.randint(-50, 50)
+        sample['sensor5'] = random.randint(-50, 50)
+        sample['sensor6'] = random.randint(-50, 50)
+        sample['sensor7'] = random.randint(-50, 50)
+        sample['sensor8'] = random.randint(-50, 50)
+        sample['sensor10'] = random.randint(-50, 50)
+        sample['sensor11'] = random.randint(-50, 50)
+        sample['sensor12'] = random.randint(-50, 50)
+        sample['sensor21'] = random.randint(-50, 50)
+        sample['sensor25'] = random.randint(-50, 50)
+        sample['sensor26'] = random.randint(-50, 50)
+        sample['sensor29'] = random.randint(-50, 50)
+        sample['sensor33'] = random.randint(-50, 50)
+        sample['sensor35'] = random.randint(-50, 50)
+        sample['sensor37'] = random.randint(-50, 50)
+        sample['sensor38'] = random.randint(-50, 50)
+        sample['sensor39'] = random.randint(-50, 50)
 
         self.telemetry_connection.authorized = True
         self.telemetry_connection._on_meta(meta)
