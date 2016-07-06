@@ -174,26 +174,25 @@ class TelemetryConnectionTest(unittest.TestCase):
             meta['sensor' + str(i)].configure_mock(name='sensor' + str(i))
 
         # Manually doing this to aid debugging if this test breaks
-        sample['sensor2'] = random.randint(-50, 50)
-        sample['sensor3'] = random.randint(-50, 50)
-        sample['sensor4'] = random.randint(-50, 50)
-        sample['sensor5'] = random.randint(-50, 50)
-        sample['sensor6'] = random.randint(-50, 50)
-        sample['sensor7'] = random.randint(-50, 50)
-        sample['sensor8'] = random.randint(-50, 50)
-        sample['sensor10'] = random.randint(-50, 50)
-        sample['sensor11'] = random.randint(-50, 50)
-        sample['sensor12'] = random.randint(-50, 50)
-        sample['sensor21'] = random.randint(-50, 50)
-        sample['sensor25'] = random.randint(-50, 50)
-        sample['sensor26'] = random.randint(-50, 50)
-        sample['sensor29'] = random.randint(-50, 50)
-        sample['sensor33'] = random.randint(-50, 50)
-        sample['sensor35'] = random.randint(-50, 50)
-        sample['sensor37'] = random.randint(-50, 50)
-        sample['sensor38'] = random.randint(-50, 50)
-        sample['sensor39'] = random.randint(-50, 50)
-
+        sample['sensor2'] = random.randint(-50, 50)  #
+        sample['sensor3'] = random.randint(-50, 50)  #
+        sample['sensor4'] = random.randint(-50, 50)  #
+        sample['sensor5'] = random.randint(-50, 50)  #
+        sample['sensor6'] = random.randint(-50, 50)  #
+        sample['sensor7'] = random.randint(-50, 50)  #
+        sample['sensor8'] = random.randint(-50, 50)  #
+        sample['sensor10'] = random.randint(-50, 50)  #
+        sample['sensor11'] = random.randint(-50, 50)  #
+        sample['sensor12'] = random.randint(-50, 50)  #
+        sample['sensor21'] = random.randint(-50, 50)  #
+        sample['sensor25'] = random.randint(-50, 50)  #
+        sample['sensor26'] = random.randint(-50, 50)  #
+        sample['sensor29'] = random.randint(-50, 50)  #
+        sample['sensor33'] = random.randint(-50, 50)  #
+        sample['sensor35'] = random.randint(-50, 50)  #
+        sample['sensor37'] = random.randint(-50, 50)  #
+        sample['sensor38'] = random.randint(-50, 50)  #
+        sample['sensor39'] = random.randint(-50, 50)  #
 
         self.telemetry_connection.authorized = True
         self.telemetry_connection._on_meta(meta)
@@ -201,12 +200,36 @@ class TelemetryConnectionTest(unittest.TestCase):
         self.telemetry_connection._on_sample(sample)
         self.telemetry_connection._send_sample()
 
+        bitmasks = []
+        bitmask = ''
+        bit_count = 0
+
+        # Compute our own bitmask to verify
+        for channel_name, value in self.telemetry_connection._channel_metas.iteritems():
+            if sample.get(channel_name):
+                bitmask = "1" + bitmask
+            else:
+                bitmask = "0" + bitmask
+            bit_count += 1
+            if bit_count > 31:
+                bitmasks.append(bitmask)
+                bitmask = ''
+                bit_count = 0
+
+        bitmasks.append(bitmask)
+
         args, kwargs = self.telemetry_connection.push.call_args
         message, = args
 
         message_json = json.loads(message)
-        self.assertEqual(19, message_json["s"]["d"][len(message_json["s"]["d"]) - 1])
-        self.assertEqual(1479378921, message_json["s"]["d"][len(message_json["s"]["d"]) - 2])
+
+        expected1 = int(bitmasks[0], 2)
+        actual1 = message_json["s"]["d"][len(message_json["s"]["d"]) - 2]
+        expected2 = int(bitmasks[1], 2)
+        actual2 = message_json["s"]["d"][len(message_json["s"]["d"]) - 1]
+
+        self.assertEqual(expected1, actual1)
+        self.assertEqual(expected2, actual2)
 
     @patch('threading.Timer')
     def resends_meta(self, timer_mock, asyncore_loop_mock):
