@@ -2,6 +2,7 @@ from kivy.uix.bubble import Bubble, BubbleButton
 from kivy.clock import Clock
 from kivy.uix.label import Label
 from kivy.app import Builder
+from kivy.logger import Logger
 
 Builder.load_string('''
 <WarnLabel>
@@ -35,10 +36,9 @@ class CenteredBubble(Bubble):
 
         pos = widget.center
         x = pos[0]
-        y = pos[1]
+        y = widget.top
         half_width = bubble_width / 2
         x = x - half_width
-        y = y - bubble_height - widget.height / 2
 
         window = widget.get_root_window()
         if x < 0: x = 0

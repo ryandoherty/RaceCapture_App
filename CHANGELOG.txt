@@ -5,6 +5,7 @@
 * Remove top level RaceTracks screen and menu item to avoid confusion during configuration
 * Addressed possible UI lockup issue with telemetry rates above 10Hz
 * Update tachometer to improve performance, responsiveness and screen layout
+* Advanced bluetooth configuration allows for setting name and passkey
 
 ==1.5.3==
 * Make pit stop timer configurable
