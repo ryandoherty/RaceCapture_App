@@ -24,13 +24,15 @@ from kivy.app import Builder
 from kivy.logger import Logger
 from kivy.metrics import dp
 from kivy.uix.stacklayout import StackLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from utils import *
 from autosportlabs.uix.bettertextinput import BetterTextInput
 
 
 CONFIG_VIEW = '''
 <BluetoothConfigView>
-    pos: root.pos
+    cols: 1
     Label:
         text: "NOTE: current values not shown. Enter new values to change settings. Changes will take affect after restarting RaceCapture."
         text_size: self.size
@@ -38,21 +40,18 @@ CONFIG_VIEW = '''
         size_hint_y: 0.2
     GridLayout:
         cols: 1
-        row_default_height: dp(100)
         SettingsView:
             id: name
-            size_hint_y: 1
             label_text: 'New Name'
-            help_text: 'Minimum 1 character.'
+            help_text: 'Minimum 1 character'
         SettingsView:
             id: passkey
-            size_hint_y: 1
             label_text: 'New Passcode'
-            help_text: '4 digits required.'
+            help_text: '4 digits required'
 '''
 
 
-class BluetoothConfigView(StackLayout):
+class BluetoothConfigView(GridLayout):
     """
     Advanced Bluetooth configuration for name and passkey. For RCP Mk2, the configuration cannot be read and new
     configuration will take affect after a power cycle.
@@ -67,7 +66,7 @@ class BluetoothConfigView(StackLayout):
         super(BluetoothConfigView, self).__init__(**kwargs)
 
         self.ids.passkey.setControl(BetterTextInput(max_chars=4, regex='\D'))
-        self.ids.name.setControl(BetterTextInput(max_chars=20, regex='\W'))
+        self.ids.name.setControl(BetterTextInput(max_chars=14, regex='\W'))
 
     def validate(self):
         """

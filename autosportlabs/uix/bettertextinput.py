@@ -12,6 +12,7 @@ class BetterTextInput(ValueField):
 
     def __init__(self, max_chars=200000, regex=None, **kwargs):
         super(BetterTextInput, self).__init__(**kwargs)
+        self.font_size = self.height * 0.30
         self.max_chars = max_chars
         self.regex = regex
 
