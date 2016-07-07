@@ -1,3 +1,12 @@
+==1.6.0===
+* Add dashboard view navigation with 'left'/'right' keyboard keys
+* Allow switching analysis by time or distance
+* Change analysis view to query LapTime and CurrentLap channels
+* Remove top level RaceTracks screen and menu item to avoid confusion during configuration
+* Addressed possible UI lockup issue with telemetry rates above 10Hz
+* Update tachometer to improve performance, responsiveness and screen layout
+* Advanced bluetooth configuration allows for setting name and passkey
+
 ==1.5.3==
 * Make pit stop timer configurable
 * Make pit stop timer time correctly on slower tablets

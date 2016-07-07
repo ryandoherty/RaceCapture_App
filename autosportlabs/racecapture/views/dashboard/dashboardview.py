@@ -10,9 +10,9 @@ from autosportlabs.racecapture.views.dashboard.widgets.stopwatch import PitstopT
 from autosportlabs.racecapture.settings.systemsettings import SettingsListener
 from kivy.uix.settings import SettingsWithNoMenu
 from kivy.app import Builder
-from kivy.core.window import Window
+from kivy.core.window import Window, Keyboard
 from kivy.uix.screenmanager import *
-from autosportlabs.racecapture.views.dashboard.widgets.tachometer import Tachometer
+from autosportlabs.racecapture.views.dashboard.widgets.tachometer import TachometerGauge
 from utils import kvFind, kvFindClass
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
 from kivy.logger import Logger
@@ -45,7 +45,7 @@ class DashboardView(Screen):
         self.init_view()
         self._dismiss_popup_trigger = Clock.create_trigger(self._dismiss_popup, POPUP_DISMISS_TIMEOUT_LONG)
         self._popup = None
-        
+
 
     def on_tracks_updated(self, trackmanager):
         pass
@@ -101,21 +101,30 @@ class DashboardView(Screen):
 
     def on_enter(self):
         Window.bind(mouse_pos=self.on_mouse_pos)
-        
+        Window.bind(on_key_down=self.on_key_down)
+
     def on_leave(self):
         Window.unbind(mouse_pos=self.on_mouse_pos)
-        
+        Window.unbind(on_key_down=self.on_key_down)
+
     def _got_activity(self):
         self.ids.preferences_button.brighten()
-        
+
     def on_touch_down(self, touch):
         self._got_activity()
         return super(DashboardView, self).on_touch_down(touch)
-    
+
     def on_mouse_pos(self, x, pos):
         if self.collide_point(pos[0], pos[1]):
             self._got_activity()
             self.ids.preferences_button.brighten()
+        return False
+
+    def on_key_down(self, window, key, *args):
+        if key == Keyboard.keycodes['left']:
+            self.on_nav_left()
+        elif key == Keyboard.keycodes['right']:
+            self.on_nav_right()
         return False
     
     def on_preferences(self, *args):

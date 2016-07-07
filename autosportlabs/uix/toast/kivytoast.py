@@ -11,6 +11,7 @@ TOAST_KV='''
     size_hint: (None, None)
     halign: 'center'
     valign: 'middle'
+    font_name: "resource/fonts/ASL_light.ttf"
     color: (1.0, 1.0, 1.0, self._transparency)
     canvas:
         Color:

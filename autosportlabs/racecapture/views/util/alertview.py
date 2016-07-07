@@ -95,7 +95,7 @@ def editor_popup(title, content, answerCallback):
     content.bind(on_answer=answerCallback)
     popup = Popup(title=title,
                     content=content,
-                    size_hint=(0.7, 0.7),
+                    size_hint=(0.7, 0.8),
                     auto_dismiss= False)
     popup.open()
     return popup

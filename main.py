@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.5.3"
+__version__ = "1.6.0"
 import sys
 import os
 
@@ -35,7 +35,6 @@ if __name__ == '__main__':
     from kivy.uix.screenmanager import *
     from installfix_garden_navigationdrawer import NavigationDrawer
     from autosportlabs.racecapture.views.util.alertview import alertPopup, confirmPopup
-    from autosportlabs.racecapture.views.tracks.tracksview import TracksView
     from autosportlabs.racecapture.views.configuration.rcp.configview import ConfigView
     from autosportlabs.racecapture.views.status.statusview import StatusView
     from autosportlabs.racecapture.views.dashboard.dashboardview import DashboardView
@@ -294,11 +293,6 @@ class RaceCaptureApp(App):
         self.tracks_listeners.append(status_view)
         return status_view
 
-    def build_tracks_view(self):
-        tracks_view = TracksView(name='tracks', track_manager=self.trackManager)
-        self.tracks_listeners.append(tracks_view)
-        return tracks_view
-
     def build_dash_view(self):
         dash_view = DashboardView(name='dash', dataBus=self._databus, settings=self.settings)
         self.tracks_listeners.append(dash_view)
@@ -321,7 +315,6 @@ class RaceCaptureApp(App):
 
     def init_view_builders(self):
         self.view_builders = {'config': self.build_config_view,
-                              'tracks': self.build_tracks_view,
                               'dash': self.build_dash_view,
                               'analysis': self.build_analysis_view,
                               'preferences': self.build_preferences_view,

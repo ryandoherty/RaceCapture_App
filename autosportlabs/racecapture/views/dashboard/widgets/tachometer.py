@@ -1,31 +1,177 @@
 import kivy
 kivy.require('1.9.1')
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.label import Label
 from kivy.app import Builder
-from collections import OrderedDict  
-from kivy.metrics import dp
-from kivy.graphics import Color
-from autosportlabs.racecapture.views.dashboard.widgets.fontgraphicalgauge import FontGraphicalGauge
+from autosportlabs.racecapture.views.dashboard.widgets.gauge import CustomizableGauge
+from kivy.graphics import Rectangle, PushMatrix, PopMatrix, Color, Scale, Translate
+from kivy.properties import NumericProperty, ListProperty
+from kivy.logger import Logger
 
-Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/tachometer.kv')
+class LinearGauge(BoxLayout):
+    '''
+    A widget that displays a horizontal, triangular shaped bar graph style gauge.
+    '''
 
-class Tachometer(FontGraphicalGauge):
+    value = NumericProperty(0)
+    color = ListProperty([1, 1, 1, 1])
+
     def __init__(self, **kwargs):
-        super(Tachometer, self).__init__(**kwargs)
-        self.initWidgets()
-            
-    def initWidgets(self):
-        pass
-        
-    def on_touch_down(self, touch, *args):
-        pass
+        super(LinearGauge, self).__init__(**kwargs)
+        # these values match the actual dimensions of the referenced graphic assets
+        self.gauge_width = 2000
+        self.gauge_height = 500
+        x = self.pos[0]
+        y = self.pos[1]
 
-    def on_touch_move(self, touch, *args):
-        pass
+        scale_x = self.width / self.gauge_width
+        scale_y = self.height / self.gauge_height
 
-    def on_touch_up(self, touch, *args):
-        pass
-        
-        
-        
+        with self.canvas:
+            PushMatrix()
+            self.dial_color = Color(rgba=self.color)
+            self.gauge_translate = Translate(x, y, 0)
+            self.gauge_scale = Scale(x=scale_x, y=scale_y)
+            Rectangle(source='resource/gauge/horizontal_bar_gauge.png', pos=self.pos, size=(self.gauge_width, self.gauge_height))
+            PopMatrix()
+            PushMatrix()
+            self.mask_translate = Translate(x, y, 0)
+            self.mask_scale = Scale(x=scale_x, y=scale_y)
+            Rectangle(source='resource/gauge/horizontal_bar_gauge_mask.png', pos=self.pos, size=(self.gauge_width, self.gauge_height))
+            PopMatrix()
+
+        with self.canvas.after:
+            PushMatrix()
+            Color(1, 1, 1, 1)
+            self.shadow_translate = Translate(x, y, 0)
+            self.shadow_scale = Scale(x=scale_x, y=scale_y)
+            Rectangle(source='resource/gauge/horizontal_bar_gauge_shadow.png', pos=self.pos, size=(self.gauge_width, self.gauge_height))
+            PopMatrix()
+
+        self.bind(pos=self.update_all, size=self.update_all)
+
+    def update_all(self, *args):
+        '''
+        Update all positions and sizes for graphics in widgets.
+        '''
+        x = self.pos[0]
+        y = self.pos[1]
+        self.gauge_translate.x = x
+        self.gauge_translate.y = y
+        self.shadow_translate.x = x
+        self.shadow_translate.y = y
+        self.mask_translate.x = x
+        self.mask_translate.y = y
+
+        scale_x = self.width / self.gauge_width
+        scale_y = self.height / self.gauge_height
+        self.gauge_scale.x = scale_x
+        self.gauge_scale.y = scale_y
+        self.shadow_scale.x = scale_x
+        self.shadow_scale.y = scale_y
+        self.mask_scale.x = scale_x
+        self.mask_scale.y = scale_y
+
+    def on_value(self, instance, value):
+        '''
+        Translate a 0-100 value to a 0-100% gauge value
+        :param instance the widget instance
+        :type instance Widget
+        :param value the value of the widget
+        :type value float
+        '''
+        x = self.pos[0]
+        y = self.pos[1]
+        offset = (value / 100.0) * self.width
+        self.mask_translate.x = x + offset
+
+    def on_color(self, instance, value):
+        '''
+        :param instance the widget instance
+        :type instance Widget
+        :param value the color value
+        :type value list
+        '''
+        self.dial_color.rgba = value
+
+
+class TachometerGauge(CustomizableGauge):
+    Builder.load_string("""
+<TachometerGauge>:
+    anchor_x: 'center'
+    anchor_y: 'center'
+    value_size: self.height * 0.3
+    title_size: self.height * 0.15
+    LinearGauge:
+        id: gauge
+    AnchorLayout:
+        anchor_x: 'left'
+        anchor_y: 'center'
+        BoxLayout:
+            orientation: 'vertical'
+            BoxLayout:
+                size_hint_y: 0.4
+            BoxLayout:
+                size_hint_y: 0.4
+                orientation: 'vertical'
+                FieldLabel:
+                    size_hint_y: 0.6
+                    id: value
+                    font_size: root.value_size
+                    halign: 'left'
+                    valign: 'bottom'
+                FieldLabel:
+                    size_hint_y: 0.4
+                    id: title
+                    halign: 'left'
+                    valign: 'bottom'
+                    font_size: root.title_size
+            BoxLayout:
+                size_hint_y: 0.2
+    """)
+
+    def __init__(self, **kwargs):
+        super(TachometerGauge, self).__init__(**kwargs)
+
+    def update_colors(self):
+        '''
+        Refreshes the color of the gauge
+        '''
+        self.ids.gauge.color = self.select_alert_color()
+        return super(TachometerGauge, self).update_colors()
+
+    def update_title(self, channel, channel_meta):
+        '''
+        Override the default title setter to prevent units from being shown
+        as this is a concise label (like the DigitalGauge)
+        '''
+        self.title = channel if channel else ''
+
+    def on_value(self, instance, value):
+        '''
+        Set the value of the gauge.
+        Limit the value to the max value of the widget so it shows only 0-100%
+        :param instance the widget instance
+        :type instance Widget
+        :param value the value of the widget
+        :type value float
+        '''
+        gauge_value = 0
+        value = self.value
+        if value:
+            min_value = self.min
+            max_value = self.max
+            # rail value to min/max values
+            if value > max_value:
+                value = max_value
+            if value < min_value:
+                value = min_value
+
+            value_range = max_value - min_value
+            if value_range > 0:
+                offset = value - min_value
+                gauge_value = offset * 100 / value_range
+        self.ids.gauge.value = gauge_value
+
+        return super(TachometerGauge, self).on_value(instance, value)
+

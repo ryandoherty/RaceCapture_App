@@ -267,8 +267,11 @@ class TrackMapView(Widget):
         map_height = height - padding_both_sides;
 
         # determine the width and height ratio because we need to magnify the map to fit into the given image dimension
-        map_width_ratio = float(map_width) / float(self._max_XY.x)
-        map_height_ratio = float(map_height) / float(self._max_XY.y)
+        max_x = float(self._max_XY.x)
+        map_width_ratio = float(map_width) / max_x if max_x > 0 else 0
+
+        max_y = float(self._max_XY.y)
+        map_height_ratio = float(map_height) / max_y if max_y > 0 else 0
 
         # using different ratios for width and height will cause the map to be stretched. So, we have to determine
         # the global ratio that will perfectly fit into the given image dimension
