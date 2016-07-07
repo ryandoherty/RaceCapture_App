@@ -12,6 +12,7 @@ from fieldlabel import FieldLabel
 from autosportlabs.uix.textwidget import TextWidget
 from helplabel import HelpLabel
 from kivy.app import Builder
+from kivy.clock import Clock
 from utils import *
 from mappedspinner import MappedSpinner
 from autosportlabs.racecapture.views.popup.centeredbubble import CenteredBubble, WarnLabel
@@ -137,6 +138,7 @@ class SettingsView(RelativeLayout):
             self.add_widget(warn)
             warn.center_below(control)
             self.warn_bubble = warn
+            Clock.schedule_once(lambda dt: self.clear_error(), self.WARN_LONG_TIMEOUT)
 
     def clear_error(self):
         if self.warn_bubble is not None:

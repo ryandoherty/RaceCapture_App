@@ -4,44 +4,47 @@
 		anchor_x: 'center'
 		anchor_y: 'center'
 		AnchorLayout:
-			anchor_x: 'right'
+			anchor_x: 'center'
 			anchor_y: 'bottom'
 			BoxLayout:
-				size_hint: (0.8, 0.6)
+				size_hint: (1.0, 0.6)
 				orientation: 'horizontal'
+                BoxLayout:
+                    size_hint_x: 0.02
 				AnchorLayout:
-					size_hint: (0.25, 1.0)
-					anchor_x: 'center'
+					size_hint_x: 0.23
+					anchor_x: 'left'
 					anchor_y: 'center'
 					BigNumberView:
                         rcid: 'bignumberview_tach'
-						size_hint: (0.8, 0.8)
+						size_hint: (1.0, 0.8)
 						channel: 'CurrentLap'
 						warning_color: [0.2, 0.2, 0.2, 1.0]
 						alert_color: [0.2, 0.2, 0.2, 1.0]
 				BoxLayout:
-					size_hint: (0.7, 1.0)
+					size_hint: (0.70, 1.0)
 					orientation: 'vertical'
 					CurrentLaptime:
 						rcid: 'curLap'
+						halign: 'right'
                         normal_color: [1.0, 1.0 , 1.0, 1.0]						
-					BoxLayout:
-						orientation: 'horizontal'
-						TimeDelta:
-							rcid: 'delta'
-							channel: 'LapDelta'
-							halign: 'right'
-							valign: 'middle'
-							value: None
-							size_hint_x: 0.8
-						BoxLayout:
-                            size_hint_x: 0.2
+                    TimeDelta:
+                        rcid: 'delta'
+                        channel: 'LapDelta'
+                        halign: 'right'
+                        valign: 'middle'
+                        value: None
+                        size_hint_x: 0.83
+                BoxLayout:
+                    size_hint_x: 0.02
 		AnchorLayout:
-			anchor_x: 'left'
-			anchor_y: 'center'
+			anchor_x: 'center'
+			anchor_y: 'top'
 			orientation: 'horizontal'
-			Tachometer:
-				size_hint_y: 0.8
+            padding: (sp(5), sp(10))
+			TachometerGauge:
+				size_hint_y: 0.4
+				size_hint_x: 0.96
 				rcid: 'tach'
 				channel: 'RPM'
 				min: 0

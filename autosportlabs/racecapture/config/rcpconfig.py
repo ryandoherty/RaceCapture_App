@@ -2,6 +2,7 @@ import json
 from copy import copy
 from autosportlabs.racecapture.geo.geopoint import GeoPoint
 from kivy.logger import Logger
+from distutils.version import StrictVersion
 
 RCP_COMPATIBLE_MAJOR_VERSION = 2
 RCP_MINIMUM_MINOR_VERSION = 8
@@ -848,14 +849,14 @@ class BluetoothConfig(object):
 
     def fromJson(self, btCfgJson):
         self.btEnabled = btCfgJson['btEn'] == 1
-        self.name = btCfgJson.get('name', self.name)
         self.passKey = btCfgJson.get('pass', self.passKey)
+        self.name = btCfgJson.get('name', self.name)
 
     def toJson(self):
         btCfgJson = {}
         btCfgJson['btEn'] = 1 if self.btEnabled else 0
+        btCfgJson['pass'] = self.passKey
         btCfgJson['name'] = self.name
-        btCfgJson['passKey'] = self.passKey
         return btCfgJson
 
 class CellConfig(object):
@@ -1114,13 +1115,17 @@ class LinksCapabilities(object):
         }
 
 
+
 class Capabilities(object):
+
+    MIN_BT_CONFIG_VERSION = "2.9.0"
 
     def __init__(self):
         self.channels = ChannelCapabilities()
         self.sample_rates = SampleRateCapabilities()
         self.storage = StorageCapabilities()
         self.links = LinksCapabilities()
+        self.bluetooth_config = True
 
     @property
     def has_analog(self):
@@ -1159,7 +1164,7 @@ class Capabilities(object):
     def has_bluetooth(self):
         return self.links.bluetooth
 
-    def from_json_dict(self, json_dict):
+    def from_json_dict(self, json_dict, version_config=None):
         if json_dict:
             channels = json_dict.get('channels')
             if channels:
@@ -1179,6 +1184,16 @@ class Capabilities(object):
                 self.links.from_json_dict(links)
             else:
                 self.links.from_json_dict({'bluetooth': True, 'cellular': True})
+
+        # For select features/capabilities we need to check RCP version because
+        # the capability wasn't added to the API. Not ideal, but let's at least
+        # insulate other code from inspecting the version string
+        if version_config:
+            min_bt_config_version = StrictVersion(self.MIN_BT_CONFIG_VERSION)
+
+            rcp_version = StrictVersion(version_config.version_string())
+
+            self.bluetooth_config = rcp_version >= min_bt_config_version
 
     def to_json_dict(self):
         return {
@@ -1253,7 +1268,7 @@ class RcpConfig(object):
 
                 capabilities = rcpJson.get('capabilities', None)
                 if capabilities:
-                    self.capabilities.from_json_dict(capabilities)
+                    self.capabilities.from_json_dict(capabilities, version_config=self.versionConfig)
 
                 analogCfgJson = rcpJson.get('analogCfg', None)
                 if analogCfgJson:

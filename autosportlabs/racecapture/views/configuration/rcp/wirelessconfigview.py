@@ -1,6 +1,27 @@
+#
+# Race Capture App
+#
+# Copyright (C) 2014-2016 Autosport Labs
+#
+# This file is part of the Race Capture App
+#
+# This is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details. You should
+# have received a copy of the GNU General Public License along with
+# this code. If not, see <http://www.gnu.org/licenses/>.
+
 import kivy
 kivy.require('1.9.1')
 from kivy.app import Builder
+
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty
 from autosportlabs.racecapture.views.configuration.baseconfigview import BaseConfigView
@@ -9,8 +30,6 @@ from kivy.logger import Logger
 from autosportlabs.racecapture.views.configuration.rcp.wireless.bluetoothconfigview import BluetoothConfigView
 from autosportlabs.racecapture.views.configuration.rcp.wireless.cellularconfigview import CellularConfigView
 from autosportlabs.racecapture.views.configuration.rcp.wireless.wificonfigview import WifiConfigView
-from autosportlabs.racecapture.config.rcpconfig import Capabilities
-
 
 WIRELESS_CONFIG_VIEW_KV = 'autosportlabs/racecapture/views/configuration/rcp/wirelessconfigview.kv'
 
@@ -46,6 +65,8 @@ class WirelessConfigView(BaseConfigView):
             cellular_view = CellularConfigView(self.base_dir, self.rcp_config)
             self.ids.wireless_settings.add_widget(cellular_view, index=0)
             self._views.append(cellular_view)
+
+
 
     def _attach_event_handlers(self):
         for view in self._views:
