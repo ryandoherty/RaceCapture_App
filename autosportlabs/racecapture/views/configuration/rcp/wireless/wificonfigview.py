@@ -93,11 +93,9 @@ Builder.load_string('''
     SettingsView:
         id: ap_channel
         label_text: 'Channel'
-        height: dp(160)
     SettingsView:
         id: ap_encryption
         label_text: 'Encryption'
-        size_hint_y: 0.5
 ''')
 
 

@@ -7,6 +7,8 @@ from kivy.metrics import dp
 from kivy.app import Builder
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.clock import Clock
+from kivy.metrics import sp
+from kivy.metrics import dp
 from iconbutton import IconButton
 
 __all__ = ('alertPopup, confirmPopup, okPopup, editor_popup')
@@ -49,6 +51,7 @@ Builder.load_string('''
     BoxLayout:
         id: content
     GridLayout:
+        id: buttons
         cols: 2
         size_hint_y: None
         height: '44sp'
@@ -96,7 +99,8 @@ def editor_popup(title, content, answerCallback):
     popup = Popup(title=title,
                     content=content,
                     size_hint=(0.7, 0.8),
-                    auto_dismiss= False)
+                    auto_dismiss= False,
+                  title_size=sp(18))
     popup.open()
     return popup
     

@@ -32,28 +32,27 @@ from autosportlabs.uix.bettertextinput import BetterTextInput
 
 CONFIG_VIEW = '''
 <AdvancedBluetoothConfigView>
-    cols: 1
     Label:
         text: "NOTE: current values not shown. Enter new values to change settings. Changes will take affect after restarting RaceCapture."
-        text_size: self.size
-        size: self.texture_size
-        size_hint_y: 0.2
+        text_size: root.width, None
+        size_hint_y: None
+        height: self.texture_size[1]
+        padding: [dp(10), dp(10)]
     GridLayout:
         cols: 1
+        spacing: dp(10)
         SettingsView:
             id: name
             label_text: 'New Name'
             help_text: 'Minimum 1 character'
-            size_hint_y: 0.3
         SettingsView:
             id: passkey
             label_text: 'New Passcode'
             help_text: '4 digits required'
-            size_hint_y: 0.3
 '''
 
 
-class AdvancedBluetoothConfigView(GridLayout):
+class AdvancedBluetoothConfigView(StackLayout):
     """
     Advanced Bluetooth configuration for name and passkey. For RCP Mk2, the configuration cannot be read and new
     configuration will take affect after a power cycle.

@@ -14,19 +14,16 @@ Builder.load_string('''
     id: bluetooth
     cols: 1
     spacing: [0, dp(20)]
-    row_default_height: dp(40)
     size_hint: [1, None]
     height: self.minimum_height
     HSeparator:
-        size_hint_y: 0.5
         text: 'Bluetooth'
+        size_hint_y: None
     SettingsView:
         id: bt_enable
         label_text: 'Bluetooth'
         help_text: 'If the Bluetooth module is connected, enable it here'
-        size_hint_y: 1
     SettingsView:
-        size_hint_y: 0.15
         id: btconfig
         label_text: 'Advanced configuration'
         help_text: 'Change Bluetooth name and passkey. Firmware version 2.9.0 or greater required.'

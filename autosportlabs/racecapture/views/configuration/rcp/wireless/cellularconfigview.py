@@ -24,7 +24,7 @@ Builder.load_string('''
         label_text: 'Cellular Module'
         help_text: 'Enable if the Real-time telemetry module is installed'
     SettingsView:
-        size_hint_y: 0.5
+        size_hint_y: None
         rcid: 'cellprovider'
         label_text: 'Cellular Provider'
         help_text: 'Select the cellular provider, or specify custom APN settings'

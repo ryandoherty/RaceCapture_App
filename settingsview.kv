@@ -1,6 +1,8 @@
 #:kivy 1.9.1
 
 <SettingsView>:
+    size_hint_y: None
+    height: max(root.ids.helplabel.texture_size[1],sp(30)) + root.ids.fieldlabel.texture_size[1]
     BoxLayout:
         rcid: 'fieldContainer'
         orientation: 'vertical'
@@ -10,6 +12,7 @@
             FieldLabel:
                 size_hint: (0.65, 1.0)
                 rcid: 'fieldLabel'
+                id: fieldlabel
                 halign: 'right'
                 font_size: sp(24)
                 text: ''
@@ -20,6 +23,7 @@
                     rcid: 'control'
                     id: control
         TextWidget:
+            id: helplabel
             rcid: 'helpLabel'
             halign: 'right'
             text: ''
