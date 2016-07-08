@@ -51,8 +51,8 @@ class BluetoothConfigView(GridLayout):
 
     def on_bluetooth_enabled_change(self, instance, value):
         if self.config:
-            self.config.bluetoothConfig.btEnabled = value
-            self.config.stale = True
+            self.config.connectivityConfig.bluetoothConfig.btEnabled = value
+            self.config.connectivityConfig.stale = True
             self.dispatch('on_modified')
 
     def config_updated(self, config):
