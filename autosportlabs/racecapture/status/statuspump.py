@@ -43,10 +43,11 @@ class StatusPump(object):
 
     def stop(self):
         self._running.clear()
-        try:
-            self._status_thread.join()
-        except Exception as e:
-            Logger.warn('StatusPump: failed to join status_worker: {}'.format(e))
+        if self._status_thread:
+            try:
+                self._status_thread.join()
+            except Exception as e:
+                Logger.warn('StatusPump: failed to join status_worker: {}'.format(e))
 
     def status_worker(self):
         Logger.info('StatusPump: status_worker starting')
