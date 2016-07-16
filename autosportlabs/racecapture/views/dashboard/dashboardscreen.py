@@ -4,6 +4,9 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.properties import StringProperty
 
 class DashboardScreen(AnchorLayout):
+    """
+    A base class to for all dashboard screens.
+    """
     name = StringProperty()
 
     def on_enter(self):

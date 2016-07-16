@@ -95,8 +95,10 @@ class DashboardView(Screen):
         pass
 
     def _init_view_builders(self):
-
         # Factory / builder functions for views
+        # To add a new dashboard screen, add a function here for the builder
+        # And add it to the dictionary below.
+
         def build_gauge_view():
             return GaugeView(name='gaugeView', databus=self._databus, settings=self._settings)
 
