@@ -210,11 +210,9 @@ class DashboardView(Screen):
             listener.user_preferences_updated(self._settings.userPrefs)
 
     def on_nav_left(self):
-#        self.ids.carousel.transition = SlideTransition(direction='right')
         self.ids.carousel.load_previous()
 
     def on_nav_right(self):
- #       self._carousel.transition = SlideTransition(direction='left')
         self.ids.carousel.load_next()
 
     def _check_load_screen(self, slide_screen):
