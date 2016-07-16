@@ -2,26 +2,26 @@ import kivy
 kivy.require('1.9.1')
 from fieldlabel import FieldLabel
 from kivy.app import Builder
-from kivy.uix.screenmanager import Screen
 from utils import kvFind, kvFindClass
 from autosportlabs.racecapture.views.dashboard.widgets.laptime import Laptime
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import SingleChannelGauge, Gauge
-Builder.load_file('autosportlabs/racecapture/views/dashboard/laptimeview.kv')
+from autosportlabs.racecapture.views.dashboard.dashboardscreen import DashboardScreen
 
-class LaptimeView(Screen):
+class LaptimeView(DashboardScreen):
+    Builder.load_file('autosportlabs/racecapture/views/dashboard/laptimeview.kv')
 
     _databus = None
     _settings = None
-     
+
     def __init__(self, databus, settings, **kwargs):
         super(LaptimeView, self).__init__(**kwargs)
         self._databus = databus
         self._settings = settings
-        self.initScreen()
-        
+        self._initialized = False
+
     def on_meta(self, channelMetas):
         gauges = self.findActiveGauges(SingleChannelGauge)
-        
+
         for gauge in gauges:
             channel = gauge.channel
             if channel:
@@ -33,14 +33,21 @@ class LaptimeView(Screen):
 
     def findActiveGauges(self, gauge_type):
         return list(kvFindClass(self, gauge_type))
-        
-    def initScreen(self):
+
+    def on_enter(self):
+        if self._initialized == False:
+            self._init_screen()
+
+    def _init_screen(self):
         dataBus = self._databus
         settings = self._settings
         dataBus.addMetaListener(self.on_meta)
-        
+
         gauges = self.findActiveGauges(Gauge)
         for gauge in gauges:
             gauge.settings = settings
             gauge.data_bus = dataBus
- 
+
+        self._initialized = True
+
+

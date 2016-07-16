@@ -2,9 +2,11 @@
     AnchorLayout:
     	BoxLayout:
     		orientation: 'vertical'
-    		ScreenManager:
+    		Carousel:
     			rcid: 'screens'
+                on_current_slide: root.on_current_slide(args[1])    			
     			size_hint_y: 0.90
+    			loop: True
     		BoxLayout:
     			size_hint_y: 0.10
     			orientation: 'horizontal'
