@@ -4,31 +4,49 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.app import Builder
 from autosportlabs.racecapture.views.dashboard.widgets.gauge import Gauge
-from kivy.uix.screenmanager import Screen, ScreenManager
 from autosportlabs.racecapture.views.dashboard.widgets.imugauge import ImuGauge
+from autosportlabs.racecapture.views.dashboard.dashboardscreen import DashboardScreen
+from utils import kvFind, kvFindClass
 from kivy.clock import Clock
 from utils import kvFindClass
 
-Builder.load_file('autosportlabs/racecapture/views/dashboard/comboview.kv')
+COMBO_VIEW_KV = """
+<ComboView>:
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            size_hint_x: 0.1
+        ImuGauge:
+            size_hint_x: 0.8
+            rcid: 'imu_gauge'
+        BoxLayout:
+            size_hint_x: 0.1
+"""
 
-class ComboView(Screen):
+class ComboView(DashboardScreen):
+    Builder.load_string(COMBO_VIEW_KV)
 
     def __init__(self, databus, settings, **kwargs):
         super(ComboView, self).__init__(**kwargs)
         self.register_event_type('on_tracks_updated')
         self._databus = databus
         self._settings = settings
-        self.init_view()
+        self._initialized = False
 
     def init_view(self):
         data_bus = self._databus
         settings = self._settings
-        
+
         gauges = list(kvFindClass(self, Gauge))
-        
+
         for gauge in gauges:
             gauge.settings = settings
-            gauge.data_bus = data_bus        
-            
+            gauge.data_bus = data_bus
+        self._initialized = True
+
     def on_tracks_updated(self, trackmanager):
         pass
+
+    def on_enter(self):
+        if not self._initialized:
+            self.init_view()

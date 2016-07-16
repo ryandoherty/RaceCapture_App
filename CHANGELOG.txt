@@ -1,4 +1,6 @@
 ==1.6.1==
+* Improve performance of dashboard screen loading
+* Added swiping to screen
 
 ==1.6.0==
 * Add dashboard view navigation with 'left'/'right' keyboard keys

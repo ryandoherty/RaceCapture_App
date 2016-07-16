@@ -24,7 +24,7 @@ if __name__ == '__main__':
     Config.set('graphics', 'height', '576')
     Config.set('kivy', 'exit_on_escape', 0)
     from utils import is_mobile_platform
-    #optimize scroll vs touch behavior for mobile platform
+    # optimize scroll vs touch behavior for mobile platform
     if is_mobile_platform():
         Config.set('widgets', 'scroll_distance', 40)
         Config.set('widgets', 'scroll_timeout', 250)
@@ -142,12 +142,12 @@ class RaceCaptureApp(App):
 
         HelpInfo.settings = self.settings
 
-        #Ensure soft input mode text inputs aren't obstructed
+        # Ensure soft input mode text inputs aren't obstructed
         Window.softinput_mode = 'below_target'
-        
-        #Capture keyboard events for handling escape / back
+
+        # Capture keyboard events for handling escape / back
         Window.bind(on_keyboard=self._on_keyboard)
-        
+
         self.register_event_type('on_tracks_updated')
         self.processArgs()
         self.settings.appConfig.setUserDir(self.user_data_dir)
