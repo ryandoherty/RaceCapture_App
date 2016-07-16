@@ -1,3 +1,23 @@
+#
+# Race Capture App
+#
+# Copyright (C) 2014-2016 Autosport Labs
+#
+# This file is part of the Race Capture App
+#
+# This is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This software is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See the GNU General Public License for more details. You should
+# have received a copy of the GNU General Public License along with
+# this code. If not, see <http://www.gnu.org/licenses/>.
+
 
 class LaptimeDeltaFilter(object):
     """Update the DeltaTime if BestLap and a reference lap time is available.
@@ -15,7 +35,7 @@ class LaptimeDeltaFilter(object):
     
     def __init__(self, system_channels):
         self.lap_delta_meta = system_channels.findChannelMeta(LaptimeDeltaFilter.LAP_DELTA_KEY)
-        
+
     def reset(self):
         pass
     
@@ -29,10 +49,9 @@ class LaptimeDeltaFilter(object):
         laptime = channel_data.get(LaptimeDeltaFilter.LAPTIME_KEY)
         predtime = channel_data.get(LaptimeDeltaFilter.PREDTIME_KEY)
         best_laptime = channel_data.get(LaptimeDeltaFilter.BEST_LAPTIME_KEY)
-        
+
         #we choose predicted laptime if it is present in the data stream
         reference_laptime = laptime if predtime == None else predtime
-        delta_time = 0.0
         if reference_laptime and best_laptime:
             delta_time = (reference_laptime - best_laptime) * 60.0
-        channel_data[LaptimeDeltaFilter.LAP_DELTA_KEY] = delta_time
+            channel_data[LaptimeDeltaFilter.LAP_DELTA_KEY] = delta_time
