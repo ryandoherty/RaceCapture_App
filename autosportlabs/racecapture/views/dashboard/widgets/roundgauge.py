@@ -9,14 +9,19 @@ from utils import kvFind
 from kivy.graphics import *
 from kivy.properties import NumericProperty, ListProperty
 from kivy.logger import Logger
-Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/roundgauge.kv')
+from kivy.core.image import Image as CoreImage
+import io
 
 
 class SweepGauge(BoxLayout):
     # these values match the dimensions of the svg elements used in this gauge.
+    Builder.load_file('autosportlabs/racecapture/views/dashboard/widgets/roundgauge.kv')
 
     value = NumericProperty(0)
     color = ListProperty([1, 1, 1, 1])
+    gauge_mask = CoreImage('resource/gauge/gauge_mask.png')
+    gauge_image = CoreImage('resource/gauge/round_gauge_270.png')
+    gauge_shadow = CoreImage('resource/gauge/round_gauge_270_shadow.png')
 
     def __init__(self, **kwargs):
         super(SweepGauge, self).__init__(**kwargs)
@@ -35,18 +40,18 @@ class SweepGauge(BoxLayout):
             self.dial_color = Color(rgba=self.color)
             self.gauge_translate = Translate(x_center, y_center, 0)
             self.gauge_scale = Scale(x=gauge_height, y=gauge_height)
-            Rectangle(source='resource/gauge/round_gauge_270.png', pos=self.pos, size=self.size)
+            Rectangle(texture=SweepGauge.gauge_image.texture, pos=self.pos, size=self.size)
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-135, axis=(0, 0, 1), origin=(self.center[0], self.center[1])))
-            Rectangle(source='resource/gauge/gauge_mask.png')
+            Rectangle(texture=SweepGauge.gauge_mask.texture)
             PopMatrix()
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-225, axis=(0, 0, 1), origin=(self.center[0], self.center[1])))
-            Rectangle(source='resource/gauge/gauge_mask.png')
+            Rectangle(texture=SweepGauge.gauge_mask.texture)
             PopMatrix()
             PushMatrix()
             self.mask_rotations.append(Rotate(angle=-315, axis=(0, 0, 1), origin=(self.center[0], self.center[1])))
-            Rectangle(source='resource/gauge/gauge_mask.png')
+            Rectangle(texture=SweepGauge.gauge_mask.texture)
             PopMatrix()
             PopMatrix()
 
@@ -55,7 +60,7 @@ class SweepGauge(BoxLayout):
             Color(1, 1, 1, 1)
             self.shadow_translate = Translate(x_center, y_center, 0)
             self.shadow_scale = Scale(x=gauge_height, y=gauge_height)
-            Rectangle(source='resource/gauge/round_gauge_270_shadow.png')
+            Rectangle(texture=SweepGauge.gauge_shadow.texture)
             PopMatrix()
 
         self.bind(pos=self.update_all, size=self.update_all)
