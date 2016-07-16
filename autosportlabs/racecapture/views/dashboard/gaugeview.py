@@ -94,7 +94,7 @@ class GaugeView(DashboardScreen):
         for gauge in gauges:
             gauge.settings = self._settings
             gauge.data_bus = dataBus
-            channel = self._settings.userPrefs.get_gauge_config(gauge.id)
+            channel = self._settings.userPrefs.get_gauge_config(gauge.rcid)
             if channel:
                 gauge.channel = channel
 
