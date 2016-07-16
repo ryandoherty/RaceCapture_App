@@ -1,6 +1,7 @@
 ==1.6.1==
 * Improve performance of dashboard screen loading
 * Added swiping to screen
+* Changed LapDelta filter to not add channels to samples if its meta is not added to channel meta
 
 ==1.6.0==
 * Add dashboard view navigation with 'left'/'right' keyboard keys
