@@ -51,20 +51,10 @@ class RawChannelView(DashboardScreen):
         return self._grid
 
     def on_meta(self, channel_metas):
-
-        def _add_gauge(meta, time):
-            return lambda: Clock.schedule_once(lambda dt: self._addGauge(meta), time)
-
-        time = 0;
         if self._initialized == True:
             self._clearGauges()
-            gauges_to_add = []
             for channel_meta in channel_metas.itervalues():
-                gauges_to_add.append(_add_gauge(channel_meta, time))
-                time = time + 0.05
-
-            for g in gauges_to_add:
-                g()
+                self._addGauge(channel_meta)
 
     def on_enter(self):
         if self._initialized == False:
