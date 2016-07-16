@@ -53,9 +53,8 @@ class RawChannelView(Screen):
 
     def on_meta(self, channel_metas):
         self._clearGauges()
-        with channel_metas as cm:
-            for channel_meta in cm.itervalues():
-                self._addGauge(channel_meta)
+        for channel_meta in channel_metas.itervalues():
+            self._addGauge(channel_meta)
 
     def initScreen(self):
         dataBus = self._databus

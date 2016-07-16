@@ -10,7 +10,7 @@ from autosportlabs.racecapture.views.dashboard.widgets.stopwatch import PitstopT
 from autosportlabs.racecapture.settings.systemsettings import SettingsListener
 from kivy.uix.settings import SettingsWithNoMenu
 from kivy.app import Builder
-from kivy.core.window import Window
+from kivy.core.window import Window, Keyboard
 from kivy.uix.screenmanager import *
 from autosportlabs.racecapture.views.dashboard.widgets.tachometer import TachometerGauge
 from utils import kvFind, kvFindClass
@@ -101,9 +101,11 @@ class DashboardView(Screen):
 
     def on_enter(self):
         Window.bind(mouse_pos=self.on_mouse_pos)
+        Window.bind(on_key_down=self.on_key_down)
 
     def on_leave(self):
         Window.unbind(mouse_pos=self.on_mouse_pos)
+        Window.unbind(on_key_down=self.on_key_down)
 
     def _got_activity(self):
         self.ids.preferences_button.brighten()
@@ -118,6 +120,13 @@ class DashboardView(Screen):
             self.ids.preferences_button.brighten()
         return False
 
+    def on_key_down(self, window, key, *args):
+        if key == Keyboard.keycodes['left']:
+            self.on_nav_left()
+        elif key == Keyboard.keycodes['right']:
+            self.on_nav_right()
+        return False
+    
     def on_preferences(self, *args):
         settings_view = SettingsWithNoMenu()
         base_dir = self._settings.base_dir
