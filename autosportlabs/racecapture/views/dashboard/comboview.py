@@ -48,5 +48,5 @@ class ComboView(DashboardScreen):
         pass
 
     def on_enter(self):
-        if self._initialized == False:
+        if not self._initialized:
             self.init_view()

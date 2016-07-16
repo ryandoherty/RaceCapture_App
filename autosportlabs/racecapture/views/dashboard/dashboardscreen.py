@@ -10,4 +10,7 @@ class DashboardScreen(AnchorLayout):
     name = StringProperty()
 
     def on_enter(self):
+        """
+        Called when the screen is shown. 
+        """
         pass

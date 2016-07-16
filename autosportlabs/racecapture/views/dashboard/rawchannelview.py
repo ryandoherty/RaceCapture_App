@@ -86,7 +86,7 @@ class RawChannelView(DashboardScreen):
                 self._add_gauge(channel_meta)
 
     def on_enter(self):
-        if self._initialized == False:
+        if not self._initialized:
             self._init_screen()
 
     def _init_screen(self):

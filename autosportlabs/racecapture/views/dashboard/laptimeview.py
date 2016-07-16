@@ -99,7 +99,7 @@ class LaptimeView(DashboardScreen):
         return list(kvFindClass(self, gauge_type))
 
     def on_enter(self):
-        if self._initialized == False:
+        if not self._initialized:
             self._init_screen()
 
     def _init_screen(self):

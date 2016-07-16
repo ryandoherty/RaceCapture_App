@@ -83,7 +83,7 @@ class GaugeView(DashboardScreen):
         return list(kvFindClass(self, Gauge))
 
     def on_enter(self):
-        if self._initialized == False:
+        if not self._initialized:
             self._init_view()
 
     def _init_view(self):
