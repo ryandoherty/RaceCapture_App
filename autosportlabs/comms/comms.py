@@ -66,7 +66,7 @@ def connection_message_process(connection, device, rx_queue, tx_queue, command_q
                     Logger.debug('Comms: connection process: got close command')
                     reader_writer_should_run.clear()
             except Empty:
-                Logger.info('Comms: keep alive timeout')
+                Logger.debug('Comms: keep alive timeout')
                 reader_writer_should_run.clear()
         Logger.debug('Comms: connection worker exiting')
 
@@ -76,9 +76,10 @@ def connection_message_process(connection, device, rx_queue, tx_queue, command_q
         try:
             connection.close()
         except:
-            Logger.error('Comms: Exception closing connection worker connection')
+            Logger.debug('Comms: Exception closing connection worker connection')
+            Logger.debug(traceback.format_exc())
     except Exception as e:
-        Logger.error('Comms: Exception setting up connection process: ' + str(type(e)) + str(e))
+        Logger.debug('Comms: Exception setting up connection process: ' + str(type(e)) + str(e))
         Logger.debug(traceback.format_exc())
 
     Logger.debug('Comms: connection worker exited')
@@ -120,7 +121,7 @@ class Comms():
 
     def open(self):
         connection = self._connection
-        Logger.info('Comms: Opening connection ' + str(self.device))
+        Logger.debug('Comms: Opening connection ' + str(self.device))
         self.start_connection_process()
 
     def keep_alive(self):

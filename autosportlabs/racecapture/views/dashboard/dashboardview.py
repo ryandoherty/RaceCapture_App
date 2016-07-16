@@ -96,6 +96,7 @@ class DashboardView(Screen):
 
     def on_leave(self):
         Window.unbind(mouse_pos=self.on_mouse_pos)
+        Window.unbind(on_key_down=self.on_key_down)
 
     def _got_activity(self):
         self.ids.preferences_button.brighten()

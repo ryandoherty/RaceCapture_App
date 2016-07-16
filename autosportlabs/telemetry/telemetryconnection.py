@@ -3,6 +3,7 @@ from kivy.properties import ObjectProperty, BooleanProperty, StringProperty
 from kivy.event import EventDispatcher
 from kivy.clock import Clock
 from time import sleep
+from copy import copy
 import threading
 import asynchat, asyncore
 import json
@@ -72,7 +73,9 @@ class TelemetryManager(EventDispatcher):
     # Event handler for when meta (channel list) changes
     def _on_meta(self, channel_metas):
         Logger.debug("TelemetryManager: Got meta")
-        self.channels = channel_metas
+        # Isolate the data from the calling thread by making a copy
+        channel_metas_copy = copy(channel_metas)
+        self.channels = channel_metas_copy
 
     # Event handler for when self.channels changes, don't restart connection b/c
     # the TelemetryConnection object will handle new channels
@@ -272,7 +275,7 @@ class TelemetryConnection(asynchat.async_chat):
         self._connected = False
         self._connecting = False
         self.authorized = False
-        self.meta_sent = False
+        self._should_send_meta = False
 
         self._channel_metas = channel_metas
         self._sample_data = None
@@ -289,15 +292,19 @@ class TelemetryConnection(asynchat.async_chat):
 
     # Event handler for when RCP sends data to app
     def _on_sample(self, sample):
-        self._sample_data = sample
+        # isolate the data from the calling thread by making a copy
+        sample_copy = copy(sample)
+        # variable assignment in python is atomic, and therefore thread safe
+        self._sample_data = sample_copy
 
     # Event handler for when RCP's channel list changes
     def _on_meta(self, meta):
         Logger.info("TelemetryConnection: got new meta")
         if self.authorized:
             try:
-                self._channel_metas = meta
-                self._send_meta()
+                meta_copy = copy(meta)
+                self._channel_metas = meta_copy
+                self._should_send_meta = True
             except Exception as e:
                 Logger.warn("TelemetryConnection: Failed to send meta: {}".format(e))
 
@@ -310,8 +317,12 @@ class TelemetryConnection(asynchat.async_chat):
 
     def _sample_worker(self):
         Logger.info('TelemetryConnection: sample worker starting')
+        self._should_send_meta = True
         while self._running.is_set():
             try:
+                if self._should_send_meta == True:
+                    self._send_meta()
+                    self._should_send_meta = False
                 self._send_sample()
                 sleep(self.SAMPLE_INTERVAL)
             except Exception as e:
@@ -465,16 +476,22 @@ class TelemetryConnection(asynchat.async_chat):
         msg = {"s":{"meta":[]}}
         meta = []
 
-        with self._channel_metas as cm:
-            for channel_config in cm.itervalues():
-                channel = {
-                    "nm": channel_config.name,
-                    "ut": channel_config.units,
-                    "sr": channel_config.sampleRate,
-                    "min": channel_config.min,
-                    "max": channel_config.max
-                }
-                meta.append(channel)
+        # assign local variable to make thread safe
+        # class member variable may be changed
+        # by other thread.
+        # DO NOT REMOVE
+        cm = self._channel_metas
+        # DO NOT REMOVE
+
+        for channel_config in cm.itervalues():
+            channel = {
+                "nm": channel_config.name,
+                "ut": channel_config.units,
+                "sr": channel_config.sampleRate,
+                "min": channel_config.min,
+                "max": channel_config.max
+            }
+            meta.append(channel)
 
         msg["s"]["meta"] = meta
         msg_json = json.dumps(msg)
@@ -488,22 +505,30 @@ class TelemetryConnection(asynchat.async_chat):
             channel_bit_position = 0
             bitmask_index = 0
             data = []
-            with self._sample_data as sd, self._channel_metas as cm:
-                bitmasks_needed = int(max(0, math.floor((len(cm) - 1) / 32)) + 1)
-                for x in range(0, bitmasks_needed):
-                    bitmasks.append(0)
 
-                for channel_name, value in cm.iteritems():
-                    if channel_bit_position > 31:
-                        bitmask_index += 1
-                        channel_bit_position = 0
+            # assign local variables to make thread safe
+            # class member variables may be changed
+            # by other thread.
+            # DO NOT REMOVE
+            sd = self._sample_data
+            cm = self._channel_metas
+            # DO NOT REMOVE
 
-                    value = sd.get(channel_name)
-                    if value is not None:
-                        bitmasks[bitmask_index] = bitmasks[bitmask_index] | (1 << channel_bit_position)
-                        data.append(value)
+            bitmasks_needed = int(max(0, math.floor((len(cm) - 1) / 32)) + 1)
+            for x in range(0, bitmasks_needed):
+                bitmasks.append(0)
 
-                    channel_bit_position += 1
+            for channel_name, value in cm.iteritems():
+                if channel_bit_position > 31:
+                    bitmask_index += 1
+                    channel_bit_position = 0
+
+                value = sd.get(channel_name)
+                if value is not None:
+                    bitmasks[bitmask_index] = bitmasks[bitmask_index] | (1 << channel_bit_position)
+                    data.append(value)
+
+                channel_bit_position += 1
 
             for bitmask in bitmasks:
                 data.append(bitmask)

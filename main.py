@@ -1,5 +1,5 @@
 #!/usr/bin/python
-__version__ = "1.5.4"
+__version__ = "1.6.1"
 import sys
 import os
 
