@@ -21,7 +21,7 @@ GAUGE_VIEW_KV = """
             RoundGauge:
                 size_hint_x: 0.3
                 size_hint_y: 0.5
-                id: tl
+                rcid: 'tl'
 
         AnchorLayout:
             anchor_x:'left'
@@ -29,19 +29,23 @@ GAUGE_VIEW_KV = """
             RoundGauge:
                 size_hint_x: 0.3
                 size_hint_y: 0.5
-                id: bl
+                rcid: 'bl'
         
         AnchorLayout:
             anchor_x:'right'
-            anchor_y:'center'
-            BoxLayout:
+            anchor_y:'top'
+            RoundGauge:
                 size_hint_x: 0.3
-                orientation: 'vertical'
-                RoundGauge:
-                    id: tr
-                RoundGauge:
-                    id: br
-                    
+                size_hint_y: 0.5
+                rcid: 'tr'
+
+        AnchorLayout:
+            anchor_x:'right'
+            anchor_y:'bottom'
+            RoundGauge:
+                size_hint_x: 0.3
+                size_hint_y: 0.5
+                rcid: 'br'                    
                     
         AnchorLayout:
             anchor_x:'center'
@@ -50,7 +54,7 @@ GAUGE_VIEW_KV = """
                 size_hint_x: 0.47
                 orientation: 'vertical'
                 RoundGauge:
-                    id: center
+                    rcid: 'center'
 """
 
 class GaugeView(DashboardScreen):
